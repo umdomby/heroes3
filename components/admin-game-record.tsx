@@ -15,7 +15,7 @@ export const AdminGameRecord: React.FC<Props> = ({data, gameRecords}) => {
     return (
         <Container className="w-[100%]">
             <Table>
-                <TableCaption>Gamerecord.online</TableCaption>
+                <TableCaption>heroes3.site</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[12%] text-left">Player</TableHead>

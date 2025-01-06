@@ -164,7 +164,7 @@ export const EditGameRecord: React.FC<Props> = ({ user, gameRecords, carModel, c
     return (
         <Container className="w-[100%]">
             <Table className="table-fixed">
-                <TableCaption>Gamerecord.online</TableCaption>
+                <TableCaption>heroes3.site</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[20%] text-left overflow-hidden text-ellipsis whitespace-nowrap">GAME</TableHead>

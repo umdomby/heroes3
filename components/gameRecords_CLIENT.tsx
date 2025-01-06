@@ -28,7 +28,7 @@ export const GameRecord_CLIENT: React.FC<Props> = ({gameRecords}) => {
 
             <Container className="w-[100%]">
                 <Table className="table-fixed">
-                    <TableCaption>Gamerecord.online</TableCaption>
+                    <TableCaption>heroes3.site</TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[30%] text-left overflow-hidden text-ellipsis whitespace-nowrap">

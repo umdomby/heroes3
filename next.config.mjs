@@ -14,7 +14,7 @@ const nextConfig = {
         serverActions: {
             bodySizeLimit: '5mb',
             serverActions: true,
-            allowedOrigins: ['localhost:3000/', 'https://gamerecord.online'],
+            allowedOrigins: ['localhost:3000/', 'https://heroes3.site'],
         },
     },
 };
