@@ -9,8 +9,6 @@ export const metadata: Metadata = {
     title: 'HEROES 3',
 };
 
-
-
 async function fetchData() {
     try {
         const [product, category, productItem] = await prisma.$transaction([
@@ -34,16 +32,6 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
         <main className="min-h-screen">
             <Suspense>
                 <Header/>
-                <div style={{width: "50%", margin: "0 auto"}}>
-                    <Image
-                        src="/h3.gif"
-                        alt="Logo"
-                        width={100}
-                        height={65}
-                        style={{width: '100%', height: 'auto'}} // Explicitly set width and height here
-                        priority
-                    />
-                </div>
                 {/*<TopBar category={data.category} product={data.product} productItem={data.productItem} />*/}
             </Suspense>
             {children} {/* <-- Render children here */}
