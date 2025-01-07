@@ -2,7 +2,8 @@ import { Header } from '@/components/header';
 import { TopBar } from '@/components/top-bar';
 import { prisma } from '@/prisma/prisma-client';
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
+import Image from "next/image";
 
 export const metadata: Metadata = {
     title: 'GAME RECORD ONLINE',
@@ -32,8 +33,18 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
 
         <main className="min-h-screen">
             <Suspense>
-                <Header />
-                <TopBar category={data.category} product={data.product} productItem={data.productItem} />
+                <Header/>
+                <div style={{width: "50%", margin: "0 auto"}}>
+                    <Image
+                        src="/h3.gif"
+                        alt="Logo"
+                        width={100}
+                        height={65}
+                        style={{width: '100%', height: 'auto'}} // Explicitly set width and height here
+                        priority
+                    />
+                </div>
+                {/*<TopBar category={data.category} product={data.product} productItem={data.productItem} />*/}
             </Suspense>
             {children} {/* <-- Render children here */}
         </main>

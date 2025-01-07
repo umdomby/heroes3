@@ -24,10 +24,10 @@ export const Header: React.FC<Props> = ({  className }) => {
                 {/* Левая часть */}
                 <Link href="/">
                     <div className="flex items-center gap-4">
-                        <Image src="/logo.webp" alt="Logo" width={65} height={65}/>
+                        <Image src="/logo.png" alt="Logo" width={65} height={65}/>
                         <div>
-                            <h1 className="text-2xl uppercase font-black">GAME RECORD</h1>
-                            <p className="text-sm text-gray-400 leading-3">ONLINE</p>
+                            <h1 className="text-2xl uppercase font-black">HEROES3</h1>
+                            <p className="text-sm text-gray-400 leading-3">SITE</p>
                         </div>
                     </div>
                 </Link>
