@@ -6,7 +6,7 @@ import React, { Suspense } from 'react';
 import Image from "next/image";
 
 export const metadata: Metadata = {
-    title: 'GAME RECORD ONLINE',
+    title: 'HEROES 3',
 };
 
 
