@@ -1,3 +1,3 @@
 export default function Loading(){
-    return <div> loading...</div>
+    return <div style={{width: "50%", margin: "0 auto"}}> Loading...</div>
 }
