@@ -16,11 +16,11 @@ import {Container} from "@/components/container";
 import Link from "next/link";
 
 interface Props {
-    gameRecords: any[];
+    gameBet: any[];
     className?: string;
 }
 
-export const GameRecord_CLIENT: React.FC<Props> = ({gameRecords}) => {
+export const GameRecord_CLIENT: React.FC<Props> = ({gameBet}) => {
 
     return (
 
@@ -48,7 +48,7 @@ export const GameRecord_CLIENT: React.FC<Props> = ({gameRecords}) => {
 
                     <Suspense>
                         {
-                            gameRecords.map((records, index) => (
+                            gameBet.map((records, index) => (
                                 <TableBody key={index} className="border-b border-b-gray-800">
                                     <TableRow>
                                         <TableCell>
@@ -69,7 +69,7 @@ export const GameRecord_CLIENT: React.FC<Props> = ({gameRecords}) => {
                                                 {records.timestate.substring(3)}
                                             </div>
                                             <div className="text-ellipsis overflow-hidden whitespace-nowrap">
-                                                {records.carModel !== null && records.carModel?.name}
+                                                {records.betModel !== null && records.betModel?.name}
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-right">

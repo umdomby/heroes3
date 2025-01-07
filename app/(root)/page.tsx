@@ -24,7 +24,7 @@ export default async function Home({
     const pageSize = 30;
     const offset = (page - 1) * pageSize;
 
-    const gameRecords = await prisma.gameRecords.findMany({
+    const gameBet = await prisma.gameBet.findMany({
         skip: offset,
         take: pageSize,
         orderBy: { updatedAt: 'desc' },
@@ -33,18 +33,18 @@ export default async function Home({
             product: true,
             productItem: true,
             category: true,
-            carModel: true,
+            betModel: true,
         },
     });
 
-    const totalRecords = await prisma.gameRecords.count({});
+    const totalRecords = await prisma.gameBet.count({});
 
     const totalPages = Math.ceil(totalRecords / pageSize);
 
     return (
         <Container className="flex flex-col my-10">
             <Suspense fallback={<Loading/>}>
-                <GameRecord_CLIENT gameRecords={gameRecords}/>
+                <GameRecord_CLIENT gameBet={gameBet}/>
                 <div className="pagination-buttons flex justify-center mt-6">
                     <Link href={`/?page=${page - 1}`}>
                         <Button

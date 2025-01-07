@@ -11,32 +11,32 @@ datasource db {
 }
 
 model User {
-  id                   Int              @id @default(autoincrement())
+  id                   Int           @id @default(autoincrement())
   fullName             String
-  email                String           @unique
+  email                String        @unique
   provider             String?
   providerId           String?
   password             String
-  role                 UserRole         @default(USER)
+  role                 UserRole      @default(USER)
   img                  String?
-  gameRecords          GameRecords[]
-  goldProductItems     ProductItem[]    @relation("GoldUser")
-  silverProductItems   ProductItem[]    @relation("SilverUser")
-  bronzeProductItems   ProductItem[]    @relation("BronzeUser")
-  platinumProductItems ProductItem[]    @relation("PlatinumUser")
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @updatedAt
-  gameCreateTime       GameCreateTime[]
+  gameBet              GameBet[]
+  goldProductItems     ProductItem[] @relation("GoldUser")
+  silverProductItems   ProductItem[] @relation("SilverUser")
+  bronzeProductItems   ProductItem[] @relation("BronzeUser")
+  platinumProductItems ProductItem[] @relation("PlatinumUser")
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  createTime           CreateTime[]
 }
 
 model Category {
-  id          Int           @id @default(autoincrement())
-  name        String        @unique
-  products    Product[]
-  img         String?
-  gameRecords GameRecords[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  products  Product[]
+  img       String?
+  gameBet   GameBet[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Product {
@@ -44,8 +44,8 @@ model Product {
   name        String
   img         String?
   productItem ProductItem[]
-  gameRecords GameRecords[]
-  carModel    CarModel[]
+  gameBet     GameBet[]
+  betModel    BetModel[]
   category    Category      @relation(fields: [categoryId], references: [id])
   categoryId  Int
   createdAt   DateTime      @default(now())
@@ -53,14 +53,14 @@ model Product {
 }
 
 model ProductItem {
-  id          Int           @id @default(autoincrement())
-  name        String
-  img         String?
-  gameRecords GameRecords[]
-  product     Product       @relation(fields: [productId], references: [id])
-  productId   Int
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id        Int       @id @default(autoincrement())
+  name      String
+  img       String?
+  gameBet   GameBet[]
+  product   Product   @relation(fields: [productId], references: [id])
+  productId Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   goldId       Int?
   goldUser     User? @relation("GoldUser", fields: [goldId], references: [id])
@@ -72,7 +72,7 @@ model ProductItem {
   platinumUser User? @relation("PlatinumUser", fields: [platinumId], references: [id])
 }
 
-model GameRecords {
+model GameBet {
   id            Int         @id @default(autoincrement())
   user          User        @relation(fields: [userId], references: [id])
   userId        Int
@@ -83,8 +83,8 @@ model GameRecords {
   productItem   ProductItem @relation(fields: [productItemId], references: [id])
   productItemId Int
 
-  carModel   CarModel? @relation(fields: [carModelId], references: [id])
-  carModelId Int?
+  betModel   BetModel? @relation(fields: [betModelId], references: [id])
+  betModelId Int?
 
   timestate String?
   video     String?
@@ -93,7 +93,7 @@ model GameRecords {
   updatedAt DateTime @updatedAt
 }
 
-model GameCreateTime {
+model CreateTime {
   id     Int  @id @default(autoincrement())
   user   User @relation(fields: [userId], references: [id])
   userId Int  @unique
@@ -105,12 +105,12 @@ model GameCreateTime {
   updatedAt   DateTime @updatedAt
 }
 
-model CarModel {
-  id          Int           @id @default(autoincrement())
-  name        String
-  gameRecords GameRecords[]
-  product     Product       @relation(fields: [productId], references: [id])
-  productId   Int
+model BetModel {
+  id        Int       @id @default(autoincrement())
+  name      String
+  gameBet   GameBet[]
+  product   Product   @relation(fields: [productId], references: [id])
+  productId Int
 }
 
 enum UserRole {

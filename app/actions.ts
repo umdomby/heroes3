@@ -85,7 +85,7 @@ export async function uploadImage(formData: FormData) {
 export async function categoryCreateDateTime(data: any) {
   let category;
   let categoryNameFind;
-  let userFindGameCreateTime;
+  let userFindCreateTime;
   const currentTimeMinusOneHour = new Date();
   currentTimeMinusOneHour.setHours(currentTimeMinusOneHour.getHours() - 1);
   let gameTime;
@@ -100,14 +100,14 @@ export async function categoryCreateDateTime(data: any) {
       throw new Error('Данная категория уже существует');
     }
     console.log("111111111")
-    userFindGameCreateTime = await prisma.gameCreateTime.findFirst({
+    userFindCreateTime = await prisma.createTime.findFirst({
       where: {
         userId: data.userId,
       }
     })
 
-    if(!userFindGameCreateTime){
-      gameTime = await prisma.gameCreateTime.create({
+    if(!userFindCreateTime){
+      gameTime = await prisma.createTime.create({
         data: {
          userId: Number(data.userId),
           category: currentTimeMinusOneHour,
@@ -123,7 +123,7 @@ export async function categoryCreateDateTime(data: any) {
 
     console.log("222222222")
     const currentTime = new Date();
-    const lastCategoryTime = await prisma.gameCreateTime.findFirst({
+    const lastCategoryTime = await prisma.createTime.findFirst({
       where: { userId: Number(data.userId)}, // предполагаем, что у вас есть текущий пользователь
       select: { category: true }
     });
@@ -157,7 +157,7 @@ export async function categoryCreateDateTime(data: any) {
     console.log("555555555555")
     console.log(data.userId)
 
-    const existingRecord = await prisma.gameCreateTime.findFirst({
+    const existingRecord = await prisma.createTime.findFirst({
       where: { userId: data.userId },
     });
     console.log("666666666666")
@@ -165,7 +165,7 @@ export async function categoryCreateDateTime(data: any) {
       throw new Error(`Запись с userId ${data.userId} не найдена`);
     }
     console.log("77777777")
-    await prisma.gameCreateTime.update({
+    await prisma.createTime.update({
       where: { id: existingRecord.id }, // Используем уникальный id
       data: { category: currentTime }, // Данные для обновления
     });
@@ -183,7 +183,7 @@ export async function categoryCreateDateTime(data: any) {
 export async function productCreateDateTime(data: any) {
   let product;
   let productNameFind;
-  let userFindGameCreateTime;
+  let userFindCreateTime;
   const currentTimeMinusOneHour = new Date();
   currentTimeMinusOneHour.setHours(currentTimeMinusOneHour.getHours() - 1);
 
@@ -200,14 +200,14 @@ export async function productCreateDateTime(data: any) {
       throw new Error('Данный продукт уже существует');
     }
     console.log("111111111")
-    userFindGameCreateTime = await prisma.gameCreateTime.findFirst({
+    userFindCreateTime = await prisma.createTime.findFirst({
       where: {
         userId: data.userId,
       }
     })
 
-    if(!userFindGameCreateTime){
-      gameTime = await prisma.gameCreateTime.create({
+    if(!userFindCreateTime){
+      gameTime = await prisma.createTime.create({
         data: {
           userId: Number(data.userId),
           category: currentTimeMinusOneHour,
@@ -223,7 +223,7 @@ export async function productCreateDateTime(data: any) {
 
     console.log("222222222")
     const currentTime = new Date();
-    const lastProductTime = await prisma.gameCreateTime.findFirst({
+    const lastProductTime = await prisma.createTime.findFirst({
       where: { userId: data.userId}, // предполагаем, что у вас есть текущий пользователь
       select: { product: true }
     });
@@ -253,7 +253,7 @@ export async function productCreateDateTime(data: any) {
     console.log("555555555555")
     console.log(data.userId)
 
-    const existingRecord = await prisma.gameCreateTime.findFirst({
+    const existingRecord = await prisma.createTime.findFirst({
       where: { userId: data.userId },
     });
     console.log("666666666666")
@@ -261,7 +261,7 @@ export async function productCreateDateTime(data: any) {
       throw new Error(`Запись с userId ${data.userId} не найдена`);
     }
     console.log("77777777")
-    await prisma.gameCreateTime.update({
+    await prisma.createTime.update({
       where: { id: existingRecord.id }, // Используем уникальный id
       data: { product: currentTime }, // Данные для обновления
     });
@@ -279,7 +279,7 @@ export async function productCreateDateTime(data: any) {
 export async function productItemCreateDateTime(data: any) {
   let productItem;
   let productItemNameFind;
-  let userFindGameCreateTime;
+  let userFindCreateTime;
   const currentTimeMinusOneHour = new Date();
   currentTimeMinusOneHour.setHours(currentTimeMinusOneHour.getHours() - 1);
   let gameTime;
@@ -295,14 +295,14 @@ export async function productItemCreateDateTime(data: any) {
       throw new Error('Данный продукт уже существует');
     }
     console.log("111111111")
-    userFindGameCreateTime = await prisma.gameCreateTime.findFirst({
+    userFindCreateTime = await prisma.createTime.findFirst({
       where: {
         userId: data.userId,
       }
     })
 
-    if(!userFindGameCreateTime){
-      gameTime = await prisma.gameCreateTime.create({
+    if(!userFindCreateTime){
+      gameTime = await prisma.createTime.create({
         data: {
           userId: Number(data.userId),
           category: currentTimeMinusOneHour,
@@ -318,7 +318,7 @@ export async function productItemCreateDateTime(data: any) {
 
     console.log("222222222")
     const currentTime = new Date();
-    const lastProductItemTime = await prisma.gameCreateTime.findFirst({
+    const lastProductItemTime = await prisma.createTime.findFirst({
       where: { userId: data.userId}, // предполагаем, что у вас есть текущий пользователь
       select: { productItem: true }
     });
@@ -348,7 +348,7 @@ export async function productItemCreateDateTime(data: any) {
     console.log("555555555555")
     console.log(data.userId)
 
-    const existingRecord = await prisma.gameCreateTime.findFirst({
+    const existingRecord = await prisma.createTime.findFirst({
       where: { userId: data.userId },
     });
     console.log("666666666666")
@@ -356,7 +356,7 @@ export async function productItemCreateDateTime(data: any) {
       throw new Error(`Запись с userId ${data.userId} не найдена`);
     }
     console.log("77777777")
-    await prisma.gameCreateTime.update({
+    await prisma.createTime.update({
       where: { id: existingRecord.id }, // Используем уникальный id
       data: { productItem: currentTime }, // Данные для обновления
     });
@@ -644,9 +644,9 @@ export async function productItemCreate(data: any) {
 export async function addRecordActions(data :any) {
 
   try {
-    console.log("data.carModelId");
-    console.log(data.carModelId);
-    await prisma.gameRecords.create({
+    console.log("data.betModelId");
+    console.log(data.betModelId);
+    await prisma.gameBet.create({
         data: {
           userId: data.userId,
           categoryId: data.categoryId,
@@ -655,7 +655,7 @@ export async function addRecordActions(data :any) {
           timestate: data.timestate,
           video: data.video,
           img: data.img,
-          carModelId: data.carModelId,
+          betModelId: data.betModelId,
         }
       });
 
@@ -673,7 +673,7 @@ export async function editRecordActions(data :any) {
 
   let result;
   try {
-    result = await prisma.gameRecords.findFirst({
+    result = await prisma.gameBet.findFirst({
       where: {
         id: data.id,
         userId: data.userId,
@@ -690,7 +690,7 @@ export async function editRecordActions(data :any) {
     console.log("data");
     console.log(data);
 
-    await prisma.gameRecords.update({
+    await prisma.gameBet.update({
       where: {
         id: data.id,
         userId: data.userId,
@@ -702,7 +702,7 @@ export async function editRecordActions(data :any) {
         timestate: data?.timestate,
         video: data?.video,
         img: data?.img,
-        carModelId: data?.carModelId,
+        betModelId: data?.betModelId,
       },
     });
 
@@ -720,7 +720,7 @@ export async function deleteRecordActions(data :any) {
   console.log('data data data data')
   console.log(data.id)
   try {
-    record = await prisma.gameRecords.findFirst({
+    record = await prisma.gameBet.findFirst({
       where: {
         id: data.id,
       },
@@ -729,7 +729,7 @@ export async function deleteRecordActions(data :any) {
       throw new Error('recordGame not found');
     }
     console.log('1111111111111111111')
-    await prisma.gameRecords.delete({
+    await prisma.gameBet.delete({
       where: {
         id: data.id,
       }
