@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import React, {Suspense} from "react";
 import Loading from "@/app/(root)/loading";
 import { InferGetServerSidePropsType } from 'next';
-import {GameRecord_CLIENT} from "@/components/gameRecords_CLIENT";
+import {GameRecord_CLIENT} from "@/components/HEROES_CLIENT";
 import Link from "next/link";
 import {Button} from "@/components/ui";
 import Image from "next/image";
@@ -18,7 +18,6 @@ export default async function Home({
     params: Promise<{ categoryPage: string }>;
     searchParams: Promise<{ page?: string | undefined }>;
 }) {
-    // Явно дожидаемся params (expected as a Promise)
     const { categoryPage } = await params;
     const resolvedSearchParams = await searchParams; // Ждём Promise
     const page = parseInt(resolvedSearchParams.page ?? '1', 30);
@@ -45,47 +44,27 @@ export default async function Home({
     return (
         <Container className="flex flex-col my-10">
             <Suspense fallback={<Loading/>}>
-
-                <div style={{width: "50%", margin: "0 auto"}}>
-                    <Image
-                        src="/h3.gif"
-                        alt="Logo"
-                        width={100}
-                        height={65}
-                        style={{width: '100%', height: 'auto'}} // Explicitly set width and height here
-                        priority
-                    />
+                <GameRecord_CLIENT gameRecords={gameRecords}/>
+                <div className="pagination-buttons flex justify-center mt-6">
+                    <Link href={`/?page=${page - 1}`}>
+                        <Button
+                            className="btn btn-primary mx-2 w-[100px]"
+                            disabled={page === 1}
+                        >
+                            Previous
+                        </Button>
+                    </Link>
+                    <span className="mx-3 text-lg font-semibold">
+                        Page {page} of {totalPages}
+                    </span>
+                    {page < totalPages && (
+                        <Link href={`/?page=${page + 1}`}>
+                            <Button className="btn btn-primary mx-2 w-[100px]">
+                                Next
+                            </Button>
+                        </Link>
+                    )}
                 </div>
-                {/*<div style={{width: "50%", height: "auto", display: 'block', margin: '0 auto'}}>*/}
-                {/*    <Image*/}
-                {/*        src="/h3.gif"*/}
-                {/*        alt="Logo"*/}
-                {/*        layout="responsive" // Use responsive layout*/}
-                {/*        width={100} // Placeholder width*/}
-                {/*        height={65} // Placeholder height*/}
-                {/*    />*/}
-                {/*</div>*/}
-                {/*<GameRecord_CLIENT gameRecords={gameRecords} />*/}
-                {/*<div className="pagination-buttons flex justify-center mt-6">*/}
-                {/*    <Link href={`/?page=${page - 1}`}>*/}
-                {/*        <Button*/}
-                {/*            className="btn btn-primary mx-2 w-[100px]"*/}
-                {/*            disabled={page === 1}*/}
-                {/*        >*/}
-                {/*            Previous*/}
-                {/*        </Button>*/}
-                {/*    </Link>*/}
-                {/*    <span className="mx-3 text-lg font-semibold">*/}
-                {/*        Page {page} of {totalPages}*/}
-                {/*    </span>*/}
-                {/*    {page < totalPages && (*/}
-                {/*        <Link href={`/?page=${page + 1}`}>*/}
-                {/*            <Button className="btn btn-primary mx-2 w-[100px]">*/}
-                {/*                Next*/}
-                {/*            </Button>*/}
-                {/*        </Link>*/}
-                {/*    )}*/}
-                {/*</div>*/}
             </Suspense>
         </Container>
     );
