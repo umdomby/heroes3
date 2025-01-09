@@ -3,10 +3,9 @@ import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
 import {Prisma} from '@prisma/client';
 import {hashSync} from 'bcrypt';
-import {revalidatePath} from 'next/cache'
-import {redirect} from 'next/navigation'
-import {put, PutBlobResult} from "@vercel/blob";
-import {list} from "@vercel/blob"
+import * as z from 'zod'
+import { revalidatePath } from 'next/cache';
+import { BetParticipant, PlayerChoice } from '@prisma/client'
 
 
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
@@ -34,11 +33,9 @@ export async function updateUserInfo(body: Prisma.UserUpdateInput) {
       },
     });
   } catch (err) {
-    //console.log('Error [UPDATE_USER]', err);
     throw err;
   }
 }
-
 export async function registerUser(body: Prisma.UserCreateInput) {
   try {
     const user = await prisma.user.findFirst({
@@ -46,11 +43,9 @@ export async function registerUser(body: Prisma.UserCreateInput) {
         email: body.email,
       },
     });
-
     if (user) {
       throw new Error('Пользователь уже существует');
     }
-
     await prisma.user.create({
       data: {
         fullName: body.fullName,
@@ -58,688 +53,250 @@ export async function registerUser(body: Prisma.UserCreateInput) {
         password: hashSync(body.password, 10),
       },
     });
-
   } catch (err) {
     console.log('Error [CREATE_USER]', err);
     throw err;
   }
 }
 
-export async function uploadImage(formData: FormData) {
+const createBetSchema = z.object({
+  player1: z.string().min(1, { message: 'Введите имя игрока 1' }),
+  player2: z.string().min(1, { message: 'Введите имя игрока 2' }),
+  oddsPlayer1: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
+  oddsPlayer2: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
+  categoryId: z.number().int(),
+  productId: z.number().int(),
+  productItemId: z.number().int(),
+});
+export async function createBet(formData: z.infer<typeof createBetSchema>) {
+  'use server'
+  const session = await getUserSession();
+  const data = createBetSchema.parse(formData)
   try {
-    const imageFile = formData.get('image') as File;
-    const blob = await put('nfs/' + imageFile.name, imageFile, {
-      access: 'public',
-    });
-    //revalidatePath('/add-game');
-    return blob;
 
-  } catch (error: any) {
-    if (error.code === 'P2002') {
-      return {error: 'That slug already exists.'}
+    await prisma.bet.create({
+      data: {
+        ...data,
+        creatorId: Number(session?.id),
+        currentOdds1: data.oddsPlayer1, // Initialize current odds
+        currentOdds2: data.oddsPlayer2, // Initialize current odds
+      },
+
+    })
+    revalidatePath('/') // Revalidate the home page to show the new bet
+  } catch (error) {
+    console.error("Error creating bet:", error)
+    if (error instanceof z.ZodError) {
+      throw new Error(error.message)
+    } else if (error instanceof Error) {
+      throw new Error(error.message)
+
+
+    } else {
+      throw new Error("Failed to create bet.")
     }
-    return {error: error.message || 'Failed to create the blog.'}
   }
 }
 
-export async function categoryCreateDateTime(data: any) {
-  let category;
-  let categoryNameFind;
-  let userFindCreateTime;
-  const currentTimeMinusOneHour = new Date();
-  currentTimeMinusOneHour.setHours(currentTimeMinusOneHour.getHours() - 1);
-  let gameTime;
+const placeBetSchema = z.object({
+  betId: z.number().int(),
+  userId: z.number().int(),
+  amount: z.number().positive({ message: 'Сумма должна быть положительным числом' }),
+  player: z.nativeEnum(PlayerChoice), // Use zod.nativeEnum
+});
+
+export async function placeBet(formData: z.infer<typeof placeBetSchema>) {
   try {
 
-    categoryNameFind = await prisma.category.findFirst({
-      where: {
-        name: data.name,
+    const data = placeBetSchema.parse(formData);
+
+    const bet = await prisma.bet.findUnique({
+      where: { id: data.betId },
+      include: {
+        participants: { include: { user: true } }
       }
-    })
-    if (categoryNameFind) {
-      throw new Error('Данная категория уже существует');
+    });
+
+
+    if (!bet) {
+      throw new Error("Ставка не найдена");
     }
-    console.log("111111111")
-    userFindCreateTime = await prisma.createTime.findFirst({
-      where: {
+
+    if (bet.status === 'CLOSED') {
+      throw new Error("Ставка закрыта");
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: data.userId } });
+    if (!user) {
+      throw new Error("Пользователь не найден");
+    }
+
+    if (user.points < data.amount) {
+      throw new Error("Недостаточно средств");
+    }
+
+
+    const participant = await prisma.betParticipant.create({
+      data: {
+        betId: data.betId,
         userId: data.userId,
-      }
-    })
-
-    if(!userFindCreateTime){
-      gameTime = await prisma.createTime.create({
-        data: {
-         userId: Number(data.userId),
-          category: currentTimeMinusOneHour,
-          product: currentTimeMinusOneHour,
-          productItem: currentTimeMinusOneHour,
-        }
-      })
-
-      if (!gameTime) {
-        throw new Error('gameTime Error');
-      }
-    }
-
-    console.log("222222222")
-    const currentTime = new Date();
-    const lastCategoryTime = await prisma.createTime.findFirst({
-      where: { userId: Number(data.userId)}, // предполагаем, что у вас есть текущий пользователь
-      select: { category: true }
+        amount: data.amount,
+        odds: data.player === "PLAYER1" ? bet.currentOdds1 : bet.currentOdds2, // Correct odds recording
+        player: data.player
+      },
     });
-    console.log("lastCategoryTime")
-    console.log(lastCategoryTime)
 
-    console.log("3333333333")
-    // Проверяем, прошло ли больше 1 минуты
-    if (lastCategoryTime && lastCategoryTime.category) {
-      const timeDiff = currentTime.getTime() - new Date(lastCategoryTime.category).getTime();
+    await prisma.user.update({
+      where: { id: data.userId },
+      data: { points: { decrement: data.amount } },
+    });
 
-      console.log("timeDiff")
-      console.log(timeDiff)
-      console.log(" process.env.DATE_TIME_UPDATE ")
-      console.log(Number(process.env.DATE_TIME_UPDATE))
-      if (timeDiff < Number(process.env.DATE_TIME_UPDATE)) { // 60000 мс = 1 минута
-          throw new Error('Вы можете добавлять категории только раз в час');
-      }
-    }
-    console.log("444444444444")
-    category = await prisma.category.create({
+
+    const totalBetAmount = bet.participants.reduce((acc, p) => acc + p.amount, 0) + participant.amount
+
+    const odds1 = calculateOdds(totalBetAmount, data.betId, 'PLAYER1');
+    const odds2 = calculateOdds(totalBetAmount, data.betId, 'PLAYER2');
+
+    await prisma.bet.update({
+      where: { id: data.betId },
       data: {
-        name: data.name,
-      }
-    })
-
-    if (!category) {
-      throw new Error('Category Error');
-    }
-
-    console.log("555555555555")
-    console.log(data.userId)
-
-    const existingRecord = await prisma.createTime.findFirst({
-      where: { userId: data.userId },
-    });
-    console.log("666666666666")
-    if (!existingRecord) {
-      throw new Error(`Запись с userId ${data.userId} не найдена`);
-    }
-    console.log("77777777")
-    await prisma.createTime.update({
-      where: { id: existingRecord.id }, // Используем уникальный id
-      data: { category: currentTime }, // Данные для обновления
-    });
-
-    console.log("8888888")
-    revalidatePath('/admin/game')
-
-  } catch (error) {
-    if (error instanceof Error) {
-      console.log(error.stack);
-    }
-    throw new Error('Failed to game your interaction. Please try again.');
-  }
-}
-export async function productCreateDateTime(data: any) {
-  let product;
-  let productNameFind;
-  let userFindCreateTime;
-  const currentTimeMinusOneHour = new Date();
-  currentTimeMinusOneHour.setHours(currentTimeMinusOneHour.getHours() - 1);
-
-  let gameTime;
-  try {
-
-    productNameFind = await prisma.product.findFirst({
-      where: {
-        categoryId: data.categoryId,
-        name: data.name,
-      }
-    })
-    if (productNameFind) {
-      throw new Error('Данный продукт уже существует');
-    }
-    console.log("111111111")
-    userFindCreateTime = await prisma.createTime.findFirst({
-      where: {
-        userId: data.userId,
-      }
-    })
-
-    if(!userFindCreateTime){
-      gameTime = await prisma.createTime.create({
-        data: {
-          userId: Number(data.userId),
-          category: currentTimeMinusOneHour,
-          product: currentTimeMinusOneHour,
-          productItem: currentTimeMinusOneHour,
-        }
-      })
-
-      if (!gameTime) {
-        throw new Error('gameTime Error');
-      }
-    }
-
-    console.log("222222222")
-    const currentTime = new Date();
-    const lastProductTime = await prisma.createTime.findFirst({
-      where: { userId: data.userId}, // предполагаем, что у вас есть текущий пользователь
-      select: { product: true }
-    });
-    console.log("lastProductTime")
-    console.log(lastProductTime)
-
-    console.log("3333333333")
-    // Проверяем, прошло ли больше 1 минуты
-    if (lastProductTime && lastProductTime.product) {
-      const timeDiff = currentTime.getTime() - new Date(lastProductTime.product).getTime();
-      if (timeDiff < Number(process.env.DATE_TIME_UPDATE)) { // 60000 мс = 1 минута
-        throw new Error('Вы можете добавлять продукты только раз в час');
-      }
-    }
-    console.log("444444444444")
-    product = await prisma.product.create({
-      data: {
-        name: data.name,
-        categoryId: Number(data.categoryId),
-      }
-    })
-
-    if (!product) {
-      throw new Error('Category Error');
-    }
-
-    console.log("555555555555")
-    console.log(data.userId)
-
-    const existingRecord = await prisma.createTime.findFirst({
-      where: { userId: data.userId },
-    });
-    console.log("666666666666")
-    if (!existingRecord) {
-      throw new Error(`Запись с userId ${data.userId} не найдена`);
-    }
-    console.log("77777777")
-    await prisma.createTime.update({
-      where: { id: existingRecord.id }, // Используем уникальный id
-      data: { product: currentTime }, // Данные для обновления
-    });
-
-    console.log("8888888")
-    revalidatePath('/admin/game')
-
-  } catch (error) {
-    if (error instanceof Error) {
-      console.log(error.stack);
-    }
-    throw new Error('Failed to game your interaction. Please try again.');
-  }
-}
-export async function productItemCreateDateTime(data: any) {
-  let productItem;
-  let productItemNameFind;
-  let userFindCreateTime;
-  const currentTimeMinusOneHour = new Date();
-  currentTimeMinusOneHour.setHours(currentTimeMinusOneHour.getHours() - 1);
-  let gameTime;
-  try {
-
-    productItemNameFind = await prisma.productItem.findFirst({
-      where: {
-        name: data.name,
-        productId: Number(data.productId),
-      }
-    })
-    if (productItemNameFind) {
-      throw new Error('Данный продукт уже существует');
-    }
-    console.log("111111111")
-    userFindCreateTime = await prisma.createTime.findFirst({
-      where: {
-        userId: data.userId,
-      }
-    })
-
-    if(!userFindCreateTime){
-      gameTime = await prisma.createTime.create({
-        data: {
-          userId: Number(data.userId),
-          category: currentTimeMinusOneHour,
-          product: currentTimeMinusOneHour,
-          productItem: currentTimeMinusOneHour,
-        }
-      })
-
-      if (!gameTime) {
-        throw new Error('gameTime Error');
-      }
-    }
-
-    console.log("222222222")
-    const currentTime = new Date();
-    const lastProductItemTime = await prisma.createTime.findFirst({
-      where: { userId: data.userId}, // предполагаем, что у вас есть текущий пользователь
-      select: { productItem: true }
-    });
-    console.log("lastProductItemTime")
-    console.log(lastProductItemTime)
-
-    console.log("3333333333")
-    // Проверяем, прошло ли больше 1 минуты
-    if (lastProductItemTime && lastProductItemTime.productItem) {
-      const timeDiff = currentTime.getTime() - new Date(lastProductItemTime.productItem).getTime();
-      if (timeDiff < Number(process.env.DATE_TIME_UPDATE)) { // 60000 мс = 1 минута
-        throw new Error('Вы можете добавлять категории только раз в час');
-      }
-    }
-    console.log("444444444444")
-    productItem = await prisma.productItem.create({
-      data: {
-        name: data.name,
-        productId: Number(data.productId),
-      }
-    })
-
-    if (!productItem) {
-      throw new Error('Category Error');
-    }
-
-    console.log("555555555555")
-    console.log(data.userId)
-
-    const existingRecord = await prisma.createTime.findFirst({
-      where: { userId: data.userId },
-    });
-    console.log("666666666666")
-    if (!existingRecord) {
-      throw new Error(`Запись с userId ${data.userId} не найдена`);
-    }
-    console.log("77777777")
-    await prisma.createTime.update({
-      where: { id: existingRecord.id }, // Используем уникальный id
-      data: { productItem: currentTime }, // Данные для обновления
-    });
-
-    console.log("8888888")
-    revalidatePath('/admin/game')
-
-  } catch (error) {
-    if (error instanceof Error) {
-      console.log(error.stack);
-    }
-    throw new Error('Failed to game your interaction. Please try again.');
-  }
-}
-
-export async function categoryUpdate(data: any) {
-  try {
-    const findCategory = await prisma.category.findFirst({
-      where: {
-        id: Number(data.id),
-      },
-    });
-
-    if (!findCategory) {
-      throw new Error('Category non found');
-    }
-
-    // if (findCategory.name === data.name) {
-    //   throw new Error('Данные не обновлены, они одинаковые.');
-    // }
-
-    await prisma.category.update({
-      where: {
-        id: Number(data.id),
-
-      },
-      data: {
-        name: data.name,
-        img: data?.img,
-      },
-    });
-
-    revalidatePath('/admin/game')
-  } catch (err) {
-    //console.log('Error [UPDATE_CATEGORY]', err);
-    throw err;
-  }
-}
-export async function categoryCreate(data: any) {
-  let category;
-  let categoryNameFind;
-  try {
-    categoryNameFind = await prisma.category.findFirst({
-      where: {
-        name: data.name,
-      }
-    })
-    if (categoryNameFind) {
-      throw new Error('Данная категория уже существует');
-    }
-
-    category = await prisma.category.create({
-      data: {
-        name: data.name,
-        img: data.img,
-      }
-    })
-
-    if (!category) {
-      throw new Error('Category Error');
-    }
-
-    revalidatePath('/admin/game')
-
-  } catch (err) {
-    console.log('Error [CREATE_CATEGORY]', err);
-    throw err;
-  }
-}
-export async function categoryDelete(data: any) {
-
-  let categoryDelete;
-  try {
-    categoryDelete = await prisma.category.findFirst({
-      where: {
-        id: Number(data.id),
-      },
-    });
-
-    if (!categoryDelete) {
-      throw new Error('Category delete Error');
-    }
-
-    await prisma.category.delete({
-      where: {
-        id: Number(data.id),
-      }
-    })
-    revalidatePath('/admin/game')
-  } catch (err) {
-    //console.log('Error [CREATE_CATEGORY]', err);
-    throw err;
-  }
-}
-
-export async function productUpdate(data: any) {
-  try {
-    const product = await prisma.product.findFirst({
-      where: {
-        id: Number(data.id),
-      },
-    });
-
-    if (!product) {
-      throw new Error('product not found');
-    }
-
-    if (product.name === data.name) {
-      throw new Error('No update, data identical.');
-    }
-
-    await prisma.product.update({
-      where: {
-        id: Number(data.id),
-      },
-      data: {
-        name: data.name,
-      },
-    });
-    revalidatePath('/admin/product')
-  } catch (err) {
-    //console.log('Error [UPDATE_PRODUCT]', err);
-    throw err;
-  }
-}
-export async function productDelete(data: any) {
-  let product;
-  try {
-    product = await prisma.product.findFirst({
-      where: {
-        id: Number(data.id),
-      },
-    });
-    if (!product) {
-      throw new Error('Product delete Error');
-    }
-    await prisma.product.delete({
-      where: {
-        id: Number(data.id),
-      }
-    })
-    revalidatePath('/admin/product')
-  } catch (err) {
-    //console.log('Error [CREATE_PRODUCT]', err);
-    throw err;
-  }
-}
-export async function productCreate(data: any) {
-  let product;
-  let productNameFind;
-    console.log(data.name)
-    console.log(data.categoryId)
-  try {
-    productNameFind = await prisma.product.findFirst({
-      where: {
-        categoryId: data.categoryId,
-        name: data.name,
+        totalBetAmount: totalBetAmount,
+        currentOdds1: odds1,
+        currentOdds2: odds2,
       }
     });
-
-    if (productNameFind) {
-      throw new Error('product already exists');
-    }
-
-    product = await prisma.product.create({
-      data: {
-        name: data.name,
-        categoryId: Number(data.categoryId),
-      }
-    });
-
-    if (!product) {
-      throw new Error('Product Error');
-    }
-
-    revalidatePath('/admin/product')
-
-  }   catch (error) {
-    if (error instanceof Error) {
-      console.log(error.stack);
-    }
-    throw new Error('Failed to game your interaction. Please try again.');
-  }
-}
-
-export async function productItemUpdate(data: any) {
-  try {
-    const product = await prisma.productItem.findFirst({
-      where: {
-        id: Number(data.id),
-      },
-    });
-
-    if (!product) {
-      throw new Error('product not found');
-    }
-
-    // if (product.name === data.name) {
-    //   throw new Error('No update, data identical.');
-    // }
-
-    await prisma.productItem.update({
-      where: {
-        id: Number(data.id),
-      },
-      data: {
-        name: data.name,
-        img: data?.img,
-      },
-    });
-    revalidatePath('/admin/product')
-  } catch (err) {
-    //console.log('Error [UPDATE_PRODUCT]', err);
-    throw err;
-  }
-}
-export async function productItemDelete(data : any) {
-  let product;
-  try {
-    product = await prisma.productItem.findFirst({
-      where: {
-        id: Number(data.id),
-      },
-    });
-    if (!product) {
-      throw new Error('Product delete Error');
-    }
-    console.log(Number(data.id))
-    await prisma.productItem.delete({
-      where: {
-        id: Number(data.id),
-      }
-    })
-    revalidatePath('/admin/product-item')
-  } catch (err) {
-    //console.log('Error [CREATE_PRODUCT]', err);
-    throw err;
-  }
-}
-export async function productItemCreate(data: any) {
-  let product;
-  let productNameFind;
-  try {
-    productNameFind = await prisma.productItem.findFirst({
-      where: {
-        name: data.name,
-        productId: Number(data.productId),
-      }
-    });
-
-    if (productNameFind) {
-      throw new Error('product already exists');
-    }else {
-      product = await prisma.productItem.create({
-        data: {
-          name: data.name,
-          productId: Number(data.productId),
-          img:data?.img,
-        }
-      });
-      if (!product) {
-        throw new Error('Product Error');
-      }
-    }
-
-    revalidatePath('/admin/product')
-  } catch (error) {
-    if (error instanceof Error) {
-      console.log(error.stack);
-    }
-    throw new Error('Failed to game your interaction. Please try again.');
-  }
-}
-
-export async function addRecordActions(data :any) {
-
-  try {
-    console.log("data.betModelId");
-    console.log(data.betModelId);
-    await prisma.gameBet.create({
-        data: {
-          userId: data.userId,
-          categoryId: data.categoryId,
-          productId: data.productId,
-          productItemId: data.productItemId,
-          timestate: data.timestate,
-          video: data.video,
-          img: data.img,
-          betModelId: data.betModelId,
-        }
-      });
 
     revalidatePath('/')
 
+
+
   } catch (error) {
-    if (error instanceof Error) {
-      console.log(error.stack);
+
+    console.error("Error placing bet:", error);
+    if (error instanceof z.ZodError) {
+
+      throw new Error(error.format()._errors[0])
+
+    } else if (error instanceof Error) {
+
+      throw new Error(error.message)
+
+
+    } else {
+
+      throw new Error("Failed to place bet.");
+
     }
-    throw new Error('Failed to game your interaction. Please try again.');
   }
 }
 
-export async function editRecordActions(data :any) {
 
-  let result;
+async function calculateOdds(totalBetAmount: number, betId: number, player: PlayerChoice) {
+  const participants = await prisma.betParticipant.findMany({
+    where: { betId, player },
+  });
+  const totalBetsOnPlayer = participants.reduce((sum, p) => sum + p.amount, 0);
+
+  if(totalBetsOnPlayer === 0){
+    return 0
+  }
+  const oppositePlayer = player === 'PLAYER1' ? 'PLAYER2' : 'PLAYER1';
+  const betsOnOppositePlayer = await prisma.betParticipant.findMany({ where: { betId: betId, player: oppositePlayer } })
+  const totalBetsOnOppositePlayer = betsOnOppositePlayer.reduce((acc, cur) => acc + cur.amount, 0)
+
+
+  const odds = totalBetsOnOppositePlayer / totalBetsOnPlayer
+  if(isNaN(odds)){
+    return 0
+  }
+  return odds
+}
+
+
+export async function getBets() {
+  'use server'; // Mark as server action
+
   try {
-    result = await prisma.gameBet.findFirst({
-      where: {
-        id: data.id,
-        userId: data.userId,
-        categoryId: data.categoryId,
-        productId: data.productId,
-        productItemId: data.productItemId,
-      }
-    })
-
-    if (!result) {
-      throw new Error('editRecordActions result not found');
-    }
-
-    console.log("data");
-    console.log(data);
-
-    await prisma.gameBet.update({
-      where: {
-        id: data.id,
-        userId: data.userId,
-        categoryId: data.categoryId,
-        productId: data.productId,
-        productItemId: data.productItemId,
-      },
-      data: {
-        timestate: data?.timestate,
-        video: data?.video,
-        img: data?.img,
-        betModelId: data?.betModelId,
+    const bets = await prisma.bet.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        creator: true,
+        participants: {
+          include: { user: true },
+        },
+        category: true,
+        product: true,
+        productItem: true,
       },
     });
-
-    revalidatePath('/admin/edit-game')
-  }catch (error) {
-    if (error instanceof Error) {
-      console.log(error.stack);
-    }
-    throw new Error('Failed to game your interaction. Please try again.');
+    return bets;
+  } catch (error) {
+    console.error("Error getting bets:", error);
+    throw new Error("Failed to retrieve bets."); // Throw error for server component error handling
   }
 }
 
-export async function deleteRecordActions(data :any) {
-  let record;
-  console.log('data data data data')
-  console.log(data.id)
+export async function closeBet(betId: number, winnerId: number) {
+  'use server'
+
+
   try {
-    record = await prisma.gameBet.findFirst({
-      where: {
-        id: data.id,
-      },
-    });
-    if (!record) {
-      throw new Error('recordGame not found');
-    }
-    console.log('1111111111111111111')
-    await prisma.gameBet.delete({
-      where: {
-        id: data.id,
+    const bet = await prisma.bet.update({
+      where: { id: betId },
+      data: { status: 'CLOSED', winnerId: winnerId },
+      include: {
+        participants: {
+          include: {
+            user: true,
+          }
+        }
       }
-    })
-    revalidatePath('/edit-game')
-  } catch (error) {
-    if (error instanceof Error) {
-      console.log(error.stack);
+    });
+
+    if (!bet) {
+      throw new Error("Ставка не найдена");
     }
-    throw new Error('Failed to game your interaction. Please try again.');
+
+
+    const winningPlayer = bet.winnerId === bet.creatorId ? PlayerChoice.PLAYER1 : PlayerChoice.PLAYER2;
+
+
+
+    for (const participant of bet.participants) {
+      if (participant.player === winningPlayer) {
+
+        const winAmount = participant.amount * participant.odds;
+
+        await prisma.user.update({
+          where: { id: participant.userId },
+          data: { points: { increment: winAmount } },
+        });
+
+
+        await prisma.betParticipant.update({
+          where: {id: participant.id},
+          data: {
+            isWinner: true,
+          }
+        })
+      }
+    }
+
+
+    revalidatePath('/')
+
+
+
+  } catch (error) {
+    console.error("Error closing bet:", error)
+
+    if (error instanceof Error) {
+      throw new Error(error.message)
+    } else {
+      throw new Error("Failed to close bet.")
+    }
+
   }
+
 }
 

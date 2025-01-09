@@ -11,109 +11,92 @@ datasource db {
 }
 
 model User {
-  id                   Int           @id @default(autoincrement())
-  fullName             String
-  email                String        @unique
-  provider             String?
-  providerId           String?
-  password             String
-  role                 UserRole      @default(USER)
-  img                  String?
-  gameBet              GameBet[]
-  goldProductItems     ProductItem[] @relation("GoldUser")
-  silverProductItems   ProductItem[] @relation("SilverUser")
-  bronzeProductItems   ProductItem[] @relation("BronzeUser")
-  platinumProductItems ProductItem[] @relation("PlatinumUser")
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
-  createTime           CreateTime[]
+  id          Int              @id @default(autoincrement())
+  fullName    String
+  email       String           @unique
+  provider    String?
+  providerId  String?
+  password    String
+  role        UserRole         @default(USER)
+  img         String?
+  points      Float            @default(1000)
+  betsCreated Bet[]            @relation("BetsCreated")
+  betsPlaced  BetParticipant[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Bet {
+  id             Int              @id @default(autoincrement())
+  player1        String
+  player2        String
+  initialOdds1   Float
+  initialOdds2   Float
+  currentOdds1   Float            @default(0)
+  currentOdds2   Float            @default(0)
+  maxBetAmount   Float            @default(10)
+  totalBetAmount Float            @default(0)
+  creator        User             @relation("BetsCreated", fields: [creatorId], references: [id])
+  creatorId      Int
+  status         BetStatus        @default(OPEN)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  participants   BetParticipant[]
+  categoryId     Int?
+  category       Category?        @relation(fields: [categoryId], references: [id])
+  productId      Int?
+  product        Product?         @relation(fields: [productId], references: [id])
+  productItemId  Int?
+  productItem    ProductItem?     @relation(fields: [productItemId], references: [id])
+}
+
+model BetParticipant {
+  id       Int          @id @default(autoincrement())
+  betId    Int
+  bet      Bet          @relation(fields: [betId], references: [id])
+  userId   Int
+  user     User         @relation(fields: [userId], references: [id])
+  amount   Float
+  odds     Float
+  player   PlayerChoice
+  isWinner Boolean      @default(false)
 }
 
 model Category {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  products  Product[]
-  img       String?
-  gameBet   GameBet[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+  bets     Bet[]
 }
 
 model Product {
-  id          Int           @id @default(autoincrement())
-  name        String
-  img         String?
-  productItem ProductItem[]
-  gameBet     GameBet[]
-  betModel    BetModel[]
-  category    Category      @relation(fields: [categoryId], references: [id])
-  categoryId  Int
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  categoryId   Int
+  category     Category      @relation(fields: [categoryId], references: [id])
+  productItems ProductItem[]
+  bets         Bet[]
 }
 
 model ProductItem {
-  id        Int       @id @default(autoincrement())
-  name      String
-  img       String?
-  gameBet   GameBet[]
-  product   Product   @relation(fields: [productId], references: [id])
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
   productId Int
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  goldId       Int?
-  goldUser     User? @relation("GoldUser", fields: [goldId], references: [id])
-  silverId     Int?
-  silverUser   User? @relation("SilverUser", fields: [silverId], references: [id])
-  bronzeId     Int?
-  bronzeUser   User? @relation("BronzeUser", fields: [bronzeId], references: [id])
-  platinumId   Int?
-  platinumUser User? @relation("PlatinumUser", fields: [platinumId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+  bets      Bet[]
 }
 
-model GameBet {
-  id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id])
-  userId        Int
-  category      Category    @relation(fields: [categoryId], references: [id])
-  categoryId    Int
-  product       Product     @relation(fields: [productId], references: [id])
-  productId     Int
-  productItem   ProductItem @relation(fields: [productItemId], references: [id])
-  productItemId Int
-
-  betModel   BetModel? @relation(fields: [betModelId], references: [id])
-  betModelId Int?
-
-  timestate String?
-  video     String?
-  img       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model CreateTime {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int  @unique
-
-  category    DateTime
-  product     DateTime
-  productItem DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model BetModel {
-  id        Int       @id @default(autoincrement())
-  name      String
-  gameBet   GameBet[]
-  product   Product   @relation(fields: [productId], references: [id])
-  productId Int
+enum BetStatus {
+  OPEN
+  CLOSED
 }
 
 enum UserRole {
   USER
   ADMIN
+}
+
+enum PlayerChoice {
+  PLAYER1
+  PLAYER2
 }

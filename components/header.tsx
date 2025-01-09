@@ -42,6 +42,7 @@ export const Header: React.FC<Props> = ({  className }) => {
 
                 {/* Правая часть */}
                 <div className="flex items-center gap-3">
+                    <Link href="/create-bet" className="flex items-center gap-2">Создать ставку</Link>
                     <ModeToggle/>
                     <AuthModal open={openAuthModal} onClose={() => setOpenAuthModal(false)}/>
                     <ProfileButton onClickSignIn={() => setOpenAuthModal(true)}/>

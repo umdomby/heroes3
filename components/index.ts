@@ -7,5 +7,6 @@ export { RequiredSymbol } from './required-symbol';
 export { Container } from './container';
 export { ThemeProvider } from './theme-provider';
 export { Providers } from './providers';
+export { AddGame } from './add-game';
 export * from './form';
 export * from './modals';

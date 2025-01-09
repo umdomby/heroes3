@@ -1,71 +1,41 @@
-import { Container } from '@/components/container';
-import { prisma } from '@/prisma/prisma-client';
-import { notFound } from 'next/navigation';
+import {Container} from '@/components/container';
+import {prisma} from '@/prisma/prisma-client';
+import {notFound, redirect} from 'next/navigation';
 
 import React, {Suspense} from "react";
 import Loading from "@/app/(root)/loading";
-import { InferGetServerSidePropsType } from 'next';
-import {GameRecord_CLIENT} from "@/components/HEROES_CLIENT";
+import {InferGetServerSidePropsType} from 'next';
+import {HEROES_CLIENT} from "@/components/HEROES_CLIENT";
 import Link from "next/link";
 import {Button} from "@/components/ui";
 import Image from "next/image";
+import {getUserSession} from "@/components/lib/get-user-session";
+
 export const dynamic = 'force-dynamic'
 
-export default async function Home({
-                                               params,
-                                               searchParams,
-                                           }: {
-    params: Promise<{ categoryPage: string }>;
-    searchParams: Promise<{ page?: string | undefined }>;
-}) {
-    const { categoryPage } = await params;
-    const resolvedSearchParams = await searchParams; // Ждём Promise
-    const page = parseInt(resolvedSearchParams.page ?? '1', 30);
-    const pageSize = 30;
-    const offset = (page - 1) * pageSize;
+export default async function Home() {
 
-    const gameBet = await prisma.gameBet.findMany({
-        skip: offset,
-        take: pageSize,
-        orderBy: { updatedAt: 'desc' },
-        include: {
-            user: true,
-            product: true,
-            productItem: true,
-            category: true,
-            betModel: true,
-        },
-    });
+    const session = await getUserSession();
 
-    const totalRecords = await prisma.gameBet.count({});
+    if (!session) {
+        return redirect('/not-auth');
+    }
 
-    const totalPages = Math.ceil(totalRecords / pageSize);
+    const user = await prisma.user.findFirst({where: {id: Number(session?.id)}});
 
-    return (
-        <Container className="flex flex-col my-10">
-            <Suspense fallback={<Loading/>}>
-                <GameRecord_CLIENT gameBet={gameBet}/>
-                <div className="pagination-buttons flex justify-center mt-6">
-                    <Link href={`/?page=${page - 1}`}>
-                        <Button
-                            className="btn btn-primary mx-2 w-[100px]"
-                            disabled={page === 1}
-                        >
-                            Previous
-                        </Button>
-                    </Link>
-                    <span className="mx-3 text-lg font-semibold">
-                        Page {page} of {totalPages}
-                    </span>
-                    {page < totalPages && (
-                        <Link href={`/?page=${page + 1}`}>
-                            <Button className="btn btn-primary mx-2 w-[100px]">
-                                Next
-                            </Button>
-                        </Link>
-                    )}
-                </div>
-            </Suspense>
-        </Container>
-    );
+    if (user) {
+        return (
+            <Container className="flex flex-col my-10">
+                <Suspense fallback={<Loading/>}>
+                    <HEROES_CLIENT user={user}/>
+                </Suspense>
+            </Container>
+        );
+    } else {
+        return (
+            <div>
+                123
+            </div>
+        )
+    }
 }
