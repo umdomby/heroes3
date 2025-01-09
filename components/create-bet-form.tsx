@@ -21,8 +21,8 @@ import {clientCreateBet} from "@/app/actions";
 const createBetSchema = z.object({
     player1: z.string().min(1, { message: 'Введите имя игрока 1' }),
     player2: z.string().min(1, { message: 'Введите имя игрока 2' }),
-    initialOdds1: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
-    initialOdds2: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
+    initialOdds1: z.number().positive({ message: 'Введите положительное число очков' }),
+    initialOdds2: z.number().positive({ message: 'Введите положительное число очков' }),
     categoryId: z.coerce.number(),
     productId: z.coerce.number(),
     productItemId: z.coerce.number(),
@@ -103,7 +103,13 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                         <FormItem>
                             <FormLabel>Odds for Player 1</FormLabel>
                             <FormControl>
-                                <Input placeholder="Odds" type="number" {...field} />
+                                <Input
+                                    placeholder="Odds"
+                                    type="number"
+                                    {...field}
+                                    value={field.value === undefined ? '' : field.value} // Ensure correct value prop
+                                    onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))} // Use valueAsNumber for numbers
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -117,7 +123,13 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                         <FormItem>
                             <FormLabel>Odds for Player 2</FormLabel>
                             <FormControl>
-                                <Input placeholder="Odds" type="number" {...field} />
+                                <Input
+                                    placeholder="Odds"
+                                    type="number"
+                                    {...field}
+                                    value={field.value === undefined ? '' : field.value} // Ensure correct value prop
+                                    onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))} // Use valueAsNumber for numbers
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

@@ -97,14 +97,14 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     return (
         <div>
             {bets.map((bet) => ( // Map over the bets array
-                <div key={bet.id}>
+                <div key={bet.id} className="border border-gray-300 p-4 mt-4">
                     <h3>{bet.player1} vs {bet.player2}</h3>
                     {/* ... other bet information */}
 
                     {bet.status === 'OPEN' && (
                         <div>
                             <p>Ваши баллы: {user?.points}</p>
-                            <p>Текущие коэффициенты: {bet.currentOdds1} - {bet.currentOdds2}</p>
+                            <p>Текущие ставки: {bet.currentOdds1} - {bet.currentOdds2}</p>
 
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit((values) => handlePlaceBet(bet, values))}>
