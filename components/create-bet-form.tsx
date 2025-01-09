@@ -1,8 +1,8 @@
+'use client';
 
 import * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createBet } from '@/app/actions';
 import {
     Form,
     FormControl,
@@ -13,18 +13,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Category, Product, ProductItem, User } from '@prisma/client';
+import {clientCreateBet} from "@/app/actions";
 
 
 const createBetSchema = z.object({
     player1: z.string().min(1, { message: 'Введите имя игрока 1' }),
     player2: z.string().min(1, { message: 'Введите имя игрока 2' }),
-    oddsPlayer1: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
-    oddsPlayer2: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
-    categoryId: z.number().int(),
-    productId: z.number().int(),
-    productItemId: z.number().int(),
+    initialOdds1: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
+    initialOdds2: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
+    categoryId: z.coerce.number(),
+    productId: z.coerce.number(),
+    productItemId: z.coerce.number(),
 });
 
 interface Props {
@@ -32,32 +33,32 @@ interface Props {
     categories: Category[];
     products: Product[];
     productItems: ProductItem[];
-    className?: string;
+    createBet: typeof clientCreateBet;
 }
 
-export const CreateBet: React.FC<Props> = ({ user, categories, products, productItems, className }) => {
+export const CreateBetForm: React.FC<Props> = ({ user, categories, products, productItems, createBet }) => {
     const form = useForm<z.infer<typeof createBetSchema>>({
         resolver: zodResolver(createBetSchema),
         defaultValues: {
             player1: '',
             player2: '',
-            oddsPlayer1: 1,
-            oddsPlayer2: 1,
-            categoryId: categories.length > 0 ? categories[0].id : null,
-            productId: products.length > 0 ? products[0].id : null,
-            productItemId: productItems.length > 0 ? productItems[0].id : null,
+            initialOdds1: 1,
+            initialOdds2: 1,
+            categoryId: categories[0]?.id,
+            productId: products[0]?.id,
+            productItemId: productItems[0]?.id,
         },
     });
 
     const [createBetError, setCreateBetError] = useState<string | null>(null);
 
-    const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
+    const onSubmit = async (values: z.infer<typeof createBetSchema>) => { // Use correct type
         try {
-            await createBet({ ...values, userId: user.id });
+            await createBet(values); // Pass the values directly
             form.reset();
             setCreateBetError(null);
         } catch (error) {
-            // ... (error handling remains the same)
+            setCreateBetError(error.message);
         }
     };
 
@@ -97,7 +98,7 @@ export const CreateBet: React.FC<Props> = ({ user, categories, products, product
 
                 <FormField
                     control={form.control}
-                    name="oddsPlayer1"
+                    name="initialOdds1"  // Correct field name
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Odds for Player 1</FormLabel>
@@ -109,10 +110,9 @@ export const CreateBet: React.FC<Props> = ({ user, categories, products, product
                     )}
                 />
 
-
                 <FormField
                     control={form.control}
-                    name="oddsPlayer2"
+                    name="initialOdds2" // Correct field name
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Odds for Player 2</FormLabel>
@@ -179,7 +179,7 @@ export const CreateBet: React.FC<Props> = ({ user, categories, products, product
                     )}
                 />
                 <Button type="submit">Create Bet</Button>
-                {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
+                {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>} {/* Display error message */}
             </form>
         </Form>
     );

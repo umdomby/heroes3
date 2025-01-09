@@ -62,28 +62,33 @@ export async function registerUser(body: Prisma.UserCreateInput) {
 const createBetSchema = z.object({
   player1: z.string().min(1, { message: 'Введите имя игрока 1' }),
   player2: z.string().min(1, { message: 'Введите имя игрока 2' }),
-  oddsPlayer1: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
-  oddsPlayer2: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }),
+  initialOdds1: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }), // Add this
+  initialOdds2: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }), // Add this
   categoryId: z.number().int(),
   productId: z.number().int(),
   productItemId: z.number().int(),
 });
-export async function createBet(formData: z.infer<typeof createBetSchema>) {
-  'use server'
-  const session = await getUserSession();
-  const data = createBetSchema.parse(formData)
-  try {
 
+export async function createBet(formData: any) {
+  const session = await getUserSession();
+  console.log("formData:", formData); // Log the incoming data
+  console.log("session:", session); // Log the session
+  const data = createBetSchema.parse(formData);
+  console.log("Parsed data:", data);  // Log the parsed data
+  try {
+    console.log("creatorId:", Number(session?.id)); // Log creatorId before Prisma call
+    console.log("Other data:", { ...data, currentOdds1: data.oddsPlayer1, currentOdds2: data.oddsPlayer2 });
     await prisma.bet.create({
       data: {
         ...data,
-        creatorId: Number(session?.id),
-        currentOdds1: data.oddsPlayer1, // Initialize current odds
-        currentOdds2: data.oddsPlayer2, // Initialize current odds
+        creatorId: Number(session?.id), // Make sure creatorId is a number
+        initialOdds1: data.initialOdds1, // Use initialOdds1 from formData
+        initialOdds2: data.initialOdds2, // Use initialOdds2 from formData
+        currentOdds1: data.initialOdds1,  // Initialize current odds
+        currentOdds2: data.initialOdds2,  // Initialize current odds
       },
-
-    })
-    revalidatePath('/') // Revalidate the home page to show the new bet
+    });
+    revalidatePath('/');
   } catch (error) {
     console.error("Error creating bet:", error)
     if (error instanceof z.ZodError) {
@@ -97,6 +102,19 @@ export async function createBet(formData: z.infer<typeof createBetSchema>) {
     }
   }
 }
+
+export async function clientCreateBet(formData: any) { // This is the new wrapper
+  'use server'; // Mark the wrapper as a server action
+  try {
+    await createBet(formData); // Call the ORIGINAL createBet function
+    revalidatePath('/');
+  } catch (error) {
+    console.error("Ошибка при создании ставки:", error);
+    throw error; // Re-throw to be caught by the client
+  }
+}
+
+
 
 const placeBetSchema = z.object({
   betId: z.number().int(),

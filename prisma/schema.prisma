@@ -30,17 +30,15 @@ model Bet {
   id             Int              @id @default(autoincrement())
   player1        String
   player2        String
-  initialOdds1   Float
-  initialOdds2   Float
-  currentOdds1   Float            @default(0)
-  currentOdds2   Float            @default(0)
+  initialOdds1   Float // Correct field name
+  initialOdds2   Float // Correct field name
+  currentOdds1   Float // Correct field name
+  currentOdds2   Float // Correct field name
   maxBetAmount   Float            @default(10)
   totalBetAmount Float            @default(0)
   creator        User             @relation("BetsCreated", fields: [creatorId], references: [id])
   creatorId      Int
   status         BetStatus        @default(OPEN)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
   participants   BetParticipant[]
   categoryId     Int?
   category       Category?        @relation(fields: [categoryId], references: [id])
@@ -48,6 +46,9 @@ model Bet {
   product        Product?         @relation(fields: [productId], references: [id])
   productItemId  Int?
   productItem    ProductItem?     @relation(fields: [productItemId], references: [id])
+  winnerId       Int?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
 model BetParticipant {

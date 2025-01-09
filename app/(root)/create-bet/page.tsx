@@ -1,46 +1,49 @@
-import {prisma} from '@/prisma/prisma-client';
-import {getUserSession} from '@/components/lib/get-user-session';
-import {redirect} from 'next/navigation';
-import {CreateBet} from "@/components/create-bet";
-import {Container} from "@/components";
-import {Suspense} from "react";
+import { prisma } from '@/prisma/prisma-client';
+import { getUserSession } from '@/components/lib/get-user-session';
+import { redirect } from 'next/navigation';
+import { CreateBetForm } from '@/components/create-bet-form';
+import { Suspense } from 'react';
 import Loading from "@/app/(root)/loading";
+import {clientCreateBet} from "@/app/actions";
 
 
 async function fetchData() {
+    const session = await getUserSession();
+
+    if (!session) {
+        redirect('/not-auth');
+    }
+
     try {
-        const session = await getUserSession();
-
-        if (!session) {
-            return redirect('/not-auth');
-        }
-
-        const [user, product, category, productItem] = await prisma.$transaction([
-            prisma.user.findFirst({where: {id: Number(session?.id)}}),
-            prisma.category.findMany(),
-            prisma.product.findMany(),
-            prisma.productItem.findMany(),
-        ]);
-        return {user, category, product, productItem};
-    } catch (e) {
-        console.error('Database Error:', e);
-        return {user: [], category: [], product: [], productItem: []}; // Return empty arrays on error
+        const user = await prisma.user.findUnique({ where: { id: parseInt(session.id) } });
+        const categories = await prisma.category.findMany();
+        const products = await prisma.product.findMany();
+        const productItems = await prisma.productItem.findMany();
+        return { user, categories, products, productItems };
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        return { user: null, categories: [], products: [], productItems: [] };
     }
 }
 
 
-export default async function AdminPage() {
+export default async function CreateBetPage() {
+    const { user, categories, products, productItems } = await fetchData();
 
-    const data = await fetchData()
-
-    if (data.user) {
-        return (
-            <Suspense fallback={<Loading/>}>
-                <CreateBet user={data.user} category={data.category} product={data.product}
-                           productItem={data.productItem}/>;
-            </Suspense>
-        );
-    } else {
-        return redirect('/not-auth');
+    if (!user) {
+        redirect('/not-auth');
     }
+
+
+    return (
+        <Suspense fallback={<Loading />}>
+            <CreateBetForm
+                user={user}
+                categories={categories}
+                products={products}
+                productItems={productItems}
+                createBet={clientCreateBet}
+            />
+        </Suspense>
+    );
 }
