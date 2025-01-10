@@ -14,13 +14,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import React, { useState } from 'react';
-import { Category, Product, ProductItem, User } from '@prisma/client';
+import {Category, Product, ProductItem, User, Player} from '@prisma/client';
 import {clientCreateBet} from "@/app/actions";
 
 
 const createBetSchema = z.object({
-    player1: z.string().min(1, { message: 'Введите имя игрока 1' }),
-    player2: z.string().min(1, { message: 'Введите имя игрока 2' }),
+    player1Id: z.coerce.number(),
+    player2Id: z.coerce.number(),
     initialOdds1: z.number().positive({ message: 'Введите положительное число очков' }),
     initialOdds2: z.number().positive({ message: 'Введите положительное число очков' }),
     categoryId: z.coerce.number(),
@@ -33,15 +33,16 @@ interface Props {
     categories: Category[];
     products: Product[];
     productItems: ProductItem[];
+    players: Player[];
     createBet: typeof clientCreateBet;
 }
 
-export const CreateBetForm: React.FC<Props> = ({ user, categories, products, productItems, createBet }) => {
+export const CreateBetForm: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
     const form = useForm<z.infer<typeof createBetSchema>>({
         resolver: zodResolver(createBetSchema),
         defaultValues: {
-            player1: '',
-            player2: '',
+            player1Id: players[0]?.id,
+            player2Id: players[1]?.id,
             initialOdds1: 1,
             initialOdds2: 1,
             categoryId: categories[0]?.id,
@@ -53,11 +54,15 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
     const [createBetError, setCreateBetError] = useState<string | null>(null);
 
     const onSubmit = async (values: z.infer<typeof createBetSchema>) => { // Use correct type
+
+        console.log("00000000000000")
         try {
             await createBet(values); // Pass the values directly
+            console.log("111111111111")
             form.reset();
             setCreateBetError(null);
         } catch (error) {
+            console.log("22222222222")
             setCreateBetError(error.message);
         }
     };
@@ -68,29 +73,37 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                     control={form.control}
-                    name="player1"
-                    render={({ field }) => (
+                    name="player1Id"
+                    render={({field}) => (
                         <FormItem>
-                            <FormLabel>Player 1</FormLabel>
+                            <FormLabel>Product</FormLabel>
                             <FormControl>
-                                <Input placeholder="Name for Player 1" {...field} />
+                                <select {...field}>
+                                    {players.map((player) => (
+                                        <option key={player.id} value={player.id}>{player.name}</option>
+                                    ))}
+                                </select>
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage/>
                         </FormItem>
                     )}
                 />
 
-                {/* Player 2 (similar to Player 1) */}
+
                 <FormField
                     control={form.control}
-                    name="player2"
-                    render={({ field }) => (
+                    name="player2Id"
+                    render={({field}) => (
                         <FormItem>
-                            <FormLabel>Player 2</FormLabel>
+                            <FormLabel>Product Item</FormLabel>
                             <FormControl>
-                                <Input placeholder="Name for Player 2" {...field} />
+                                <select {...field}>
+                                    {players.map((player) => (
+                                        <option key={player.id} value={player.id}>{player.name}</option>
+                                    ))}
+                                </select>
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage/>
                         </FormItem>
                     )}
                 />
@@ -99,7 +112,7 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                 <FormField
                     control={form.control}
                     name="initialOdds1"  // Correct field name
-                    render={({ field }) => (
+                    render={({field}) => (
                         <FormItem>
                             <FormLabel>Odds for Player 1</FormLabel>
                             <FormControl>
@@ -111,7 +124,7 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                                     onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))} // Use valueAsNumber for numbers
                                 />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage/>
                         </FormItem>
                     )}
                 />
@@ -119,7 +132,7 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                 <FormField
                     control={form.control}
                     name="initialOdds2" // Correct field name
-                    render={({ field }) => (
+                    render={({field}) => (
                         <FormItem>
                             <FormLabel>Odds for Player 2</FormLabel>
                             <FormControl>
@@ -131,7 +144,7 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                                     onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))} // Use valueAsNumber for numbers
                                 />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage/>
                         </FormItem>
                     )}
                 />
@@ -139,7 +152,7 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                 <FormField // Example for categoryId - adjust other dropdowns similarly
                     control={form.control}
                     name="categoryId"
-                    render={({ field }) => (
+                    render={({field}) => (
                         <FormItem>
                             <FormLabel>Category</FormLabel>
                             <FormControl>
@@ -149,7 +162,7 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                                     ))}
                                 </select>
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage/>
                         </FormItem>
                     )}
                 />
@@ -157,7 +170,7 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                 <FormField
                     control={form.control}
                     name="productId"
-                    render={({ field }) => (
+                    render={({field}) => (
                         <FormItem>
                             <FormLabel>Product</FormLabel>
                             <FormControl>
@@ -167,7 +180,7 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                                     ))}
                                 </select>
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage/>
                         </FormItem>
                     )}
                 />
@@ -176,7 +189,7 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                 <FormField
                     control={form.control}
                     name="productItemId"
-                    render={({ field }) => (
+                    render={({field}) => (
                         <FormItem>
                             <FormLabel>Product Item</FormLabel>
                             <FormControl>
@@ -186,12 +199,12 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                                     ))}
                                 </select>
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage/>
                         </FormItem>
                     )}
                 />
                 <Button type="submit">Create Bet</Button>
-                {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>} {/* Display error message */}
+                {createBetError && <p style={{color: 'red'}}>{createBetError}</p>} {/* Display error message */}
             </form>
         </Form>
     );

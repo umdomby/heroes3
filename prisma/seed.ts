@@ -1,4 +1,4 @@
-import { categories, products, productsItem } from './constants';
+import { categories, products, productsItem, players } from './constants';
 import { prisma } from './prisma-client';
 import { hashSync } from 'bcrypt';
 
@@ -37,6 +37,10 @@ async function up() {
 
   await prisma.productItem.createMany({
     data: productsItem,
+  });
+
+  await prisma.player.createMany({
+    data: players,
   });
 }
 

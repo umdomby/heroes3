@@ -28,8 +28,10 @@ model User {
 
 model Bet {
   id             Int              @id @default(autoincrement())
-  player1        String
-  player2        String
+  player1        Player           @relation(name: "Player1Bets", fields: [player1Id], references: [id])
+  player1Id      Int
+  player2        Player           @relation(name: "Player2Bets", fields: [player2Id], references: [id])
+  player2Id      Int
   initialOdds1   Float // Correct field name
   initialOdds2   Float // Correct field name
   currentOdds1   Float // Correct field name
@@ -61,6 +63,13 @@ model BetParticipant {
   odds     Float
   player   PlayerChoice
   isWinner Boolean      @default(false)
+}
+
+model Player {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  player1Bets Bet[]  @relation(name: "Player1Bets") // Relation for bets as player 1
+  player2Bets Bet[]  @relation(name: "Player2Bets") // Relation for bets as player 2
 }
 
 model Category {

@@ -60,13 +60,13 @@ export async function registerUser(body: Prisma.UserCreateInput) {
 }
 
 const createBetSchema = z.object({
-  player1: z.string().min(1, { message: 'Введите имя игрока 1' }),
-  player2: z.string().min(1, { message: 'Введите имя игрока 2' }),
-  initialOdds1: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }), // Add this
-  initialOdds2: z.number().positive({ message: 'Коэффициент должен быть положительным числом' }), // Add this
-  categoryId: z.number().int(),
-  productId: z.number().int(),
-  productItemId: z.number().int(),
+  player1Id: z.number().int(), // Correct field names and types
+  player2Id: z.number().int(),
+  initialOdds1: z.number().positive(),
+  initialOdds2: z.number().positive(),
+  categoryId: z.number(),
+  productId: z.number(),
+  productItemId: z.number(),
 });
 
 export async function createBet(formData: any) {
@@ -77,11 +77,13 @@ export async function createBet(formData: any) {
   console.log("Parsed data:", data);  // Log the parsed data
   try {
     console.log("creatorId:", Number(session?.id)); // Log creatorId before Prisma call
-    console.log("Other data:", { ...data, currentOdds1: data.oddsPlayer1, currentOdds2: data.oddsPlayer2 });
+    console.log("Other data:", { ...data, currentOdds1: data.palayer1Id, currentOdds2: data.palayer2Id });
     await prisma.bet.create({
       data: {
         ...data,
         creatorId: Number(session?.id), // Make sure creatorId is a number
+        player1Id: data.player1Id, // Use player1Id from formData
+        player2Id: data.player2Id, // Use player2Id from formData
         initialOdds1: data.initialOdds1, // Use initialOdds1 from formData
         initialOdds2: data.initialOdds2, // Use initialOdds2 from formData
         currentOdds1: data.initialOdds1,  // Initialize current odds
@@ -105,6 +107,7 @@ export async function createBet(formData: any) {
 
 export async function clientCreateBet(formData: any) { // This is the new wrapper
   'use server'; // Mark the wrapper as a server action
+  console.log("99999999999999")
   try {
     await createBet(formData); // Call the ORIGINAL createBet function
     revalidatePath('/');

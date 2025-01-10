@@ -7,6 +7,7 @@ import Loading from "@/app/(root)/loading";
 import {clientCreateBet} from "@/app/actions";
 
 
+
 async function fetchData() {
     const session = await getUserSession();
 
@@ -19,16 +20,17 @@ async function fetchData() {
         const categories = await prisma.category.findMany();
         const products = await prisma.product.findMany();
         const productItems = await prisma.productItem.findMany();
-        return { user, categories, products, productItems };
+        const players = await prisma.player.findMany();
+        return { user, categories, products, productItems, players };
     } catch (error) {
         console.error("Error fetching data:", error);
-        return { user: null, categories: [], products: [], productItems: [] };
+        return { user: null, categories: [], products: [], productItems: [], players: [] };
     }
 }
 
 
 export default async function CreateBetPage() {
-    const { user, categories, products, productItems } = await fetchData();
+    const { user, categories, products, productItems, players } = await fetchData();
 
     if (!user) {
         redirect('/not-auth');
@@ -42,6 +44,7 @@ export default async function CreateBetPage() {
                 categories={categories}
                 products={products}
                 productItems={productItems}
+                players={players}
                 createBet={clientCreateBet}
             />
         </Suspense>

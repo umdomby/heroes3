@@ -47,3 +47,25 @@ export const productsItem =[
     },
 
 ];
+
+export const players = [
+    {
+        "id": 1,
+        "name": "pup_ok_",
+
+    },
+    {
+        "id": 2,
+        "name": "HotaGirl",
+
+    },
+    {
+        "id": 3,
+        "name": "2BISHOP",
+    },
+    {
+        "id": 4,
+        "name": "HILTYHA",
+    },
+
+];
