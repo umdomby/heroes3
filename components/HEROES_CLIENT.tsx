@@ -98,7 +98,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
         <div>
             {bets.map((bet) => ( // Map over the bets array
                 <div key={bet.id} className="border border-gray-300 p-4 mt-4">
-                    <h3>{bet.player1} vs {bet.player2}</h3>
+                    <h3>{bet.player1.name} vs {bet.player2.name}</h3>
                     {/* ... other bet information */}
 
                     {bet.status === 'OPEN' && (

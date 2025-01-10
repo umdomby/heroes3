@@ -13,6 +13,10 @@ import {getUserSession} from "@/components/lib/get-user-session";
 
 export const dynamic = 'force-dynamic'
 
+
+
+
+
 export default async function Home() {
 
     const session = await getUserSession();
@@ -20,6 +24,17 @@ export default async function Home() {
     if (!session) {
         return redirect('/not-auth');
     }
+
+    // const bet = await prisma.bet.findMany({
+    //     orderBy: { updatedAt: 'desc' },
+    //     include: {
+    //         user: true,
+    //         product: true,
+    //         productItem: true,
+    //         category: true,
+    //         carModel: true,
+    //     },
+    // });
 
     const user = await prisma.user.findFirst({where: {id: Number(session?.id)}});
 
