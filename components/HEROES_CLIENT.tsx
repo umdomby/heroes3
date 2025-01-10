@@ -87,10 +87,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
     const handleCloseBet = async (betId: number, winnerId: number) => {
         try {
-            await closeBet(betId, winnerId);
+            await closeBet(betId, winnerId); // Pass the correct winnerId
             mutate();
         } catch (error) {
-            console.error('Error closing bet:', error);
+            console.error('Error closing bet:', error); // Handle errors as needed
         }
     };
 
@@ -117,8 +117,12 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
                     {bet.status === 'OPEN' && bet.creatorId === user?.id && (
                         <div className="flex gap-2">
-                            <Button onClick={() => handleCloseBet(bet.id, bet.creatorId)}>Создатель выиграл</Button>
-                            <Button onClick={() => handleCloseBet(bet.id, bet?.participants[0]?.userId)}>Акцептор выиграл</Button>
+                            <Button type="button" onClick={() => handleCloseBet(bet.id, bet.player1Id)}>
+                                {bet.player1.name} выиграл {/* Display Player 1 name */}
+                            </Button>
+                            <Button type="button" onClick={() => handleCloseBet(bet.id, bet.player2Id)}>
+                                {bet.player2.name} выиграл {/* Display Player 2 name */}
+                            </Button>
                         </div>
                     )}
 
