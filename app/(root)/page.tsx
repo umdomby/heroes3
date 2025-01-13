@@ -25,16 +25,6 @@ export default async function Home() {
         return redirect('/not-auth');
     }
 
-    // const bet = await prisma.bet.findMany({
-    //     orderBy: { updatedAt: 'desc' },
-    //     include: {
-    //         user: true,
-    //         product: true,
-    //         productItem: true,
-    //         category: true,
-    //         carModel: true,
-    //     },
-    // });
 
     const user = await prisma.user.findFirst({where: {id: Number(session?.id)}});
 

@@ -1,11 +1,10 @@
-import { prisma } from '@/prisma/prisma-client';
-import { getUserSession } from '@/components/lib/get-user-session';
-import { redirect } from 'next/navigation';
-import { CreateBetForm } from '@/components/create-bet-form';
-import { Suspense } from 'react';
+import {prisma} from '@/prisma/prisma-client';
+import {getUserSession} from '@/components/lib/get-user-session';
+import {redirect} from 'next/navigation';
+import {CreateBetForm} from '@/components/create-bet-form';
+import {Suspense} from 'react';
 import Loading from "@/app/(root)/loading";
 import {clientCreateBet} from "@/app/actions";
-
 
 
 async function fetchData() {
@@ -16,21 +15,24 @@ async function fetchData() {
     }
 
     try {
-        const user = await prisma.user.findUnique({ where: { id: parseInt(session.id) } });
-        const categories = await prisma.category.findMany();
-        const products = await prisma.product.findMany();
-        const productItems = await prisma.productItem.findMany();
-        const players = await prisma.player.findMany();
-        return { user, categories, products, productItems, players };
+        const [user, categories, products, productItems, players] = await prisma.$transaction([
+            prisma.user.findUnique({where: {id: parseInt(session.id)}}),
+            prisma.category.findMany(),
+            prisma.product.findMany(),
+            prisma.productItem.findMany(),
+            prisma.player.findMany(),
+
+        ]);
+        return {user, categories, products, productItems, players};
     } catch (error) {
         console.error("Error fetching data:", error);
-        return { user: null, categories: [], products: [], productItems: [], players: [] };
+        return {user: null, categories: [], products: [], productItems: [], players: []};
     }
 }
 
 
 export default async function CreateBetPage() {
-    const { user, categories, products, productItems, players } = await fetchData();
+    const {user, categories, products, productItems, players} = await fetchData();
 
     if (!user) {
         redirect('/not-auth');
@@ -38,7 +40,7 @@ export default async function CreateBetPage() {
 
 
     return (
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<Loading/>}>
             <CreateBetForm
                 user={user}
                 categories={categories}

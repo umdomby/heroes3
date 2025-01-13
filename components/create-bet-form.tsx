@@ -53,17 +53,20 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
 
     const [createBetError, setCreateBetError] = useState<string | null>(null);
 
-    const onSubmit = async (values: z.infer<typeof createBetSchema>) => { // Use correct type
-
-        console.log("00000000000000")
+    const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
+        console.log("00000000000000");
         try {
             await createBet(values); // Pass the values directly
-            console.log("111111111111")
+            console.log("111111111111");
             form.reset();
             setCreateBetError(null);
         } catch (error) {
-            console.log("22222222222")
-            setCreateBetError(error.message);
+            console.log("22222222222");
+            if (error instanceof Error) {
+                setCreateBetError(error.message); // Теперь TypeScript знает, что error имеет свойство message
+            } else {
+                setCreateBetError("Произошла неизвестная ошибка"); // Обработка других типов ошибок
+            }
         }
     };
 

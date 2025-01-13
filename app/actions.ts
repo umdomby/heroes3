@@ -1,11 +1,10 @@
 'use server';
 import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
-import {Prisma} from '@prisma/client';
+import {PlayerChoice, Prisma} from '@prisma/client';
 import {hashSync} from 'bcrypt';
+import {revalidatePath} from 'next/cache'
 import * as z from 'zod'
-import { revalidatePath } from 'next/cache';
-import { BetParticipant, PlayerChoice } from '@prisma/client'
 
 
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
@@ -33,9 +32,11 @@ export async function updateUserInfo(body: Prisma.UserUpdateInput) {
       },
     });
   } catch (err) {
+    //console.log('Error [UPDATE_USER]', err);
     throw err;
   }
 }
+
 export async function registerUser(body: Prisma.UserCreateInput) {
   try {
     const user = await prisma.user.findFirst({
@@ -43,9 +44,11 @@ export async function registerUser(body: Prisma.UserCreateInput) {
         email: body.email,
       },
     });
+
     if (user) {
       throw new Error('Пользователь уже существует');
     }
+
     await prisma.user.create({
       data: {
         fullName: body.fullName,
@@ -53,6 +56,7 @@ export async function registerUser(body: Prisma.UserCreateInput) {
         password: hashSync(body.password, 10),
       },
     });
+
   } catch (err) {
     console.log('Error [CREATE_USER]', err);
     throw err;
@@ -77,7 +81,6 @@ export async function createBet(formData: any) {
   console.log("Parsed data:", data);  // Log the parsed data
   try {
     console.log("creatorId:", Number(session?.id)); // Log creatorId before Prisma call
-    console.log("Other data:", { ...data, currentOdds1: data.palayer1Id, currentOdds2: data.palayer2Id });
     await prisma.bet.create({
       data: {
         ...data,
@@ -116,8 +119,6 @@ export async function clientCreateBet(formData: any) { // This is the new wrappe
     throw error; // Re-throw to be caught by the client
   }
 }
-
-
 
 const placeBetSchema = z.object({
   betId: z.number().int(),
@@ -175,15 +176,15 @@ export async function placeBet(formData: z.infer<typeof placeBetSchema>) {
 
     const totalBetAmount = bet.participants.reduce((acc, p) => acc + p.amount, 0) + participant.amount
 
-    const odds1 = calculateOdds(totalBetAmount, data.betId, 'PLAYER1');
-    const odds2 = calculateOdds(totalBetAmount, data.betId, 'PLAYER2');
+    const odds1 = await calculateOdds(totalBetAmount, data.betId, 'PLAYER1');
+    const odds2 = await calculateOdds(totalBetAmount, data.betId, 'PLAYER2');
 
     await prisma.bet.update({
       where: { id: data.betId },
       data: {
         totalBetAmount: totalBetAmount,
-        currentOdds1: odds1,
-        currentOdds2: odds2,
+        currentOdds1: odds1, // Теперь это число, а не Promise<number>
+        currentOdds2: odds2, // Теперь это число, а не Promise<number>
       }
     });
 
@@ -211,7 +212,6 @@ export async function placeBet(formData: z.infer<typeof placeBetSchema>) {
   }
 }
 
-
 async function calculateOdds(totalBetAmount: number, betId: number, player: PlayerChoice) {
   const participants = await prisma.betParticipant.findMany({
     where: { betId, player },
@@ -233,91 +233,66 @@ async function calculateOdds(totalBetAmount: number, betId: number, player: Play
   return odds
 }
 
-
-export async function getBets() {
-  'use server'; // Mark as server action
-
-  try {
-    const bets = await prisma.bet.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        creator: true,
-        participants: {
-          include: { user: true },
-        },
-        category: true,
-        product: true,
-        productItem: true,
-      },
-    });
-    return bets;
-  } catch (error) {
-    console.error("Error getting bets:", error);
-    throw new Error("Failed to retrieve bets."); // Throw error for server component error handling
-  }
-}
-
 export async function closeBet(betId: number, winnerId: number) {
-  'use server'
-
+  'use server';
 
   try {
+    // Находим ставку и обновляем её статус и победителя
     const bet = await prisma.bet.update({
       where: { id: betId },
-      data: { status: 'CLOSED', winnerId: winnerId },
+      data: {
+        status: 'CLOSED',
+        winnerId: winnerId, // Устанавливаем победителя (ID игрока)
+      },
       include: {
         participants: {
           include: {
             user: true,
-          }
-        }
-      }
+          },
+        },
+        player1: true, // Включаем данные о player1
+        player2: true, // Включаем данные о player2
+      },
     });
 
     if (!bet) {
       throw new Error("Ставка не найдена");
     }
 
+    // Определяем, кто выиграл: player1 или player2
+    const winningPlayer = bet.winnerId === bet.player1Id ? PlayerChoice.PLAYER1 : PlayerChoice.PLAYER2;
 
-    const winningPlayer = bet.winnerId === bet.creatorId ? PlayerChoice.PLAYER1 : PlayerChoice.PLAYER2;
-
-
-
+    // Обновляем балансы участников
     for (const participant of bet.participants) {
       if (participant.player === winningPlayer) {
-
         const winAmount = participant.amount * participant.odds;
 
+        // Начисляем выигрыш победителю
         await prisma.user.update({
           where: { id: participant.userId },
           data: { points: { increment: winAmount } },
         });
 
-
+        // Помечаем участника как победителя
         await prisma.betParticipant.update({
-          where: {id: participant.id},
+          where: { id: participant.id },
           data: {
             isWinner: true,
-          }
-        })
+          },
+        });
       }
     }
 
-
-    revalidatePath('/')
-
-
+    // Ревалидируем путь (если используете Next.js)
+    revalidatePath('/');
 
   } catch (error) {
-    console.error("Error closing bet:", error)
+    console.error("Ошибка при закрытии ставки:", error);
 
     if (error instanceof Error) {
-      throw new Error(error.message)
+      throw new Error(error.message);
     } else {
-      throw new Error("Failed to close bet.")
+      throw new Error("Не удалось закрыть ставку.");
     }
-
   }
-
 }
-
