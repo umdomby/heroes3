@@ -1,8 +1,8 @@
 'use client';
 
 import * as z from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
 import {
     Form,
     FormControl,
@@ -11,9 +11,9 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import React, { useState } from 'react';
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import React, {useState} from 'react';
 import {Category, Product, ProductItem, User, Player} from '@prisma/client';
 import {clientCreateBet} from "@/app/actions";
 
@@ -21,8 +21,8 @@ import {clientCreateBet} from "@/app/actions";
 const createBetSchema = z.object({
     player1Id: z.coerce.number(),
     player2Id: z.coerce.number(),
-    initialOdds1: z.number().positive({ message: 'Введите положительное число очков' }),
-    initialOdds2: z.number().positive({ message: 'Введите положительное число очков' }),
+    initialOdds1: z.number().positive({message: 'Введите положительное число очков'}),
+    initialOdds2: z.number().positive({message: 'Введите положительное число очков'}),
     categoryId: z.coerce.number(),
     productId: z.coerce.number(),
     productItemId: z.coerce.number(),
@@ -37,7 +37,7 @@ interface Props {
     createBet: typeof clientCreateBet;
 }
 
-export const CreateBetForm: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
+export const CreateBetForm: React.FC<Props> = ({user, categories, products, productItems, players, createBet}) => {
     const form = useForm<z.infer<typeof createBetSchema>>({
         resolver: zodResolver(createBetSchema),
         defaultValues: {
@@ -72,143 +72,147 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
 
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
-                    control={form.control}
-                    name="player1Id"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Product</FormLabel>
-                            <FormControl>
-                                <select {...field}>
-                                    {players.map((player) => (
-                                        <option key={player.id} value={player.id}>{player.name}</option>
-                                    ))}
-                                </select>
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
+        <div>
+            <div>Ваши баллы: {user?.points}</div>
+
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <FormField
+                        control={form.control}
+                        name="player1Id"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Product</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {players.map((player) => (
+                                            <option key={player.id} value={player.id}>{player.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
 
 
-                <FormField
-                    control={form.control}
-                    name="player2Id"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Product Item</FormLabel>
-                            <FormControl>
-                                <select {...field}>
-                                    {players.map((player) => (
-                                        <option key={player.id} value={player.id}>{player.name}</option>
-                                    ))}
-                                </select>
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
+                    <FormField
+                        control={form.control}
+                        name="player2Id"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Product Item</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {players.map((player) => (
+                                            <option key={player.id} value={player.id}>{player.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
 
 
-                <FormField
-                    control={form.control}
-                    name="initialOdds1"  // Correct field name
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Odds for Player 1</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Odds"
-                                    type="number"
-                                    {...field}
-                                    value={field.value === undefined ? '' : field.value} // Ensure correct value prop
-                                    onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))} // Use valueAsNumber for numbers
-                                />
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
+                    <FormField
+                        control={form.control}
+                        name="initialOdds1"  // Correct field name
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Odds for Player 1</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Odds"
+                                        type="number"
+                                        {...field}
+                                        value={field.value === undefined ? '' : field.value} // Ensure correct value prop
+                                        onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))} // Use valueAsNumber for numbers
+                                    />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
 
-                <FormField
-                    control={form.control}
-                    name="initialOdds2" // Correct field name
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Odds for Player 2</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Odds"
-                                    type="number"
-                                    {...field}
-                                    value={field.value === undefined ? '' : field.value} // Ensure correct value prop
-                                    onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))} // Use valueAsNumber for numbers
-                                />
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
-                {/* ... other FormFields (similar structure) */}
-                <FormField // Example for categoryId - adjust other dropdowns similarly
-                    control={form.control}
-                    name="categoryId"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Category</FormLabel>
-                            <FormControl>
-                                <select {...field}>
-                                    {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                    ))}
-                                </select>
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
+                    <FormField
+                        control={form.control}
+                        name="initialOdds2" // Correct field name
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Odds for Player 2</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Odds"
+                                        type="number"
+                                        {...field}
+                                        value={field.value === undefined ? '' : field.value} // Ensure correct value prop
+                                        onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))} // Use valueAsNumber for numbers
+                                    />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    {/* ... other FormFields (similar structure) */}
+                    <FormField // Example for categoryId - adjust other dropdowns similarly
+                        control={form.control}
+                        name="categoryId"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Category</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {categories.map((cat) => (
+                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
 
-                <FormField
-                    control={form.control}
-                    name="productId"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Product</FormLabel>
-                            <FormControl>
-                                <select {...field}>
-                                    {products.map((prod) => (
-                                        <option key={prod.id} value={prod.id}>{prod.name}</option>
-                                    ))}
-                                </select>
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
+                    <FormField
+                        control={form.control}
+                        name="productId"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Product</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {products.map((prod) => (
+                                            <option key={prod.id} value={prod.id}>{prod.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
 
 
-                <FormField
-                    control={form.control}
-                    name="productItemId"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormLabel>Product Item</FormLabel>
-                            <FormControl>
-                                <select {...field}>
-                                    {productItems.map((prodItem) => (
-                                        <option key={prodItem.id} value={prodItem.id}>{prodItem.name}</option>
-                                    ))}
-                                </select>
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
-                <Button type="submit">Create Bet</Button>
-                {createBetError && <p style={{color: 'red'}}>{createBetError}</p>} {/* Display error message */}
-            </form>
-        </Form>
+                    <FormField
+                        control={form.control}
+                        name="productItemId"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Product Item</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {productItems.map((prodItem) => (
+                                            <option key={prodItem.id} value={prodItem.id}>{prodItem.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <Button type="submit">Create Bet</Button>
+                    {createBetError && <p style={{color: 'red'}}>{createBetError}</p>} {/* Display error message */}
+                </form>
+            </Form>
+        </div>
     );
 };

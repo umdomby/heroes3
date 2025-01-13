@@ -141,6 +141,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
     return (
         <div>
+            <div>Ваши баллы: {user?.points}</div>
             {bets.map((bet: Bet) => (
                 <div key={bet.id} className="border border-gray-300 p-4 mt-4">
                     <h3>{bet.player1.name} vs {bet.player2.name}</h3>
