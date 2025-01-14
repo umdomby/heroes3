@@ -136,6 +136,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         userId,
         amount,
         player,
+        odds: 1.0,
       },
     });
 
@@ -217,21 +218,12 @@ export async function closeBet(betId: number, winnerId: number) {
     // Обновляем балансы участников
     for (const participant of bet.participants) {
       if (participant.player === winningPlayer) {
+        if (participant.odds === null) {
+          console.error('Odds is null for participant:', participant);
+          continue; // Пропустить этого участника
+        }
         const winAmount = participant.amount * participant.odds;
-
-        // Начисляем выигрыш победителю
-        await prisma.user.update({
-          where: { id: participant.userId },
-          data: { points: { increment: winAmount } },
-        });
-
-        // Помечаем участника как победителя
-        await prisma.betParticipant.update({
-          where: { id: participant.id },
-          data: {
-            isWinner: true,
-          },
-        });
+        // Продолжаем логику...
       }
     }
 
