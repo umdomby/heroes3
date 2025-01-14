@@ -6,7 +6,12 @@ import {hashSync} from 'bcrypt';
 import {revalidatePath} from 'next/cache'
 import * as z from 'zod'
 
-
+const placeBetSchema = z.object({
+  betId: z.number().int(),
+  userId: z.number().int(),
+  amount: z.number().positive({ message: 'Сумма должна быть положительным числом' }),
+  player: z.nativeEnum(PlayerChoice),
+});
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
   try {
     const currentUser = await getUserSession();
@@ -120,95 +125,43 @@ export async function clientCreateBet(formData: any) { // This is the new wrappe
   }
 }
 
-const placeBetSchema = z.object({
-  betId: z.number().int(),
-  userId: z.number().int(),
-  amount: z.number().positive({ message: 'Сумма должна быть положительным числом' }),
-  player: z.nativeEnum(PlayerChoice), // Use zod.nativeEnum
-});
-
-export async function placeBet(formData: z.infer<typeof placeBetSchema>) {
+export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
+    const { betId, userId, amount, player } = formData;
 
-    const data = placeBetSchema.parse(formData);
-
-    const bet = await prisma.bet.findUnique({
-      where: { id: data.betId },
-      include: {
-        participants: { include: { user: true } }
-      }
-    });
-
-
-    if (!bet) {
-      throw new Error("Ставка не найдена");
-    }
-
-    if (bet.status === 'CLOSED') {
-      throw new Error("Ставка закрыта");
-    }
-
-    const user = await prisma.user.findUnique({ where: { id: data.userId } });
-    if (!user) {
-      throw new Error("Пользователь не найден");
-    }
-
-    if (user.points < data.amount) {
-      throw new Error("Недостаточно средств");
-    }
-
-
-    const participant = await prisma.betParticipant.create({
+    // Создаем участника ставки
+    await prisma.betParticipant.create({
       data: {
-        betId: data.betId,
-        userId: data.userId,
-        amount: data.amount,
-        odds: data.player === "PLAYER1" ? bet.currentOdds1 : bet.currentOdds2, // Correct odds recording
-        player: data.player
+        betId,
+        userId,
+        amount,
+        player,
       },
     });
 
-    await prisma.user.update({
-      where: { id: data.userId },
-      data: { points: { decrement: data.amount } },
+    // Обновляем общую сумму ставок
+    const totalBetAmount = await prisma.betParticipant.aggregate({
+      where: { betId },
+      _sum: { amount: true },
     });
 
-
-    const totalBetAmount = bet.participants.reduce((acc, p) => acc + p.amount, 0) + participant.amount
-
-    const odds1 = await calculateOdds(totalBetAmount, data.betId, 'PLAYER1');
-    const odds2 = await calculateOdds(totalBetAmount, data.betId, 'PLAYER2');
+    // Обновляем коэффициенты
+    const odds1 = await calculateOdds(totalBetAmount._sum.amount || 0, betId, 'PLAYER1');
+    const odds2 = await calculateOdds(totalBetAmount._sum.amount || 0, betId, 'PLAYER2');
 
     await prisma.bet.update({
-      where: { id: data.betId },
+      where: { id: betId },
       data: {
-        totalBetAmount: totalBetAmount,
-        currentOdds1: odds1, // Теперь это число, а не Promise<number>
-        currentOdds2: odds2, // Теперь это число, а не Promise<number>
-      }
+        totalBetAmount: totalBetAmount._sum.amount || 0,
+        currentOdds1: odds1,
+        currentOdds2: odds2,
+      },
     });
 
-    revalidatePath('/')
-
-
-
+    revalidatePath('/');
   } catch (error) {
-
-    console.error("Error placing bet:", error);
-    if (error instanceof z.ZodError) {
-
-      throw new Error(error.format()._errors[0])
-
-    } else if (error instanceof Error) {
-
-      throw new Error(error.message)
-
-
-    } else {
-
-      throw new Error("Failed to place bet.");
-
-    }
+    console.error('Error placing bet:', error);
+    throw new Error('Failed to place bet.');
   }
 }
 
@@ -218,19 +171,18 @@ async function calculateOdds(totalBetAmount: number, betId: number, player: Play
   });
   const totalBetsOnPlayer = participants.reduce((sum, p) => sum + p.amount, 0);
 
-  if(totalBetsOnPlayer === 0){
-    return 0
+  if (totalBetsOnPlayer === 0) {
+    return 0;
   }
+
   const oppositePlayer = player === 'PLAYER1' ? 'PLAYER2' : 'PLAYER1';
-  const betsOnOppositePlayer = await prisma.betParticipant.findMany({ where: { betId: betId, player: oppositePlayer } })
-  const totalBetsOnOppositePlayer = betsOnOppositePlayer.reduce((acc, cur) => acc + cur.amount, 0)
+  const betsOnOppositePlayer = await prisma.betParticipant.findMany({
+    where: { betId, player: oppositePlayer },
+  });
+  const totalBetsOnOppositePlayer = betsOnOppositePlayer.reduce((acc, cur) => acc + cur.amount, 0);
 
-
-  const odds = totalBetsOnOppositePlayer / totalBetsOnPlayer
-  if(isNaN(odds)){
-    return 0
-  }
-  return odds
+  const odds = totalBetsOnOppositePlayer / totalBetsOnPlayer;
+  return isNaN(odds) ? 0 : odds;
 }
 
 export async function closeBet(betId: number, winnerId: number) {

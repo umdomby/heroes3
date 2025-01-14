@@ -49,9 +49,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     useEffect(() => {
         let source = new EventSource('/api/sse');
 
-        const intervalId = setInterval(() => {
-            mutate();
-        }, 5000);
+        // const intervalId = setInterval(() => {
+        //     mutate();
+        // }, 5000);
 
         source.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -73,24 +73,30 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
         return () => {
             source.close();
-            clearInterval(intervalId);
+            // clearInterval(intervalId);
         };
     }, [mutate]);
 
-    const handlePlaceBet = async (bet: Bet, values: z.infer<typeof placeBetSchema>) => {
+    const handlePlaceBet = async (bet: Bet, amount: number, player: PlayerChoice) => {
         try {
             if (!user) {
                 throw new Error("Пользователь не найден");
             }
 
+            console.log("Placing bet with:", { betId: bet.id, userId: user.id, amount, player });
+
+            // Вызываем placeBet
             await placeBet({
                 betId: bet.id,
                 userId: user.id,
-                amount: values.amount,
-                player: values.player,
+                amount,
+                player,
             });
+
+            // Обновляем данные
             mutate();
-            form.reset();
+
+            // Очищаем ошибки
             setPlaceBetError(null);
         } catch (err) {
             if (err instanceof Error) {
@@ -100,6 +106,21 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             }
             console.error('Error placing bet:', err);
         }
+    };
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>, bet: Bet) => {
+        event.preventDefault(); // Предотвращаем перезагрузку страницы
+
+        const formData = new FormData(event.currentTarget);
+        const amount = parseFloat(formData.get('amount') as string);
+        const player = formData.get('player') as PlayerChoice;
+
+        if (isNaN(amount) || amount <= 0) {
+            setPlaceBetError('Сумма должна быть положительным числом');
+            return;
+        }
+
+        handlePlaceBet(bet, amount, player);
     };
 
     const handleCloseBet = async (betId: number) => {
@@ -141,7 +162,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
     return (
         <div>
-            <div>Ваши баллы: {user?.points}</div>
             {bets.map((bet: Bet) => (
                 <div key={bet.id} className="border border-gray-300 p-4 mt-4">
                     <h3>{bet.player1.name} vs {bet.player2.name}</h3>
@@ -151,36 +171,39 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                             <p>Ваши баллы: {user?.points}</p>
                             <p>Текущие ставки: {bet.currentOdds1} - {bet.currentOdds2}</p>
 
-                            <Form {...form}>
-                                <form onSubmit={form.handleSubmit((values) => handlePlaceBet(bet, values))}>
-                                    <Input
-                                        type="number"
-                                        placeholder="Сумма ставки"
-                                        {...form.register('amount', { valueAsNumber: true })}
-                                    />
-                                    <div className="flex gap-2 mt-2">
-                                        <label>
-                                            <input
-                                                type="radio"
-                                                value={PlayerChoice.PLAYER1}
-                                                {...form.register('player')}
-                                            />
-                                            {bet.player1.name}
-                                        </label>
-                                        <label>
-                                            <input
-                                                type="radio"
-                                                value={PlayerChoice.PLAYER2}
-                                                {...form.register('player')}
-                                            />
-                                            {bet.player2.name}
-                                        </label>
-                                    </div>
-                                    <Button type="submit" className="mt-2">
-                                        Сделать ставку
-                                    </Button>
-                                </form>
-                            </Form>
+                            <form onSubmit={(event) => handleSubmit(event, bet)}>
+                                <input
+                                    type="number"
+                                    name="amount"
+                                    placeholder="Сумма ставки"
+                                    min="0.01"
+                                    step="0.01"
+                                    required
+                                />
+                                <div className="flex gap-2 mt-2">
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="player"
+                                            value={PlayerChoice.PLAYER1}
+                                            required
+                                        />
+                                        {bet.player1.name}
+                                    </label>
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="player"
+                                            value={PlayerChoice.PLAYER2}
+                                            required
+                                        />
+                                        {bet.player2.name}
+                                    </label>
+                                </div>
+                                <Button type="submit" className="mt-2">
+                                    Сделать ставку
+                                </Button>
+                            </form>
                             {placeBetError && <p className="text-red-500">{placeBetError}</p>}
                         </div>
                     )}

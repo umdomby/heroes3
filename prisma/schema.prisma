@@ -54,15 +54,16 @@ model Bet {
 }
 
 model BetParticipant {
-  id       Int          @id @default(autoincrement())
-  betId    Int
-  bet      Bet          @relation(fields: [betId], references: [id])
-  userId   Int
-  user     User         @relation(fields: [userId], references: [id])
-  amount   Float
-  odds     Float
-  player   PlayerChoice
-  isWinner Boolean      @default(false)
+  id        Int          @id @default(autoincrement())
+  betId     Int
+  userId    Int
+  amount    Float
+  player    PlayerChoice
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  bet  Bet  @relation(fields: [betId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Player {
@@ -110,4 +111,3 @@ enum PlayerChoice {
   PLAYER1
   PLAYER2
 }
-
