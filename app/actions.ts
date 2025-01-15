@@ -80,35 +80,37 @@ const createBetSchema = z.object({
 
 export async function createBet(formData: any) {
   const session = await getUserSession();
-  console.log("formData:", formData); // Log the incoming data
-  console.log("session:", session); // Log the session
-  const data = createBetSchema.parse(formData);
-  console.log("Parsed data:", data);  // Log the parsed data
+  console.log("formData:", formData); // Логируем входящие данные
+  console.log("session:", session); // Логируем сессию
+
   try {
-    console.log("creatorId:", Number(session?.id)); // Log creatorId before Prisma call
-    await prisma.bet.create({
+    console.log("creatorId:", Number(session?.id)); // Логируем creatorId перед вызовом Prisma
+
+    // Создаем ставку в базе данных
+    const newBet = await prisma.bet.create({
       data: {
-        ...data,
-        creatorId: Number(session?.id), // Make sure creatorId is a number
-        player1Id: data.player1Id, // Use player1Id from formData
-        player2Id: data.player2Id, // Use player2Id from formData
-        initialOdds1: data.initialOdds1, // Use initialOdds1 from formData
-        initialOdds2: data.initialOdds2, // Use initialOdds2 from formData
-        currentOdds1: data.initialOdds1,  // Initialize current odds
-        currentOdds2: data.initialOdds2,  // Initialize current odds
+        ...formData, // Используем данные напрямую из formData
+        creatorId: Number(session?.id), // Убедимся, что creatorId — число
+        status: 'OPEN', // Устанавливаем статус ставки как "открытая"
+        totalBetAmount: 0, // Инициализируем общую сумму ставок
+        currentOdds1: formData.initialOdds1, // Инициализируем текущие коэффициенты
+        currentOdds2: formData.initialOdds2, // Инициализируем текущие коэффициенты
       },
     });
+
+    console.log("New bet created:", newBet); // Логируем созданную ставку
+
+    // Ревалидируем путь (если используем Next.js)
     revalidatePath('/');
+
+    return newBet; // Возвращаем созданную ставку
   } catch (error) {
-    console.error("Error creating bet:", error)
-    if (error instanceof z.ZodError) {
-      throw new Error(error.message)
-    } else if (error instanceof Error) {
-      throw new Error(error.message)
+    console.error("Error creating bet:", error); // Логируем ошибку
 
-
+    if (error instanceof Error) {
+      throw new Error(error.message); // Обрабатываем ошибки
     } else {
-      throw new Error("Failed to create bet.")
+      throw new Error("Failed to create bet."); // Общая ошибка
     }
   }
 }
@@ -129,6 +131,30 @@ export async function placeBet(formData: { betId: number; userId: number; amount
   try {
     const { betId, userId, amount, player } = formData;
 
+    // Проверяем, что ставка существует и доступна
+    const bet = await prisma.bet.findUnique({
+      where: { id: betId },
+    });
+
+    if (!bet || bet.status !== 'OPEN') {
+      throw new Error('Ставка недоступна для участия');
+    }
+
+    // Проверяем баланс пользователя
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || user.points < amount) {
+      throw new Error('Недостаточно баллов для ставки');
+    }
+
+    // Получаем текущие коэффициенты
+    const odds = player === 'PLAYER1' ? bet.currentOdds1 : bet.currentOdds2;
+
+    // Рассчитываем потенциальную прибыль
+    const profit = amount * odds;
+
     // Создаем участника ставки
     await prisma.betParticipant.create({
       data: {
@@ -136,7 +162,16 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         userId,
         amount,
         player,
-        odds: 1.0,
+        odds,
+        profit,
+      },
+    });
+
+    // Обновляем баланс пользователя
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        points: user.points - amount,
       },
     });
 
@@ -159,12 +194,14 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       },
     });
 
-    revalidatePath('/');
+    revalidatePath('/'); // Ревалидируем путь (если используете Next.js)
+    console.log(`Пользователь ${userId} сделал ставку ${amount} на игрока ${player}`);
   } catch (error) {
     console.error('Error placing bet:', error);
     throw new Error('Failed to place bet.');
   }
 }
+
 
 async function calculateOdds(totalBetAmount: number, betId: number, player: PlayerChoice) {
   const participants = await prisma.betParticipant.findMany({

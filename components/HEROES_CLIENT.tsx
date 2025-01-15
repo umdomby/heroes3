@@ -8,7 +8,6 @@ import { redirect } from 'next/navigation';
 import { placeBet, closeBet } from '@/app/actions';
 import { unstable_batchedUpdates } from 'react-dom';
 
-
 // Исправленный fetcher
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
@@ -18,6 +17,8 @@ interface BetParticipant {
     userId: number;
     amount: number;
     player: PlayerChoice;
+    odds: number; // Добавлено поле для коэффициента
+    profit: number; // Добавлено поле для потенциальной прибыли
     createdAt: Date;
     user: User; // Если есть связь с пользователем
 }
@@ -150,99 +151,132 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     }
 
     return (
-
         <div>
             <p>Ваши баллы: {user?.points}</p>
-            {bets.map((bet: Bet) => (
-                <div key={bet.id} className="border border-gray-300 p-4 mt-4">
-                    <h3>{bet.player1.name} vs {bet.player2.name}</h3>
-                    {bet.status === 'OPEN' && (
-                        <div>
-                            <p>Текущие ставки: {bet.currentOdds1} - {bet.currentOdds2}</p>
-                            <p>
-                                Ставки на {bet.player1.name}:{' '}
-                                {bet.participants
-                                    .filter((p) => p.player === PlayerChoice.PLAYER1)
-                                    .reduce((sum, p) => sum + p.amount, 0)}
-                            </p>
-                            <p>
-                                Ставки на {bet.player2.name}:{' '}
-                                {bet.participants
-                                    .filter((p) => p.player === PlayerChoice.PLAYER2)
-                                    .reduce((sum, p) => sum + p.amount, 0)}
-                            </p>
-                            <form onSubmit={(event) => handleSubmit(event, bet)}>
-                                <input
-                                    type="number"
-                                    name="amount"
-                                    placeholder="Сумма ставки"
-                                    min="0.01"
-                                    step="0.01"
-                                    required
-                                />
+            {bets.map((bet: Bet) => {
+                const userBetsOnPlayer1 = bet.participants
+                    .filter(p => p.userId === user?.id && p.player === PlayerChoice.PLAYER1)
+                    .reduce((sum, p) => sum + p.amount, 0);
+
+                const userBetsOnPlayer2 = bet.participants
+                    .filter(p => p.userId === user?.id && p.player === PlayerChoice.PLAYER2)
+                    .reduce((sum, p) => sum + p.amount, 0);
+
+                const userOddsOnPlayer1 = bet.participants
+                    .find(p => p.userId === user?.id && p.player === PlayerChoice.PLAYER1)?.odds || 0;
+
+                const userOddsOnPlayer2 = bet.participants
+                    .find(p => p.userId === user?.id && p.player === PlayerChoice.PLAYER2)?.odds || 0;
+
+                const potentialProfitPlayer1 = userBetsOnPlayer1 * userOddsOnPlayer1;
+                const potentialLossPlayer1 = -userBetsOnPlayer1;
+
+                const potentialProfitPlayer2 = userBetsOnPlayer2 * userOddsOnPlayer2;
+                const potentialLossPlayer2 = -userBetsOnPlayer2;
+
+                return (
+                    <div key={bet.id} className="border border-gray-300 p-4 mt-4">
+                        <h3>{bet.player1.name} vs {bet.player2.name}</h3>
+                        {bet.status === 'OPEN' && (
+                            <div>
+                                <p>Текущие ставки: {bet.currentOdds1} - {bet.currentOdds2}</p>
+                                <p>
+                                    Ставки на {bet.player1.name}:{' '}
+                                    {bet.participants
+                                        .filter((p) => p.player === PlayerChoice.PLAYER1)
+                                        .reduce((sum, p) => sum + p.amount, 0)}
+                                </p>
+                                <p>
+                                    Ставки на {bet.player2.name}:{' '}
+                                    {bet.participants
+                                        .filter((p) => p.player === PlayerChoice.PLAYER2)
+                                        .reduce((sum, p) => sum + p.amount, 0)}
+                                </p>
+                                <p>
+                                    Ваши ставки на {bet.player1.name}: {userBetsOnPlayer1} (коэффициент: {userOddsOnPlayer1})
+                                </p>
+                                <p>
+                                    Ваши ставки на {bet.player2.name}: {userBetsOnPlayer2} (коэффициент: {userOddsOnPlayer2})
+                                </p>
+                                <p>
+                                    Потенциальная прибыль/убыток на {bet.player1.name}: {potentialProfitPlayer1} / {potentialLossPlayer1}
+                                </p>
+                                <p>
+                                    Потенциальная прибыль/убыток на {bet.player2.name}: {potentialProfitPlayer2} / {potentialLossPlayer2}
+                                </p>
+                                <form onSubmit={(event) => handleSubmit(event, bet)}>
+                                    <input
+                                        type="number"
+                                        name="amount"
+                                        placeholder="Сумма ставки"
+                                        min="0.01"
+                                        step="0.01"
+                                        required
+                                    />
+                                    <div className="flex gap-2 mt-2">
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="player"
+                                                value={PlayerChoice.PLAYER1}
+                                                required
+                                            />
+                                            {bet.player1.name}
+                                        </label>
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="player"
+                                                value={PlayerChoice.PLAYER2}
+                                                required
+                                            />
+                                            {bet.player2.name}
+                                        </label>
+                                    </div>
+                                    <Button type="submit" className="mt-2">
+                                        Сделать ставку
+                                    </Button>
+                                </form>
+                                {placeBetError && <p className="text-red-500">{placeBetError}</p>}
+                            </div>
+                        )}
+
+                        {bet.status === 'OPEN' && bet.creatorId === user?.id && (
+                            <div className="mt-4">
+                                <h4 className="text-lg font-semibold">Закрыть ставку</h4>
                                 <div className="flex gap-2 mt-2">
                                     <label>
                                         <input
                                             type="radio"
-                                            name="player"
-                                            value={PlayerChoice.PLAYER1}
-                                            required
+                                            name="winner"
+                                            value={bet.player1Id}
+                                            onChange={() => setSelectedWinner(bet.player1Id)}
                                         />
-                                        {bet.player1.name}
+                                        {bet.player1.name} выиграл
                                     </label>
                                     <label>
                                         <input
                                             type="radio"
-                                            name="player"
-                                            value={PlayerChoice.PLAYER2}
-                                            required
+                                            name="winner"
+                                            value={bet.player2Id}
+                                            onChange={() => setSelectedWinner(bet.player2Id)}
                                         />
-                                        {bet.player2.name}
+                                        {bet.player2.name} выиграл
                                     </label>
                                 </div>
-                                <Button type="submit" className="mt-2">
-                                    Сделать ставку
+                                <Button
+                                    type="button"
+                                    onClick={() => handleCloseBet(bet.id)}
+                                    className="mt-2"
+                                >
+                                    Закрыть ставку
                                 </Button>
-                            </form>
-                            {placeBetError && <p className="text-red-500">{placeBetError}</p>}
-                        </div>
-                    )}
-
-                    {bet.status === 'OPEN' && bet.creatorId === user?.id && (
-                        <div className="mt-4">
-                            <h4 className="text-lg font-semibold">Закрыть ставку</h4>
-                            <div className="flex gap-2 mt-2">
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="winner"
-                                        value={bet.player1Id}
-                                        onChange={() => setSelectedWinner(bet.player1Id)}
-                                    />
-                                    {bet.player1.name} выиграл
-                                </label>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="winner"
-                                        value={bet.player2Id}
-                                        onChange={() => setSelectedWinner(bet.player2Id)}
-                                    />
-                                    {bet.player2.name} выиграл
-                                </label>
+                                {closeBetError && <p className="text-red-500">{closeBetError}</p>}
                             </div>
-                            <Button
-                                type="button"
-                                onClick={() => handleCloseBet(bet.id)}
-                                className="mt-2"
-                            >
-                                Закрыть ставку
-                            </Button>
-                            {closeBetError && <p className="text-red-500">{closeBetError}</p>}
-                        </div>
-                    )}
-                </div>
-            ))}
+                        )}
+                    </div>
+                );
+            })}
         </div>
     );
 };
