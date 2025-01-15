@@ -32,10 +32,10 @@ model Bet {
   player1Id      Int
   player2        Player           @relation(name: "Player2Bets", fields: [player2Id], references: [id])
   player2Id      Int
-  betPlauer1     Float // Correct field name
-  betPlauer2     Float // Correct field name
-  currentOdds1   Float // Correct field name
-  currentOdds2   Float // Correct field name
+  initBetPlauer1 Float
+  initBetPlauer2 Float
+  currentOdds1   Float
+  currentOdds2   Float
   maxBetAmount   Float            @default(10)
   totalBetAmount Float            @default(0)
   creator        User             @relation("BetsCreated", fields: [creatorId], references: [id])

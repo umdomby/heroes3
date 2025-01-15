@@ -179,7 +179,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                         <h3>{bet.player1.name} vs {bet.player2.name}</h3>
                         {bet.status === 'OPEN' && (
                             <div>
-                                <p>Текущие ставки: {bet.currentOdds1} - {bet.currentOdds2}</p>
+                                <p>Коэффициенты: {bet.currentOdds1} - {bet.currentOdds2}</p>
                                 <p>
                                     Ставки на {bet.player1.name}:{' '}
                                     {bet.participants
