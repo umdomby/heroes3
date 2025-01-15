@@ -74,7 +74,6 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
     return (
         <div>
             <div>Ваши баллы: {user?.points}</div>
-
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <FormField
@@ -95,7 +94,6 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
                         )}
                     />
 
-
                     <FormField
                         control={form.control}
                         name="player2Id"
@@ -113,7 +111,6 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
                             </FormItem>
                         )}
                     />
-
 
                     <FormField
                         control={form.control}
@@ -190,7 +187,6 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
                             </FormItem>
                         )}
                     />
-
 
                     <FormField
                         control={form.control}
