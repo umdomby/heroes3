@@ -88,10 +88,6 @@ export async function clientCreateBet(formData: any) {
   if (!session) {
     throw new Error("User session is not available.");
   }
-
-  if (!formData.player1Id || !formData.player2Id || !formData.creatorId || !formData.initBetPlayer1 || !formData.initBetPlayer2 || !formData.currentOdds1 || !formData.currentOdds2) {
-    throw new Error("Missing required fields in formData.");
-  }
   console.log("formData:", formData); // Логируем входящие данные
   console.log("session:", session); // Логируем сессию
 
@@ -115,6 +111,8 @@ export async function clientCreateBet(formData: any) {
         productId: formData.productId,
         productItemId: formData.productItemId,
         creatorId: formData.creatorId,
+        totalBetPlayer1: formData.totalBetPlayer1,
+        totalBetPlayer2: formData.totalBetPlayer2,
       },
     });
 
@@ -140,6 +138,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Проверяем, что ставка существует и доступна
     const bet = await prisma.bet.findUnique({
       where: { id: betId },
+      include: { participants: true }, // Включаем участников для расчета коэффициентов
     });
 
     if (!bet || bet.status !== 'OPEN') {
@@ -155,10 +154,22 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Недостаточно баллов для ставки');
     }
 
-    // Получаем текущие коэффициенты
-    const odds = player === 'PLAYER1' ? bet.currentOdds1 : bet.currentOdds2;
+    // Рассчитываем коэффициенты перед созданием участника
+    const totalPlayer1 = bet.participants
+        .filter(p => p.player === PlayerChoice.PLAYER1)
+        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
+
+    const totalPlayer2 = bet.participants
+        .filter(p => p.player === PlayerChoice.PLAYER2)
+        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
+
+    const total = totalPlayer1 + totalPlayer2;
+
+    const oddsPlayer1 = total / totalPlayer1;
+    const oddsPlayer2 = total / totalPlayer2;
 
     // Рассчитываем потенциальную прибыль
+    const odds = player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2;
     const profit = amount * odds;
 
     // Создаем участника ставки
@@ -181,22 +192,14 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       },
     });
 
-    // Обновляем общую сумму ставок
-    const totalBetAmount = await prisma.betParticipant.aggregate({
-      where: { betId },
-      _sum: { amount: true },
-    });
-
-    // Обновляем коэффициенты
-    const odds1 = await calculateOdds(totalBetAmount._sum.amount || 0, betId, 'PLAYER1');
-    const odds2 = await calculateOdds(totalBetAmount._sum.amount || 0, betId, 'PLAYER2');
-
+    // Обновляем коэффициенты и общую сумму ставок
     await prisma.bet.update({
       where: { id: betId },
       data: {
-        totalBetAmount: totalBetAmount._sum.amount || 0,
-        currentOdds1: odds1,
-        currentOdds2: odds2,
+        currentOdds1: oddsPlayer1,
+        currentOdds2: oddsPlayer2,
+        totalBetPlayer1: totalPlayer1,
+        totalBetPlayer2: totalPlayer2,
       },
     });
 
@@ -206,27 +209,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     console.error('Error placing bet:', error);
     throw new Error('Failed to place bet.');
   }
-}
-
-
-async function calculateOdds(totalBetAmount: number, betId: number, player: PlayerChoice) {
-  const participants = await prisma.betParticipant.findMany({
-    where: { betId, player },
-  });
-  const totalBetsOnPlayer = participants.reduce((sum, p) => sum + p.amount, 0);
-
-  if (totalBetsOnPlayer === 0) {
-    return 0;
-  }
-
-  const oppositePlayer = player === 'PLAYER1' ? 'PLAYER2' : 'PLAYER1';
-  const betsOnOppositePlayer = await prisma.betParticipant.findMany({
-    where: { betId, player: oppositePlayer },
-  });
-  const totalBetsOnOppositePlayer = betsOnOppositePlayer.reduce((acc, cur) => acc + cur.amount, 0);
-
-  const odds = totalBetsOnOppositePlayer / totalBetsOnPlayer;
-  return isNaN(odds) ? 0 : odds;
 }
 
 export async function closeBet(betId: number, winnerId: number) {
@@ -283,3 +265,4 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+

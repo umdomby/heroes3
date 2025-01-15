@@ -154,55 +154,32 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
         <div>
             <p>Ваши баллы: {user?.points}</p>
             {bets.map((bet: Bet) => {
-                const userBetsOnPlayer1 = bet.participants
-                    .filter(p => p.userId === user?.id && p.player === PlayerChoice.PLAYER1)
-                    .reduce((sum, p) => sum + p.amount, 0);
+                const totalPlayer1 = bet.participants
+                    .filter((p) => p.player === PlayerChoice.PLAYER1)
+                    .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
 
-                const userBetsOnPlayer2 = bet.participants
-                    .filter(p => p.userId === user?.id && p.player === PlayerChoice.PLAYER2)
-                    .reduce((sum, p) => sum + p.amount, 0);
+                const totalPlayer2 = bet.participants
+                    .filter((p) => p.player === PlayerChoice.PLAYER2)
+                    .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
 
-                const userOddsOnPlayer1 = bet.participants
-                    .find(p => p.userId === user?.id && p.player === PlayerChoice.PLAYER1)?.odds || 0;
+                const total = totalPlayer1 + totalPlayer2;
 
-                const userOddsOnPlayer2 = bet.participants
-                    .find(p => p.userId === user?.id && p.player === PlayerChoice.PLAYER2)?.odds || 0;
-
-                const potentialProfitPlayer1 = userBetsOnPlayer1 * userOddsOnPlayer1;
-                const potentialLossPlayer1 = -userBetsOnPlayer1;
-
-                const potentialProfitPlayer2 = userBetsOnPlayer2 * userOddsOnPlayer2;
-                const potentialLossPlayer2 = -userBetsOnPlayer2;
+                const oddsPlayer1 = total / totalPlayer1;
+                const oddsPlayer2 = total / totalPlayer2;
 
                 return (
                     <div key={bet.id} className="border border-gray-300 p-4 mt-4">
                         <h3>{bet.player1.name} vs {bet.player2.name}</h3>
                         {bet.status === 'OPEN' && (
                             <div>
-                                <p>Коэффициенты: {bet.currentOdds1} - {bet.currentOdds2}</p>
+                                <p>Коэффициенты: {oddsPlayer1.toFixed(2)} - {oddsPlayer2.toFixed(2)}</p>
                                 <p>
                                     Ставки на {bet.player1.name}:{' '}
-                                    {bet.participants
-                                        .filter((p) => p.player === PlayerChoice.PLAYER1)
-                                        .reduce((sum, p) => sum + p.amount, 0)}
+                                    {totalPlayer1}
                                 </p>
                                 <p>
                                     Ставки на {bet.player2.name}:{' '}
-                                    {bet.participants
-                                        .filter((p) => p.player === PlayerChoice.PLAYER2)
-                                        .reduce((sum, p) => sum + p.amount, 0)}
-                                </p>
-                                <p>
-                                    Ваши ставки на {bet.player1.name}: {userBetsOnPlayer1} (коэффициент: {userOddsOnPlayer1})
-                                </p>
-                                <p>
-                                    Ваши ставки на {bet.player2.name}: {userBetsOnPlayer2} (коэффициент: {userOddsOnPlayer2})
-                                </p>
-                                <p>
-                                    Потенциальная прибыль/убыток на {bet.player1.name}: {potentialProfitPlayer1} / {potentialLossPlayer1}
-                                </p>
-                                <p>
-                                    Потенциальная прибыль/убыток на {bet.player2.name}: {potentialProfitPlayer2} / {potentialLossPlayer2}
+                                    {totalPlayer2}
                                 </p>
                                 <form onSubmit={(event) => handleSubmit(event, bet)}>
                                     <input

@@ -71,6 +71,8 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
             creatorId: user.id, // Добавляем creatorId из данных текущего пользователя
             initBetPlayer1: values.initBetPlayer1, // Убедитесь, что это поле передается
             initBetPlayer2: values.initBetPlayer2, // Убедитесь, что это поле передается
+            totalBetPlayer1: initBetPlayer1, // Добавляем totalBetPlayer1
+            totalBetPlayer2: initBetPlayer2, // Добавляем totalBetPlayer2
         };
 
         // Передаем данные в clientCreateBet
