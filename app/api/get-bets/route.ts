@@ -6,12 +6,10 @@ export async function GET(request: Request) {  // Explicitly define the GET meth
         const bets = await prisma.bet.findMany({
             orderBy: { createdAt: 'desc' },
             include: {
-                player1: true, // Include player1 relation
-                player2: true, // Include player2 relation
+                player1: true,
+                player2: true,
                 creator: true,
-                participants: {
-                    include: { user: true },
-                },
+                participants: true, // Убедитесь, что participants включены
                 category: true,
                 product: true,
                 productItem: true,

@@ -6,24 +6,26 @@ import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { placeBet, closeBet } from '@/app/actions';
-import * as z from 'zod';
-import { Input } from '@/components/ui/input';
 import { unstable_batchedUpdates } from 'react-dom';
-import { Form } from "@/components/ui/form";
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+
 
 // Исправленный fetcher
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
-const placeBetSchema = z.object({
-    amount: z.number().positive({ message: 'Сумма должна быть положительным числом' }),
-    player: z.nativeEnum(PlayerChoice),
-});
+interface BetParticipant {
+    id: number;
+    betId: number;
+    userId: number;
+    amount: number;
+    player: PlayerChoice;
+    createdAt: Date;
+    user: User; // Если есть связь с пользователем
+}
 
 interface Bet extends PrismaBet {
     player1: Player; // Добавляем поле player1
     player2: Player; // Добавляем поле player2
+    participants: BetParticipant[]; // Добавляем поле participants
 }
 
 interface Props {
@@ -32,14 +34,6 @@ interface Props {
 }
 
 export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
-    const form = useForm<z.infer<typeof placeBetSchema>>({
-        resolver: zodResolver(placeBetSchema),
-        defaultValues: {
-            amount: 0,
-            player: PlayerChoice.PLAYER1,
-        },
-    });
-
     const { data: session } = useSession();
     const { data: bets, error, isLoading, mutate } = useSWR<Bet[]>('/api/get-bets', fetcher);
     const [placeBetError, setPlaceBetError] = useState<string | null>(null);
@@ -48,10 +42,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
     useEffect(() => {
         let source = new EventSource('/api/sse');
-
-        // const intervalId = setInterval(() => {
-        //     mutate();
-        // }, 5000);
 
         source.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -73,7 +63,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
         return () => {
             source.close();
-            // clearInterval(intervalId);
         };
     }, [mutate]);
 
@@ -170,6 +159,18 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                     {bet.status === 'OPEN' && (
                         <div>
                             <p>Текущие ставки: {bet.currentOdds1} - {bet.currentOdds2}</p>
+                            <p>
+                                Ставки на {bet.player1.name}:{' '}
+                                {bet.participants
+                                    .filter((p) => p.player === PlayerChoice.PLAYER1)
+                                    .reduce((sum, p) => sum + p.amount, 0)}
+                            </p>
+                            <p>
+                                Ставки на {bet.player2.name}:{' '}
+                                {bet.participants
+                                    .filter((p) => p.player === PlayerChoice.PLAYER2)
+                                    .reduce((sum, p) => sum + p.amount, 0)}
+                            </p>
                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                 <input
                                     type="number"
