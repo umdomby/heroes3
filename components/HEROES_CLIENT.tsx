@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Bet as PrismaBet, Player, PlayerChoice, User } from '@prisma/client';
+import { Bet as PrismaBet, Player, PlayerChoice, User, BetParticipant } from '@prisma/client';
 import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
@@ -8,25 +8,12 @@ import { redirect } from 'next/navigation';
 import { placeBet, closeBet } from '@/app/actions';
 import { unstable_batchedUpdates } from 'react-dom';
 
-// Исправленный fetcher
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
-interface BetParticipant {
-    id: number;
-    betId: number;
-    userId: number;
-    amount: number;
-    player: PlayerChoice;
-    odds: number; // Добавлено поле для коэффициента
-    profit: number; // Добавлено поле для потенциальной прибыли
-    createdAt: Date;
-    user: User; // Если есть связь с пользователем
-}
-
 interface Bet extends PrismaBet {
-    player1: Player; // Добавляем поле player1
-    player2: Player; // Добавляем поле player2
-    participants: BetParticipant[]; // Добавляем поле participants
+    player1: Player;
+    player2: Player;
+    participants: BetParticipant[];
 }
 
 interface Props {
@@ -73,9 +60,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                 throw new Error("Пользователь не найден");
             }
 
-            console.log("Placing bet with:", { betId: bet.id, userId: user.id, amount, player });
-
-            // Вызываем placeBet
             await placeBet({
                 betId: bet.id,
                 userId: user.id,
@@ -83,10 +67,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                 player,
             });
 
-            // Обновляем данные
             mutate();
-
-            // Очищаем ошибки
             setPlaceBetError(null);
         } catch (err) {
             if (err instanceof Error) {
@@ -99,7 +80,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>, bet: Bet) => {
-        event.preventDefault(); // Предотвращаем перезагрузку страницы
+        event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
         const amount = parseFloat(formData.get('amount') as string);
@@ -153,33 +134,54 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     return (
         <div>
             <p>Ваши баллы: {user?.points}</p>
+
+            {/* Отображение всех ставок */}
             {bets.map((bet: Bet) => {
-                const totalPlayer1 = bet.participants
-                    .filter((p) => p.player === PlayerChoice.PLAYER1)
-                    .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
-
-                const totalPlayer2 = bet.participants
-                    .filter((p) => p.player === PlayerChoice.PLAYER2)
-                    .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
-
-                const total = totalPlayer1 + totalPlayer2;
-
-                const oddsPlayer1 = total / totalPlayer1;
-                const oddsPlayer2 = total / totalPlayer2;
+                // Фильтруем ставки пользователя для текущей ставки (bet)
+                const userBets = bet.participants.filter((p) => p.userId === user?.id);
 
                 return (
-                    <div key={bet.id} className="border border-gray-300 p-4 mt-4">
-                        <h3>{bet.player1.name} vs {bet.player2.name}</h3>
+                    <div key={bet.id} className="border border-gray-300 p-4 mt-4  rounded-lg shadow-sm">
+                        <h3 className="text-lg font-semibold">{bet.player1.name} vs {bet.player2.name}</h3>
+
+                        {/* Отображение ставок пользователя для текущей ставки (bet) */}
+                        {userBets.length > 0 && (
+                            <div className="mt-4 p-4 rounded-lg">
+                                <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
+                                {userBets.map((participant) => (
+                                    <div key={participant.id} className="border border-gray-200 p-3 mb-3  rounded-md">
+                                        <p>
+                                            <strong>Сумма ставки:</strong> {participant.amount} баллов на{' '}
+                                            {participant.player === PlayerChoice.PLAYER1 ? bet.player1.name : bet.player2.name}
+                                        </p>
+                                        <p>
+                                            <strong>Коэффициент:</strong> {participant.odds.toFixed(2)}
+                                        </p>
+                                        <p>
+                                            <strong>Прибыль:</strong> {participant.profit.toFixed(2)}
+                                        </p>
+                                        <p>
+                                            <strong>Дата:</strong> {new Date(participant.createdAt).toLocaleString()}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         {bet.status === 'OPEN' && (
                             <div>
-                                <p>Коэффициенты: {oddsPlayer1.toFixed(2)} - {oddsPlayer2.toFixed(2)}</p>
+                                <p>Коэффициенты: {bet.currentOdds1.toFixed(2)} - {bet.currentOdds2.toFixed(2)}</p>
                                 <p>
-                                    Ставки на {bet.player1.name}:{' '}
-                                    {totalPlayer1}
+                                    Все ставки на {bet.player1.name}:{' '}
+                                    {bet.participants
+                                        .filter((p) => p.player === PlayerChoice.PLAYER1)
+                                        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1)}
                                 </p>
                                 <p>
-                                    Ставки на {bet.player2.name}:{' '}
-                                    {totalPlayer2}
+                                    Все ставки на {bet.player2.name}:{' '}
+                                    {bet.participants
+                                        .filter((p) => p.player === PlayerChoice.PLAYER2)
+                                        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2)}
                                 </p>
                                 <form onSubmit={(event) => handleSubmit(event, bet)}>
                                     <input
@@ -189,6 +191,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                         min="0.01"
                                         step="0.01"
                                         required
+                                        className="border p-2 rounded w-full"
                                     />
                                     <div className="flex gap-2 mt-2">
                                         <label>
@@ -210,7 +213,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                             {bet.player2.name}
                                         </label>
                                     </div>
-                                    <Button type="submit" className="mt-2">
+                                    <Button type="submit" className="mt-2 w-full">
                                         Сделать ставку
                                     </Button>
                                 </form>
@@ -244,7 +247,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                 <Button
                                     type="button"
                                     onClick={() => handleCloseBet(bet.id)}
-                                    className="mt-2"
+                                    className="mt-2 w-full"
                                 >
                                     Закрыть ставку
                                 </Button>

@@ -199,7 +199,7 @@ export async function closeBet(betId: number, winnerId: number) {
       where: { id: betId },
       data: {
         status: 'CLOSED',
-        winnerId: winnerId, // Устанавливаем победителя (ID игрока)
+        winnerId: winnerId,
       },
       include: {
         participants: {
@@ -207,8 +207,8 @@ export async function closeBet(betId: number, winnerId: number) {
             user: true,
           },
         },
-        player1: true, // Включаем данные о player1
-        player2: true, // Включаем данные о player2
+        player1: true,
+        player2: true,
       },
     });
 
@@ -222,12 +222,16 @@ export async function closeBet(betId: number, winnerId: number) {
     // Обновляем балансы участников
     for (const participant of bet.participants) {
       if (participant.player === winningPlayer) {
-        if (participant.odds === null) {
-          console.error('Odds is null for participant:', participant);
-          continue; // Пропустить этого участника
-        }
+        // Начисляем выигрыш
         const winAmount = participant.amount * participant.odds;
-        // Продолжаем логику...
+        await prisma.user.update({
+          where: { id: participant.userId },
+          data: {
+            points: {
+              increment: winAmount,
+            },
+          },
+        });
       }
     }
 
@@ -244,4 +248,5 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
 
