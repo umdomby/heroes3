@@ -6,12 +6,6 @@ import {hashSync} from 'bcrypt';
 import {revalidatePath} from 'next/cache'
 import * as z from 'zod'
 
-const placeBetSchema = z.object({
-  betId: z.number().int(),
-  userId: z.number().int(),
-  amount: z.number().positive({ message: 'Сумма должна быть положительным числом' }),
-  player: z.nativeEnum(PlayerChoice),
-});
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
   try {
     const currentUser = await getUserSession();
@@ -67,21 +61,6 @@ export async function registerUser(body: Prisma.UserCreateInput) {
     throw err;
   }
 }
-
-const createBetSchema = z.object({
-  player1Id: z.number().int(),
-  player2Id: z.number().int(),
-  initBetPlayer1: z.number().positive(),
-  initBetPlayer2: z.number().positive(),
-  currentOdds1: z.number().positive(),
-  currentOdds2: z.number().positive(),
-  creatorId: z.number().int(),
-  categoryId: z.number().int().optional(),
-  productId: z.number().int().optional(),
-  productItemId: z.number().int().optional(),
-  maxBetAmount: z.number().positive().default(1), // Значение по умолчанию
-  totalBetAmount: z.number().positive().default(1), // Значение по умолчанию
-});
 
 export async function clientCreateBet(formData: any) {
   const session = await getUserSession();
