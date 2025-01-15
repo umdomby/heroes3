@@ -21,8 +21,8 @@ import {clientCreateBet} from "@/app/actions";
 const createBetSchema = z.object({
     player1Id: z.coerce.number(),
     player2Id: z.coerce.number(),
-    initialOdds1: z.number().positive({message: 'Введите положительное число очков'}).min(50, {message: 'Минимальная ставка на игрока 1 должна быть 50 баллов'}),
-    initialOdds2: z.number().positive({message: 'Введите положительное число очков'}).min(50, {message: 'Минимальная ставка на игрока 2 должна быть 50 баллов'}),
+    betPlauer1: z.number().positive({message: 'Введите положительное число очков'}).min(50, {message: 'Минимальная ставка на игрока 1 должна быть 50 баллов'}),
+    betPlauer2: z.number().positive({message: 'Введите положительное число очков'}).min(50, {message: 'Минимальная ставка на игрока 2 должна быть 50 баллов'}),
     categoryId: z.coerce.number(),
     productId: z.coerce.number(),
     productItemId: z.coerce.number(),
@@ -43,8 +43,8 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
         defaultValues: {
             player1Id: players[0]?.id,
             player2Id: players[1]?.id,
-            initialOdds1: 50, // Дефолтное значение 50
-            initialOdds2: 50, // Дефолтное значение 50
+            betPlauer1: 50, // Дефолтное значение 50
+            betPlauer2: 50, // Дефолтное значение 50
             categoryId: categories[0]?.id,
             productId: products[0]?.id,
             productItemId: productItems[0]?.id,
@@ -54,7 +54,7 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
     const [createBetError, setCreateBetError] = useState<string | null>(null);
 
     const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
-        if (values.initialOdds1 < 50 || values.initialOdds2 < 50) {
+        if (values.betPlauer1 < 50 || values.betPlauer2 < 50) {
             setCreateBetError("Минимальная ставка на каждого игрока должна быть 50 баллов");
             return;
         }
@@ -116,7 +116,7 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
 
                     <FormField
                         control={form.control}
-                        name="initialOdds1"
+                        name="betPlauer1"
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>Bet Player 1</FormLabel> {/* Обновленная метка */}
@@ -135,7 +135,7 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
 
                     <FormField
                         control={form.control}
-                        name="initialOdds2"
+                        name="betPlauer2"
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>Bet Player 2</FormLabel> {/* Обновленная метка */}

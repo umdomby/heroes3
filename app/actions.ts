@@ -71,8 +71,8 @@ export async function registerUser(body: Prisma.UserCreateInput) {
 const createBetSchema = z.object({
   player1Id: z.number().int(), // Correct field names and types
   player2Id: z.number().int(),
-  initialOdds1: z.number().positive(),
-  initialOdds2: z.number().positive(),
+  betPlauer1: z.number().positive(),
+  betPlauer2: z.number().positive(),
   categoryId: z.number(),
   productId: z.number(),
   productItemId: z.number(),
@@ -93,8 +93,8 @@ export async function createBet(formData: any) {
         creatorId: Number(session?.id), // Убедимся, что creatorId — число
         status: 'OPEN', // Устанавливаем статус ставки как "открытая"
         totalBetAmount: 0, // Инициализируем общую сумму ставок
-        currentOdds1: formData.initialOdds1, // Инициализируем текущие коэффициенты
-        currentOdds2: formData.initialOdds2, // Инициализируем текущие коэффициенты
+        currentOdds1: formData.betPlauer1, // Инициализируем текущие коэффициенты
+        currentOdds2: formData.betPlauer2, // Инициализируем текущие коэффициенты
       },
     });
 
