@@ -20,8 +20,8 @@ import { clientCreateBet } from "@/app/actions";
 const createBetSchema = z.object({
     player1Id: z.coerce.number(),
     player2Id: z.coerce.number(),
-    initBetPlayer1: z.number().positive({ message: 'Введите положительное число очков' }),
-    initBetPlayer2: z.number().positive({ message: 'Введите положительное число очков' }),
+    initBetPlayer1: z.number().min(50, { message: 'Минимальная ставка на игрока 1: 50 баллов' }),
+    initBetPlayer2: z.number().min(50, { message: 'Минимальная ставка на игрока 2: 50 баллов' }),
     categoryId: z.coerce.number(),
     productId: z.coerce.number(),
     productItemId: z.coerce.number(),
@@ -42,8 +42,8 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
         defaultValues: {
             player1Id: players[0]?.id,
             player2Id: players[1]?.id,
-            initBetPlayer1: 50, // Дефолтное значение 50
-            initBetPlayer2: 50, // Дефолтное значение 50
+            initBetPlayer1: 50,
+            initBetPlayer2: 50,
             categoryId: categories[0]?.id,
             productId: products[0]?.id,
             productItemId: productItems[0]?.id,
@@ -52,34 +52,38 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
 
     const [createBetError, setCreateBetError] = useState<string | null>(null);
 
-    const onSubmit = async (values: any) => {
+    const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
         const { initBetPlayer1, initBetPlayer2 } = values;
 
-        // Логируем значения для отладки
-        console.log("initBetPlayer1:", initBetPlayer1);
-        console.log("initBetPlayer2:", initBetPlayer2);
+        // Проверка на минимальную сумму ставки
+        if (initBetPlayer1 < 50 || initBetPlayer2 < 50) {
+            setCreateBetError('Минимальная ставка на каждого игрока: 50 баллов');
+            return;
+        }
+
+        // Проверка баланса пользователя
+        const totalBetAmount = initBetPlayer1 + initBetPlayer2;
+        if (user.points < totalBetAmount) {
+            setCreateBetError('Недостаточно баллов для создания ставки');
+            return;
+        }
 
         // Рассчитываем коэффициенты
         const totalBets = initBetPlayer1 + initBetPlayer2;
-        const currentOdds1 = totalBets / initBetPlayer1; // Коэффициент для игрока 1
-        const currentOdds2 = totalBets / initBetPlayer2; // Коэффициент для игрока 2
+        const currentOdds1 = totalBets / initBetPlayer1;
+        const currentOdds2 = totalBets / initBetPlayer2;
 
         const betData = {
             ...values,
-            currentOdds1, // Добавляем currentOdds1
-            currentOdds2, // Добавляем currentOdds2
-            creatorId: user.id, // Добавляем creatorId из данных текущего пользователя
-            initBetPlayer1: values.initBetPlayer1, // Убедитесь, что это поле передается
-            initBetPlayer2: values.initBetPlayer2, // Убедитесь, что это поле передается
-            totalBetPlayer1: initBetPlayer1, // Добавляем totalBetPlayer1
-            totalBetPlayer2: initBetPlayer2, // Добавляем totalBetPlayer2
+            currentOdds1,
+            currentOdds2,
+            creatorId: user.id,
+            totalBetPlayer1: initBetPlayer1,
+            totalBetPlayer2: initBetPlayer2,
         };
 
-        // Передаем данные в clientCreateBet
         try {
-            console.log("Data being sent to clientCreateBet");
-            console.log(betData); // Логируем данные перед отправкой
-            await clientCreateBet(betData); // Передаем данные в clientCreateBet
+            await createBet(betData);
             form.reset();
             setCreateBetError(null);
         } catch (error) {

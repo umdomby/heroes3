@@ -67,19 +67,34 @@ export async function clientCreateBet(formData: any) {
   if (!session) {
     throw new Error("User session is not available.");
   }
+
   console.log("formData:", formData); // Логируем входящие данные
   console.log("session:", session); // Логируем сессию
 
   try {
     console.log("creatorId:", Number(session?.id)); // Логируем creatorId перед вызовом Prisma
 
+    // Получаем текущего пользователя
+    const user = await prisma.user.findUnique({
+      where: { id: Number(session.id) },
+    });
+
+    if (!user) {
+      throw new Error("Пользователь не найден");
+    }
+
+    // Проверяем, что у пользователя достаточно баллов
+    const totalBetAmount = formData.initBetPlayer1 + formData.initBetPlayer2;
+    if (user.points < totalBetAmount) {
+      throw new Error("Недостаточно баллов для создания ставки");
+    }
+
     // Создаем ставку в базе данных
     const newBet = await prisma.bet.create({
       data: {
-        // ...formData, // Используем данные напрямую из formData
         status: 'OPEN', // Устанавливаем статус ставки как "открытая"
-        totalBetAmount: 50, // Инициализируем общую сумму ставок
-        maxBetAmount: 50,
+        totalBetAmount: totalBetAmount, // Общая сумма ставок
+        maxBetAmount: totalBetAmount, // Максимальная сумма ставок
         currentOdds1: formData.currentOdds1, // Инициализируем текущие коэффициенты
         currentOdds2: formData.currentOdds2, // Инициализируем текущие коэффициенты
         player1Id: formData.player1Id,
@@ -90,13 +105,24 @@ export async function clientCreateBet(formData: any) {
         productId: formData.productId,
         productItemId: formData.productItemId,
         creatorId: formData.creatorId,
-        totalBetPlayer1: formData.totalBetPlayer1,
-        totalBetPlayer2: formData.totalBetPlayer2,
+        totalBetPlayer1: formData.initBetPlayer1, // Инициализируем сумму ставок на игрока 1
+        totalBetPlayer2: formData.initBetPlayer2, // Инициализируем сумму ставок на игрока 2
       },
     });
 
-    console.log("New bet created: newBet"); // Логируем созданную ставку
-    console.log(newBet); // Логируем созданную ставку
+    console.log("New bet created:", newBet); // Логируем созданную ставку
+
+    // Списание баллов у пользователя
+    await prisma.user.update({
+      where: { id: Number(session.id) },
+      data: {
+        points: {
+          decrement: totalBetAmount,
+        },
+      },
+    });
+
+    console.log("User points updated:", user.points - totalBetAmount); // Логируем обновленный баланс
 
     // Ревалидируем путь (если используем Next.js)
     revalidatePath('/');
@@ -106,9 +132,10 @@ export async function clientCreateBet(formData: any) {
     if (error instanceof Error) {
       console.log(error.stack);
     }
-    throw new Error('Failed to game your interaction. Please try again.');
+    throw new Error('Failed to create bet. Please try again.');
   }
 }
+
 
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
