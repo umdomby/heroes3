@@ -1,8 +1,8 @@
 'use client';
 
 import * as z from 'zod';
-import {useForm} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
     Form,
     FormControl,
@@ -11,18 +11,17 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import {Input} from "@/components/ui/input";
-import {Button} from "@/components/ui/button";
-import React, {useState} from 'react';
-import {Category, Product, ProductItem, User, Player} from '@prisma/client';
-import {clientCreateBet} from "@/app/actions";
-
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
+import { Category, Product, ProductItem, User, Player } from '@prisma/client';
+import { clientCreateBet } from "@/app/actions";
 
 const createBetSchema = z.object({
     player1Id: z.coerce.number(),
     player2Id: z.coerce.number(),
-    initBetPlauer1: z.number().positive({message: 'Введите положительное число очков'}).min(50, {message: 'Минимальная ставка на игрока 1 должна быть 50 баллов'}),
-    initBetPlauer2: z.number().positive({message: 'Введите положительное число очков'}).min(50, {message: 'Минимальная ставка на игрока 2 должна быть 50 баллов'}),
+    initBetPlayer1: z.number().positive({ message: 'Введите положительное число очков' }),
+    initBetPlayer2: z.number().positive({ message: 'Введите положительное число очков' }),
     categoryId: z.coerce.number(),
     productId: z.coerce.number(),
     productItemId: z.coerce.number(),
@@ -37,14 +36,14 @@ interface Props {
     createBet: typeof clientCreateBet;
 }
 
-export const CreateBetForm: React.FC<Props> = ({user, categories, products, productItems, players, createBet}) => {
+export const CreateBetForm: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
     const form = useForm<z.infer<typeof createBetSchema>>({
         resolver: zodResolver(createBetSchema),
         defaultValues: {
             player1Id: players[0]?.id,
             player2Id: players[1]?.id,
-            initBetPlauer1: 50, // Дефолтное значение 50
-            initBetPlauer2: 50, // Дефолтное значение 50
+            initBetPlayer1: 50, // Дефолтное значение 50
+            initBetPlayer2: 50, // Дефолтное значение 50
             categoryId: categories[0]?.id,
             productId: products[0]?.id,
             productItemId: productItems[0]?.id,
@@ -53,14 +52,32 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
 
     const [createBetError, setCreateBetError] = useState<string | null>(null);
 
-    const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
-        if (values.initBetPlauer1 < 50 || values.initBetPlauer2 < 50) {
-            setCreateBetError("Минимальная ставка на каждого игрока должна быть 50 баллов");
-            return;
-        }
+    const onSubmit = async (values: any) => {
+        const { initBetPlayer1, initBetPlayer2 } = values;
 
+        // Логируем значения для отладки
+        console.log("initBetPlayer1:", initBetPlayer1);
+        console.log("initBetPlayer2:", initBetPlayer2);
+
+        // Рассчитываем коэффициенты
+        const totalBets = initBetPlayer1 + initBetPlayer2;
+        const currentOdds1 = totalBets / initBetPlayer1; // Коэффициент для игрока 1
+        const currentOdds2 = totalBets / initBetPlayer2; // Коэффициент для игрока 2
+
+        const betData = {
+            ...values,
+            currentOdds1, // Добавляем currentOdds1
+            currentOdds2, // Добавляем currentOdds2
+            creatorId: user.id, // Добавляем creatorId из данных текущего пользователя
+            initBetPlayer1: values.initBetPlayer1, // Убедитесь, что это поле передается
+            initBetPlayer2: values.initBetPlayer2, // Убедитесь, что это поле передается
+        };
+
+        // Передаем данные в clientCreateBet
         try {
-            await createBet(values);
+            console.log("Data being sent to clientCreateBet");
+            console.log(betData); // Логируем данные перед отправкой
+            await clientCreateBet(betData); // Передаем данные в clientCreateBet
             form.reset();
             setCreateBetError(null);
         } catch (error) {
@@ -72,16 +89,16 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
         }
     };
 
-
     return (
         <div>
             <div>Ваши баллы: {user?.points}</div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    {/* Поле выбора Player 1 */}
                     <FormField
                         control={form.control}
                         name="player1Id"
-                        render={({field}) => (
+                        render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Player 1</FormLabel>
                                 <FormControl>
@@ -91,15 +108,16 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
 
+                    {/* Поле выбора Player 2 */}
                     <FormField
                         control={form.control}
                         name="player2Id"
-                        render={({field}) => (
+                        render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Player 2</FormLabel>
                                 <FormControl>
@@ -109,104 +127,115 @@ export const CreateBetForm: React.FC<Props> = ({user, categories, products, prod
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
 
+                    {/* Поле для ставки на Player 1 */}
                     <FormField
                         control={form.control}
-                        name="initBetPlauer1"
-                        render={({field}) => (
+                        name="initBetPlayer1"
+                        render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Bet Player 1</FormLabel> {/* Обновленная метка */}
+                                <FormLabel>Ставка на Player 1</FormLabel>
                                 <FormControl>
                                     <Input
+                                        placeholder="Сумма ставки"
                                         type="number"
                                         {...field}
                                         value={field.value === undefined ? '' : field.value}
                                         onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))}
                                     />
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
 
+                    {/* Поле для ставки на Player 2 */}
                     <FormField
                         control={form.control}
-                        name="initBetPlauer2"
-                        render={({field}) => (
+                        name="initBetPlayer2"
+                        render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Bet Player 2</FormLabel> {/* Обновленная метка */}
+                                <FormLabel>Ставка на Player 2</FormLabel>
                                 <FormControl>
                                     <Input
+                                        placeholder="Сумма ставки"
                                         type="number"
                                         {...field}
                                         value={field.value === undefined ? '' : field.value}
                                         onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))}
                                     />
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
 
+                    {/* Поле выбора категории */}
                     <FormField
                         control={form.control}
                         name="categoryId"
-                        render={({field}) => (
+                        render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Category</FormLabel>
                                 <FormControl>
                                     <select {...field}>
-                                        {categories.map((cat) => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id}>{category.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
 
+                    {/* Поле выбора продукта */}
                     <FormField
                         control={form.control}
                         name="productId"
-                        render={({field}) => (
+                        render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Product</FormLabel>
                                 <FormControl>
                                     <select {...field}>
-                                        {products.map((prod) => (
-                                            <option key={prod.id} value={prod.id}>{prod.name}</option>
+                                        {products.map((product) => (
+                                            <option key={product.id} value={product.id}>{product.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
 
+                    {/* Поле выбора элемента продукта */}
                     <FormField
                         control={form.control}
                         name="productItemId"
-                        render={({field}) => (
+                        render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Product Item</FormLabel>
                                 <FormControl>
                                     <select {...field}>
-                                        {productItems.map((prodItem) => (
-                                            <option key={prodItem.id} value={prodItem.id}>{prodItem.name}</option>
+                                        {productItems.map((productItem) => (
+                                            <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
+
+                    {/* Кнопка отправки формы */}
                     <Button type="submit">Create Bet</Button>
-                    {createBetError && <p style={{color: 'red'}}>{createBetError}</p>}
+
+                    {/* Отображение ошибки */}
+                    {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
                 </form>
             </Form>
         </div>

@@ -69,17 +69,29 @@ export async function registerUser(body: Prisma.UserCreateInput) {
 }
 
 const createBetSchema = z.object({
-  player1Id: z.number().int(), // Correct field names and types
+  player1Id: z.number().int(),
   player2Id: z.number().int(),
-  initBetPlauer1: z.number().positive(),
-  initBetPlauer2: z.number().positive(),
-  categoryId: z.number(),
-  productId: z.number(),
-  productItemId: z.number(),
+  initBetPlayer1: z.number().positive(),
+  initBetPlayer2: z.number().positive(),
+  currentOdds1: z.number().positive(),
+  currentOdds2: z.number().positive(),
+  creatorId: z.number().int(),
+  categoryId: z.number().int().optional(),
+  productId: z.number().int().optional(),
+  productItemId: z.number().int().optional(),
+  maxBetAmount: z.number().positive().default(1), // Значение по умолчанию
+  totalBetAmount: z.number().positive().default(1), // Значение по умолчанию
 });
 
-export async function createBet(formData: any) {
+export async function clientCreateBet(formData: any) {
   const session = await getUserSession();
+  if (!session) {
+    throw new Error("User session is not available.");
+  }
+
+  if (!formData.player1Id || !formData.player2Id || !formData.creatorId || !formData.initBetPlayer1 || !formData.initBetPlayer2 || !formData.currentOdds1 || !formData.currentOdds2) {
+    throw new Error("Missing required fields in formData.");
+  }
   console.log("formData:", formData); // Логируем входящие данные
   console.log("session:", session); // Логируем сессию
 
@@ -89,41 +101,35 @@ export async function createBet(formData: any) {
     // Создаем ставку в базе данных
     const newBet = await prisma.bet.create({
       data: {
-        ...formData, // Используем данные напрямую из formData
-        creatorId: Number(session?.id), // Убедимся, что creatorId — число
+        // ...formData, // Используем данные напрямую из formData
         status: 'OPEN', // Устанавливаем статус ставки как "открытая"
-        totalBetAmount: 0, // Инициализируем общую сумму ставок
-        currentOdds1: formData.initBetPlauer1, // Инициализируем текущие коэффициенты
-        currentOdds2: formData.initBetPlauer2, // Инициализируем текущие коэффициенты
+        totalBetAmount: 50, // Инициализируем общую сумму ставок
+        maxBetAmount: 50,
+        currentOdds1: formData.currentOdds1, // Инициализируем текущие коэффициенты
+        currentOdds2: formData.currentOdds2, // Инициализируем текущие коэффициенты
+        player1Id: formData.player1Id,
+        player2Id: formData.player2Id,
+        initBetPlayer1: formData.initBetPlayer1,
+        initBetPlayer2: formData.initBetPlayer2,
+        categoryId: formData.categoryId,
+        productId: formData.productId,
+        productItemId: formData.productItemId,
+        creatorId: formData.creatorId,
       },
     });
 
-    console.log("New bet created:", newBet); // Логируем созданную ставку
+    console.log("New bet created: newBet"); // Логируем созданную ставку
+    console.log(newBet); // Логируем созданную ставку
 
     // Ревалидируем путь (если используем Next.js)
     revalidatePath('/');
 
     return newBet; // Возвращаем созданную ставку
   } catch (error) {
-    console.error("Error creating bet:", error); // Логируем ошибку
-
     if (error instanceof Error) {
-      throw new Error(error.message); // Обрабатываем ошибки
-    } else {
-      throw new Error("Failed to create bet."); // Общая ошибка
+      console.log(error.stack);
     }
-  }
-}
-
-export async function clientCreateBet(formData: any) { // This is the new wrapper
-  'use server'; // Mark the wrapper as a server action
-  console.log("99999999999999")
-  try {
-    await createBet(formData); // Call the ORIGINAL createBet function
-    revalidatePath('/');
-  } catch (error) {
-    console.error("Ошибка при создании ставки:", error);
-    throw error; // Re-throw to be caught by the client
+    throw new Error('Failed to game your interaction. Please try again.');
   }
 }
 
