@@ -84,7 +84,7 @@ export async function clientCreateBet(formData: any) {
     }
 
     // Проверяем, что у пользователя достаточно баллов
-    const totalBetAmount = formData.initBetPlayer1 + formData.initBetPlayer2;
+    const totalBetAmount = formData.totalBetPlayer1 + formData.totalBetPlayer2;
     if (user.points < totalBetAmount) {
       throw new Error("Недостаточно баллов для создания ставки");
     }
@@ -99,14 +99,12 @@ export async function clientCreateBet(formData: any) {
         currentOdds2: formData.currentOdds2, // Инициализируем текущие коэффициенты
         player1Id: formData.player1Id,
         player2Id: formData.player2Id,
-        initBetPlayer1: formData.initBetPlayer1,
-        initBetPlayer2: formData.initBetPlayer2,
+        totalBetPlayer1: formData.totalBetPlayer1,
+        totalBetPlayer2: formData.totalBetPlayer2,
         categoryId: formData.categoryId,
         productId: formData.productId,
         productItemId: formData.productItemId,
         creatorId: formData.creatorId,
-        totalBetPlayer1: formData.initBetPlayer1, // Инициализируем сумму ставок на игрока 1
-        totalBetPlayer2: formData.initBetPlayer2, // Инициализируем сумму ставок на игрока 2
       },
     });
 
@@ -157,27 +155,80 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     });
 
     if (!user || user.points < amount) {
-      throw new Error('Недостаточно баллов для ставки');
+      throw new Error('Недостаточно баллов для совершения ставки');
     }
 
-    // Рассчитываем коэффициенты перед созданием участника
+    // Рассчитываем текущие суммы ставок на каждого игрока
     const totalPlayer1 = bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER1)
-        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
+        .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer1);
 
     const totalPlayer2 = bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER2)
-        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
+        .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer2);
 
     const total = totalPlayer1 + totalPlayer2;
 
-    // Расчет коэффициентов без маржи
+    // Расчет текущих коэффициентов
     const oddsPlayer1 = totalPlayer1 === 0 ? 1 : total / totalPlayer1;
     const oddsPlayer2 = totalPlayer2 === 0 ? 1 : total / totalPlayer2;
 
+    // Проверка коэффициента перед ставкой
+    if ((player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.05) ||
+        (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.05)) {
+      throw new Error('Коэффициент слишком низкий для ставки');
+    }
+
+    // Проверка, не приведет ли ставка к снижению коэффициента до 1.05 или ниже
+    const updatedTotalPlayer1 = player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1;
+    const updatedTotalPlayer2 = player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2;
+    const updatedTotal = updatedTotalPlayer1 + updatedTotalPlayer2;
+
+    const updatedOddsPlayer1 = updatedTotalPlayer1 === 0 ? 1 : updatedTotal / updatedTotalPlayer1;
+    const updatedOddsPlayer2 = updatedTotalPlayer2 === 0 ? 1 : updatedTotal / updatedTotalPlayer2;
+
+    if ((player === PlayerChoice.PLAYER1 && updatedOddsPlayer1 <= 1.05) ||
+        (player === PlayerChoice.PLAYER2 && updatedOddsPlayer2 <= 1.05)) {
+      throw new Error('Ставка приведет к снижению коэффициента до 1.05 или ниже');
+    }
+
     // Рассчитываем потенциальную прибыль
-    const odds = player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2;
-    const profit = amount * odds;
+    const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
+
+    // Проверка, чтобы прибыль не превышала 30% от суммы ставок на другого игрока
+    if (player === PlayerChoice.PLAYER1 && potentialProfit > totalPlayer2 * 0.3) {
+      throw new Error('Прибыль от ставки превышает 30% от суммы ставок на другого игрока');
+    }
+
+    if (player === PlayerChoice.PLAYER2 && potentialProfit > totalPlayer1 * 0.3) {
+      throw new Error('Прибыль от ставки превышает 30% от суммы ставок на другого игрока');
+    }
+
+    // Рассчитываем максимальную ставку с учетом ограничения на прибыль
+    const maxBetForProfit = player === PlayerChoice.PLAYER1
+        ? (totalPlayer2 * 0.3) / oddsPlayer1 // Максимум 30% от суммы ставок на Player 2, деленные на коэффициент
+        : (totalPlayer1 * 0.3) / oddsPlayer2; // Максимум 30% от суммы ставок на Player 1, деленные на коэффициент
+
+    // Максимальная ставка, чтобы коэффициент не опустился ниже 1.05
+    const maxBetForOdds = player === PlayerChoice.PLAYER1
+        ? (total / 1.05) - totalPlayer1
+        : (total / 1.05) - totalPlayer2;
+
+    // Максимальная ставка, чтобы не превысить сумму другого игрока на 30%
+    const maxBetForBalance = player === PlayerChoice.PLAYER1
+        ? totalPlayer2 * 1.3
+        : totalPlayer1 * 1.3;
+
+    // Максимальная ставка, которую может сделать пользователь
+    const userMaxBet = user.points;
+
+    // Возвращаем минимальное значение из всех ограничений
+    const maxAllowedBet = Math.min(maxBetForOdds, maxBetForBalance, maxBetForProfit, userMaxBet);
+
+    // Проверка, что ставка не превышает максимально допустимую
+    if (amount > maxAllowedBet) {
+      throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
+    }
 
     // Создаем участника ставки
     await prisma.betParticipant.create({
@@ -186,8 +237,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         userId,
         amount,
         player,
-        odds,
-        profit,
+        odds: player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2,
+        profit: potentialProfit,
       },
     });
 
@@ -200,14 +251,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     });
 
     // Обновляем коэффициенты и общую сумму ставок
-    const updatedTotalPlayer1 = player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1;
-    const updatedTotalPlayer2 = player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2;
-
     await prisma.bet.update({
       where: { id: betId },
       data: {
-        currentOdds1: updatedTotalPlayer1 === 0 ? 1 : (total + amount) / updatedTotalPlayer1,
-        currentOdds2: updatedTotalPlayer2 === 0 ? 1 : (total + amount) / updatedTotalPlayer2,
+        currentOdds1: updatedOddsPlayer1,
+        currentOdds2: updatedOddsPlayer2,
         totalBetPlayer1: updatedTotalPlayer1,
         totalBetPlayer2: updatedTotalPlayer2,
       },
@@ -222,6 +270,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
+
 
 
 export async function closeBet(betId: number, winnerId: number) {
