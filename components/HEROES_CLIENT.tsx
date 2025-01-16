@@ -90,7 +90,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             setPlaceBetError('Сумма должна быть положительным числом');
             return;
         }
-
         handlePlaceBet(bet, amount, player);
     };
 
@@ -101,8 +100,13 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
         }
 
         try {
+            // Проверяем, что selectedWinner не равен null
+            if (selectedWinner === null || selectedWinner === undefined) {
+                throw new Error("Не выбран победитель.");
+            }
+
             await closeBet(betId, selectedWinner);
-            mutate();
+            mutate(); // Обновляем данные
             setSelectedWinner(null);
             setCloseBetError(null);
         } catch (error) {
@@ -142,7 +146,39 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
                 return (
                     <div key={bet.id} className="border border-gray-300 p-4 mt-4  rounded-lg shadow-sm">
-                        <h3 className="text-lg font-semibold">{bet.player1.name} vs {bet.player2.name}</h3>
+
+                        {(() => {
+                            const totalBetPlayer1 = bet.participants
+                                .filter((p) => p.player === PlayerChoice.PLAYER1)
+                                .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
+
+                            const totalBetPlayer2 = bet.participants
+                                .filter((p) => p.player === PlayerChoice.PLAYER2)
+                                .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
+
+                            const totalBets = totalBetPlayer1 + totalBetPlayer2;
+
+                            const currentOdds1 = totalBets / totalBetPlayer1;
+                            const currentOdds2 = totalBets / totalBetPlayer2;
+
+                            return (
+                                <h3 className="text-lg font-semibold">
+                                    {bet.player1.name} vs {bet.player2.name} | Коэффициенты: {currentOdds1.toFixed(2)} - {currentOdds2.toFixed(2)} | Ставки на {bet.player1.name}: {totalBetPlayer1} | Ставки на {bet.player2.name}: {totalBetPlayer2}
+                                </h3>
+                            );
+                        })()}
+
+
+                        <h3 className="text-lg font-semibold">
+                            {bet.player1.name} vs {bet.player2.name} |
+                            Коэффициенты: {bet.currentOdds1.toFixed(2)} - {bet.currentOdds2.toFixed(2)} | Ставки
+                            на {bet.player1.name}: {bet.participants
+                            .filter((p) => p.player === PlayerChoice.PLAYER1)
+                            .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1)} | Ставки
+                            на {bet.player2.name}: {bet.participants
+                            .filter((p) => p.player === PlayerChoice.PLAYER2)
+                            .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2)}
+                        </h3>
 
                         {/* Отображение ставок пользователя для текущей ставки (bet) */}
                         {userBets.length > 0 && (

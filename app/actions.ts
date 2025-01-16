@@ -212,8 +212,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     revalidatePath('/'); // Ревалидируем путь (если используете Next.js)
     console.log(`Пользователь ${userId} сделал ставку ${amount} на игрока ${player}`);
   } catch (error) {
-    console.error('Error placing bet:', error);
-    throw new Error('Failed to place bet.');
+    if (error instanceof Error) {
+      console.log(error.stack);
+    }
+    throw new Error('Failed to create bet. Please try again.');
   }
 }
 
@@ -221,21 +223,22 @@ export async function closeBet(betId: number, winnerId: number) {
   'use server';
 
   try {
+    // Проверяем, что winnerId не равен null
+    if (winnerId === null || winnerId === undefined) {
+      throw new Error("Не выбран победитель.");
+    }
+
     // Находим ставку и обновляем её статус и победителя
     const bet = await prisma.bet.update({
       where: { id: betId },
       data: {
         status: 'CLOSED',
-        winnerId: winnerId,
+        winnerId: winnerId, // Устанавливаем победителя (ID игрока)
       },
       include: {
-        participants: {
-          include: {
-            user: true,
-          },
-        },
-        player1: true,
-        player2: true,
+        participants: true, // Включаем участников ставки
+        player1: true, // Включаем данные о player1
+        player2: true, // Включаем данные о player2
       },
     });
 
@@ -245,6 +248,25 @@ export async function closeBet(betId: number, winnerId: number) {
 
     // Определяем, кто выиграл: player1 или player2
     const winningPlayer = bet.winnerId === bet.player1Id ? PlayerChoice.PLAYER1 : PlayerChoice.PLAYER2;
+
+    // Устанавливаем isWinner = false для всех участников
+    await prisma.betParticipant.updateMany({
+      where: { betId: betId },
+      data: {
+        isWinner: false,
+      },
+    });
+
+    // Устанавливаем isWinner = true для участников, которые поставили на победителя
+    await prisma.betParticipant.updateMany({
+      where: {
+        betId: betId,
+        player: winningPlayer, // Участники, которые поставили на победителя
+      },
+      data: {
+        isWinner: true,
+      },
+    });
 
     // Обновляем балансы участников
     for (const participant of bet.participants) {
@@ -262,7 +284,7 @@ export async function closeBet(betId: number, winnerId: number) {
       }
     }
 
-    // Ревалидируем путь (если используете Next.js)
+    // Ревалидируем путь (если используем Next.js)
     revalidatePath('/');
 
   } catch (error) {
@@ -275,5 +297,9 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
+
+
+
 
 
