@@ -18,13 +18,13 @@ import { Category, Product, ProductItem, User, Player } from '@prisma/client';
 import { clientCreateBet } from "@/app/actions";
 
 const createBetSchema = z.object({
-    player1Id: z.coerce.number(),
-    player2Id: z.coerce.number(),
-    initBetPlayer1: z.number().min(50, { message: 'Минимальная ставка на игрока 1: 50 баллов' }),
-    initBetPlayer2: z.number().min(50, { message: 'Минимальная ставка на игрока 2: 50 баллов' }),
-    categoryId: z.coerce.number(),
-    productId: z.coerce.number(),
-    productItemId: z.coerce.number(),
+    player1Id: z.coerce.number().int(), // Только целые числа
+    player2Id: z.coerce.number().int(), // Только целые числа
+    initBetPlayer1: z.number().int().min(50, { message: 'Минимальная ставка на игрока 1: 50 баллов' }), // Только целые числа
+    initBetPlayer2: z.number().int().min(50, { message: 'Минимальная ставка на игрока 2: 50 баллов' }), // Только целые числа
+    categoryId: z.coerce.number().int(), // Только целые числа
+    productId: z.coerce.number().int(), // Только целые числа
+    productItemId: z.coerce.number().int(), // Только целые числа
 });
 
 interface Props {
@@ -151,7 +151,12 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                                         type="number"
                                         {...field}
                                         value={field.value === undefined ? '' : field.value}
-                                        onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))}
+                                        onChange={(e) => {
+                                            const value = e.target.valueAsNumber;
+                                            if (Number.isInteger(value)) { // Проверка на целое число
+                                                field.onChange(value);
+                                            }
+                                        }}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -172,7 +177,12 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
                                         type="number"
                                         {...field}
                                         value={field.value === undefined ? '' : field.value}
-                                        onChange={(e) => field.onChange(Number(e.target.valueAsNumber || 0))}
+                                        onChange={(e) => {
+                                            const value = e.target.valueAsNumber;
+                                            if (Number.isInteger(value)) { // Проверка на целое число
+                                                field.onChange(value);
+                                            }
+                                        }}
                                     />
                                 </FormControl>
                                 <FormMessage />

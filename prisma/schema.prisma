@@ -19,7 +19,7 @@ model User {
   password    String
   role        UserRole         @default(USER)
   img         String?
-  points      Float            @default(1000)
+  points      Int              @default(1000)
   betsCreated Bet[]            @relation("BetsCreated")
   betsPlaced  BetParticipant[]
   createdAt   DateTime         @default(now())
@@ -32,14 +32,14 @@ model Bet {
   player1Id       Int
   player2         Player           @relation(name: "Player2Bets", fields: [player2Id], references: [id])
   player2Id       Int
-  initBetPlayer1  Float // инициализация ставок на игрока 1
-  initBetPlayer2  Float // инициализация ставок на игрока 2
+  initBetPlayer1  Int // инициализация ставок на игрока 1
+  initBetPlayer2  Int // инициализация ставок на игрока 2
   currentOdds1    Float // Текущий коэффициент для игрока 1
   currentOdds2    Float // Текущий коэффициент для игрока 2
-  totalBetPlayer1 Float // Сумма ставок на игрока 1
-  totalBetPlayer2 Float // Сумма ставок на игрока 2
-  maxBetAmount    Float            @default(10)
-  totalBetAmount  Float            @default(0)
+  totalBetPlayer1 Int // Сумма ставок на игрока 1
+  totalBetPlayer2 Int // Сумма ставок на игрока 2
+  maxBetAmount    Int              @default(10)
+  totalBetAmount  Int              @default(0)
   creator         User             @relation("BetsCreated", fields: [creatorId], references: [id])
   creatorId       Int
   status          BetStatus        @default(OPEN)
@@ -61,9 +61,9 @@ model BetParticipant {
   bet       Bet          @relation(fields: [betId], references: [id])
   userId    Int
   user      User         @relation(fields: [userId], references: [id])
-  amount    Float
+  amount    Int
   odds      Float
-  profit    Float
+  profit    Int
   player    PlayerChoice
   isWinner  Boolean      @default(false)
   createdAt DateTime     @default(now())
