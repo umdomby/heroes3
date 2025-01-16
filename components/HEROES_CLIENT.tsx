@@ -75,11 +75,11 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     const calculateMaxBet = (bet: Bet, player: PlayerChoice) => {
         const totalPlayer1 = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer1);
+            .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
 
         const totalPlayer2 = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer2);
+            .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
 
         const total = totalPlayer1 + totalPlayer2;
 
@@ -109,11 +109,11 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             // Рассчитываем текущие суммы ставок на каждого игрока
             const totalPlayer1 = bet.participants
                 .filter(p => p.player === PlayerChoice.PLAYER1)
-                .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer1);
+                .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
 
             const totalPlayer2 = bet.participants
                 .filter(p => p.player === PlayerChoice.PLAYER2)
-                .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer2);
+                .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
 
             const total = totalPlayer1 + totalPlayer2;
 
@@ -210,11 +210,11 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
         // Проверка, не приведет ли ставка к снижению коэффициента до 1.05 или ниже
         const totalPlayer1 = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer1);
+            .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
 
         const totalPlayer2 = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer2);
+            .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
 
         const total = totalPlayer1 + totalPlayer2;
 
@@ -307,11 +307,11 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                         {(() => {
                             const totalBetPlayer1 = bet.participants
                                 .filter((p) => p.player === PlayerChoice.PLAYER1)
-                                .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer1);
+                                .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
 
                             const totalBetPlayer2 = bet.participants
                                 .filter((p) => p.player === PlayerChoice.PLAYER2)
-                                .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer2);
+                                .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
 
                             const totalBets = totalBetPlayer1 + totalBetPlayer2;
 
@@ -418,11 +418,11 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                     // Проверка, чтобы прибыль не превышала 30% от суммы ставок на другого игрока
                                                     const totalPlayer1 = bet.participants
                                                         .filter(p => p.player === PlayerChoice.PLAYER1)
-                                                        .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer1);
+                                                        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
 
                                                     const totalPlayer2 = bet.participants
                                                         .filter(p => p.player === PlayerChoice.PLAYER2)
-                                                        .reduce((sum, p) => sum + p.amount, bet.totalBetPlayer2);
+                                                        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
 
                                                     if (selectedPlayer === PlayerChoice.PLAYER1 && potentialProfit > totalPlayer2 * 0.3) {
                                                         setPlaceBetError('Прибыль от ставки превышает 30% от суммы ставок на другого игрока');
