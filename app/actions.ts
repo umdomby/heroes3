@@ -171,8 +171,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     const total = totalPlayer1 + totalPlayer2;
 
-    const oddsPlayer1 = total / totalPlayer1;
-    const oddsPlayer2 = total / totalPlayer2;
+    // Расчет коэффициентов без маржи
+    const oddsPlayer1 = totalPlayer1 === 0 ? 1 : total / totalPlayer1;
+    const oddsPlayer2 = totalPlayer2 === 0 ? 1 : total / totalPlayer2;
 
     // Рассчитываем потенциальную прибыль
     const odds = player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2;
@@ -199,13 +200,16 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     });
 
     // Обновляем коэффициенты и общую сумму ставок
+    const updatedTotalPlayer1 = player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1;
+    const updatedTotalPlayer2 = player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2;
+
     await prisma.bet.update({
       where: { id: betId },
       data: {
-        currentOdds1: oddsPlayer1,
-        currentOdds2: oddsPlayer2,
-        totalBetPlayer1: totalPlayer1,
-        totalBetPlayer2: totalPlayer2,
+        currentOdds1: updatedTotalPlayer1 === 0 ? 1 : (total + amount) / updatedTotalPlayer1,
+        currentOdds2: updatedTotalPlayer2 === 0 ? 1 : (total + amount) / updatedTotalPlayer2,
+        totalBetPlayer1: updatedTotalPlayer1,
+        totalBetPlayer2: updatedTotalPlayer2,
       },
     });
 
@@ -218,6 +222,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
+
 
 export async function closeBet(betId: number, winnerId: number) {
   'use server';

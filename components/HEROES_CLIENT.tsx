@@ -158,12 +158,19 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
                             const totalBets = totalBetPlayer1 + totalBetPlayer2;
 
+                            // // Маржа букмекера (например, 5%)
+                            // const margin = 0.05;
+                            // // Расчет коэффициентов с учетом маржи
+                            // const currentOdds1 = (totalBets / totalBetPlayer1) * (1 - margin);
+                            // const currentOdds2 = (totalBets / totalBetPlayer2) * (1 - margin);
+
+                            // Расчет коэффициентов без учета маржи
                             const currentOdds1 = totalBets / totalBetPlayer1;
                             const currentOdds2 = totalBets / totalBetPlayer2;
 
                             return (
                                 <h3 className="text-lg font-semibold">
-                                    {bet.player1.name} vs {bet.player2.name} | Коэффициенты: {currentOdds1.toFixed(2)} - {currentOdds2.toFixed(2)} | Ставки на {bet.player1.name}: {totalBetPlayer1} | Ставки на {bet.player2.name}: {totalBetPlayer2}
+                                    {bet.player1.name} vs {bet.player2.name} | Коэффициенты 2: {currentOdds1.toFixed(2)} - {currentOdds2.toFixed(2)} | Ставки на {bet.player1.name}: {totalBetPlayer1} | Ставки на {bet.player2.name}: {totalBetPlayer2}
                                 </h3>
                             );
                         })()}
