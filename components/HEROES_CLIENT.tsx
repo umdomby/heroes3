@@ -419,15 +419,22 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                 onChange={(e) => {
                                                     const amountInput = e.target.form?.elements.namedItem('amount') as HTMLInputElement;
                                                     const amount = parseInt(amountInput.value, 10);
+
+                                                    // Обновляем максимальную ставку для Player1
+                                                    setMaxAllowedBet((prev) => ({
+                                                        ...prev,
+                                                        [bet.id]: bet.maxBetPlayer1,
+                                                    }));
+
+                                                    // Если сумма ставки введена корректно, обновляем потенциальную прибыль
                                                     if (!isNaN(amount) && amount > 0) {
-                                                        setMaxAllowedBet((prev) => ({
-                                                            ...prev,
-                                                            [bet.id]: bet.maxBetPlayer1,
-                                                        }));
+                                                        const potentialProfitValue = amount * bet.currentOdds1;
                                                         setPotentialProfit((prev) => ({
                                                             ...prev,
-                                                            [bet.id]: amount * bet.currentOdds1,
+                                                            [bet.id]: potentialProfitValue,
                                                         }));
+
+                                                        // Проверяем, не превышает ли сумма максимальную ставку
                                                         if (amount > bet.maxBetPlayer1) {
                                                             setPlaceBetErrors((prev) => ({
                                                                 ...prev,
@@ -438,6 +445,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                                 [bet.id]: true,
                                                             }));
                                                         } else {
+                                                            setPlaceBetErrors((prev) => ({
+                                                                ...prev,
+                                                                [bet.id]: null, // Очищаем ошибку, если сумма допустима
+                                                            }));
                                                             setIsBetDisabled((prev) => ({
                                                                 ...prev,
                                                                 [bet.id]: false,
@@ -448,22 +459,15 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                             ...prev,
                                                             [bet.id]: null,
                                                         }));
-                                                        setMaxAllowedBet((prev) => ({
-                                                            ...prev,
-                                                            [bet.id]: null,
-                                                        }));
                                                         setIsBetDisabled((prev) => ({
                                                             ...prev,
                                                             [bet.id]: true,
                                                         }));
                                                     }
-                                                    setHasPlacedBet((prev) => ({
-                                                        ...prev,
-                                                        [bet.id]: false, // Сбрасываем флаг при изменении выбора игрока
-                                                    }));
                                                 }}
                                             />
-                                            <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>
+                                            <span
+                                                className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>
                                         </label>
                                         <label>
                                             <input
@@ -474,15 +478,22 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                 onChange={(e) => {
                                                     const amountInput = e.target.form?.elements.namedItem('amount') as HTMLInputElement;
                                                     const amount = parseInt(amountInput.value, 10);
+
+                                                    // Обновляем максимальную ставку для Player2
+                                                    setMaxAllowedBet((prev) => ({
+                                                        ...prev,
+                                                        [bet.id]: bet.maxBetPlayer2,
+                                                    }));
+
+                                                    // Если сумма ставки введена корректно, обновляем потенциальную прибыль
                                                     if (!isNaN(amount) && amount > 0) {
-                                                        setMaxAllowedBet((prev) => ({
-                                                            ...prev,
-                                                            [bet.id]: bet.maxBetPlayer2,
-                                                        }));
+                                                        const potentialProfitValue = amount * bet.currentOdds2;
                                                         setPotentialProfit((prev) => ({
                                                             ...prev,
-                                                            [bet.id]: amount * bet.currentOdds2,
+                                                            [bet.id]: potentialProfitValue,
                                                         }));
+
+                                                        // Проверяем, не превышает ли сумма максимальную ставку
                                                         if (amount > bet.maxBetPlayer2) {
                                                             setPlaceBetErrors((prev) => ({
                                                                 ...prev,
@@ -493,6 +504,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                                 [bet.id]: true,
                                                             }));
                                                         } else {
+                                                            setPlaceBetErrors((prev) => ({
+                                                                ...prev,
+                                                                [bet.id]: null, // Очищаем ошибку, если сумма допустима
+                                                            }));
                                                             setIsBetDisabled((prev) => ({
                                                                 ...prev,
                                                                 [bet.id]: false,
@@ -503,22 +518,15 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                             ...prev,
                                                             [bet.id]: null,
                                                         }));
-                                                        setMaxAllowedBet((prev) => ({
-                                                            ...prev,
-                                                            [bet.id]: null,
-                                                        }));
                                                         setIsBetDisabled((prev) => ({
                                                             ...prev,
                                                             [bet.id]: true,
                                                         }));
                                                     }
-                                                    setHasPlacedBet((prev) => ({
-                                                        ...prev,
-                                                        [bet.id]: false, // Сбрасываем флаг при изменении выбора игрока
-                                                    }));
                                                 }}
                                             />
-                                            <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>
+                                            <span
+                                                className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>
                                         </label>
                                     </div>
                                     {maxAllowedBet[bet.id] !== null && !hasPlacedBet[bet.id] && (
