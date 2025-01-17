@@ -10,6 +10,8 @@ import Link from "next/link";
 import {Button} from "@/components/ui";
 import Image from "next/image";
 import {getUserSession} from "@/components/lib/get-user-session";
+import {GlobalData} from "@/components/globalData";
+
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +34,7 @@ export default async function Home() {
         return (
             <Container className="flex flex-col my-10">
                 <Suspense fallback={<Loading/>}>
+                    <GlobalData />
                     <HEROES_CLIENT user={user}/>
                 </Suspense>
             </Container>

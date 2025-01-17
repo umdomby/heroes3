@@ -5,6 +5,68 @@ import {PlayerChoice, Prisma} from '@prisma/client';
 import {hashSync} from 'bcrypt';
 import {revalidatePath} from 'next/cache'
 import * as z from 'zod'
+export async function updateGlobalData() {
+  try {
+    // 1. Количество пользователей, участвующих в открытых ставках
+    const usersPlay = await prisma.betParticipant.count({
+      where: {
+        bet: {
+          status: 'OPEN', // Предполагаем, что статус открытой ставки — 'OPEN'
+        },
+      },
+    });
+
+    // 2. Общая сумма ставок в открытых ставках
+    const pointsBetResult = await prisma.bet.aggregate({
+      _sum: {
+        totalBetAmount: true,
+      },
+      where: {
+        status: 'OPEN', // Только открытые ставки
+      },
+    });
+    const pointsBet = pointsBetResult._sum.totalBetAmount || 0;
+
+    // 3. Количество зарегистрированных пользователей
+    const users = await prisma.user.count();
+
+    // 4. Начальные очки (количество пользователей * 1000)
+    const pointsStart = users * 1000;
+
+    // 5. Сумма всех очков пользователей
+    const pointsAllUsersResult = await prisma.user.aggregate({
+      _sum: {
+        points: true,
+      },
+    });
+    const pointsAllUsers = pointsAllUsersResult._sum.points || 0;
+
+    // Обновляем или создаем запись в GlobalData
+    await prisma.globalData.upsert({
+      where: { id: 1 },
+      update: {
+        usersPlay,
+        pointsBet,
+        users,
+        pointsStart,
+        pointsAllUsers,
+      },
+      create: {
+        id: 1,
+        usersPlay,
+        pointsBet,
+        users,
+        pointsStart,
+        pointsAllUsers,
+      },
+    });
+
+    console.log('GlobalData updated successfully');
+  } catch (error) {
+    console.error('Error updating GlobalData:', error);
+    throw new Error('Failed to update GlobalData');
+  }
+}
 
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
   try {
@@ -55,6 +117,8 @@ export async function registerUser(body: Prisma.UserCreateInput) {
         password: hashSync(body.password, 10),
       },
     });
+
+    await updateGlobalData();
 
   } catch (err) {
     console.log('Error [CREATE_USER]', err);
@@ -127,7 +191,7 @@ export async function clientCreateBet(formData: any) {
     });
 
     console.log("User points updated:", user.points - totalBetAmount); // Логируем обновленный баланс
-
+    await updateGlobalData();
     // Ревалидируем путь (если используем Next.js)
     revalidatePath('/');
 
@@ -240,6 +304,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     revalidatePath('/'); // Ревалидируем путь (если используете Next.js)
     console.log(`Пользователь ${userId} сделал ставку ${amount} на игрока ${player}`);
+    await updateGlobalData();
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error in placeBet:', {
@@ -254,14 +319,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
-
-
-
-
-
-
-
-
 
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
@@ -328,6 +385,8 @@ export async function closeBet(betId: number, winnerId: number) {
       }
     }
 
+    await updateGlobalData();
+
     // Ревалидируем путь (если используем Next.js)
     revalidatePath('/');
 
@@ -341,6 +400,13 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
+
+
+
+
+
+
 
 
 
