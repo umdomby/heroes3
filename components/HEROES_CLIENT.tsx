@@ -39,6 +39,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>({});
     const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
     const [maxAllowedBet, setMaxAllowedBet] = useState<{ [key: number]: number | null }>({});
+    const [hasPlacedBet, setHasPlacedBet] = useState<{ [key: number]: boolean }>({}); // Новое состояние
 
     useEffect(() => {
         let source = new EventSource('/api/sse');
@@ -72,10 +73,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                 throw new Error("Пользователь не найден");
             }
 
-            // Используем maxBetPlayer1 и maxBetPlayer2 из базы данных
             const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
 
-            // Проверка, что ставка не превышает максимально допустимую
             if (amount > maxAllowedBet) {
                 throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
             }
@@ -89,6 +88,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
             mutate();
             setPlaceBetError(null);
+            setHasPlacedBet((prev) => ({
+                ...prev,
+                [bet.id]: true, // Устанавливаем флаг, что ставка сделана
+            }));
         } catch (err) {
             if (err instanceof Error) {
                 setPlaceBetError(err.message);
@@ -131,7 +134,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
         const player = formData.get('player') as PlayerChoice;
 
-        // Используем maxBetPlayer1 и maxBetPlayer2 из базы данных
         const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
 
         if (amount > maxAllowedBet) {
@@ -363,7 +365,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                         [bet.id]: maxAllowedBetValue,
                                                     }));
 
-                                                    // Проверка, что ставка не превышает максимально допустимую
                                                     if (value > maxAllowedBetValue) {
                                                         setPlaceBetErrors((prev) => ({
                                                             ...prev,
@@ -402,6 +403,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                     }));
                                                 }
                                             }
+                                            setHasPlacedBet((prev) => ({
+                                                ...prev,
+                                                [bet.id]: false, // Сбрасываем флаг при изменении суммы
+                                            }));
                                         }}
                                     />
                                     <div className="flex gap-2 mt-2">
@@ -452,6 +457,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                             [bet.id]: true,
                                                         }));
                                                     }
+                                                    setHasPlacedBet((prev) => ({
+                                                        ...prev,
+                                                        [bet.id]: false, // Сбрасываем флаг при изменении выбора игрока
+                                                    }));
                                                 }}
                                             />
                                             <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>
@@ -503,12 +512,16 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                             [bet.id]: true,
                                                         }));
                                                     }
+                                                    setHasPlacedBet((prev) => ({
+                                                        ...prev,
+                                                        [bet.id]: false, // Сбрасываем флаг при изменении выбора игрока
+                                                    }));
                                                 }}
                                             />
                                             <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>
                                         </label>
                                     </div>
-                                    {maxAllowedBet[bet.id] !== null && (
+                                    {maxAllowedBet[bet.id] !== null && !hasPlacedBet[bet.id] && (
                                         <p className="mt-2 text-blue-600">
                                             Максимально допустимая ставка: {maxAllowedBet[bet.id]?.toFixed(2)} баллов
                                         </p>
@@ -529,7 +542,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                 {placeBetErrors[bet.id] && <p className="text-red-500">{placeBetErrors[bet.id]}</p>}
                             </div>
                         )}
-
 
                         {bet.status === 'OPEN' && bet.creatorId === user?.id && (
                             <div className="mt-4">

@@ -181,18 +181,16 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Рассчитываем потенциальную прибыль
     const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
 
-    // Убираем проверку на 30% от суммы ставок на другого игрока
-
-    // Рассчитываем максимальную ставку с учетом ограничения на прибыль
-    const maxBetForProfitPlayer1 = (totalPlayer2 * 0.3) / (oddsPlayer1 - 1);
-    const maxBetForProfitPlayer2 = (totalPlayer1 * 0.3) / (oddsPlayer2 - 1);
-
     // Максимальная ставка, которую может сделать пользователь
     const userMaxBet = user.points;
 
+    // Рассчитываем максимальную ставку на основе суммы ставок на другого игрока
+    const maxBetForPlayer1 = totalPlayer2 * 0.3; // 30% от суммы ставок на Player2
+    const maxBetForPlayer2 = totalPlayer1 * 0.3; // 30% от суммы ставок на Player1
+
     // Возвращаем минимальное значение из всех ограничений для каждого игрока
-    const maxAllowedBetPlayer1 = Math.round(Math.min(maxBetForProfitPlayer1, userMaxBet));
-    const maxAllowedBetPlayer2 = Math.round(Math.min(maxBetForProfitPlayer2, userMaxBet));
+    const maxAllowedBetPlayer1 = Math.min(maxBetForPlayer1, userMaxBet);
+    const maxAllowedBetPlayer2 = Math.min(maxBetForPlayer2, userMaxBet);
 
     // Проверка, что ставка не превышает максимально допустимую
     if ((player === PlayerChoice.PLAYER1 && amount > maxAllowedBetPlayer1) ||
@@ -256,6 +254,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
+
 
 
 

@@ -69,6 +69,17 @@ model BetParticipant {
   isWinner  Boolean      @default(false)
   createdAt DateTime     @default(now())
 }
+model GlobalData {
+  id          Int      @id @default(autoincrement())
+  betId       Int
+  users       Int
+  usersPlay   Int
+  usersBet    Int
+  pointsStart Int      @default(4000)
+  pointsBet   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 
 model Player {
   id          Int    @id @default(autoincrement())
