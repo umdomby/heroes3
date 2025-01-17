@@ -85,6 +85,9 @@ export async function clientCreateBet(formData: any) {
 
     // Проверяем, что у пользователя достаточно баллов
     const totalBetAmount = formData.initBetPlayer1 + formData.initBetPlayer2;
+
+    const maxBetPlayer1 = formData.initBetPlayer1/3;
+    const maxBetPlayer2 = formData.initBetPlayer2/3;
     if (user.points < totalBetAmount) {
       throw new Error("Недостаточно баллов для создания ставки");
     }
@@ -94,7 +97,8 @@ export async function clientCreateBet(formData: any) {
       data: {
         status: 'OPEN', // Устанавливаем статус ставки как "открытая"
         totalBetAmount: totalBetAmount, // Общая сумма ставок
-        maxBetAmount: totalBetAmount, // Максимальная сумма ставок
+        maxBetPlayer1: maxBetPlayer1, // Максимальная сумма ставок на игрока 1
+        maxBetPlayer2: maxBetPlayer2, // Максимальная сумма ставок на игрока 2
         currentOdds1: formData.currentOdds1, // Инициализируем текущие коэффициенты
         currentOdds2: formData.currentOdds2, // Инициализируем текущие коэффициенты
         player1Id: formData.player1Id,
@@ -136,7 +140,6 @@ export async function clientCreateBet(formData: any) {
   }
 }
 
-
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
     const { betId, userId, amount, player } = formData;
@@ -144,7 +147,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Проверяем, что ставка существует и доступна
     const bet = await prisma.bet.findUnique({
       where: { id: betId },
-      include: { participants: true }, // Включаем участников для расчета коэффициентов
+      include: { participants: true },
     });
 
     if (!bet || bet.status !== 'OPEN') {
@@ -175,13 +178,29 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const oddsPlayer1 = totalPlayer1 === 0 ? 1 : total / totalPlayer1;
     const oddsPlayer2 = totalPlayer2 === 0 ? 1 : total / totalPlayer2;
 
-    // Проверка коэффициента перед ставкой
-    if ((player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.05) ||
-        (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.05)) {
-      throw new Error('Коэффициент слишком низкий для ставки');
+    // Рассчитываем потенциальную прибыль
+    const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
+
+    // Убираем проверку на 30% от суммы ставок на другого игрока
+
+    // Рассчитываем максимальную ставку с учетом ограничения на прибыль
+    const maxBetForProfitPlayer1 = (totalPlayer2 * 0.3) / (oddsPlayer1 - 1);
+    const maxBetForProfitPlayer2 = (totalPlayer1 * 0.3) / (oddsPlayer2 - 1);
+
+    // Максимальная ставка, которую может сделать пользователь
+    const userMaxBet = user.points;
+
+    // Возвращаем минимальное значение из всех ограничений для каждого игрока
+    const maxAllowedBetPlayer1 = Math.round(Math.min(maxBetForProfitPlayer1, userMaxBet));
+    const maxAllowedBetPlayer2 = Math.round(Math.min(maxBetForProfitPlayer2, userMaxBet));
+
+    // Проверка, что ставка не превышает максимально допустимую
+    if ((player === PlayerChoice.PLAYER1 && amount > maxAllowedBetPlayer1) ||
+        (player === PlayerChoice.PLAYER2 && amount > maxAllowedBetPlayer2)) {
+      throw new Error(`Максимально допустимая ставка: ${player === PlayerChoice.PLAYER1 ? maxAllowedBetPlayer1.toFixed(2) : maxAllowedBetPlayer2.toFixed(2)}`);
     }
 
-    // Проверка, не приведет ли ставка к снижению коэффициента до 1.05 или ниже
+    // Обновляем суммы ставок и коэффициенты с учетом новой ставки
     const updatedTotalPlayer1 = player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1;
     const updatedTotalPlayer2 = player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2;
     const updatedTotal = updatedTotalPlayer1 + updatedTotalPlayer2;
@@ -189,89 +208,59 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const updatedOddsPlayer1 = updatedTotalPlayer1 === 0 ? 1 : updatedTotal / updatedTotalPlayer1;
     const updatedOddsPlayer2 = updatedTotalPlayer2 === 0 ? 1 : updatedTotal / updatedTotalPlayer2;
 
-    if ((player === PlayerChoice.PLAYER1 && updatedOddsPlayer1 <= 1.05) ||
-        (player === PlayerChoice.PLAYER2 && updatedOddsPlayer2 <= 1.05)) {
-      throw new Error('Ставка приведет к снижению коэффициента до 1.05 или ниже');
-    }
-
-    // Рассчитываем потенциальную прибыль
-    const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
-
-    // Проверка, чтобы прибыль не превышала 30% от суммы ставок на другого игрока
-    if (player === PlayerChoice.PLAYER1 && potentialProfit > totalPlayer2 * 0.3) {
-      throw new Error('Прибыль от ставки превышает 30% от суммы ставок на другого игрока');
-    }
-
-    if (player === PlayerChoice.PLAYER2 && potentialProfit > totalPlayer1 * 0.3) {
-      throw new Error('Прибыль от ставки превышает 30% от суммы ставок на другого игрока');
-    }
-
-    // Рассчитываем максимальную ставку с учетом ограничения на прибыль
-    const maxBetForProfit = player === PlayerChoice.PLAYER1
-        ? (totalPlayer2 * 0.3) / oddsPlayer1 // Максимум 30% от суммы ставок на Player 2, деленные на коэффициент
-        : (totalPlayer1 * 0.3) / oddsPlayer2; // Максимум 30% от суммы ставок на Player 1, деленные на коэффициент
-
-    // Максимальная ставка, чтобы коэффициент не опустился ниже 1.05
-    const maxBetForOdds = player === PlayerChoice.PLAYER1
-        ? (total / 1.05) - totalPlayer1
-        : (total / 1.05) - totalPlayer2;
-
-    // Максимальная ставка, чтобы не превысить сумму другого игрока на 30%
-    const maxBetForBalance = player === PlayerChoice.PLAYER1
-        ? totalPlayer2 * 1.3
-        : totalPlayer1 * 1.3;
-
-    // Максимальная ставка, которую может сделать пользователь
-    const userMaxBet = user.points;
-
-    // Возвращаем минимальное значение из всех ограничений
-    const maxAllowedBet = Math.min(maxBetForOdds, maxBetForBalance, maxBetForProfit, userMaxBet);
-
-    // Проверка, что ставка не превышает максимально допустимую
-    if (amount > maxAllowedBet) {
-      throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
-    }
-
-    // Создаем участника ставки
-    await prisma.betParticipant.create({
-      data: {
-        betId,
-        userId,
-        amount,
-        player,
-        odds: player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2,
-        profit: potentialProfit,
-      },
-    });
-
-    // Обновляем баланс пользователя
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        points: user.points - amount,
-      },
-    });
-
-    // Обновляем коэффициенты и общую сумму ставок
-    await prisma.bet.update({
-      where: { id: betId },
-      data: {
-        currentOdds1: updatedOddsPlayer1,
-        currentOdds2: updatedOddsPlayer2,
-        totalBetPlayer1: updatedTotalPlayer1,
-        totalBetPlayer2: updatedTotalPlayer2,
-      },
-    });
+    // Используем транзакцию для атомарности
+    await prisma.$transaction([
+      prisma.betParticipant.create({
+        data: {
+          betId,
+          userId,
+          amount,
+          player,
+          odds: player === PlayerChoice.PLAYER1 ? updatedOddsPlayer1 : updatedOddsPlayer2,
+          profit: potentialProfit,
+        },
+      }),
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          points: user.points - amount,
+        },
+      }),
+      prisma.bet.update({
+        where: { id: betId },
+        data: {
+          currentOdds1: updatedOddsPlayer1,
+          currentOdds2: updatedOddsPlayer2,
+          totalBetPlayer1: updatedTotalPlayer1,
+          totalBetPlayer2: updatedTotalPlayer2,
+          totalBetAmount: updatedTotal,
+          maxBetPlayer1: maxAllowedBetPlayer1, // Обновляем максимальную ставку для Player1
+          maxBetPlayer2: maxAllowedBetPlayer2, // Обновляем максимальную ставку для Player2
+        },
+      }),
+    ]);
 
     revalidatePath('/'); // Ревалидируем путь (если используете Next.js)
     console.log(`Пользователь ${userId} сделал ставку ${amount} на игрока ${player}`);
   } catch (error) {
     if (error instanceof Error) {
-      console.log(error.stack);
+      console.error('Error in placeBet:', {
+        message: error.message,
+        stack: error.stack,
+        betId: formData.betId,
+        userId: formData.userId,
+        amount: formData.amount,
+        player: formData.player,
+      });
     }
     throw new Error('Failed to create bet. Please try again.');
   }
 }
+
+
+
+
+
 
 
 

@@ -38,7 +38,8 @@ model Bet {
   currentOdds2    Float // Текущий коэффициент для игрока 2
   totalBetPlayer1 Int // Сумма ставок на игрока 1
   totalBetPlayer2 Int // Сумма ставок на игрока 2
-  maxBetAmount    Int              @default(10)
+  maxBetPlayer1   Int // Максимальная сумма ставок на игрока 1
+  maxBetPlayer2   Int // Максимальная сумма ставок на игрока 2
   totalBetAmount  Int              @default(0)
   creator         User             @relation("BetsCreated", fields: [creatorId], references: [id])
   creatorId       Int
