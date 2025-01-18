@@ -5,6 +5,7 @@ import {PlayerChoice, Prisma} from '@prisma/client';
 import {hashSync} from 'bcrypt';
 import {revalidatePath} from 'next/cache'
 import * as z from 'zod'
+
 export async function updateGlobalData() {
   try {
     // 1. Количество пользователей, участвующих в открытых ставках
@@ -126,6 +127,8 @@ export async function registerUser(body: Prisma.UserCreateInput) {
   }
 }
 
+
+
 export async function clientCreateBet(formData: any) {
   const session = await getUserSession();
   if (!session) {
@@ -147,11 +150,10 @@ export async function clientCreateBet(formData: any) {
       throw new Error("Пользователь не найден");
     }
 
-    // Проверяем, что у пользователя достаточно баллов
+    // Проверяем, что сумма начальных ставок не превышает 100 баллов
     const totalBetAmount = formData.initBetPlayer1 + formData.initBetPlayer2;
-
-    if (user.points < totalBetAmount) {
-      throw new Error("Недостаточно баллов для создания ставки");
+    if (totalBetAmount > 100) {
+      throw new Error("Сумма начальных ставок не должна превышать 100 баллов");
     }
 
     // Рассчитываем максимальные ставки на основе начальных значений
@@ -162,7 +164,7 @@ export async function clientCreateBet(formData: any) {
     const newBet = await prisma.bet.create({
       data: {
         status: 'OPEN', // Устанавливаем статус ставки как "открытая"
-        totalBetAmount: totalBetAmount, // Общая сумма ставок
+        totalBetAmount: totalBetAmount, // Общая сумма начальных ставок
         maxBetPlayer1: maxBetPlayer1, // Максимальная сумма ставок на игрока 1
         maxBetPlayer2: maxBetPlayer2, // Максимальная сумма ставок на игрока 2
         currentOdds1: 1, // Инициализируем текущие коэффициенты (по умолчанию 1)
@@ -182,17 +184,18 @@ export async function clientCreateBet(formData: any) {
 
     console.log("New bet created:", newBet); // Логируем созданную ставку
 
-    // Списание баллов у пользователя
-    await prisma.user.update({
-      where: { id: Number(session.id) },
-      data: {
-        points: {
-          decrement: totalBetAmount,
-        },
-      },
-    });
+    // Баллы не списываются с баланса создателя
+    // Убираем этот блок кода:
+    // await prisma.user.update({
+    //   where: { id: Number(session.id) },
+    //   data: {
+    //     points: {
+    //       decrement: totalBetAmount,
+    //     },
+    //   },
+    // });
 
-    console.log("User points updated:", user.points - totalBetAmount); // Логируем обновленный баланс
+    console.log("User points remain unchanged:", user.points); // Логируем неизмененный баланс
     await updateGlobalData();
     // Ревалидируем путь (если используем Next.js)
     revalidatePath('/');
@@ -205,6 +208,7 @@ export async function clientCreateBet(formData: any) {
     throw new Error('Failed to create bet. Please try again.');
   }
 }
+
 
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
@@ -340,10 +344,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
-
-
-
-
 
 export async function closeBet(betId: number, winnerId: number) {
   'use server';

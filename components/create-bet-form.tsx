@@ -20,8 +20,8 @@ import { clientCreateBet } from "@/app/actions";
 const createBetSchema = z.object({
     player1Id: z.coerce.number().int(), // Только целые числа
     player2Id: z.coerce.number().int(), // Только целые числа
-    initBetPlayer1: z.number().int().min(50, { message: 'Минимальная ставка на игрока 1: 50 баллов' }), // Только целые числа
-    initBetPlayer2: z.number().int().min(50, { message: 'Минимальная ставка на игрока 2: 50 баллов' }), // Только целые числа
+    initBetPlayer1: z.number().int().min(10, { message: 'Минимальная ставка на игрока 1: 10 баллов' }), // Только целые числа
+    initBetPlayer2: z.number().int().min(10, { message: 'Минимальная ставка на игрока 2: 10 баллов' }), // Только целые числа
     categoryId: z.coerce.number().int(), // Только целые числа
     productId: z.coerce.number().int(), // Только целые числа
     productItemId: z.coerce.number().int(), // Только целые числа
@@ -56,15 +56,15 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
         const { initBetPlayer1, initBetPlayer2 } = values;
 
         // Проверка на минимальную сумму ставки
-        if (initBetPlayer1 < 50 || initBetPlayer2 < 50) {
-            setCreateBetError('Минимальная ставка на каждого игрока: 50 баллов');
+        if (initBetPlayer1 < 10 || initBetPlayer2 < 10) {
+            setCreateBetError('Минимальная ставка на каждого игрока: 10 баллов');
             return;
         }
 
-        // Проверка баланса пользователя
+        // Проверка на максимальную сумму ставки (100 баллов)
         const totalBetAmount = initBetPlayer1 + initBetPlayer2;
-        if (user.points < totalBetAmount) {
-            setCreateBetError('Недостаточно баллов для создания ставки');
+        if (totalBetAmount > 100) {
+            setCreateBetError('Максимальная сумма ставок на обоих игроков: 100 баллов');
             return;
         }
 
@@ -98,6 +98,9 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
     return (
         <div>
             <div>Ваши баллы: {user?.points}</div>
+            <div style={{ color: 'blue', marginBottom: '10px' }}>
+                Вы можете распределить только 100 баллов между двумя игроками. Баллы не списываются с вашего баланса.
+            </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     {/* Поле выбора Player 1 */}
