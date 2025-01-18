@@ -397,13 +397,12 @@ export async function closeBet(betId: number, winnerId: number) {
     // Обновляем балансы участников
     for (const participant of bet.participants) {
       if (participant.player === winningPlayer) {
-        // Начисляем выигрыш
-        const winAmount = participant.amount * participant.odds;
+        // Начисляем выигрыш на основе поля profit
         await prisma.user.update({
           where: { id: participant.userId },
           data: {
             points: {
-              increment: winAmount,
+              increment: participant.profit, // Используем profit для начисления
             },
           },
         });

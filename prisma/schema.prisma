@@ -19,7 +19,7 @@ model User {
   password    String
   role        UserRole         @default(USER)
   img         String?
-  points      Int              @default(1000)
+  points      Int              @default(1000) // баллы пользователя
   betsCreated Bet[]            @relation("BetsCreated")
   betsPlaced  BetParticipant[]
   createdAt   DateTime         @default(now())
@@ -63,7 +63,7 @@ model BetParticipant {
   userId    Int
   user      User         @relation(fields: [userId], references: [id])
   amount    Int
-  odds      Float
+  odds      Float // Коэффициент ставки
   profit    Int
   player    PlayerChoice
   isWinner  Boolean      @default(false)
