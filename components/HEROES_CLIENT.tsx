@@ -35,7 +35,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     const { data: bets, error, isLoading, mutate } = useSWR<Bet[]>('/api/get-bets', fetcher);
     const { user: userUp, isLoading: isLoadingUser, isError: isErrorUser, mutate: mutateUser } = useUser(user ? user.id : null);
 
-    const [placeBetError, setPlaceBetError] = useState<string | null>(null);
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
     const [selectedWinner, setSelectedWinner] = useState<number | null>(null);
     const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: number | null }>({});
@@ -95,16 +94,25 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             });
 
             mutate();
-            setPlaceBetError(null);
+            setPlaceBetErrors((prev) => ({
+                ...prev,
+                [bet.id]: null, // Очищаем ошибку при успешной ставке
+            }));
             setHasPlacedBet((prev) => ({
                 ...prev,
                 [bet.id]: true, // Устанавливаем флаг, что ставка сделана
             }));
         } catch (err) {
             if (err instanceof Error) {
-                setPlaceBetError(err.message);
+                setPlaceBetErrors((prev) => ({
+                    ...prev,
+                    [bet.id]: err.message, // Устанавливаем ошибку для конкретной ставки
+                }));
             } else {
-                setPlaceBetError('Неизвестная ошибка');
+                setPlaceBetErrors((prev) => ({
+                    ...prev,
+                    [bet.id]: 'Неизвестная ошибка', // Устанавливаем общую ошибку
+                }));
             }
             console.error('Error placing bet:', err);
         }
