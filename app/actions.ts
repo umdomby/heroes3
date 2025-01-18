@@ -127,7 +127,11 @@ export async function registerUser(body: Prisma.UserCreateInput) {
   }
 }
 
-
+function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { maxBetPlayer1: number, maxBetPlayer2: number } {
+  const maxBetPlayer1 = parseFloat((initBetPlayer2 * 1.00).toFixed(2)); // 100% от суммы ставок на Player2
+  const maxBetPlayer2 = parseFloat((initBetPlayer1 * 1.00).toFixed(2)); // 100% от суммы ставок на Player1
+  return { maxBetPlayer1, maxBetPlayer2 };
+}
 
 export async function clientCreateBet(formData: any) {
   const session = await getUserSession();
@@ -157,8 +161,7 @@ export async function clientCreateBet(formData: any) {
     }
 
     // Рассчитываем максимальные ставки на основе начальных значений
-    const maxBetPlayer1 = parseFloat((formData.initBetPlayer2 * 0.3).toFixed(2)); // 30% от суммы ставок на Player2
-    const maxBetPlayer2 = parseFloat((formData.initBetPlayer1 * 0.3).toFixed(2)); // 30% от суммы ставок на Player1
+    const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(formData.initBetPlayer1, formData.initBetPlayer2);
 
     // Создаем ставку в базе данных
     const newBet = await prisma.bet.create({
@@ -184,17 +187,6 @@ export async function clientCreateBet(formData: any) {
 
     console.log("New bet created:", newBet); // Логируем созданную ставку
 
-    // Баллы не списываются с баланса создателя
-    // Убираем этот блок кода:
-    // await prisma.user.update({
-    //   where: { id: Number(session.id) },
-    //   data: {
-    //     points: {
-    //       decrement: totalBetAmount,
-    //     },
-    //   },
-    // });
-
     console.log("User points remain unchanged:", user.points); // Логируем неизмененный баланс
     await updateGlobalData();
     // Ревалидируем путь (если используем Next.js)
@@ -208,7 +200,6 @@ export async function clientCreateBet(formData: any) {
     throw new Error('Failed to create bet. Please try again.');
   }
 }
-
 
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
@@ -255,15 +246,12 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const userMaxBet = user.points;
 
     // Рассчитываем максимальные ставки на основе суммы ставок на другого игрока
-    const maxBetForPlayer = {
-      [PlayerChoice.PLAYER1]: parseFloat((totalPlayer2 * 0.3).toFixed(2)), // 30% от суммы ставок на Player2
-      [PlayerChoice.PLAYER2]: parseFloat((totalPlayer1 * 0.3).toFixed(2)), // 30% от суммы ставок на Player1
-    };
+    const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalPlayer1, totalPlayer2);
 
     // Возвращаем минимальное значение из всех ограничений для каждого игрока
     const maxAllowedBet = {
-      [PlayerChoice.PLAYER1]: Math.min(maxBetForPlayer[PlayerChoice.PLAYER1], userMaxBet),
-      [PlayerChoice.PLAYER2]: Math.min(maxBetForPlayer[PlayerChoice.PLAYER2], userMaxBet),
+      [PlayerChoice.PLAYER1]: Math.min(maxBetPlayer1, userMaxBet),
+      [PlayerChoice.PLAYER2]: Math.min(maxBetPlayer2, userMaxBet),
     };
 
     // Проверка, что ставка не превышает максимально допустимую
@@ -285,14 +273,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     };
 
     // Пересчитываем максимальные ставки на основе обновленных сумм
-    const updatedMaxBetForPlayer = {
-      [PlayerChoice.PLAYER1]: parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER2] * 0.3).toFixed(2)),
-      [PlayerChoice.PLAYER2]: parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER1] * 0.3).toFixed(2)),
-    };
+    const { maxBetPlayer1: updatedMaxBetPlayer1, maxBetPlayer2: updatedMaxBetPlayer2 } = calculateMaxBets(updatedTotalPlayer[PlayerChoice.PLAYER1], updatedTotalPlayer[PlayerChoice.PLAYER2]);
 
     const updatedMaxAllowedBet = {
-      [PlayerChoice.PLAYER1]: Math.min(updatedMaxBetForPlayer[PlayerChoice.PLAYER1], userMaxBet),
-      [PlayerChoice.PLAYER2]: Math.min(updatedMaxBetForPlayer[PlayerChoice.PLAYER2], userMaxBet),
+      [PlayerChoice.PLAYER1]: Math.min(updatedMaxBetPlayer1, userMaxBet),
+      [PlayerChoice.PLAYER2]: Math.min(updatedMaxBetPlayer2, userMaxBet),
     };
 
     // Используем транзакцию для атомарности
@@ -344,6 +329,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
+
 
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
