@@ -150,6 +150,49 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
         const player = formData.get('player') as PlayerChoice;
 
+        // Проверка текущих коэффициентов
+        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.currentOdds1 : bet.currentOdds2;
+        if (currentOdds <= 1.01) {
+            setPlaceBetErrors((prev) => ({
+                ...prev,
+                [bet.id]: 'Ставка невозможна: текущий коэффициент уже равен или ниже 0.01',
+            }));
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
+            }));
+            return;
+        }
+
+        // Проверка будущих коэффициентов
+        const totalBetPlayer1 = bet.participants
+            .filter((p) => p.player === PlayerChoice.PLAYER1)
+            .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1);
+
+        const totalBetPlayer2 = bet.participants
+            .filter((p) => p.player === PlayerChoice.PLAYER2)
+            .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2);
+
+        const updatedTotalPlayer1 = player === PlayerChoice.PLAYER1 ? totalBetPlayer1 + amount : totalBetPlayer1;
+        const updatedTotalPlayer2 = player === PlayerChoice.PLAYER2 ? totalBetPlayer2 + amount : totalBetPlayer2;
+
+        const updatedTotal = updatedTotalPlayer1 + updatedTotalPlayer2;
+
+        const updatedOddsPlayer1 = updatedTotalPlayer1 === 0 ? 1 : updatedTotal / updatedTotalPlayer1;
+        const updatedOddsPlayer2 = updatedTotalPlayer2 === 0 ? 1 : updatedTotal / updatedTotalPlayer2;
+
+        if (updatedOddsPlayer1 <= 0.01 || updatedOddsPlayer2 <= 1.01) {
+            setPlaceBetErrors((prev) => ({
+                ...prev,
+                [bet.id]: 'Ставка невозможна: коэффициент станет 0.01 или ниже после этой ставки',
+            }));
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
+            }));
+            return;
+        }
+
         const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
 
         if (amount > maxAllowedBet) {
@@ -582,6 +625,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                 {placeBetErrors[bet.id] && <p className="text-red-500">{placeBetErrors[bet.id]}</p>}
                             </div>
                         )}
+
 
                         {bet.status === 'OPEN' && bet.creatorId === user?.id && (
                             <div className="mt-4">

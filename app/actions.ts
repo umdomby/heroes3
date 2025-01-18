@@ -239,6 +239,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const oddsPlayer1 = totalPlayer1 === 0 ? 1 : total / totalPlayer1;
     const oddsPlayer2 = totalPlayer2 === 0 ? 1 : total / totalPlayer2;
 
+    // Проверка текущих коэффициентов
+    if (oddsPlayer1 <= 1.01 || oddsPlayer2 <= 1.01) {
+      throw new Error('Ставка невозможна: текущий коэффициент уже равен или ниже 0.01');
+    }
+
     // Рассчитываем потенциальную прибыль
     const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
 
@@ -271,6 +276,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       [PlayerChoice.PLAYER1]: updatedTotalPlayer[PlayerChoice.PLAYER1] === 0 ? 1 : updatedTotal / updatedTotalPlayer[PlayerChoice.PLAYER1],
       [PlayerChoice.PLAYER2]: updatedTotalPlayer[PlayerChoice.PLAYER2] === 0 ? 1 : updatedTotal / updatedTotalPlayer[PlayerChoice.PLAYER2],
     };
+
+    // Проверка будущих коэффициентов
+    if (updatedOdds[PlayerChoice.PLAYER1] <= 1.01 || updatedOdds[PlayerChoice.PLAYER2] <= 1.01) {
+      throw new Error('Ставка невозможна: коэффициент станет 0.01 или ниже после этой ставки');
+    }
 
     // Пересчитываем максимальные ставки на основе обновленных сумм
     const { maxBetPlayer1: updatedMaxBetPlayer1, maxBetPlayer2: updatedMaxBetPlayer2 } = calculateMaxBets(updatedTotalPlayer[PlayerChoice.PLAYER1], updatedTotalPlayer[PlayerChoice.PLAYER2]);
@@ -329,6 +339,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
+
 
 
 export async function closeBet(betId: number, winnerId: number) {
