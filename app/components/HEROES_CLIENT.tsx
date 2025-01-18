@@ -7,7 +7,6 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { placeBet, closeBet } from '@/app/actions';
 import { unstable_batchedUpdates } from 'react-dom';
-import { useUser } from '@/hooks/useUser';
 
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
@@ -33,8 +32,6 @@ const playerColors = {
 export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     const { data: session } = useSession();
     const { data: bets, error, isLoading, mutate } = useSWR<Bet[]>('/api/get-bets', fetcher);
-    const { user: userUp, isLoading: isLoadingUser, isError: isErrorUser, mutate: mutateUser } = useUser(user ? user.id : null);
-
     const [placeBetError, setPlaceBetError] = useState<string | null>(null);
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
     const [selectedWinner, setSelectedWinner] = useState<number | null>(null);
@@ -52,8 +49,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
             unstable_batchedUpdates(() => {
                 if (data.type === 'create' || data.type === 'update' || data.type === 'delete') {
-                    mutate(); // Обновляем данные ставок
-                    mutateUser(); // Обновляем данные пользователя
+                    mutate();
                 }
             });
         };
@@ -69,11 +65,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
         return () => {
             source.close();
         };
-    }, [mutate, mutateUser]);
-
-    // Условные операторы перенесены после всех хуков
-    if (isLoadingUser) return <div>Загрузка данных пользователя...</div>;
-    if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
+    }, [mutate]);
 
     const handlePlaceBet = async (bet: Bet, amount: number, player: PlayerChoice) => {
         try {
@@ -176,7 +168,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
             await closeBet(betId, selectedWinner);
             mutate();
-            mutateUser(); // Обновляем данные пользователя
             setSelectedWinner(null);
             setCloseBetError(null);
         } catch (error) {
@@ -207,7 +198,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
     return (
         <div>
-            <p>Ваши баллы: {userUp?.points}</p>
+            <p>Ваши баллы: {user?.points}</p>
 
             {/* Отображение всех ставок */}
             {bets.map((bet: Bet) => {
@@ -248,20 +239,14 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
                             return (
                                 <h3 className="text-lg font-semibold">
-                                    <span
-                                        className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> vs{' '}
-                                    <span
-                                        className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> |{' '}
+                                    <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> vs{' '}
+                                    <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> |{' '}
                                     Коэффициенты:{' '}
-                                    <span
-                                        className={playerColors[PlayerChoice.PLAYER1]}>{currentOdds1.toFixed(2)}</span> -{' '}
-                                    <span
-                                        className={playerColors[PlayerChoice.PLAYER2]}>{currentOdds2.toFixed(2)}</span> |{' '}
-                                    Ставки на <span
-                                    className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
+                                    <span className={playerColors[PlayerChoice.PLAYER1]}>{currentOdds1.toFixed(2)}</span> -{' '}
+                                    <span className={playerColors[PlayerChoice.PLAYER2]}>{currentOdds2.toFixed(2)}</span> |{' '}
+                                    Ставки на <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
                                     <span className={playerColors[PlayerChoice.PLAYER1]}>{totalBetPlayer1}</span> |{' '}
-                                    Ставки на <span
-                                    className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>:{' '}
+                                    Ставки на <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>:{' '}
                                     <span className={playerColors[PlayerChoice.PLAYER2]}>{totalBetPlayer2}</span>
                                 </h3>
                             );
@@ -271,15 +256,13 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                         {bet.status === 'OPEN' && (
                             <div className="mt-4">
                                 <p>
-                                    Максимальная ставка на <span
-                                    className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
+                                    Максимальная ставка на <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
                                     <span className={playerColors[PlayerChoice.PLAYER1]}>
                                         {bet.maxBetPlayer1.toFixed(2)}
                                     </span>
                                 </p>
                                 <p>
-                                    Максимальная ставка на <span
-                                    className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>:{' '}
+                                    Максимальная ставка на <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>:{' '}
                                     <span className={playerColors[PlayerChoice.PLAYER2]}>
                                         {bet.maxBetPlayer2.toFixed(2)}
                                     </span>
@@ -294,15 +277,12 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                 {userBets.map((participant) => (
                                     <div key={participant.id} className="border border-gray-200 p-3 mb-3 rounded-md">
                                         <p>
-                                            Ставка: <strong
-                                            className={playerColors[participant.player]}>{participant.amount}</strong> на{' '}
+                                            Ставка: <strong className={playerColors[participant.player]}>{participant.amount}</strong> на{' '}
                                             <strong className={playerColors[participant.player]}>
                                                 {participant.player === PlayerChoice.PLAYER1 ? bet.player1.name : bet.player2.name}
                                             </strong>{','}
-                                            {' '}Коэффициент: <span
-                                            className={playerColors[participant.player]}>{participant.odds.toFixed(2)}</span>{','}
-                                            {' '}Прибыль: <span
-                                            className={playerColors[participant.player]}>{participant.profit.toFixed(2)}</span>{','}
+                                            {' '}Коэффициент: <span className={playerColors[participant.player]}>{participant.odds.toFixed(2)}</span>{','}
+                                            {' '}Прибыль: <span className={playerColors[participant.player]}>{participant.profit.toFixed(2)}</span>{','}
                                             {' '}{new Date(participant.createdAt).toLocaleString()}
                                         </p>
                                     </div>
@@ -311,17 +291,13 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                 {/* Потенциальная прибыль (или убыток) для каждого исхода */}
                                 <div className="mt-4">
                                     <p>
-                                        Если выиграет <span
-                                        className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>, ваш
-                                        результат:{' '}
+                                        Если выиграет <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>, ваш результат:{' '}
                                         <span className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
                                             {profitIfPlayer1Wins.toFixed(2)} баллов
                                         </span>.
                                     </p>
                                     <p>
-                                        Если выиграет <span
-                                        className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>, ваш
-                                        результат:{' '}
+                                        Если выиграет <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>, ваш результат:{' '}
                                         <span className={profitIfPlayer2Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
                                             {profitIfPlayer2Wins.toFixed(2)} баллов
                                         </span>.

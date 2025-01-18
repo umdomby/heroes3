@@ -1,4 +1,3 @@
-"use server";
 import {Container} from '@/components/container';
 import {prisma} from '@/prisma/prisma-client';
 import {notFound, redirect} from 'next/navigation';
@@ -12,6 +11,11 @@ import {Button} from "@/components/ui";
 import Image from "next/image";
 import {getUserSession} from "@/components/lib/get-user-session";
 import {GlobalData} from "@/components/globalData";
+
+
+export const dynamic = 'force-dynamic'
+
+
 
 
 
