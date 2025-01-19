@@ -12,7 +12,7 @@ import { useUser } from '@/hooks/useUser';
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
 // Константа для минимального допустимого коэффициента
-const MIN_ODDS = 1.60;
+const MIN_ODDS = 1.01;
 
 interface Bet extends PrismaBet {
     player1: Player;
@@ -90,7 +90,22 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
         // Рассчитываем новый коэффициент после добавления ставки
         const newOdds = calculateNewOdds(totalBets, totalBetOnPlayer, amount);
 
-        // Сообщение 2: Проверка, как изменится коэффициент после ставки
+        // Проверка на максимальную допустимую ставку
+        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
+
+        if (amount > maxAllowedBet) {
+            setPlaceBetErrors((prev) => ({
+                ...prev,
+                [bet.id]: `Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`,
+            }));
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
+            }));
+            return;
+        }
+
+        // Проверка, как изменится коэффициент после ставки
         if (newOdds < MIN_ODDS) {
             setOddsErrors((prev) => ({
                 ...prev,
@@ -108,11 +123,16 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             ...prev,
             [bet.id]: null,
         }));
+        setPlaceBetErrors((prev) => ({
+            ...prev,
+            [bet.id]: null,
+        }));
         setIsBetDisabled((prev) => ({
             ...prev,
             [bet.id]: false,
         }));
     };
+
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>, bet: Bet) => {
         const value = parseInt(e.target.value, 10);
@@ -137,12 +157,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
         try {
             if (!user) {
                 throw new Error("Пользователь не найден");
-            }
-
-            const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
-
-            if (amount > maxAllowedBet) {
-                throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
             }
 
             await placeBet({
