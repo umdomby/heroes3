@@ -91,7 +91,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                     {/* Правая колонка: История входов */}
                     <div className="w-full md:w-1/2 p-4 rounded-lg">
                         <Title text="История входов" size="md" className="font-bold mb-4" />
-                        <Title text="Не злоупотребляйте созданием аккаунтов для получения бонусов, хороших ставок!" size="xs" className="font-bold mb-4" />
+                        <Title text="Для получения бонусов не злоупотребляйте созданием аккаунтов :) Хороших ставок!" size="xs" className="font-bold mb-4" />
                         {loginHistory.length > 0 ? (
                             <div className="space-y-4">
                                 {loginHistory.map((entry: any, index: number) => (

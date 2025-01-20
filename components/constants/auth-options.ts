@@ -148,7 +148,7 @@ export const authOptions: AuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async signIn({ user, account, req }: any) { // Используем any для req
+    async signIn({ user, account, req }: any) {
       try {
         if (account?.provider === 'credentials') {
           return true;
@@ -180,6 +180,7 @@ export const authOptions: AuthOptions = {
         console.log('IP-адрес:', ip);
 
         const isVPN = await checkVPN(ip); // Проверяем VPN
+        console.log('Результат проверки VPN:', isVPN); // Логируем результат проверки VPN
 
         const findUser = await prisma.user.findFirst({
           where: {
@@ -197,6 +198,51 @@ export const authOptions: AuthOptions = {
           return true;
         }
 
+        // Если используется VPN, points = 0
+        if (isVPN) {
+          console.log('Используется VPN. Устанавливаем points = 0');
+          const newUser = await prisma.user.create({
+            data: {
+              email: user.email,
+              fullName: user.name || 'User #' + user.id,
+              password: hashSync(user.id.toString(), 10),
+              provider: account?.provider,
+              providerId: account?.providerAccountId,
+              points: 0, // Устанавливаем points = 0, если используется VPN
+              loginHistory: [
+                {
+                  ip,
+                  lastLogin: new Date().toISOString(),
+                  vpn: isVPN,
+                  loginCount: 1,
+                },
+              ],
+            },
+          });
+
+          return true;
+        }
+
+        // Если VPN не используется, проверяем IP в истории входов
+        const allUsers = await prisma.user.findMany();
+
+        // Проверяем, был ли такой IP в истории входов
+        let ipExists = false;
+        for (const user of allUsers) {
+          if (user.loginHistory && Array.isArray(user.loginHistory)) {
+            const hasIP = user.loginHistory.some((entry: any) => entry.ip === ip);
+            if (hasIP) {
+              ipExists = true;
+              break;
+            }
+          }
+        }
+
+        // Если IP уже был в истории входов, points = 0, иначе points = 1000
+        const points = ipExists ? 0 : 1000;
+        console.log('IP уже был в истории входов:', ipExists);
+        console.log('Устанавливаем points:', points);
+
         const newUser = await prisma.user.create({
           data: {
             email: user.email,
@@ -204,6 +250,7 @@ export const authOptions: AuthOptions = {
             password: hashSync(user.id.toString(), 10),
             provider: account?.provider,
             providerId: account?.providerAccountId,
+            points, // Устанавливаем points
             loginHistory: [
               {
                 ip,
@@ -235,7 +282,6 @@ export const authOptions: AuthOptions = {
       if (findUser) {
         token.id = String(findUser.id);
         token.email = findUser.email;
-        token.fullName = findUser.fullName;
         token.role = findUser.role;
       }
 
@@ -251,3 +297,6 @@ export const authOptions: AuthOptions = {
     },
   },
 };
+
+
+
