@@ -34,7 +34,6 @@ const playerColors = {
     [PlayerChoice.PLAYER1]: 'text-blue-400', // Синий для Player1
     [PlayerChoice.PLAYER2]: 'text-red-400',  // Красный для Player2
 };
-
 export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     const { data: session } = useSession();
     const { data: bets, error, isLoading, mutate } = useSWR<Bet[]>('/api/get-bets', fetcher);
@@ -77,18 +76,12 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     if (isLoadingUser) return <div>Загрузка данных пользователя...</div>;
     if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
 
-    const calculateNewOdds = (totalBets: number, totalBetOnPlayer: number, newBetAmount: number) => {
-        const newTotalBets = totalBets + newBetAmount;
-        const newTotalBetOnPlayer = totalBetOnPlayer + newBetAmount;
-        return newTotalBets / newTotalBetOnPlayer;
-    };
-
     const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
         const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2;
         const totalBetOnPlayer = player === PlayerChoice.PLAYER1 ? bet.totalBetPlayer1 : bet.totalBetPlayer2;
 
         // Рассчитываем новый коэффициент после добавления ставки
-        const newOdds = calculateNewOdds(totalBets, totalBetOnPlayer, amount);
+        const newOdds = totalBets / totalBetOnPlayer;
 
         // Проверка на максимальную допустимую ставку
         const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
@@ -132,7 +125,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             [bet.id]: false,
         }));
     };
-
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>, bet: Bet) => {
         const value = parseInt(e.target.value, 10);
@@ -302,35 +294,23 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
                 return (
                     <div key={bet.id} className="border border-gray-300 p-4 mt-4 rounded-lg shadow-sm">
-                        {(() => {
-                            const totalBetPlayer1 = bet.totalBetPlayer1;
-                            const totalBetPlayer2 = bet.totalBetPlayer2;
-
-                            const totalBets = totalBetPlayer1 + totalBetPlayer2;
-
-                            const currentOdds1 = totalBets / totalBetPlayer1;
-                            const currentOdds2 = totalBets / totalBetPlayer2;
-
-                            return (
-                                <h3 className="text-lg font-semibold">
-                                    <span
-                                        className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> vs{' '}
-                                    <span
-                                        className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> |{' '}
-                                    Коэффициенты:{' '}
-                                    <span
-                                        className={playerColors[PlayerChoice.PLAYER1]}>{currentOdds1.toFixed(2)}</span> -{' '}
-                                    <span
-                                        className={playerColors[PlayerChoice.PLAYER2]}>{currentOdds2.toFixed(2)}</span> |{' '}
-                                    Ставки на <span
-                                    className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
-                                    <span className={playerColors[PlayerChoice.PLAYER1]}>{totalBetPlayer1}</span> |{' '}
-                                    Ставки на <span
-                                    className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>:{' '}
-                                    <span className={playerColors[PlayerChoice.PLAYER2]}>{totalBetPlayer2}</span>
-                                </h3>
-                            );
-                        })()}
+                        <h3 className="text-lg font-semibold">
+                            <span
+                                className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> vs{' '}
+                            <span
+                                className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> |{' '}
+                            Коэффициенты:{' '}
+                            <span
+                                className={playerColors[PlayerChoice.PLAYER1]}>{bet.currentOdds1.toFixed(2)}</span> -{' '}
+                            <span
+                                className={playerColors[PlayerChoice.PLAYER2]}>{bet.currentOdds2.toFixed(2)}</span> |{' '}
+                            Ставки на <span
+                            className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
+                            <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.totalBetPlayer1}</span> |{' '}
+                            Ставки на <span
+                            className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>:{' '}
+                            <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.totalBetPlayer2}</span>
+                        </h3>
 
                         {/* Отображение максимально возможной ставки */}
                         {bet.status === 'OPEN' && (

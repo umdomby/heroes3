@@ -128,8 +128,8 @@ export async function registerUser(body: Prisma.UserCreateInput) {
 }
 
 function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { maxBetPlayer1: number, maxBetPlayer2: number } {
-  const maxBetPlayer1 = parseFloat((initBetPlayer2 * 1.00).toFixed(2)); // 100% от суммы ставок на Player2
-  const maxBetPlayer2 = parseFloat((initBetPlayer1 * 1.00).toFixed(2)); // 100% от суммы ставок на Player1
+  const maxBetPlayer1 = parseFloat((initBetPlayer2 * 2.00).toFixed(2)); // 100% от суммы ставок на Player2
+  const maxBetPlayer2 = parseFloat((initBetPlayer1 * 2.00).toFixed(2)); // 100% от суммы ставок на Player1
   return { maxBetPlayer1, maxBetPlayer2 };
 }
 
@@ -180,8 +180,8 @@ export async function clientCreateBet(formData: any) {
         productId: formData.productId,
         productItemId: formData.productItemId,
         creatorId: formData.creatorId,
-        totalBetPlayer1: formData.initBetPlayer1, // Инициализируем сумму ставок на игрока 1
-        totalBetPlayer2: formData.initBetPlayer2, // Инициализируем сумму ставок на игрока 2
+        totalBetPlayer1: 0, // Инициализируем сумму ставок на игрока 1
+        totalBetPlayer2: 0, // Инициализируем сумму ставок на игрока 2
       },
     });
 
@@ -241,11 +241,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Проверка коэффициента для выбранного игрока
     if (
-        (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.02) ||
-        (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.02)
+        (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.2) ||
+        (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.2)
     ) {
       throw new Error(
-          `Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.6`
+          `Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.2`
       );
     }
 
@@ -284,10 +284,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Проверка будущих коэффициентов
     if (
-        (player === PlayerChoice.PLAYER1 && updatedOdds[PlayerChoice.PLAYER1] <= 1.01) ||
-        (player === PlayerChoice.PLAYER2 && updatedOdds[PlayerChoice.PLAYER2] <= 1.01)
+        (player === PlayerChoice.PLAYER1 && updatedOdds[PlayerChoice.PLAYER1] <= 1.1) ||
+        (player === PlayerChoice.PLAYER2 && updatedOdds[PlayerChoice.PLAYER2] <= 1.1)
     ) {
-      throw new Error('Ставка невозможна: коэффициент станет 1.5 или ниже после этой ставки');
+      throw new Error('Ставка невозможна: коэффициент станет 1.1 или ниже после этой ставки');
     }
 
     // Пересчитываем максимальные ставки на основе обновленных сумм
@@ -347,6 +347,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
+
 
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
