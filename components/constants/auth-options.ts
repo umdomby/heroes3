@@ -2,6 +2,7 @@ import { AuthOptions } from 'next-auth';
 import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
+import requestIp from 'request-ip';
 import axios from 'axios';
 
 import { prisma } from '@/prisma/prisma-client';
@@ -34,7 +35,25 @@ async function updateLoginHistory(userId: number, ip: string, isVPN: boolean) {
       throw new Error('Пользователь не найден');
     }
 
-    const loginHistory = user.loginHistory || [];
+    // Используем any для упрощения
+    let loginHistory: any[] = [];
+
+    if (Array.isArray(user.loginHistory)) {
+      // Если loginHistory уже массив, используем его
+      loginHistory = user.loginHistory;
+    } else if (typeof user.loginHistory === 'string') {
+      // Если loginHistory — строка, пытаемся распарсить её как JSON
+      try {
+        const parsedHistory = JSON.parse(user.loginHistory);
+        if (Array.isArray(parsedHistory)) {
+          loginHistory = parsedHistory;
+        }
+      } catch (error) {
+        console.error('Ошибка при парсинге loginHistory:', error);
+      }
+    }
+
+    // Ищем существующую запись
     const existingEntry = loginHistory.find((entry: any) => entry.ip === ip);
 
     if (existingEntry) {
@@ -52,6 +71,7 @@ async function updateLoginHistory(userId: number, ip: string, isVPN: boolean) {
       });
     }
 
+    // Обновляем запись пользователя в базе данных
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -128,7 +148,7 @@ export const authOptions: AuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async signIn({ user, account, req }) {
+    async signIn({ user, account, req }: any) { // Используем any для req
       try {
         if (account?.provider === 'credentials') {
           return true;
