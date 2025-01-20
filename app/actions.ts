@@ -4,7 +4,8 @@ import {getUserSession} from '@/components/lib/get-user-session';
 import {PlayerChoice, Prisma} from '@prisma/client';
 import {hashSync} from 'bcrypt';
 import {revalidatePath} from 'next/cache'
-import * as z from 'zod'
+import requestIp from 'request-ip';
+import axios from 'axios';
 
 export async function updateGlobalData() {
   try {
@@ -68,6 +69,66 @@ export async function updateGlobalData() {
     throw new Error('Failed to update GlobalData');
   }
 }
+async function checkVPN(ip: string): Promise<boolean> {
+  try {
+    const response = await axios.get(`https://v2.api.iphub.info/ip/${ip}`, {
+      headers: {
+        'X-Key': process.env.IPHUB_API_KEY!, // Замените на ваш API-ключ
+      },
+    });
+    return response.data.block === 1; // Если block === 1, то это VPN/прокси
+  } catch (error) {
+    console.error('Ошибка при проверке VPN:', error);
+    return false;
+  }
+}
+
+
+export async function registerUser(body: Prisma.UserCreateInput, req: any) {
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        email: body.email,
+      },
+    });
+
+    if (user) {
+      throw new Error('Пользователь уже существует');
+    }
+
+    const ip = requestIp.getClientIp(req); // Получаем IP-адрес
+    const isVPN = await checkVPN(ip); // Проверяем VPN
+
+    const newUser = await prisma.user.create({
+      data: {
+        fullName: body.fullName,
+        email: body.email,
+        password: hashSync(body.password, 10),
+        loginHistory: [
+          {
+            ip,
+            lastLogin: new Date().toISOString(),
+            vpn: isVPN,
+            loginCount: 1,
+          },
+        ],
+      },
+    });
+
+    console.log('New user created with login history:', newUser); // Логируем созданного пользователя
+
+    await updateGlobalData();
+
+    return newUser;
+  } catch (err) {
+    console.log('Error [CREATE_USER]', err);
+    throw err;
+  }
+}
+
+
+
+
 
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
   try {
@@ -99,33 +160,6 @@ export async function updateUserInfo(body: Prisma.UserUpdateInput) {
   }
 }
 
-export async function registerUser(body: Prisma.UserCreateInput) {
-  try {
-    const user = await prisma.user.findFirst({
-      where: {
-        email: body.email,
-      },
-    });
-
-    if (user) {
-      throw new Error('Пользователь уже существует');
-    }
-
-    await prisma.user.create({
-      data: {
-        fullName: body.fullName,
-        email: body.email,
-        password: hashSync(body.password, 10),
-      },
-    });
-
-    await updateGlobalData();
-
-  } catch (err) {
-    console.log('Error [CREATE_USER]', err);
-    throw err;
-  }
-}
 
 function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { maxBetPlayer1: number, maxBetPlayer2: number } {
   const maxBetPlayer1 = parseFloat((initBetPlayer2 * 2.00).toFixed(2)); // 100% от суммы ставок на Player2
