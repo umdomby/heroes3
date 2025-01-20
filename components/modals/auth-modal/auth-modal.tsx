@@ -31,12 +31,11 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                     <DialogTitle></DialogTitle>
                 </VisuallyHidden>
 
-                {type === 'login' ? (
+{/*                {type === 'login' ? (
                     <LoginForm onClose={handleClose} />
                 ) : (
                     <RegisterForm onClose={handleClose} />
-                )}
-
+                )}*/}
                 <hr />
                 <div className="flex gap-2">
 
@@ -72,9 +71,9 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                     </Button>
                 </div>
 
-                <Button variant="outline" onClick={onSwitchType} type="button" className="h-12">
-                    {type !== 'login' ? 'Войти' : 'Регистрация'}
-                </Button>
+                {/*<Button variant="outline" onClick={onSwitchType} type="button" className="h-12">*/}
+                {/*    {type !== 'login' ? 'Войти' : 'Регистрация'}*/}
+                {/*</Button>*/}
             </DialogContent>
         </Dialog>
     );
