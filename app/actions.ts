@@ -239,9 +239,14 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const oddsPlayer1 = totalPlayer1 === 0 ? 1 : total / totalPlayer1;
     const oddsPlayer2 = totalPlayer2 === 0 ? 1 : total / totalPlayer2;
 
-    // Проверка текущих коэффициентов
-    if (oddsPlayer1 <= 1.6 || oddsPlayer2 <= 1.6) {
-      throw new Error('Ставка невозможна: текущий коэффициент уже равен или ниже 1.6');
+    // Проверка коэффициента для выбранного игрока
+    if (
+        (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.6) ||
+        (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.6)
+    ) {
+      throw new Error(
+          `Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.6`
+      );
     }
 
     // Рассчитываем потенциальную прибыль
@@ -278,7 +283,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     };
 
     // Проверка будущих коэффициентов
-    if (updatedOdds[PlayerChoice.PLAYER1] <= 1.5 || updatedOdds[PlayerChoice.PLAYER2] <= 1.5) {
+    if (
+        (player === PlayerChoice.PLAYER1 && updatedOdds[PlayerChoice.PLAYER1] <= 1.5) ||
+        (player === PlayerChoice.PLAYER2 && updatedOdds[PlayerChoice.PLAYER2] <= 1.5)
+    ) {
       throw new Error('Ставка невозможна: коэффициент станет 1.5 или ниже после этой ставки');
     }
 
