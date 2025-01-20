@@ -170,8 +170,8 @@ export async function clientCreateBet(formData: any) {
         totalBetAmount: totalBetAmount, // Общая сумма начальных ставок
         maxBetPlayer1: maxBetPlayer1, // Максимальная сумма ставок на игрока 1
         maxBetPlayer2: maxBetPlayer2, // Максимальная сумма ставок на игрока 2
-        currentOdds1: 1, // Инициализируем текущие коэффициенты (по умолчанию 1)
-        currentOdds2: 1, // Инициализируем текущие коэффициенты (по умолчанию 1)
+        currentOdds1: formData.currentOdds1, // Инициализируем текущие коэффициенты (по умолчанию 1)
+        currentOdds2: formData.currentOdds2, // Инициализируем текущие коэффициенты (по умолчанию 1)
         player1Id: formData.player1Id,
         player2Id: formData.player2Id,
         initBetPlayer1: formData.initBetPlayer1,
