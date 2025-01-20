@@ -241,8 +241,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Проверка коэффициента для выбранного игрока
     if (
-        (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.6) ||
-        (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.6)
+        (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.02) ||
+        (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.02)
     ) {
       throw new Error(
           `Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.6`
@@ -284,8 +284,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Проверка будущих коэффициентов
     if (
-        (player === PlayerChoice.PLAYER1 && updatedOdds[PlayerChoice.PLAYER1] <= 1.5) ||
-        (player === PlayerChoice.PLAYER2 && updatedOdds[PlayerChoice.PLAYER2] <= 1.5)
+        (player === PlayerChoice.PLAYER1 && updatedOdds[PlayerChoice.PLAYER1] <= 1.01) ||
+        (player === PlayerChoice.PLAYER2 && updatedOdds[PlayerChoice.PLAYER2] <= 1.01)
     ) {
       throw new Error('Ставка невозможна: коэффициент станет 1.5 или ниже после этой ставки');
     }
