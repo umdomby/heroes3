@@ -93,13 +93,10 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                         <Title text="История входов" size="md" className="font-bold mb-4" />
                         <Title text="Для получения бонусов не злоупотребляйте созданием аккаунтов :) Хороших ставок!" size="xs" className="font-bold mb-4" />
                         {loginHistory.length > 0 ? (
-                            <div className="space-y-4">
+                            <div className="space-y-1">
                                 {loginHistory.map((entry: any, index: number) => (
-                                    <div key={index} className="p-4 border border-gray-300 rounded-lg">
-                                        <p><strong>IP:</strong> {entry.ip}</p>
-                                        <p><strong>Последний вход:</strong> {new Date(entry.lastLogin).toLocaleString()}</p>
-                                        <p><strong>Использовался VPN:</strong> {entry.vpn ? 'Да' : 'Нет'}</p>
-                                        <p><strong>Количество входов:</strong> {entry.loginCount}</p>
+                                    <div key={index} className="p-1 border border-gray-300 rounded-lg">
+                                        <p><strong>IP:</strong> {entry.ip}, {new Date(entry.lastLogin).toLocaleString()}, <strong>VPN:</strong> {entry.vpn ? 'Да' : 'Нет'}, {entry.loginCount}</p>
                                     </div>
                                 ))}
                             </div>
