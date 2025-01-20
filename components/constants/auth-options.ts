@@ -2,7 +2,6 @@ import { AuthOptions } from 'next-auth';
 import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import requestIp from 'request-ip';
 import axios from 'axios';
 
 import { prisma } from '@/prisma/prisma-client';
@@ -73,6 +72,19 @@ export const authOptions: AuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID || '',
+      clientSecret: process.env.GITHUB_SECRET || '',
+      profile(profile) {
+        return {
+          id: profile.id,
+          name: profile.name || profile.login,
+          email: profile.email,
+          image: profile.avatar_url,
+          role: 'USER' as UserRole,
+        };
+      },
+    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -126,7 +138,27 @@ export const authOptions: AuthOptions = {
           return false;
         }
 
-        const ip = requestIp.getClientIp(req); // Получаем IP-адрес
+        let ip = '';
+        if (req && req.headers) {
+          // Получаем IP-адрес из заголовков запроса
+          ip =
+              (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+              (req.headers['x-real-ip'] as string) ||
+              req.socket?.remoteAddress ||
+              'unknown';
+        } else {
+          // Если req недоступен, используем сторонний сервис для получения IP-адреса
+          try {
+            const response = await axios.get('https://api.ipify.org?format=json');
+            ip = response.data.ip;
+          } catch (error) {
+            console.error('Ошибка при получении IP-адреса:', error);
+            ip = 'unknown';
+          }
+        }
+
+        console.log('IP-адрес:', ip);
+
         const isVPN = await checkVPN(ip); // Проверяем VPN
 
         const findUser = await prisma.user.findFirst({
@@ -168,6 +200,34 @@ export const authOptions: AuthOptions = {
         console.error('Error [SIGNIN]', error);
         return false;
       }
+    },
+    async jwt({ token }) {
+      if (!token.email) {
+        return token;
+      }
+
+      const findUser = await prisma.user.findFirst({
+        where: {
+          email: token.email,
+        },
+      });
+
+      if (findUser) {
+        token.id = String(findUser.id);
+        token.email = findUser.email;
+        token.fullName = findUser.fullName;
+        token.role = findUser.role;
+      }
+
+      return token;
+    },
+    session({ session, token }) {
+      if (session?.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+      }
+
+      return session;
     },
   },
 };

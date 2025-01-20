@@ -69,65 +69,6 @@ export async function updateGlobalData() {
     throw new Error('Failed to update GlobalData');
   }
 }
-async function checkVPN(ip: string): Promise<boolean> {
-  try {
-    const response = await axios.get(`https://v2.api.iphub.info/ip/${ip}`, {
-      headers: {
-        'X-Key': process.env.IPHUB_API_KEY!, // Замените на ваш API-ключ
-      },
-    });
-    return response.data.block === 1; // Если block === 1, то это VPN/прокси
-  } catch (error) {
-    console.error('Ошибка при проверке VPN:', error);
-    return false;
-  }
-}
-
-
-export async function registerUser(body: Prisma.UserCreateInput, req: any) {
-  try {
-    const user = await prisma.user.findFirst({
-      where: {
-        email: body.email,
-      },
-    });
-
-    if (user) {
-      throw new Error('Пользователь уже существует');
-    }
-
-    const ip = requestIp.getClientIp(req); // Получаем IP-адрес
-    const isVPN = await checkVPN(ip); // Проверяем VPN
-
-    const newUser = await prisma.user.create({
-      data: {
-        fullName: body.fullName,
-        email: body.email,
-        password: hashSync(body.password, 10),
-        loginHistory: [
-          {
-            ip,
-            lastLogin: new Date().toISOString(),
-            vpn: isVPN,
-            loginCount: 1,
-          },
-        ],
-      },
-    });
-
-    console.log('New user created with login history:', newUser); // Логируем созданного пользователя
-
-    await updateGlobalData();
-
-    return newUser;
-  } catch (err) {
-    console.log('Error [CREATE_USER]', err);
-    throw err;
-  }
-}
-
-
-
 
 
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
