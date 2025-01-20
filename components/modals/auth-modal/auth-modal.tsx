@@ -70,7 +70,9 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                         Google
                     </Button>
                 </div>
-
+                <div className="text-center">
+                    Bonus => NO VPN
+                </div>
                 {/*<Button variant="outline" onClick={onSwitchType} type="button" className="h-12">*/}
                 {/*    {type !== 'login' ? 'Войти' : 'Регистрация'}*/}
                 {/*</Button>*/}
