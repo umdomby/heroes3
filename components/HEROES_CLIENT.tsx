@@ -9,6 +9,13 @@ import { placeBet, closeBet } from '@/app/actions';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useUser } from '@/hooks/useUser';
 
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
+
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
 // Константа для минимального допустимого коэффициента
@@ -294,11 +301,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
                 return (
                     <div key={bet.id} className="border border-gray-300 p-4 mt-4 rounded-lg shadow-sm">
+                        {/* Заголовок ставки */}
                         <h3 className="text-lg font-semibold">
-                            <span
-                                className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> vs{' '}
-                            <span
-                                className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> |{' '}
+                            <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> vs{' '}
+                            <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> |{' '}
                             Коэффициенты:{' '}
                             <span
                                 className={playerColors[PlayerChoice.PLAYER1]}>{bet.currentOdds1.toFixed(2)}</span> -{' '}
@@ -312,151 +318,171 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                             <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.totalBetPlayer2}</span>
                         </h3>
 
-                        {/* Отображение максимально возможной ставки */}
-                        {bet.status === 'OPEN' && (
-                            <div className="mt-4">
-                                <p>
-                                    Максимальная ставка на <span
-                                    className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
-                                    <span className={playerColors[PlayerChoice.PLAYER1]}>
-                                        {bet.maxBetPlayer1.toFixed(2)}
-                                    </span>
-                                </p>
-                                <p>
-                                    Максимальная ставка на <span
-                                    className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>:{' '}
-                                    <span className={playerColors[PlayerChoice.PLAYER2]}>
-                                        {bet.maxBetPlayer2.toFixed(2)}
-                                    </span>
-                                </p>
-                            </div>
-                        )}
+                        {/* Accordion для сворачивания/разворачивания информации */}
+                        <Accordion type="single" collapsible>
+                            <AccordionItem value={`item-${bet.id}`}>
+                                <AccordionTrigger>Показать/скрыть детали
 
-                        {/* Отображение ставок пользователя для текущей ставки (bet) */}
-                        {userBets.length > 0 && (
-                            <div className="mt-4 p-4 rounded-lg">
-                                <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
-                                {userBets.map((participant) => (
-                                    <div key={participant.id} className="border border-gray-200 p-3 mb-3 rounded-md">
+                                    {/* Потенциальная прибыль (или убыток) для каждого исхода */}
+                                    <div className="mt-4">
                                         <p>
-                                            Ставка: <strong
-                                            className={playerColors[participant.player]}>{participant.amount}</strong> на{' '}
-                                            <strong className={playerColors[participant.player]}>
-                                                {participant.player === PlayerChoice.PLAYER1 ? bet.player1.name : bet.player2.name}
-                                            </strong>{','}
-                                            {' '}Коэффициент: <span
-                                            className={playerColors[participant.player]}>{participant.odds.toFixed(2)}</span>{','}
-                                            {' '}Прибыль: <span
-                                            className={playerColors[participant.player]}>{participant.profit.toFixed(2)}</span>{','}
-                                            {' '}{new Date(participant.createdAt).toLocaleString()}
+                                            Если выиграет <span
+                                            className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>,
+                                            ваш
+                                            результат:{' '}
+                                            <span
+                                                className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          {profitIfPlayer1Wins.toFixed(2)} баллов
+                        </span>.
+                                        </p>
+                                        <p>
+                                            Если выиграет <span
+                                            className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>,
+                                            ваш
+                                            результат:{' '}
+                                            <span
+                                                className={profitIfPlayer2Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          {profitIfPlayer2Wins.toFixed(2)} баллов
+                        </span>.
                                         </p>
                                     </div>
-                                ))}
 
-                                {/* Потенциальная прибыль (или убыток) для каждого исхода */}
-                                <div className="mt-4">
-                                    <p>
-                                        Если выиграет <span
-                                        className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>, ваш
-                                        результат:{' '}
-                                        <span className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                            {profitIfPlayer1Wins.toFixed(2)} баллов
-                                        </span>.
-                                    </p>
-                                    <p>
-                                        Если выиграет <span
-                                        className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>, ваш
-                                        результат:{' '}
-                                        <span className={profitIfPlayer2Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                            {profitIfPlayer2Wins.toFixed(2)} баллов
-                                        </span>.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                        {bet.status === 'OPEN' && (
-                            <div>
-                                <form onSubmit={(event) => handleSubmit(event, bet)}>
-                                    <input
-                                        type="number"
-                                        name="amount"
-                                        placeholder="Сумма ставки"
-                                        min="1"
-                                        step="1"
-                                        required
-                                        className="border p-2 rounded w-full"
-                                        onChange={(e) => handleAmountChange(e, bet)}
-                                    />
-                                    <div className="flex gap-2 mt-2">
-                                        <label>
-                                            <input
-                                                type="radio"
-                                                name="player"
-                                                value={PlayerChoice.PLAYER1}
-                                                required
-                                                onChange={(e) => handlePlayerChange(e, bet)}
-                                            />
-                                            <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>
-                                        </label>
-                                        <label>
-                                            <input
-                                                type="radio"
-                                                name="player"
-                                                value={PlayerChoice.PLAYER2}
-                                                required
-                                                onChange={(e) => handlePlayerChange(e, bet)}
-                                            />
-                                            <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>
-                                        </label>
-                                    </div>
-                                    {oddsErrors[bet.id] && <p className="text-red-500">{oddsErrors[bet.id]}</p>}
-                                    {placeBetErrors[bet.id] && <p className="text-red-500">{placeBetErrors[bet.id]}</p>}
-                                    <Button
-                                        type="submit"
-                                        className={`mt-2 w-full ${isBetDisabled[bet.id] ? 'bg-gray-400 cursor-not-allowed' : ''}`}
-                                        disabled={isBetDisabled[bet.id] || !user} // Кнопка изначально выключена
-                                    >
-                                        Сделать ставку
-                                    </Button>
-                                </form>
-                            </div>
-                        )}
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    {/* Отображение максимально возможной ставки */}
+                                    {bet.status === 'OPEN' && (
+                                        <div className="mt-4">
+                                            <p>
+                                                Максимальная ставка на <span
+                                                className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
+                                                <span
+                                                    className={playerColors[PlayerChoice.PLAYER1]}>{bet.maxBetPlayer1.toFixed(2)}</span>
+                                            </p>
+                                            <p>
+                                                Максимальная ставка на <span
+                                                className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>:{' '}
+                                                <span
+                                                    className={playerColors[PlayerChoice.PLAYER2]}>{bet.maxBetPlayer2.toFixed(2)}</span>
+                                            </p>
+                                        </div>
+                                    )}
 
-                        {bet.status === 'OPEN' && bet.creatorId === user?.id && (
-                            <div className="mt-4">
-                                <h4 className="text-lg font-semibold">Закрыть ставку</h4>
-                                <div className="flex gap-2 mt-2">
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="winner"
-                                            value={bet.player1Id}
-                                            onChange={() => setSelectedWinner(bet.player1Id)}
-                                        />
-                                        <span
-                                            className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> выиграл
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="winner"
-                                            value={bet.player2Id}
-                                            onChange={() => setSelectedWinner(bet.player2Id)}
-                                        />
-                                        <span
-                                            className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> выиграл
-                                    </label>
-                                </div>
-                                <Button
-                                    type="button"
-                                    onClick={() => handleCloseBet(bet.id)}
-                                    className="mt-2 w-full"
-                                >
-                                    Закрыть ставку
-                                </Button>
-                                {closeBetError && <p className="text-red-500">{closeBetError}</p>}
-                            </div>
-                        )}
+                                    {/* Отображение ставок пользователя для текущей ставки (bet) */}
+                                    {userBets.length > 0 && (
+                                        <div className="mt-4 p-4 rounded-lg">
+                                            <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
+                                            {userBets.map((participant) => (
+                                                <div key={participant.id}
+                                                     className="border border-gray-200 p-1 mb-1 rounded-md">
+                                                    <p>
+                                                        Ставка: <strong
+                                                        className={playerColors[participant.player]}>{participant.amount}</strong> на{' '}
+                                                        <strong className={playerColors[participant.player]}>
+                                                            {participant.player === PlayerChoice.PLAYER1 ? bet.player1.name : bet.player2.name}
+                                                        </strong>{','}
+                                                        {' '}Коэффициент: <span
+                                                        className={playerColors[participant.player]}>{participant.odds.toFixed(2)}</span>{','}
+                                                        {' '}Прибыль: <span
+                                                        className={playerColors[participant.player]}>{participant.profit.toFixed(2)}</span>{','}
+                                                        {' '}{new Date(participant.createdAt).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Форма для ставки */}
+                                    {bet.status === 'OPEN' && (
+                                        <div>
+                                            <form onSubmit={(event) => handleSubmit(event, bet)}>
+                                                <input
+                                                    type="number"
+                                                    name="amount"
+                                                    placeholder="Сумма ставки"
+                                                    min="1"
+                                                    step="1"
+                                                    required
+                                                    className="border p-2 rounded w-full"
+                                                    onChange={(e) => handleAmountChange(e, bet)}
+                                                />
+                                                <div className="flex gap-2 mt-2">
+                                                    <label>
+                                                        <input
+                                                            type="radio"
+                                                            name="player"
+                                                            value={PlayerChoice.PLAYER1}
+                                                            required
+                                                            onChange={(e) => handlePlayerChange(e, bet)}
+                                                        />
+                                                        <span
+                                                            className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>
+                                                    </label>
+                                                    <label>
+                                                        <input
+                                                            type="radio"
+                                                            name="player"
+                                                            value={PlayerChoice.PLAYER2}
+                                                            required
+                                                            onChange={(e) => handlePlayerChange(e, bet)}
+                                                        />
+                                                        <span
+                                                            className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>
+                                                    </label>
+                                                </div>
+                                                {oddsErrors[bet.id] &&
+                                                    <p className="text-red-500">{oddsErrors[bet.id]}</p>}
+                                                {placeBetErrors[bet.id] &&
+                                                    <p className="text-red-500">{placeBetErrors[bet.id]}</p>}
+                                                <Button
+                                                    type="submit"
+                                                    className={`mt-2 w-full ${isBetDisabled[bet.id] ? 'bg-gray-400 cursor-not-allowed' : ''}`}
+                                                    disabled={isBetDisabled[bet.id] || !user}
+                                                >
+                                                    Сделать ставку
+                                                </Button>
+                                            </form>
+                                        </div>
+                                    )}
+
+                                    {/* Закрытие ставки (для создателя) */}
+                                    {bet.status === 'OPEN' && bet.creatorId === user?.id && (
+                                        <div className="mt-4">
+                                            <h4 className="text-lg font-semibold">Закрыть ставку</h4>
+                                            <div className="flex gap-2 mt-2">
+                                                <label>
+                                                    <input
+                                                        type="radio"
+                                                        name="winner"
+                                                        value={bet.player1Id}
+                                                        onChange={() => setSelectedWinner(bet.player1Id)}
+                                                    />
+                                                    <span
+                                                        className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> выиграл
+                                                </label>
+                                                <label>
+                                                    <input
+                                                        type="radio"
+                                                        name="winner"
+                                                        value={bet.player2Id}
+                                                        onChange={() => setSelectedWinner(bet.player2Id)}
+                                                    />
+                                                    <span
+                                                        className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> выиграл
+                                                </label>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                onClick={() => handleCloseBet(bet.id)}
+                                                className="mt-2 w-full"
+                                            >
+                                                Закрыть ставку
+                                            </Button>
+                                            {closeBetError && <p className="text-red-500">{closeBetError}</p>}
+                                        </div>
+                                    )}
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
                     </div>
                 );
             })}
