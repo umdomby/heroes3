@@ -321,32 +321,22 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                         {/* Accordion для сворачивания/разворачивания информации */}
                         <Accordion type="single" collapsible>
                             <AccordionItem value={`item-${bet.id}`}>
-                                <AccordionTrigger>Показать/скрыть детали
-
-                                    {/* Потенциальная прибыль (или убыток) для каждого исхода */}
+                                <AccordionTrigger>
+                                    Показать/скрыть детали
                                     <div className="mt-4">
                                         <p>
-                                            Если выиграет <span
-                                            className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>,
-                                            ваш
-                                            результат:{' '}
-                                            <span
-                                                className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
-                          {profitIfPlayer1Wins.toFixed(2)} баллов
-                        </span>.
+                                            <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> :{' '}
+                                            <span className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
+        {profitIfPlayer1Wins >= 0 ? `+${profitIfPlayer1Wins.toFixed(2)}` : profitIfPlayer1Wins.toFixed(2)} баллов
+      </span>.
                                         </p>
                                         <p>
-                                            Если выиграет <span
-                                            className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>,
-                                            ваш
-                                            результат:{' '}
-                                            <span
-                                                className={profitIfPlayer2Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
-                          {profitIfPlayer2Wins.toFixed(2)} баллов
-                        </span>.
+                                            <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> :{' '}
+                                            <span className={profitIfPlayer2Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
+        {profitIfPlayer2Wins >= 0 ? `+${profitIfPlayer2Wins.toFixed(2)}` : profitIfPlayer2Wins.toFixed(2)} баллов
+      </span>.
                                         </p>
                                     </div>
-
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     {/* Отображение максимально возможной ставки */}
