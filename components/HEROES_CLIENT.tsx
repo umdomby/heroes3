@@ -1,13 +1,13 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { Bet as PrismaBet, Player, PlayerChoice, User, BetParticipant } from '@prisma/client';
+import React, {useEffect, useState} from 'react';
+import {Bet as PrismaBet, Player, PlayerChoice, User, BetParticipant} from '@prisma/client';
 import useSWR from 'swr';
-import { Button } from '@/components/ui/button';
-import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
-import { placeBet, closeBet } from '@/app/actions';
-import { unstable_batchedUpdates } from 'react-dom';
-import { useUser } from '@/hooks/useUser';
+import {Button} from '@/components/ui/button';
+import {useSession} from 'next-auth/react';
+import {redirect} from 'next/navigation';
+import {placeBet, closeBet} from '@/app/actions';
+import {unstable_batchedUpdates} from 'react-dom';
+import {useUser} from '@/hooks/useUser';
 
 import {
     Accordion,
@@ -15,6 +15,16 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableFooter,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
@@ -41,10 +51,15 @@ const playerColors = {
     [PlayerChoice.PLAYER1]: 'text-blue-400', // Синий для Player1
     [PlayerChoice.PLAYER2]: 'text-red-400',  // Красный для Player2
 };
-export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
-    const { data: session } = useSession();
-    const { data: bets, error, isLoading, mutate } = useSWR<Bet[]>('/api/get-bets', fetcher);
-    const { user: userUp, isLoading: isLoadingUser, isError: isErrorUser, mutate: mutateUser } = useUser(user ? user.id : null);
+export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
+    const {data: session} = useSession();
+    const {data: bets, error, isLoading, mutate} = useSWR<Bet[]>('/api/get-bets', fetcher);
+    const {
+        user: userUp,
+        isLoading: isLoadingUser,
+        isError: isErrorUser,
+        mutate: mutateUser
+    } = useUser(user ? user.id : null);
 
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
     const [selectedWinner, setSelectedWinner] = useState<number | null>(null);
@@ -278,6 +293,23 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
         <div>
             <p>Ваши баллы: {userUp?.points}</p>
 
+            {/* Общий TableHeader для всех ставок */}
+            <Table>
+                {/*<TableCaption>Детали ставки</TableCaption>*/}
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="text-center">Игрок 1</TableHead>
+                        <TableHead className="text-center">vs</TableHead>
+                        <TableHead className="text-center">Игрок 2</TableHead>
+                        <TableHead className="text-center">Коэффициент 1</TableHead>
+                        <TableHead className="text-center">-</TableHead>
+                        <TableHead className="text-center">Коэффициент 2</TableHead>
+                        <TableHead className="text-center">Общая сумма</TableHead>
+                        <TableHead className="text-center">Прибыль/убыток</TableHead>
+                    </TableRow>
+                </TableHeader>
+            </Table>
+
             {/* Отображение всех ставок */}
             {bets.map((bet: Bet) => {
                 const userBets = bet.participants.filter((p) => p.userId === user?.id);
@@ -300,46 +332,59 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                     .reduce((sum, p) => sum + p.profit, 0) - totalBetOnPlayer1;
 
                 return (
-                    <div key={bet.id} className="border border-gray-300 p-4 mt-4 rounded-lg shadow-sm">
-                        {/* Заголовок ставки */}
-                        <h3 className="text-lg font-semibold">
-                            <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> vs{' '}
-                            <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> |{' '}
-                            Коэффициенты:{' '}
-                            <span
-                                className={playerColors[PlayerChoice.PLAYER1]}>{bet.currentOdds1.toFixed(2)}</span> -{' '}
-                            <span
-                                className={playerColors[PlayerChoice.PLAYER2]}>{bet.currentOdds2.toFixed(2)}</span> |{' '}
-                            Ставки на <span
-                            className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
-                            <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.totalBetPlayer1}</span> |{' '}
-                            Ставки на <span
-                            className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>:{' '}
-                            <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.totalBetPlayer2}</span>
-                        </h3>
-
-                        {/* Accordion для сворачивания/разворачивания информации */}
+                    <div key={bet.id}>
                         <Accordion type="single" collapsible>
                             <AccordionItem value={`item-${bet.id}`}>
                                 <AccordionTrigger>
-                                    Показать/скрыть детали
-                                    <div className="mt-4">
-                                        <p>
-                                            <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> :{' '}
-                                            <span className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
-        {profitIfPlayer1Wins >= 0 ? `+${profitIfPlayer1Wins.toFixed(2)}` : profitIfPlayer1Wins.toFixed(2)} баллов
-      </span>.
-                                        </p>
-                                        <p>
-                                            <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> :{' '}
-                                            <span className={profitIfPlayer2Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
-        {profitIfPlayer2Wins >= 0 ? `+${profitIfPlayer2Wins.toFixed(2)}` : profitIfPlayer2Wins.toFixed(2)} баллов
-      </span>.
-                                        </p>
-                                    </div>
+                                    <Table>
+                                        <TableBody>
+                                            <TableRow>
+                                                {/* Игрок 1 */}
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER1]} text-center`}>
+                                                    {bet.player1.name}: {bet.totalBetPlayer1}
+                                                </TableCell>
+
+                                                {/* Разделитель "vs" */}
+                                                <TableCell className="text-center">vs</TableCell>
+
+                                                {/* Игрок 2 */}
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-center`}>
+                                                    {bet.player2.name}: {bet.totalBetPlayer2}
+                                                </TableCell>
+
+                                                {/* Коэффициент для игрока 1 */}
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER1]} text-center`}>
+                                                    {bet.currentOdds1.toFixed(2)}
+                                                </TableCell>
+
+                                                {/* Разделитель "-" */}
+                                                <TableCell className="text-center">-</TableCell>
+
+                                                {/* Коэффициент для игрока 2 */}
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-center`}>
+                                                    {bet.currentOdds2.toFixed(2)}
+                                                </TableCell>
+
+                                                {/* Общая сумма ставок */}
+                                                <TableCell className="text-center">{bet.totalBetAmount}</TableCell>
+
+                                                {/* Прибыль/убыток */}
+                                                <TableCell className="text-center">
+                                                    <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> :{' '}
+                                                    <span className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                    {profitIfPlayer1Wins >= 0 ? `+${profitIfPlayer1Wins.toFixed(2)}` : profitIfPlayer1Wins.toFixed(2)}
+                                                </span>{' '}
+                                                    <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> :{' '}
+                                                    <span className={profitIfPlayer2Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                    {profitIfPlayer2Wins >= 0 ? `+${profitIfPlayer2Wins.toFixed(2)}` : profitIfPlayer2Wins.toFixed(2)}
+                                                </span>
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    {/* Отображение максимально возможной ставки */}
+                                    {/* Остальной код остается без изменений */}
                                     {bet.status === 'OPEN' && (
                                         <div className="mt-4">
                                             <p>
@@ -357,7 +402,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                         </div>
                                     )}
 
-                                    {/* Отображение ставок пользователя для текущей ставки (bet) */}
                                     {userBets.length > 0 && (
                                         <div className="mt-4 p-4 rounded-lg">
                                             <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
@@ -381,7 +425,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                         </div>
                                     )}
 
-                                    {/* Форма для ставки */}
                                     {bet.status === 'OPEN' && (
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
@@ -434,7 +477,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                         </div>
                                     )}
 
-                                    {/* Закрытие ставки (для создателя) */}
                                     {bet.status === 'OPEN' && bet.creatorId === user?.id && (
                                         <div className="mt-4">
                                             <h4 className="text-lg font-semibold">Закрыть ставку</h4>
@@ -478,4 +520,5 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             })}
         </div>
     );
+
 };
