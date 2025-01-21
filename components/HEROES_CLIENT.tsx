@@ -106,7 +106,15 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
 
     // Фильтрация ставок по статусу
-    const filteredBets = bets?.filter((bet) => bet.status === statusFilter) || [];
+    const filteredBets = bets?.filter((bet) => {
+        if (statusFilter === BetStatus.CLOSED) {
+            // Проверяем, участвовал ли пользователь в этой ставке
+            const userParticipated = bet.participants.some((p) => p.userId === user?.id);
+            return bet.status === BetStatus.CLOSED && userParticipated;
+        } else {
+            return bet.status === statusFilter;
+        }
+    }) || [];
 
     const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
         const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2;

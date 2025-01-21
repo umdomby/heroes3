@@ -97,6 +97,21 @@ model BetParticipant {
   isWinner  Boolean      @default(false)
   createdAt DateTime     @default(now())
 }
+
+model BetParticipantCLOSED {
+  id        Int          @id @default(autoincrement())
+  betId     Int
+  bet       Bet          @relation(fields: [betId], references: [id])
+  userId    Int
+  user      User         @relation(fields: [userId], references: [id])
+  amount    Int
+  odds      Float // Коэффициент ставки
+  profit    Int
+  player    PlayerChoice
+  isWinner  Boolean      @default(false)
+  createdAt DateTime     @default(now())
+}
+
 model GlobalData {
   id             Int      @id @default(autoincrement())
   usersPlay      Int // Количество пользователей, участвующих в открытых ставках
