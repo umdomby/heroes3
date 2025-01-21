@@ -3,7 +3,7 @@ import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
 import {PlayerChoice, Prisma} from '@prisma/client';
 import {hashSync} from 'bcrypt';
-import {revalidatePath} from 'next/cache'
+import {revalidatePath, revalidateTag} from 'next/cache'
 import requestIp from 'request-ip';
 import axios from 'axios';
 
@@ -453,7 +453,9 @@ export async function closeBet(betId: number, winnerId: number) {
 
     // Ревалидируем путь (если используем Next.js)
     revalidatePath('/');
-
+    revalidateTag('bets');
+    revalidateTag('user');
+    return { success: true, message: 'Ставка успешно закрыта' };
   } catch (error) {
     console.error("Ошибка при закрытии ставки:", error);
 
