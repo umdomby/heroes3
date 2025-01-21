@@ -199,20 +199,23 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Недостаточно баллов для совершения ставки');
     }
 
-    // Рассчитываем текущие суммы ставок на каждого игрока
+    // Рассчитываем текущие суммы ставок на каждого игрока (без учета initBetPlayer1 и initBetPlayer2)
     const totalPlayer1 = bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER1)
-        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer1 || 0);
+        .reduce((sum, p) => sum + p.amount, 0); // Убираем initBetPlayer1
 
     const totalPlayer2 = bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER2)
-        .reduce((sum, p) => sum + p.amount, bet.initBetPlayer2 || 0);
+        .reduce((sum, p) => sum + p.amount, 0); // Убираем initBetPlayer2
 
-    const total = totalPlayer1 + totalPlayer2;
+    // Рассчитываем общие суммы ставок (с учетом initBetPlayer1 и initBetPlayer2)
+    const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
+    const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
+    const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2;
 
-    // Расчет текущих коэффициентов
-    const oddsPlayer1 = totalPlayer1 === 0 ? 1 : total / totalPlayer1;
-    const oddsPlayer2 = totalPlayer2 === 0 ? 1 : total / totalPlayer2;
+    // Расчет текущих коэффициентов (с учетом initBetPlayer1 и initBetPlayer2)
+    const oddsPlayer1 = totalWithInitPlayer1 === 0 ? 1 : totalWithInit / totalWithInitPlayer1;
+    const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : totalWithInit / totalWithInitPlayer2;
 
     // Проверка коэффициента для выбранного игрока
     if (
@@ -230,8 +233,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Максимальная ставка, которую может сделать пользователь
     const userMaxBet = user.points;
 
-    // Рассчитываем максимальные ставки на основе суммы ставок на другого игрока
-    const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalPlayer1, totalPlayer2);
+    // Рассчитываем максимальные ставки на основе суммы ставок на другого игрока (с учетом initBetPlayer1 и initBetPlayer2)
+    const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
 
     // Возвращаем минимальное значение из всех ограничений для каждого игрока
     const maxAllowedBet = {
@@ -250,11 +253,13 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       [PlayerChoice.PLAYER2]: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
     };
 
-    const updatedTotal = updatedTotalPlayer[PlayerChoice.PLAYER1] + updatedTotalPlayer[PlayerChoice.PLAYER2];
+    const updatedTotalWithInitPlayer1 = updatedTotalPlayer[PlayerChoice.PLAYER1] + (bet.initBetPlayer1 || 0);
+    const updatedTotalWithInitPlayer2 = updatedTotalPlayer[PlayerChoice.PLAYER2] + (bet.initBetPlayer2 || 0);
+    const updatedTotalWithInit = updatedTotalWithInitPlayer1 + updatedTotalWithInitPlayer2;
 
     const updatedOdds = {
-      [PlayerChoice.PLAYER1]: updatedTotalPlayer[PlayerChoice.PLAYER1] === 0 ? 1 : updatedTotal / updatedTotalPlayer[PlayerChoice.PLAYER1],
-      [PlayerChoice.PLAYER2]: updatedTotalPlayer[PlayerChoice.PLAYER2] === 0 ? 1 : updatedTotal / updatedTotalPlayer[PlayerChoice.PLAYER2],
+      [PlayerChoice.PLAYER1]: updatedTotalWithInitPlayer1 === 0 ? 1 : updatedTotalWithInit / updatedTotalWithInitPlayer1,
+      [PlayerChoice.PLAYER2]: updatedTotalWithInitPlayer2 === 0 ? 1 : updatedTotalWithInit / updatedTotalWithInitPlayer2,
     };
 
     // Проверка будущих коэффициентов
@@ -265,8 +270,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Ставка невозможна: коэффициент станет 1.1 или ниже после этой ставки');
     }
 
-    // Пересчитываем максимальные ставки на основе обновленных сумм
-    const { maxBetPlayer1: updatedMaxBetPlayer1, maxBetPlayer2: updatedMaxBetPlayer2 } = calculateMaxBets(updatedTotalPlayer[PlayerChoice.PLAYER1], updatedTotalPlayer[PlayerChoice.PLAYER2]);
+    // Пересчитываем максимальные ставки на основе обновленных сумм (с учетом initBetPlayer1 и initBetPlayer2)
+    const { maxBetPlayer1: updatedMaxBetPlayer1, maxBetPlayer2: updatedMaxBetPlayer2 } = calculateMaxBets(updatedTotalWithInitPlayer1, updatedTotalWithInitPlayer2);
 
     const updatedMaxAllowedBet = {
       [PlayerChoice.PLAYER1]: Math.min(updatedMaxBetPlayer1, userMaxBet),
@@ -296,11 +301,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         data: {
           currentOdds1: updatedOdds[PlayerChoice.PLAYER1],
           currentOdds2: updatedOdds[PlayerChoice.PLAYER2],
-          totalBetPlayer1: updatedTotalPlayer[PlayerChoice.PLAYER1],
-          totalBetPlayer2: updatedTotalPlayer[PlayerChoice.PLAYER2],
-          totalBetAmount: updatedTotal,
-          maxBetPlayer1: updatedMaxAllowedBet[PlayerChoice.PLAYER1],
-          maxBetPlayer2: updatedMaxAllowedBet[PlayerChoice.PLAYER2],
+          totalBetPlayer1: updatedTotalPlayer[PlayerChoice.PLAYER1], // Без учета initBetPlayer1
+          totalBetPlayer2: updatedTotalPlayer[PlayerChoice.PLAYER2], // Без учета initBetPlayer2
+          totalBetAmount: updatedTotalWithInit, // С учетом initBetPlayer1 и initBetPlayer2
+          maxBetPlayer1: updatedMaxAllowedBet[PlayerChoice.PLAYER1], // С учетом initBetPlayer1 и initBetPlayer2
+          maxBetPlayer2: updatedMaxAllowedBet[PlayerChoice.PLAYER2], // С учетом initBetPlayer1 и initBetPlayer2
         },
       }),
     ]);
