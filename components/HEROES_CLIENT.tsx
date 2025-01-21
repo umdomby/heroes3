@@ -290,7 +290,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     }
 
     return (
-        <div>
+        <div >
             <p>Ваши баллы: {userUp?.points}</p>
 
             {/* Общий TableHeader для всех ставок */}
@@ -301,11 +301,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                         <TableHead className="text-center">Игрок 1</TableHead>
                         <TableHead className="text-center">vs</TableHead>
                         <TableHead className="text-center">Игрок 2</TableHead>
-                        <TableHead className="text-center">Коэффициент 1</TableHead>
-                        <TableHead className="text-center">-</TableHead>
-                        <TableHead className="text-center">Коэффициент 2</TableHead>
-                        <TableHead className="text-center">Общая сумма</TableHead>
+                        <TableHead className="text-center">Коэффициенты</TableHead>
+                        <TableHead className="text-center"></TableHead>
                         <TableHead className="text-center">Прибыль/убыток</TableHead>
+                        <TableHead className="text-center"></TableHead>
                     </TableRow>
                 </TableHeader>
             </Table>
@@ -332,44 +331,41 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                     .reduce((sum, p) => sum + p.profit, 0) - totalBetOnPlayer1;
 
                 return (
-                    <div key={bet.id}>
+                    <div key={bet.id} >
                         <Accordion type="single" collapsible>
                             <AccordionItem value={`item-${bet.id}`}>
                                 <AccordionTrigger>
-                                    <Table>
+                                    <Table >
                                         <TableBody>
                                             <TableRow>
                                                 {/* Игрок 1 */}
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER1]} text-center`}>
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER1]}`}>
                                                     {bet.player1.name}: {bet.totalBetPlayer1}
                                                 </TableCell>
 
                                                 {/* Разделитель "vs" */}
-                                                <TableCell className="text-center">vs</TableCell>
+                                                <TableCell>vs</TableCell>
 
                                                 {/* Игрок 2 */}
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-center`}>
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]}`}>
                                                     {bet.player2.name}: {bet.totalBetPlayer2}
                                                 </TableCell>
 
                                                 {/* Коэффициент для игрока 1 */}
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER1]} text-center`}>
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER1]}`}>
                                                     {bet.currentOdds1.toFixed(2)}
                                                 </TableCell>
 
                                                 {/* Разделитель "-" */}
-                                                <TableCell className="text-center">-</TableCell>
+                                                <TableCell>-</TableCell>
 
                                                 {/* Коэффициент для игрока 2 */}
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-center`}>
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]}`}>
                                                     {bet.currentOdds2.toFixed(2)}
                                                 </TableCell>
 
-                                                {/* Общая сумма ставок */}
-                                                <TableCell className="text-center">{bet.totalBetAmount}</TableCell>
-
                                                 {/* Прибыль/убыток */}
-                                                <TableCell className="text-center">
+                                                <TableCell >
                                                     <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> :{' '}
                                                     <span className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
                                                     {profitIfPlayer1Wins >= 0 ? `+${profitIfPlayer1Wins.toFixed(2)}` : profitIfPlayer1Wins.toFixed(2)}
@@ -387,6 +383,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                     {/* Остальной код остается без изменений */}
                                     {bet.status === 'OPEN' && (
                                         <div className="mt-4">
+                                            <p>
+                                                Общая сумма ставок на матч:<span className="text-green-400"> {bet.totalBetAmount}</span>
+                                            </p>
                                             <p>
                                                 Максимальная ставка на <span
                                                 className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>:{' '}
