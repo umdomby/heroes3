@@ -108,6 +108,197 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     // Фильтрация ставок по статусу
     const filteredBets = bets?.filter((bet) => bet.status === statusFilter) || [];
 
+    const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
+        const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2;
+        const totalBetOnPlayer = player === PlayerChoice.PLAYER1 ? bet.totalBetPlayer1 : bet.totalBetPlayer2;
+
+        // Рассчитываем новый коэффициент после добавления ставки
+        const newOdds = totalBets / totalBetOnPlayer;
+
+        // Проверка на максимальную допустимую ставку
+        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
+
+        if (amount > maxAllowedBet) {
+            setPlaceBetErrors((prev) => ({
+                ...prev,
+                [bet.id]: `Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`,
+            }));
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
+            }));
+            return;
+        }
+
+        // Проверка, как изменится коэффициент после ставки
+        if (newOdds < MIN_ODDS) {
+            setOddsErrors((prev) => ({
+                ...prev,
+                [bet.id]: `Ставка приведет к снижению коэффициента ниже минимального допустимого значения (${MIN_ODDS})`,
+            }));
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
+            }));
+            return;
+        }
+
+        // Если проверка пройдена, очищаем ошибки и разблокируем кнопку
+        setOddsErrors((prev) => ({
+            ...prev,
+            [bet.id]: null,
+        }));
+        setPlaceBetErrors((prev) => ({
+            ...prev,
+            [bet.id]: null,
+        }));
+        setIsBetDisabled((prev) => ({
+            ...prev,
+            [bet.id]: false,
+        }));
+    };
+
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>, bet: Bet) => {
+        const value = parseInt(e.target.value, 10);
+        const selectedPlayer = (e.target.form?.elements.namedItem('player') as RadioNodeList)?.value as PlayerChoice;
+
+        if (!isNaN(value) && value > 0 && selectedPlayer) {
+            handleValidation(bet, value, selectedPlayer);
+        }
+    };
+
+    const handlePlayerChange = (e: React.ChangeEvent<HTMLInputElement>, bet: Bet) => {
+        const amountInput = e.target.form?.elements.namedItem('amount') as HTMLInputElement;
+        const amount = parseInt(amountInput.value, 10);
+        const selectedPlayer = e.target.value as PlayerChoice;
+
+        if (!isNaN(amount) && amount > 0) {
+            handleValidation(bet, amount, selectedPlayer);
+        }
+    };
+
+    const handlePlaceBet = async (bet: Bet, amount: number, player: PlayerChoice) => {
+        try {
+            if (!user) {
+                throw new Error("Пользователь не найден");
+            }
+
+            await placeBet({
+                betId: bet.id,
+                userId: user.id,
+                amount,
+                player,
+            });
+
+            // Обновляем данные ставок
+            mutate();
+
+            // После успешной ставки блокируем кнопку
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
+            }));
+
+            setPlaceBetErrors((prev) => ({
+                ...prev,
+                [bet.id]: null, // Очищаем ошибку при успешной ставке
+            }));
+        } catch (err) {
+            if (err instanceof Error) {
+                setPlaceBetErrors((prev) => ({
+                    ...prev,
+                    [bet.id]: err.message, // Устанавливаем ошибку для конкретной ставки
+                }));
+            } else {
+                setPlaceBetErrors((prev) => ({
+                    ...prev,
+                    [bet.id]: 'Неизвестная ошибка', // Устанавливаем общую ошибку
+                }));
+            }
+            console.error('Error placing bet:', err);
+        }
+    };
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>, bet: Bet) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+        const amount = parseInt(formData.get('amount') as string, 10);
+        const player = formData.get('player') as PlayerChoice;
+
+        if (isNaN(amount) || amount <= 0) {
+            setPlaceBetErrors((prev) => ({
+                ...prev,
+                [bet.id]: 'Сумма должна быть положительным целым числом',
+            }));
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
+            }));
+            return;
+        }
+
+        if (!user || user.points < amount) {
+            setPlaceBetErrors((prev) => ({
+                ...prev,
+                [bet.id]: 'Недостаточно баллов для совершения ставки',
+            }));
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
+            }));
+            return;
+        }
+
+        setIsBetDisabled((prev) => ({
+            ...prev,
+            [bet.id]: false,
+        }));
+        handlePlaceBet(bet, amount, player);
+    };
+
+    const handleCloseBet = async (betId: number) => {
+        if (!selectedWinner) {
+            setCloseBetError('Выберите победителя!');
+            return;
+        }
+
+        try {
+            if (selectedWinner === null || selectedWinner === undefined) {
+                throw new Error("Не выбран победитель.");
+            }
+
+            await closeBet(betId, selectedWinner);
+            mutate();
+            mutateUser(); // Обновляем данные пользователя
+            setSelectedWinner(null);
+            setCloseBetError(null);
+        } catch (error) {
+            if (error instanceof Error) {
+                setCloseBetError(error.message);
+            } else {
+                setCloseBetError('Не удалось закрыть ставку.');
+            }
+            console.error('Error closing bet:', error);
+        }
+    };
+
+    if (!session) {
+        return redirect('/not-auth');
+    }
+
+    if (isLoading) {
+        return <div>Загрузка данных...</div>;
+    }
+
+    if (error) {
+        return <div>Ошибка при загрузке данных: {error.message}</div>;
+    }
+
+    if (!bets) {
+        return <div>Нет данных</div>;
+    }
+
     return (
         <div>
             <div className="flex justify-between items-center">
