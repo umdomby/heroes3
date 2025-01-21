@@ -18,13 +18,18 @@ import {
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
-    TableFooter,
-    TableHead,
-    TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
@@ -290,22 +295,28 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     }
 
     return (
-        <div >
-            <p>Ваши баллы: {userUp?.points}</p>
+        <div>
+            <div className="flex justify-between items-center">
+                <div>
+                    <p>Ваши баллы: {userUp?.points}</p>
+                </div>
+                <div className="flex justify-end">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="h-5">Open</Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                            <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
+                            <DropdownMenuSeparator/>
+                            <DropdownMenuRadioGroup>
+                                <DropdownMenuRadioItem value="top">OPEN</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="bottom">CLOSED</DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </div>
 
-            {/* Общий TableHeader для всех ставок */}
-            {/*<Table className="table-fixed">*/}
-            {/*    /!*<TableCaption>Детали ставки</TableCaption>*!/*/}
-            {/*    <TableHeader>*/}
-            {/*        <TableRow>*/}
-            {/*            <TableHead className="w-[20%] overflow-hidden text-ellipsis whitespace-nowrap" >Игрок 1</TableHead>*/}
-            {/*            <TableHead className="w-[20%] overflow-hidden text-ellipsis whitespace-nowrap">Игрок 2</TableHead>*/}
-            {/*            <TableHead className="w-[2%] overflow-hidden text-ellipsis whitespace-nowrap">К</TableHead>*/}
-            {/*            <TableHead className="w-[2%] overflow-hidden text-ellipsis whitespace-nowrap">К</TableHead>*/}
-            {/*            <TableHead className="w-[20%] text-right overflow-hidden text-ellipsis whitespace-nowrap">Прибыль/убыток</TableHead>*/}
-            {/*        </TableRow>*/}
-            {/*    </TableHeader>*/}
-            {/*</Table>*/}
 
             {/* Отображение всех ставок */}
             {bets.map((bet: Bet) => {
@@ -360,17 +371,20 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
 
                                                 {/* Коэффициент для игрока 1 и 2*/}
                                                 <TableCell className="w-[15%]">
-                                                    <div className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}>
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                         {bet.currentOdds1.toFixed(2)}
                                                     </div>
-                                                    <div className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}>
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                         {bet.currentOdds2.toFixed(2)}
                                                     </div>
                                                 </TableCell>
 
 
                                                 {/* Прибыль/убыток */}
-                                                <TableCell className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
+                                                <TableCell
+                                                    className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
                                                     <div>
                                                         <span
                                                             className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> :{' '}
@@ -399,7 +413,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                     {bet.status === 'OPEN' && (
                                         <div className="m-4">
                                             <p>
-                                            Общая сумма ставок на это событие:<span className="text-green-400"> {bet.totalBetAmount}</span>
+                                                Общая сумма ставок на это событие:<span
+                                                className="text-green-400"> {bet.totalBetAmount}</span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на <span
@@ -445,39 +460,40 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
 
                                                 <div className="flex gap-2 m-2">
                                                     <input className="border p-2 rounded w-[20%]"
-                                                        type="number"
-                                                        name="amount"
-                                                        placeholder="BET"
-                                                        min="1"
-                                                        step="1"
-                                                        required
+                                                           type="number"
+                                                           name="amount"
+                                                           placeholder="BET"
+                                                           min="1"
+                                                           step="1"
+                                                           required
 
-                                                        onChange={(e) => handleAmountChange(e, bet)}
+                                                           onChange={(e) => handleAmountChange(e, bet)}
                                                     />
                                                     <label className="border p-2 rounded w-[30%] text-center">
                                                         <input className="mt-1"
-                                                            type="radio"
-                                                            name="player"
-                                                            value={PlayerChoice.PLAYER1}
-                                                            required
-                                                            onChange={(e) => handlePlayerChange(e, bet)}
+                                                               type="radio"
+                                                               name="player"
+                                                               value={PlayerChoice.PLAYER1}
+                                                               required
+                                                               onChange={(e) => handlePlayerChange(e, bet)}
                                                         />
                                                         <span
                                                             className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>
                                                     </label>
                                                     <label className="border p-2 rounded w-[30%] text-center">
                                                         <input className="mt-1"
-                                                            type="radio"
-                                                            name="player"
-                                                            value={PlayerChoice.PLAYER2}
-                                                            required
-                                                            onChange={(e) => handlePlayerChange(e, bet)}
+                                                               type="radio"
+                                                               name="player"
+                                                               value={PlayerChoice.PLAYER2}
+                                                               required
+                                                               onChange={(e) => handlePlayerChange(e, bet)}
                                                         />
                                                         <span
                                                             className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>
                                                     </label>
 
-                                                    <Button className={`mt-2 w-[20%] ${isBetDisabled[bet.id] ? 'bg-gray-400 cursor-not-allowed' : ''}`}
+                                                    <Button
+                                                        className={`mt-2 w-[20%] ${isBetDisabled[bet.id] ? 'bg-gray-400 cursor-not-allowed' : ''}`}
                                                         type="submit"
                                                         disabled={isBetDisabled[bet.id] || !user}
                                                     >
