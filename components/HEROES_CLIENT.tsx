@@ -21,6 +21,7 @@ import {
     TableCell,
     TableRow,
 } from "@/components/ui/table";
+
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -30,6 +31,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+
 
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
@@ -72,7 +74,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>({});
     const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
-    const [statusFilter, setStatusFilter] = useState<BetStatus>(BetStatus.OPEN); // Состояние для фильтрации
 
     useEffect(() => {
         let source = new EventSource('/api/sse');
@@ -105,16 +106,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     if (isLoadingUser) return <div>Загрузка данных пользователя...</div>;
     if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
 
-    // Фильтрация ставок по статусу
-    const filteredBets = bets?.filter((bet) => {
-        if (statusFilter === BetStatus.CLOSED) {
-            // Проверяем, участвовал ли пользователь в этой ставке
-            const userParticipated = bet.participants.some((p) => p.userId === user?.id);
-            return bet.status === BetStatus.CLOSED && userParticipated;
-        } else {
-            return bet.status === statusFilter;
-        }
-    }) || [];
+    // Фильтрация ставок по статусу OPEN
+    const filteredBets = bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
 
     const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
         const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2;
@@ -313,21 +306,19 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                 <div>
                     <p>Ваши баллы: {userUp?.points}</p>
                 </div>
-                <div className="flex justify-end">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="h-5">Фильтр: {statusFilter}</Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56">
-                            <DropdownMenuLabel>Фильтр по статусу</DropdownMenuLabel>
-                            <DropdownMenuSeparator/>
-                            <DropdownMenuRadioGroup value={statusFilter} onValueChange={(value) => setStatusFilter(value as BetStatus)}>
-                                <DropdownMenuRadioItem value={BetStatus.OPEN}>OPEN</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value={BetStatus.CLOSED}>CLOSED</DropdownMenuRadioItem>
-                            </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="h-5">Open</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                        <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup>
+                            <DropdownMenuRadioItem value="top">Top</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="bottom">Bottom</DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             {/* Отображение отфильтрованных ставок */}
