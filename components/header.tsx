@@ -49,7 +49,7 @@ export const Header: React.FC<Props> = ({  className }) => {
                                 Создать ставку
                             </Button>
                         </Link>
-                        <Link href="/create-bet" className="flex items-center gap-2 h-5">
+                        <Link href="/rating" className="flex items-center gap-2 h-5">
                             <Button className="h-5">
                                 Rating
                             </Button>
