@@ -397,7 +397,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                 <AccordionContent>
                                     {/* Остальной код остается без изменений */}
                                     {bet.status === 'OPEN' && (
-                                        <div className="mt-4">
+                                        <div className="m-4">
                                             <p>
                                             Общая сумма ставок на это событие:<span className="text-green-400"> {bet.totalBetAmount}</span>
                                             </p>
@@ -417,7 +417,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                     )}
 
                                     {userBets.length > 0 && (
-                                        <div className="mt-4 p-4 rounded-lg">
+                                        <div className="m-1 p-4 rounded-lg">
                                             <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
                                             {userBets.map((participant) => (
                                                 <div key={participant.id}

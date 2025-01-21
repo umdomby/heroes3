@@ -20,11 +20,38 @@ model User {
   role         UserRole         @default(USER)
   img          String?
   points       Int              @default(1000) // баллы пользователя
+  p2pPlus      Int?             @default(0)
+  p2pMinus     Int?             @default(0)
+  contact      Json? // поле для хранения контактных данных
   loginHistory Json? // поле для хранения истории входов
   betsCreated  Bet[]            @relation("BetsCreated")
   betsPlaced   BetParticipant[]
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+}
+
+model PageP2P {
+  id        Int      @id @default(autoincrement())
+  user1     Int
+  user2     Int
+  chatP2P   Json?
+  points    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderP2P {
+  id        Int      @id @default(autoincrement())
+  user1     Int
+  user2     Int
+  points    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactDataEnum {
+  id   Int    @id @default(autoincrement())
+  name String @unique
 }
 
 model Bet {
@@ -75,8 +102,10 @@ model GlobalData {
   usersPlay      Int // Количество пользователей, участвующих в открытых ставках
   pointsBet      Int // Общая сумма ставок в открытых ставках
   users          Int // Количество зарегистрированных пользователей
-  pointsStart    Int // Количество зарегистрированных пользователей * 1000
-  pointsAllUsers Int // Сумма всех очков пользователей
+  pointsStart    Int // Количество зарегистрированных пользователей * 1000 free
+  pointsAllUsers Int // Сумма баллов у пользователей  pointsAllStart - pointsAllUsers = pointsSystem
+  pointsAllStart Int?     @default(1000000) // start constantpoints
+  pointsPay      Int? // сколько баллов куплено
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
