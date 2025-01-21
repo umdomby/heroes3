@@ -269,9 +269,14 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                 throw new Error("Не выбран победитель.");
             }
 
+            // Закрываем ставку
             await closeBet(betId, selectedWinner);
-            mutate();
+
+            // Обновляем данные ставок и пользователя
+            mutate(undefined, true); // Принудительно выполняем повторный запрос
             mutateUser(); // Обновляем данные пользователя
+
+            // Сбрасываем состояние
             setSelectedWinner(null);
             setCloseBetError(null);
         } catch (error) {
