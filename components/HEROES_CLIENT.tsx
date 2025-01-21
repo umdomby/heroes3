@@ -294,20 +294,18 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
             <p>Ваши баллы: {userUp?.points}</p>
 
             {/* Общий TableHeader для всех ставок */}
-            <Table>
-                {/*<TableCaption>Детали ставки</TableCaption>*/}
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="text-center">Игрок 1</TableHead>
-                        <TableHead className="text-center">vs</TableHead>
-                        <TableHead className="text-center">Игрок 2</TableHead>
-                        <TableHead className="text-center">Коэффициенты</TableHead>
-                        <TableHead className="text-center"></TableHead>
-                        <TableHead className="text-center">Прибыль/убыток</TableHead>
-                        <TableHead className="text-center"></TableHead>
-                    </TableRow>
-                </TableHeader>
-            </Table>
+            {/*<Table className="table-fixed">*/}
+            {/*    /!*<TableCaption>Детали ставки</TableCaption>*!/*/}
+            {/*    <TableHeader>*/}
+            {/*        <TableRow>*/}
+            {/*            <TableHead className="w-[20%] overflow-hidden text-ellipsis whitespace-nowrap" >Игрок 1</TableHead>*/}
+            {/*            <TableHead className="w-[20%] overflow-hidden text-ellipsis whitespace-nowrap">Игрок 2</TableHead>*/}
+            {/*            <TableHead className="w-[2%] overflow-hidden text-ellipsis whitespace-nowrap">К</TableHead>*/}
+            {/*            <TableHead className="w-[2%] overflow-hidden text-ellipsis whitespace-nowrap">К</TableHead>*/}
+            {/*            <TableHead className="w-[20%] text-right overflow-hidden text-ellipsis whitespace-nowrap">Прибыль/убыток</TableHead>*/}
+            {/*        </TableRow>*/}
+            {/*    </TableHeader>*/}
+            {/*</Table>*/}
 
             {/* Отображение всех ставок */}
             {bets.map((bet: Bet) => {
@@ -331,49 +329,66 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                     .reduce((sum, p) => sum + p.profit, 0) - totalBetOnPlayer1;
 
                 return (
-                    <div key={bet.id} >
+                    <div key={bet.id} className="border border-gray-700 mt-1">
                         <Accordion type="single" collapsible>
                             <AccordionItem value={`item-${bet.id}`}>
                                 <AccordionTrigger>
-                                    <Table >
+                                    <Table>
                                         <TableBody>
                                             <TableRow>
                                                 {/* Игрок 1 */}
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER1]}`}>
-                                                    {bet.player1.name}: {bet.totalBetPlayer1}
+                                                <TableCell
+                                                    className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[25%]`}>
+                                                    <div>
+                                                        {bet.player1.name}
+                                                    </div>
+                                                    <div>
+                                                        {bet.totalBetPlayer1}
+                                                    </div>
                                                 </TableCell>
-
-                                                {/* Разделитель "vs" */}
-                                                <TableCell>vs</TableCell>
 
                                                 {/* Игрок 2 */}
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]}`}>
-                                                    {bet.player2.name}: {bet.totalBetPlayer2}
+                                                <TableCell
+                                                    className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[25%]`}>
+                                                    <div>
+                                                        {bet.player2.name}
+                                                    </div>
+                                                    <div>
+                                                        {bet.totalBetPlayer2}
+                                                    </div>
                                                 </TableCell>
 
-                                                {/* Коэффициент для игрока 1 */}
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER1]}`}>
-                                                    {bet.currentOdds1.toFixed(2)}
+                                                {/* Коэффициент для игрока 1 и 2*/}
+                                                <TableCell className="w-[15%]">
+                                                    <div className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}>
+                                                        {bet.currentOdds1.toFixed(2)}
+                                                    </div>
+                                                    <div className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}>
+                                                        {bet.currentOdds2.toFixed(2)}
+                                                    </div>
                                                 </TableCell>
 
-                                                {/* Разделитель "-" */}
-                                                <TableCell>-</TableCell>
-
-                                                {/* Коэффициент для игрока 2 */}
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]}`}>
-                                                    {bet.currentOdds2.toFixed(2)}
-                                                </TableCell>
 
                                                 {/* Прибыль/убыток */}
-                                                <TableCell >
-                                                    <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> :{' '}
-                                                    <span className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                <TableCell className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
+                                                    <div>
+                                                        <span
+                                                            className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span> :{' '}
+                                                        <span
+                                                            className={profitIfPlayer1Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
                                                     {profitIfPlayer1Wins >= 0 ? `+${profitIfPlayer1Wins.toFixed(2)}` : profitIfPlayer1Wins.toFixed(2)}
-                                                </span>{' '}
-                                                    <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> :{' '}
-                                                    <span className={profitIfPlayer2Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                    </span>
+                                                    </div>
+
+                                                    <div>
+                                                <span
+                                                    className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span> :{' '}
+                                                        <span
+                                                            className={profitIfPlayer2Wins >= 0 ? 'text-green-600' : 'text-red-600'}>
                                                     {profitIfPlayer2Wins >= 0 ? `+${profitIfPlayer2Wins.toFixed(2)}` : profitIfPlayer2Wins.toFixed(2)}
-                                                </span>
+                                                    </span>
+                                                    </div>
+
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
@@ -384,7 +399,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                     {bet.status === 'OPEN' && (
                                         <div className="mt-4">
                                             <p>
-                                                Общая сумма ставок на матч:<span className="text-green-400"> {bet.totalBetAmount}</span>
+                                            Общая сумма ставок на это событие:<span className="text-green-400"> {bet.totalBetAmount}</span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на <span
@@ -427,19 +442,20 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                     {bet.status === 'OPEN' && (
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
-                                                <input
-                                                    type="number"
-                                                    name="amount"
-                                                    placeholder="Сумма ставки"
-                                                    min="1"
-                                                    step="1"
-                                                    required
-                                                    className="border p-2 rounded w-full"
-                                                    onChange={(e) => handleAmountChange(e, bet)}
-                                                />
-                                                <div className="flex gap-2 mt-2">
-                                                    <label>
-                                                        <input
+
+                                                <div className="flex gap-2 m-2">
+                                                    <input className="border p-2 rounded w-[20%]"
+                                                        type="number"
+                                                        name="amount"
+                                                        placeholder="BET"
+                                                        min="1"
+                                                        step="1"
+                                                        required
+
+                                                        onChange={(e) => handleAmountChange(e, bet)}
+                                                    />
+                                                    <label className="border p-2 rounded w-[30%] text-center">
+                                                        <input className="mt-1"
                                                             type="radio"
                                                             name="player"
                                                             value={PlayerChoice.PLAYER1}
@@ -449,8 +465,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                         <span
                                                             className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>
                                                     </label>
-                                                    <label>
-                                                        <input
+                                                    <label className="border p-2 rounded w-[30%] text-center">
+                                                        <input className="mt-1"
                                                             type="radio"
                                                             name="player"
                                                             value={PlayerChoice.PLAYER2}
@@ -460,18 +476,18 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                         <span
                                                             className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>
                                                     </label>
+
+                                                    <Button className={`mt-2 w-[20%] ${isBetDisabled[bet.id] ? 'bg-gray-400 cursor-not-allowed' : ''}`}
+                                                        type="submit"
+                                                        disabled={isBetDisabled[bet.id] || !user}
+                                                    >
+                                                        BET
+                                                    </Button>
                                                 </div>
                                                 {oddsErrors[bet.id] &&
                                                     <p className="text-red-500">{oddsErrors[bet.id]}</p>}
                                                 {placeBetErrors[bet.id] &&
                                                     <p className="text-red-500">{placeBetErrors[bet.id]}</p>}
-                                                <Button
-                                                    type="submit"
-                                                    className={`mt-2 w-full ${isBetDisabled[bet.id] ? 'bg-gray-400 cursor-not-allowed' : ''}`}
-                                                    disabled={isBetDisabled[bet.id] || !user}
-                                                >
-                                                    Сделать ставку
-                                                </Button>
                                             </form>
                                         </div>
                                     )}

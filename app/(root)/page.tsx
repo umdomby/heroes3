@@ -28,7 +28,7 @@ export default async function Home() {
 
     if (user) {
         return (
-            <Container className="flex flex-col my-10">
+            <Container className="w-[100%]">
                 <Suspense fallback={<Loading/>}>
                     <GlobalData />
                     <HEROES_CLIENT user={user}/>
