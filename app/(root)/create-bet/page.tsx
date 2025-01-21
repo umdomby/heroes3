@@ -1,3 +1,4 @@
+"use server";
 import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
 import {redirect} from 'next/navigation';
@@ -5,7 +6,7 @@ import {CreateBetForm} from '@/components/create-bet-form';
 import {Suspense} from 'react';
 import Loading from "@/app/(root)/loading";
 import {clientCreateBet} from "@/app/actions";
-
+import {Container} from '@/components/container';
 
 async function fetchData() {
     const session = await getUserSession();
@@ -40,15 +41,17 @@ export default async function CreateBetPage() {
 
 
     return (
-        <Suspense fallback={<Loading/>}>
-            <CreateBetForm
-                user={user}
-                categories={categories}
-                products={products}
-                productItems={productItems}
-                players={players}
-                createBet={clientCreateBet}
-            />
-        </Suspense>
+        <Container className="flex flex-col my-10">
+            <Suspense fallback={<Loading/>}>
+                <CreateBetForm
+                    user={user}
+                    categories={categories}
+                    products={products}
+                    productItems={productItems}
+                    players={players}
+                    createBet={clientCreateBet}
+                />
+            </Suspense>
+        </Container>
     );
 }
