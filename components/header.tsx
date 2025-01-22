@@ -62,21 +62,20 @@ export const Header: React.FC<Props> = ({className}) => {
                                 {/*<DropdownMenuLabel>Panel</DropdownMenuLabel>*/}
                                 <DropdownMenuSeparator/>
                                 <DropdownMenuRadioGroup>
-                                    <DropdownMenuRadioItem value="create-bet">
-                                        <Link href="/create-bet" className="flex items-center gap-2 mb-1">
-                                                Создать событие
-                                        </Link>
-                                    </DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="rating">
-                                        <Link href="/rating" className="flex items-center gap-2 h-5">
-                                                Rating
-                                        </Link>
-                                    </DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="bet-closed">
-                                        <Link href="/bet-closed" className="flex items-center gap-2 h-5">
+                                    <Link href="/create-bet">
+                                        <DropdownMenuRadioItem value="create-bet">
+                                            Создать событие
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/rating">
+                                        <DropdownMenuRadioItem value="rating">
+                                            Rating
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-closed">
+                                        <DropdownMenuRadioItem value="bet-closed">
                                             Bet closed
-                                        </Link>
-                                    </DropdownMenuRadioItem>
+                                        </DropdownMenuRadioItem> </Link>
                                     <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
                                 </DropdownMenuRadioGroup>
                             </DropdownMenuContent>
