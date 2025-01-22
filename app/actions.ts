@@ -27,13 +27,13 @@ export async function updateGlobalData() {
         status: 'OPEN', // Только открытые ставки
       },
     });
-    const pointsBet = pointsBetResult._sum.totalBetAmount || 0;
+    const pointsBet = parseFloat((pointsBetResult._sum.totalBetAmount || 0).toFixed(2));
 
     // 3. Количество зарегистрированных пользователей
     const users = await prisma.user.count();
 
     // 4. Начальные очки (количество пользователей * 1000)
-    const pointsStart = users * 1000;
+    const pointsStart = parseFloat((users * 1000).toFixed(2));
 
     // 5. Сумма всех очков пользователей
     const pointsAllUsersResult = await prisma.user.aggregate({
@@ -41,7 +41,7 @@ export async function updateGlobalData() {
         points: true,
       },
     });
-    const pointsAllUsers = pointsAllUsersResult._sum.points || 0;
+    const pointsAllUsers = parseFloat((pointsAllUsersResult._sum.points || 0).toFixed(2));
 
     // Обновляем или создаем запись в GlobalData
     await prisma.globalData.upsert({
@@ -130,7 +130,7 @@ export async function clientCreateBet(formData: any) {
     }
 
     // Проверяем, что сумма начальных ставок не превышает 100 баллов
-    const totalBetAmount = formData.initBetPlayer1 + formData.initBetPlayer2;
+    const totalBetAmount = parseFloat((formData.initBetPlayer1 + formData.initBetPlayer2).toFixed(2));
     if (totalBetAmount > 100) {
       throw new Error("Сумма начальных ставок не должна превышать 100 баллов");
     }
@@ -145,12 +145,12 @@ export async function clientCreateBet(formData: any) {
         totalBetAmount: 0, // Общая сумма начальных ставок
         maxBetPlayer1: maxBetPlayer1, // Максимальная сумма ставок на игрока 1
         maxBetPlayer2: maxBetPlayer2, // Максимальная сумма ставок на игрока 2
-        currentOdds1: formData.currentOdds1, // Инициализируем текущие коэффициенты (по умолчанию 1)
-        currentOdds2: formData.currentOdds2, // Инициализируем текущие коэффициенты (по умолчанию 1)
+        currentOdds1: parseFloat(formData.currentOdds1.toFixed(2)), // Инициализируем текущие коэффициенты (по умолчанию 1)
+        currentOdds2: parseFloat(formData.currentOdds2.toFixed(2)), // Инициализируем текущие коэффициенты (по умолчанию 1)
         player1Id: formData.player1Id,
         player2Id: formData.player2Id,
-        initBetPlayer1: formData.initBetPlayer1,
-        initBetPlayer2: formData.initBetPlayer2,
+        initBetPlayer1: parseFloat(formData.initBetPlayer1.toFixed(2)),
+        initBetPlayer2: parseFloat(formData.initBetPlayer2.toFixed(2)),
         categoryId: formData.categoryId,
         productId: formData.productId,
         productItemId: formData.productItemId,
@@ -200,22 +200,22 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     }
 
     // Рассчитываем текущие суммы ставок на каждого игрока (без учета initBetPlayer1 и initBetPlayer2)
-    const totalPlayer1 = bet.participants
+    const totalPlayer1 = parseFloat(bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER1)
-        .reduce((sum, p) => sum + p.amount, 0); // Убираем initBetPlayer1
+        .reduce((sum, p) => sum + p.amount, 0).toFixed(2)); // Убираем initBetPlayer1
 
-    const totalPlayer2 = bet.participants
+    const totalPlayer2 = parseFloat(bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER2)
-        .reduce((sum, p) => sum + p.amount, 0); // Убираем initBetPlayer2
+        .reduce((sum, p) => sum + p.amount, 0).toFixed(2)); // Убираем initBetPlayer2
 
     // Рассчитываем общие суммы ставок (с учетом initBetPlayer1 и initBetPlayer2)
-    const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
-    const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
-    const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2;
+    const totalWithInitPlayer1 = parseFloat((totalPlayer1 + (bet.initBetPlayer1 || 0)).toFixed(2));
+    const totalWithInitPlayer2 = parseFloat((totalPlayer2 + (bet.initBetPlayer2 || 0)).toFixed(2));
+    const totalWithInit = parseFloat((totalWithInitPlayer1 + totalWithInitPlayer2).toFixed(2));
 
     // Расчет текущих коэффициентов (с учетом initBetPlayer1 и initBetPlayer2)
-    const oddsPlayer1 = totalWithInitPlayer1 === 0 ? 1 : totalWithInit / totalWithInitPlayer1;
-    const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : totalWithInit / totalWithInitPlayer2;
+    const oddsPlayer1 = totalWithInitPlayer1 === 0 ? 1 : parseFloat((totalWithInit / totalWithInitPlayer1).toFixed(2));
+    const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : parseFloat((totalWithInit / totalWithInitPlayer2).toFixed(2));
 
     // Проверка коэффициента для выбранного игрока
     if (
@@ -228,7 +228,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     }
 
     // Рассчитываем потенциальную прибыль
-    const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
+    const potentialProfit = parseFloat((amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2)).toFixed(2));
 
     // Максимальная ставка, которую может сделать пользователь
     const userMaxBet = user.points;
@@ -249,17 +249,17 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Обновляем суммы ставок и коэффициенты с учетом новой ставки
     const updatedTotalPlayer = {
-      [PlayerChoice.PLAYER1]: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
-      [PlayerChoice.PLAYER2]: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
+      [PlayerChoice.PLAYER1]: player === PlayerChoice.PLAYER1 ? parseFloat((totalPlayer1 + amount).toFixed(2)) : totalPlayer1,
+      [PlayerChoice.PLAYER2]: player === PlayerChoice.PLAYER2 ? parseFloat((totalPlayer2 + amount).toFixed(2)) : totalPlayer2,
     };
 
-    const updatedTotalWithInitPlayer1 = updatedTotalPlayer[PlayerChoice.PLAYER1] + (bet.initBetPlayer1 || 0);
-    const updatedTotalWithInitPlayer2 = updatedTotalPlayer[PlayerChoice.PLAYER2] + (bet.initBetPlayer2 || 0);
-    const updatedTotalWithInit = updatedTotalWithInitPlayer1 + updatedTotalWithInitPlayer2;
+    const updatedTotalWithInitPlayer1 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER1] + (bet.initBetPlayer1 || 0)).toFixed(2));
+    const updatedTotalWithInitPlayer2 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER2] + (bet.initBetPlayer2 || 0)).toFixed(2));
+    const updatedTotalWithInit = parseFloat((updatedTotalWithInitPlayer1 + updatedTotalWithInitPlayer2).toFixed(2));
 
     const updatedOdds = {
-      [PlayerChoice.PLAYER1]: updatedTotalWithInitPlayer1 === 0 ? 1 : updatedTotalWithInit / updatedTotalWithInitPlayer1,
-      [PlayerChoice.PLAYER2]: updatedTotalWithInitPlayer2 === 0 ? 1 : updatedTotalWithInit / updatedTotalWithInitPlayer2,
+      [PlayerChoice.PLAYER1]: updatedTotalWithInitPlayer1 === 0 ? 1 : parseFloat((updatedTotalWithInit / updatedTotalWithInitPlayer1).toFixed(2)),
+      [PlayerChoice.PLAYER2]: updatedTotalWithInitPlayer2 === 0 ? 1 : parseFloat((updatedTotalWithInit / updatedTotalWithInitPlayer2).toFixed(2)),
     };
 
     // Проверка будущих коэффициентов
@@ -293,7 +293,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       prisma.user.update({
         where: { id: userId },
         data: {
-          points: user.points - amount,
+          points: parseFloat((user.points - amount).toFixed(2)),
         },
       }),
       prisma.bet.update({
@@ -327,7 +327,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
-
 
 export async function closeBet(betId: number, winnerId: number) {
   'use server';

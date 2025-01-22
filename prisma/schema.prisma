@@ -19,7 +19,7 @@ model User {
   password          String
   role              UserRole               @default(USER)
   img               String?
-  points            Int                    @default(1000) // баллы пользователя
+  points            Float                  @default(1000) // баллы пользователя
   p2pPlus           Int?                   @default(0)
   p2pMinus          Int?                   @default(0)
   contact           Json? // поле для хранения контактных данных
@@ -37,7 +37,7 @@ model PageP2P {
   user1     Int
   user2     Int
   chatP2P   Json?
-  points    Int
+  points    Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -46,7 +46,7 @@ model OrderP2P {
   id        Int      @id @default(autoincrement())
   user1     Int
   user2     Int
-  points    Int
+  points    Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -62,15 +62,15 @@ model Bet {
   player1Id       Int
   player2         Player           @relation(name: "Player2Bets", fields: [player2Id], references: [id])
   player2Id       Int
-  initBetPlayer1  Int // инициализация ставок на игрока 1
-  initBetPlayer2  Int // инициализация ставок на игрока 2
-  totalBetPlayer1 Int // Сумма ставок на игрока 1
-  totalBetPlayer2 Int // Сумма ставок на игрока 2
-  maxBetPlayer1   Int // Максимальная сумма ставок на игрока 1
-  maxBetPlayer2   Int // Максимальная сумма ставок на игрока 2
+  initBetPlayer1  Float // инициализация ставок на игрока 1
+  initBetPlayer2  Float // инициализация ставок на игрока 2
+  totalBetPlayer1 Float // Сумма ставок на игрока 1
+  totalBetPlayer2 Float // Сумма ставок на игрока 2
+  maxBetPlayer1   Float // Максимальная сумма ставок на игрока 1
+  maxBetPlayer2   Float // Максимальная сумма ставок на игрока 2
   currentOdds1    Float // Текущий коэффициент для игрока 1
   currentOdds2    Float // Текущий коэффициент для игрока 2
-  totalBetAmount  Int              @default(0)
+  totalBetAmount  Float            @default(0)
   creator         User             @relation("BetsCreated", fields: [creatorId], references: [id])
   creatorId       Int
   status          BetStatus        @default(OPEN)
@@ -92,9 +92,9 @@ model BetParticipant {
   bet       Bet          @relation(fields: [betId], references: [id])
   userId    Int
   user      User         @relation(fields: [userId], references: [id])
-  amount    Int
+  amount    Float
   odds      Float // Коэффициент ставки
-  profit    Int
+  profit    Float
   player    PlayerChoice
   isWinner  Boolean      @default(false)
   createdAt DateTime     @default(now())
@@ -107,15 +107,15 @@ model BetCLOSED {
   player1Id          Int
   player2            Player                 @relation(name: "Player2BetsCLOSED", fields: [player2Id], references: [id])
   player2Id          Int
-  initBetPlayer1     Int // Инициализация ставок на игрока 1
-  initBetPlayer2     Int // Инициализация ставок на игрока 2
-  totalBetPlayer1    Int // Сумма ставок на игрока 1
-  totalBetPlayer2    Int // Сумма ставок на игрока 2
-  maxBetPlayer1      Int // Максимальная сумма ставок на игрока 1
-  maxBetPlayer2      Int // Максимальная сумма ставок на игрока 2
+  initBetPlayer1     Float // Инициализация ставок на игрока 1
+  initBetPlayer2     Float // Инициализация ставок на игрока 2
+  totalBetPlayer1    Float // Сумма ставок на игрока 1
+  totalBetPlayer2    Float // Сумма ставок на игрока 2
+  maxBetPlayer1      Float // Максимальная сумма ставок на игрока 1
+  maxBetPlayer2      Float // Максимальная сумма ставок на игрока 2
   currentOdds1       Float // Текущий коэффициент для игрока 1
   currentOdds2       Float // Текущий коэффициент для игрока 2
-  totalBetAmount     Int                    @default(0) // Общая сумма ставок
+  totalBetAmount     Float                  @default(0) // Общая сумма ставок
   creator            User                   @relation("BetsCLOSEDCreated", fields: [creatorId], references: [id])
   creatorId          Int
   status             BetStatus              @default(CLOSED) // Статус ставки
@@ -136,9 +136,9 @@ model BetParticipantCLOSED {
   betCLOSED   BetCLOSED    @relation("BetCLOSEDParticipants", fields: [betCLOSEDId], references: [id]) // Обратная связь
   userId      Int
   user        User         @relation(fields: [userId], references: [id])
-  amount      Int // Сумма ставки
+  amount      Float // Сумма ставки
   odds        Float // Коэффициент ставки
-  profit      Int // Выигрыш
+  profit      Float // Выигрыш
   player      PlayerChoice // Выбор игрока (PLAYER1 или PLAYER2)
   isWinner    Boolean      @default(false) // Победитель ли?
   createdAt   DateTime     @default(now()) // Дата создания
@@ -147,12 +147,12 @@ model BetParticipantCLOSED {
 model GlobalData {
   id             Int      @id @default(autoincrement())
   usersPlay      Int // Количество пользователей, участвующих в открытых ставках
-  pointsBet      Int // Общая сумма ставок в открытых ставках
+  pointsBet      Float // Общая сумма ставок в открытых ставках
   users          Int // Количество зарегистрированных пользователей
-  pointsStart    Int // Количество зарегистрированных пользователей * 1000 free
-  pointsAllUsers Int // Сумма баллов у пользователей  pointsAllStart - pointsAllUsers = pointsSystem
-  pointsAllStart Int?     @default(1000000) // start constantpoints
-  pointsPay      Int? // сколько баллов куплено
+  pointsStart    Float // Количество зарегистрированных пользователей * 1000 free
+  pointsAllUsers Float // Сумма баллов у пользователей  pointsAllStart - pointsAllUsers = pointsSystem
+  pointsAllStart Float?   @default(1000000) // start constantpoints
+  pointsPay      Float? // сколько баллов куплено
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

@@ -153,7 +153,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     };
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>, bet: Bet) => {
-        const value = parseInt(e.target.value, 10);
+        const value = parseFloat(e.target.value);
         const selectedPlayer = (e.target.form?.elements.namedItem('player') as RadioNodeList)?.value as PlayerChoice;
 
         if (!isNaN(value) && value > 0 && selectedPlayer) {
@@ -217,13 +217,13 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
-        const amount = parseInt(formData.get('amount') as string, 10);
+        const amount = parseFloat(formData.get('amount') as string);
         const player = formData.get('player') as PlayerChoice;
 
         if (isNaN(amount) || amount <= 0) {
             setPlaceBetErrors((prev) => ({
                 ...prev,
-                [bet.id]: 'Сумма должна быть положительным целым числом',
+                [bet.id]: 'Сумма должна быть положительным числом',
             }));
             setIsBetDisabled((prev) => ({
                 ...prev,
