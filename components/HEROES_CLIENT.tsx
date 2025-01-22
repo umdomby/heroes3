@@ -22,16 +22,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-
 
 const fetcher = (url: string, options?: RequestInit) => fetch(url, options).then(res => res.json());
 
@@ -311,22 +301,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     return (
         <div>
             <div className="flex justify-between items-center">
-                <div>
                     <p>Ваши баллы: {userUp?.points}</p>
-                </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="h-5">Open</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                        <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup>
-                            <DropdownMenuRadioItem value="top">Top</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="bottom">Bottom</DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                </DropdownMenu>
             </div>
 
             {/* Отображение отфильтрованных ставок */}

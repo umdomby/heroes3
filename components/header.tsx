@@ -1,21 +1,31 @@
 'use client';
 
-import { cn } from '@/components/lib/utils';
+import {cn} from '@/components/lib/utils';
 import React from 'react';
-import { Container } from './container';
+import {Container} from './container';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ProfileButton } from './profile-button';
-import { AuthModal } from './modals';
+import {ProfileButton} from './profile-button';
+import {AuthModal} from './modals';
 import {ModeToggle} from "@/components/buttonTheme";
 import {Button} from "@/components/ui";
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 
 interface Props {
     className?: string;
 }
 
-export const Header: React.FC<Props> = ({  className }) => {
+export const Header: React.FC<Props> = ({className}) => {
     const [openAuthModal, setOpenAuthModal] = React.useState(false);
 
     return (
@@ -24,13 +34,13 @@ export const Header: React.FC<Props> = ({  className }) => {
                 {/* Левая часть */}
                 <Link href="/">
                     <div className="flex items-center gap-4">
-                            <Image
-                                src="/logo.png"
-                                alt="Logo"
-                                width={65}
-                                height={65}
-                                priority
-                            />
+                        <Image
+                            src="/logo.png"
+                            alt="Logo"
+                            width={65}
+                            height={65}
+                            priority
+                        />
                         <div>
                             <h1 className="text-2xl uppercase font-black">
                                 HEROES<span className="text-red-500">3</span>
@@ -44,19 +54,36 @@ export const Header: React.FC<Props> = ({  className }) => {
                 {/* Правая часть */}
                 <div className="flex items-center gap-3">
                     <div>
-                        <Link href="/create-bet" className="flex items-center gap-2 mb-1">
-                            <Button className="h-5">
-                                Создать ставку
-                            </Button>
-                        </Link>
-                        <Link href="/rating" className="flex items-center gap-2 h-5">
-                            <Button className="h-5">
-                                Rating
-                            </Button>
-                        </Link>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild className="width-[20%]">
+                                <Button variant="outline" className="h-5">SYSTEM</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56">
+                                {/*<DropdownMenuLabel>Panel</DropdownMenuLabel>*/}
+                                <DropdownMenuSeparator/>
+                                <DropdownMenuRadioGroup>
+                                    <DropdownMenuRadioItem value="create-bet">No Link</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="bottom">
+                                        <Link href="/create-bet" className="flex items-center gap-2 mb-1">
+                                                Создать ставку
+                                        </Link>
+                                    </DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="rating">
+                                        <Link href="/rating" className="flex items-center gap-2 h-5">
+                                                Rating
+                                        </Link>
+                                    </DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="bet-closed">
+                                        <Link href="/bet-closed" className="flex items-center gap-2 h-5">
+                                            Bet closed
+                                        </Link>
+                                    </DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                     <div>
-                        <ModeToggle />
                         <AuthModal open={openAuthModal} onClose={() => setOpenAuthModal(false)}/>
                         <ProfileButton onClickSignIn={() => setOpenAuthModal(true)}/>
                     </div>
