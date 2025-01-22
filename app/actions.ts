@@ -126,13 +126,7 @@ export async function clientCreateBet(formData: any) {
     throw new Error("User session is not available.");
   }
 
-  console.log("formData:", formData); // Логируем входящие данные
-  console.log("session:", session); // Логируем сессию
-
   try {
-    console.log("creatorId:", Number(session?.id)); // Логируем creatorId перед вызовом Prisma
-
-    // Получаем текущего пользователя
     const user = await prisma.user.findUnique({
       where: { id: Number(session.id) },
     });
@@ -141,16 +135,13 @@ export async function clientCreateBet(formData: any) {
       throw new Error("Пользователь не найден");
     }
 
-    // Проверяем, что сумма начальных ставок не превышает 100 баллов
     const totalBetAmount = parseFloat((formData.initBetPlayer1 + formData.initBetPlayer2).toFixed(2));
     if (totalBetAmount > 100) {
       throw new Error("Сумма начальных ставок не должна превышать 100 баллов");
     }
 
-    // Рассчитываем максимальные ставки на основе начальных значений
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(formData.initBetPlayer1, formData.initBetPlayer2);
 
-    // Создаем ставку в базе данных
     const newBet = await prisma.bet.create({
       data: {
         status: 'OPEN', // Устанавливаем статус ставки как "открытая"
@@ -192,7 +183,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
   try {
     const { betId, userId, amount, player } = formData;
 
-    // Проверяем, что ставка существует и доступна
     const bet = await prisma.bet.findUnique({
       where: { id: betId },
       include: { participants: true },
@@ -202,7 +192,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Ставка недоступна для участия');
     }
 
-    // Проверяем баланс пользователя
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -211,7 +200,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Недостаточно баллов для совершения ставки');
     }
 
-    // Рассчитываем текущие суммы ставок на каждого игрока (без учета initBetPlayer1 и initBetPlayer2)
     const totalPlayer1 = parseFloat(bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER1)
         .reduce((sum, p) => sum + p.amount, 0).toFixed(2));
@@ -220,14 +208,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         .filter(p => p.player === PlayerChoice.PLAYER2)
         .reduce((sum, p) => sum + p.amount, 0).toFixed(2));
 
-    // Рассчитываем общие суммы ставок (с учетом initBetPlayer1 и initBetPlayer2)
     const totalWithInitPlayer1 = parseFloat((totalPlayer1 + (bet.initBetPlayer1 || 0)).toFixed(2));
     const totalWithInitPlayer2 = parseFloat((totalPlayer2 + (bet.initBetPlayer2 || 0)).toFixed(2));
 
-    // Рассчитываем коэффициенты с учетом маржи
     const { oddsPlayer1, oddsPlayer2 } = calculateOdds(totalWithInitPlayer1, totalWithInitPlayer2);
 
-    // Проверка коэффициента для выбранного игрока
     if (
         (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.2) ||
         (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.2)
@@ -237,27 +222,20 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       );
     }
 
-    // Рассчитываем потенциальную прибыль с учетом маржи
     const potentialProfit = parseFloat((amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2)).toFixed(2));
-
-    // Максимальная ставка, которую может сделать пользователь
     const userMaxBet = user.points;
 
-    // Рассчитываем максимальные ставки на основе суммы ставок на другого игрока (с учетом initBetPlayer1 и initBetPlayer2)
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
 
-    // Возвращаем минимальное значение из всех ограничений для каждого игрока
     const maxAllowedBet = {
       [PlayerChoice.PLAYER1]: Math.min(maxBetPlayer1, userMaxBet),
       [PlayerChoice.PLAYER2]: Math.min(maxBetPlayer2, userMaxBet),
     };
 
-    // Проверка, что ставка не превышает максимально допустимую
     if (amount > maxAllowedBet[player]) {
       throw new Error(`Максимально допустимая ставка: ${maxAllowedBet[player].toFixed(2)}`);
     }
 
-    // Обновляем суммы ставок и коэффициенты с учетом новой ставки
     const updatedTotalPlayer = {
       [PlayerChoice.PLAYER1]: player === PlayerChoice.PLAYER1 ? parseFloat((totalPlayer1 + amount).toFixed(2)) : totalPlayer1,
       [PlayerChoice.PLAYER2]: player === PlayerChoice.PLAYER2 ? parseFloat((totalPlayer2 + amount).toFixed(2)) : totalPlayer2,
@@ -266,7 +244,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const updatedTotalWithInitPlayer1 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER1] + (bet.initBetPlayer1 || 0)).toFixed(2));
     const updatedTotalWithInitPlayer2 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER2] + (bet.initBetPlayer2 || 0)).toFixed(2));
 
-    // Пересчитываем коэффициенты с учетом маржи
     const { oddsPlayer1: updatedOdds1, oddsPlayer2: updatedOdds2 } = calculateOdds(updatedTotalWithInitPlayer1, updatedTotalWithInitPlayer2);
 
     const updatedOdds = {
@@ -274,7 +251,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       [PlayerChoice.PLAYER2]: updatedOdds2,
     };
 
-    // Проверка будущих коэффициентов
     if (
         (player === PlayerChoice.PLAYER1 && updatedOdds[PlayerChoice.PLAYER1] <= 1.1) ||
         (player === PlayerChoice.PLAYER2 && updatedOdds[PlayerChoice.PLAYER2] <= 1.1)
@@ -282,7 +258,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Ставка невозможна: коэффициент станет 1.1 или ниже после этой ставки');
     }
 
-    // Используем транзакцию для атомарности
+    const participantMargin = parseFloat((amount * MARGIN).toFixed(2)); // Маржа от текущей ставки
+
     await prisma.$transaction([
       prisma.betParticipant.create({
         data: {
@@ -292,7 +269,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           player,
           odds: updatedOdds[player],
           profit: potentialProfit,
-          margin: parseFloat((amount * MARGIN).toFixed(2)), // Рассчитываем 5% от суммы ставки
+          margin: participantMargin, // Сохраняем маржу участника
         },
       }),
       prisma.user.update({
@@ -311,11 +288,12 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           totalBetAmount: updatedTotalWithInitPlayer1 + updatedTotalWithInitPlayer2,
           maxBetPlayer1: maxBetPlayer1,
           maxBetPlayer2: maxBetPlayer2,
+          margin: { increment: participantMargin }, // Обновляем общую маржу в Bet
         },
       }),
     ]);
 
-    revalidatePath('/'); // Ревалидируем путь (если используете Next.js)
+    revalidatePath('/');
     console.log(`Пользователь ${userId} сделал ставку ${amount} на игрока ${player}`);
     await updateGlobalData();
   } catch (error) {
