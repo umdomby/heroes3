@@ -82,6 +82,7 @@ model Bet {
   productItemId   Int?
   productItem     ProductItem?     @relation(fields: [productItemId], references: [id])
   winnerId        Int?
+  margin          Float?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -96,6 +97,7 @@ model BetParticipant {
   odds      Float // Коэффициент ставки
   profit    Float
   player    PlayerChoice
+  margin    Float
   isWinner  Boolean      @default(false)
   createdAt DateTime     @default(now())
 }
@@ -126,6 +128,7 @@ model BetCLOSED {
   productItemId      Int?
   productItem        ProductItem?           @relation(fields: [productItemId], references: [id])
   winnerId           Int? // ID победителя (без связи)
+  margin             Float?
   createdAt          DateTime               @default(now()) // Дата создания
   updatedAt          DateTime               @updatedAt // Дата обновления
 }
@@ -141,6 +144,7 @@ model BetParticipantCLOSED {
   profit      Float // Выигрыш
   player      PlayerChoice // Выбор игрока (PLAYER1 или PLAYER2)
   isWinner    Boolean      @default(false) // Победитель ли?
+  margin      Float?
   createdAt   DateTime     @default(now()) // Дата создания
 }
 
@@ -153,6 +157,7 @@ model GlobalData {
   pointsAllUsers Float // Сумма баллов у пользователей  pointsAllStart - pointsAllUsers = pointsSystem
   pointsAllStart Float?   @default(1000000) // start constantpoints
   pointsPay      Float? // сколько баллов куплено
+  margin         Float? // маржа
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

@@ -8,6 +8,7 @@ interface GlobalData {
     users: number;
     pointsStart: number;
     pointsAllUsers: number;
+    margin: number;
 }
 
 export const GlobalData = () => {
@@ -78,6 +79,8 @@ export const GlobalData = () => {
             <p>Bet open: {globalData.usersPlay}</p>
             <span>|</span>
             <p>Bet Points: {globalData.pointsBet}</p>
+            <span>|</span>
+            <p>Margin: {globalData.margin}</p>
         </div>
     );
 };
