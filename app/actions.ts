@@ -160,6 +160,7 @@ export async function clientCreateBet(formData: any) {
         creatorId: formData.creatorId,
         totalBetPlayer1: 0, // Инициализируем сумму ставок на игрока 1
         totalBetPlayer2: 0, // Инициализируем сумму ставок на игрока 2
+        margin: 0, // Инициализируем общую маржу
       },
     });
 
@@ -260,6 +261,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     const participantMargin = parseFloat((amount * MARGIN).toFixed(2)); // Маржа от текущей ставки
 
+    // Вычисляем общую сумму марж для данной ставки
+    const totalMargin = bet.participants.reduce((sum, p) => sum + p.margin, 0) + participantMargin;
+
     await prisma.$transaction([
       prisma.betParticipant.create({
         data: {
@@ -288,7 +292,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           totalBetAmount: updatedTotalWithInitPlayer1 + updatedTotalWithInitPlayer2,
           maxBetPlayer1: maxBetPlayer1,
           maxBetPlayer2: maxBetPlayer2,
-          margin: { increment: participantMargin }, // Обновляем общую маржу в Bet
+          margin: totalMargin, // Обновляем общую маржу в Bet
         },
       }),
     ]);

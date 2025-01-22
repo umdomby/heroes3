@@ -455,24 +455,28 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                 <span className="text-green-400"> {bet.totalBetAmount}</span>
                                             </p>
                                             <p>
+                                                Маржа:
+                                                <span className="text-yellow-400"> {bet.margin}</span>
+                                            </p>
+                                            <p>
                                                 Максимальная ставка на{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                          {bet.player1.name}
-                        </span>
+                {bet.player1.name}
+            </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                          {bet.maxBetPlayer1.toFixed(2)}
-                        </span>
+                {bet.maxBetPlayer1.toFixed(2)}
+            </span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-                          {bet.player2.name}
-                        </span>
+                {bet.player2.name}
+            </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-                          {bet.maxBetPlayer2.toFixed(2)}
-                        </span>
+                {bet.maxBetPlayer2.toFixed(2)}
+            </span>
                                             </p>
                                         </div>
                                     )}
