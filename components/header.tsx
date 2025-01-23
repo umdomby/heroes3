@@ -62,7 +62,7 @@ export const Header: React.FC<Props> = ({className}) => {
                                 {/*<DropdownMenuLabel>Panel</DropdownMenuLabel>*/}
                                 <DropdownMenuSeparator/>
                                 <DropdownMenuRadioGroup>
-                                    <Link href="/create-bet">
+                                    <Link href="/bet-create">
                                         <DropdownMenuRadioItem value="create-bet">
                                             Создать событие
                                         </DropdownMenuRadioItem>
