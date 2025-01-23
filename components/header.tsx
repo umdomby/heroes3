@@ -60,7 +60,7 @@ export const Header: React.FC<Props> = ({className}) => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-56">
                                 {/*<DropdownMenuLabel>Panel</DropdownMenuLabel>*/}
-                                <DropdownMenuSeparator/>
+                                {/*<DropdownMenuSeparator/>*/}
                                 <DropdownMenuRadioGroup>
                                     <Link href="/bet-create">
                                         <DropdownMenuRadioItem value="create-bet">
