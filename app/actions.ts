@@ -280,10 +280,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     let isCovered = false;
     if (oppositeParticipants.length > 0) {
-      // Перекрываем ставку
       isCovered = true;
       await prisma.betParticipant.update({
-        where: { id: oppositeParticipants[0].id },
+        where: { id: oppositeParticipants.reverse()[0].id }, // Перекрываем последнюю ставку
         data: {
           isCovered: true,
         },
@@ -399,6 +398,8 @@ export async function closeBet(betId: number, winnerId: number) {
           margin: bet.margin,
           createdAt: bet.createdAt,
           updatedAt: bet.updatedAt,
+          oddsBetPlayer1: bet.oddsBetPlayer1,
+          oddsBetPlayer2: bet.oddsBetPlayer2,
         },
       });
 
@@ -444,6 +445,7 @@ export async function closeBet(betId: number, winnerId: number) {
             isWinner: participant.isWinner,
             margin: participant.margin,
             createdAt: participant.createdAt,
+            isCovered: participant.isCovered,
           },
         });
       }

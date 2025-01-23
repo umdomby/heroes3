@@ -155,17 +155,17 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
         }
 
         // Проверка, как изменится коэффициент после ставки
-        if (newOdds < MIN_ODDS) {
-            setOddsErrors((prev) => ({
-                ...prev,
-                [bet.id]: `Ставка приведет к снижению коэффициента ниже минимального допустимого значения (${MIN_ODDS})`,
-            }));
-            setIsBetDisabled((prev) => ({
-                ...prev,
-                [bet.id]: true,
-            }));
-            return;
-        }
+        // if (newOdds < MIN_ODDS) {
+        //     setOddsErrors((prev) => ({
+        //         ...prev,
+        //         [bet.id]: `Ставка приведет к снижению коэффициента ниже минимального допустимого значения (${MIN_ODDS})`,
+        //     }));
+        //     setIsBetDisabled((prev) => ({
+        //         ...prev,
+        //         [bet.id]: true,
+        //     }));
+        //     return;
+        // }
 
         // Если проверка пройдена, очищаем ошибки и разблокируем кнопку
         setOddsErrors((prev) => ({

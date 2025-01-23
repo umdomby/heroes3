@@ -66,6 +66,8 @@ model Bet {
   initBetPlayer2  Float // инициализация ставок на игрока 2
   totalBetPlayer1 Float // Сумма ставок на игрока 1
   totalBetPlayer2 Float // Сумма ставок на игрока 2
+  oddsBetPlayer1  Float // разница ставок перекрытия на игрока 1
+  oddsBetPlayer2  Float // разница ставок перекрытия на игрока 2
   maxBetPlayer1   Float // Максимальная сумма ставок на игрока 1
   maxBetPlayer2   Float // Максимальная сумма ставок на игрока 2
   currentOdds1    Float // Текущий коэффициент для игрока 1
@@ -114,6 +116,8 @@ model BetCLOSED {
   initBetPlayer2     Float // Инициализация ставок на игрока 2
   totalBetPlayer1    Float // Сумма ставок на игрока 1
   totalBetPlayer2    Float // Сумма ставок на игрока 2
+  oddsBetPlayer1     Float // разница ставок перекрытия на игрока 1
+  oddsBetPlayer2     Float // разница ставок перекрытия на игрока 2
   maxBetPlayer1      Float // Максимальная сумма ставок на игрока 1
   maxBetPlayer2      Float // Максимальная сумма ставок на игрока 2
   currentOdds1       Float // Текущий коэффициент для игрока 1
@@ -144,6 +148,7 @@ model BetParticipantCLOSED {
   odds        Float // Коэффициент ставки
   profit      Float // Выигрыш
   player      PlayerChoice // Выбор игрока (PLAYER1 или PLAYER2)
+  isCovered   Boolean      @default(false) // Перекрыта ли ставка
   isWinner    Boolean      @default(false) // Победитель ли?
   margin      Float?
   createdAt   DateTime     @default(now()) // Дата создания
