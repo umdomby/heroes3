@@ -216,88 +216,75 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Недостаточно баллов для совершения ставки');
     }
 
-    const totalPlayer1 = parseFloat(bet.participants
+    // Рассчитываем общие суммы ставок на каждого игрока
+    const totalPlayer1 = bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER1)
-        .reduce((sum, p) => sum + p.amount, 0).toFixed(2));
+        .reduce((sum, p) => sum + p.amount, 0);
 
-    const totalPlayer2 = parseFloat(bet.participants
+    const totalPlayer2 = bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER2)
-        .reduce((sum, p) => sum + p.amount, 0).toFixed(2));
+        .reduce((sum, p) => sum + p.amount, 0);
 
-    const totalWithInitPlayer1 = parseFloat((totalPlayer1 + (bet.initBetPlayer1 || 0)).toFixed(2));
-    const totalWithInitPlayer2 = parseFloat((totalPlayer2 + (bet.initBetPlayer2 || 0)).toFixed(2));
+    const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
+    const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
 
     const { oddsPlayer1, oddsPlayer2 } = calculateOdds(totalWithInitPlayer1, totalWithInitPlayer2);
 
+    // Проверка на минимальный коэффициент
     if (
         (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.2) ||
         (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.2)
     ) {
-      throw new Error(
-          `Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.2`
-      );
+      throw new Error('Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.2');
     }
 
-    const potentialProfit = parseFloat((amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2)).toFixed(2));
-    const userMaxBet = user.points;
+    // Рассчитываем потенциальный выигрыш
+    const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
 
+    // Проверка на максимальную допустимую ставку
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
+    const maxAllowedBet = player === PlayerChoice.PLAYER1 ? maxBetPlayer1 : maxBetPlayer2;
 
-    const maxAllowedBet = {
-      [PlayerChoice.PLAYER1]: Math.min(maxBetPlayer1, userMaxBet),
-      [PlayerChoice.PLAYER2]: Math.min(maxBetPlayer2, userMaxBet),
-    };
-
-    if (amount > maxAllowedBet[player]) {
-      throw new Error(`Максимально допустимая ставка: ${maxAllowedBet[player].toFixed(2)}`);
+    if (amount > maxAllowedBet) {
+      throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
     }
 
-    const updatedTotalPlayer = {
-      [PlayerChoice.PLAYER1]: player === PlayerChoice.PLAYER1 ? parseFloat((totalPlayer1 + amount).toFixed(2)) : totalPlayer1,
-      [PlayerChoice.PLAYER2]: player === PlayerChoice.PLAYER2 ? parseFloat((totalPlayer2 + amount).toFixed(2)) : totalPlayer2,
-    };
+    // Логика частичного перекрытия
+    const oppositeParticipants = bet.participants
+        .filter(p => p.player !== player && !p.isCovered)
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); // Сортируем по времени создания
 
-    const updatedTotalWithInitPlayer1 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER1] + (bet.initBetPlayer1 || 0)).toFixed(2));
-    const updatedTotalWithInitPlayer2 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER2] + (bet.initBetPlayer2 || 0)).toFixed(2));
+    let remainingAmount = amount;
+    let overlapAmount = 0;
 
-// Рассчитываем разницу ставок перекрытия
-    const oddsBetPlayer1 = updatedTotalWithInitPlayer1 - updatedTotalWithInitPlayer2;
-    const oddsBetPlayer2 = updatedTotalWithInitPlayer2 - updatedTotalWithInitPlayer1;
+    for (const participant of oppositeParticipants) {
+      if (remainingAmount <= 0) break;
 
-    const { oddsPlayer1: updatedOdds1, oddsPlayer2: updatedOdds2 } = calculateOdds(updatedTotalWithInitPlayer1, updatedTotalWithInitPlayer2);
+      const overlap = Math.min(participant.amount, remainingAmount);
+      overlapAmount += overlap;
+      remainingAmount -= overlap;
 
-    const updatedOdds = {
-      [PlayerChoice.PLAYER1]: updatedOdds1,
-      [PlayerChoice.PLAYER2]: updatedOdds2,
-    };
-
-    if (
-        (player === PlayerChoice.PLAYER1 && updatedOdds[PlayerChoice.PLAYER1] <= 1.1) ||
-        (player === PlayerChoice.PLAYER2 && updatedOdds[PlayerChoice.PLAYER2] <= 1.1)
-    ) {
-      throw new Error('Ставка невозможна: коэффициент станет 1.1 или ниже после этой ставки');
-    }
-
-    const participantMargin = parseFloat((amount * MARGIN).toFixed(2)); // Маржа от текущей ставки
-
-    // Вычисляем общую сумму марж для данной ставки
-    const totalMargin = bet.participants.reduce((sum, p) => sum + p.margin, 0) + participantMargin;
-
-    // Проверяем, есть ли противоположные ставки для перекрытия
-    const oppositeParticipants = bet.participants.filter(
-        (p) => p.player !== player && !p.isCovered
-    );
-
-    let isCovered = false;
-    if (oppositeParticipants.length > 0) {
-      isCovered = true;
+      // Обновляем участника, который был перекрыт
       await prisma.betParticipant.update({
-        where: { id: oppositeParticipants.reverse()[0].id }, // Перекрываем последнюю ставку
+        where: { id: participant.id },
         data: {
           isCovered: true,
+          overlap: participant.overlap + overlap, // Увеличиваем сумму перекрытия
         },
       });
     }
+
+    // Создаем новую ставку
+    const participantMargin = amount * MARGIN; // Маржа от текущей ставки
+    const totalMargin = bet.participants.reduce((sum, p) => sum + p.margin, 0) + participantMargin;
+
+    // Обновляем суммы ставок на игроков
+    const newTotalBetPlayer1 = player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1;
+    const newTotalBetPlayer2 = player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2;
+
+    // Рассчитываем разницу ставок перекрытия
+    const oddsBetPlayer1 = newTotalBetPlayer1 - newTotalBetPlayer2;
+    const oddsBetPlayer2 = newTotalBetPlayer2 - newTotalBetPlayer1;
 
     await prisma.$transaction([
       prisma.betParticipant.create({
@@ -306,56 +293,60 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           userId,
           amount,
           player,
-          odds: updatedOdds[player],
+          odds: player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2,
           profit: potentialProfit,
           margin: participantMargin,
-          isCovered, // Указываем, перекрыта ли ставка
-          overlap: 0,    // на какую сумму перекрыто
+          isCovered: overlapAmount > 0, // Указываем, перекрыта ли ставка
+          overlap: overlapAmount, // Сумма перекрытия
         },
       }),
       prisma.user.update({
         where: { id: userId },
         data: {
-          points: parseFloat((user.points - amount).toFixed(2)),
+          points: user.points - amount,
         },
       }),
       prisma.bet.update({
         where: { id: betId },
         data: {
-          currentOdds1: updatedOdds[PlayerChoice.PLAYER1],
-          currentOdds2: updatedOdds[PlayerChoice.PLAYER2],
-          totalBetPlayer1: updatedTotalPlayer[PlayerChoice.PLAYER1],
-          totalBetPlayer2: updatedTotalPlayer[PlayerChoice.PLAYER2],
-          totalBetAmount: updatedTotalWithInitPlayer1 + updatedTotalWithInitPlayer2,
-          maxBetPlayer1: maxBetPlayer1,
-          maxBetPlayer2: maxBetPlayer2,
+          currentOdds1: oddsPlayer1,
+          currentOdds2: oddsPlayer2,
+          totalBetPlayer1: newTotalBetPlayer1, // Обновляем сумму ставок на игрока 1
+          totalBetPlayer2: newTotalBetPlayer2, // Обновляем сумму ставок на игрока 2
+          totalBetAmount: totalWithInitPlayer1 + totalWithInitPlayer2 + amount,
           margin: totalMargin,
-          oddsBetPlayer1: oddsBetPlayer1, // Добавляем разницу ставок перекрытия для игрока 1
-          oddsBetPlayer2: oddsBetPlayer2, // Добавляем разницу ставок перекрытия для игрока 2
+          oddsBetPlayer1: oddsBetPlayer1, // Обновляем разницу ставок перекрытия для игрока 1
+          oddsBetPlayer2: oddsBetPlayer2, // Обновляем разницу ставок перекрытия для игрока 2
         },
       }),
     ]);
 
-    revalidatePath('/');
-    console.log(`Пользователь ${userId} сделал ставку ${amount} на игрока ${player}`);
-    await updateGlobalData();
+    // Возврат баллов при частичном перекрытии
+    if (overlapAmount > 0) {
+      const profit = overlapAmount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
+      const returnedAmount = remainingAmount * (1 - MARGIN); // Возврат с учетом маржи
 
-    // Уведомляем пользователя о перекрытии ставки
-    return { success: true, isCovered };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error in placeBet:', {
-        message: error.message,
-        stack: error.stack,
-        betId: formData.betId,
-        userId: formData.userId,
-        amount: formData.amount,
-        player: formData.player,
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          points: {
+            increment: profit + returnedAmount,
+          },
+        },
       });
     }
-    throw new Error('Failed to create bet. Please try again.');
+
+    revalidatePath('/');
+    await updateGlobalData();
+
+    // Уведомляем пользователя о перекрытии
+    return { success: true, isCovered: overlapAmount > 0, overlapAmount };
+  } catch (error) {
+    console.error('Error in placeBet:', error);
+    throw new Error('Failed to place bet. Please try again.');
   }
 }
+
 
 
 
@@ -459,6 +450,7 @@ export async function closeBet(betId: number, winnerId: number) {
             margin: participant.margin,
             createdAt: participant.createdAt,
             isCovered: participant.isCovered,
+            overlap: participant.overlap, // Добавляем сумму перекрытия
           },
         });
       }
@@ -466,22 +458,28 @@ export async function closeBet(betId: number, winnerId: number) {
       // Обновляем балансы участников
       for (const participant of bet.participants) {
         if (participant.player === winningPlayer) {
-          // Начисляем выигрыш на основе поля profit
+          // Начисляем выигрыш на перекрытую сумму
+          const profitFromOverlap = participant.overlap * participant.odds;
+          const returnedAmount = (participant.amount - participant.overlap) * (1 - MARGIN); // Возврат не перекрытой суммы с учетом маржи
+
           await prisma.user.update({
             where: { id: participant.userId },
             data: {
               points: {
-                increment: participant.profit, // Убедитесь, что profit рассчитан с учетом маржи
+                increment: profitFromOverlap + returnedAmount, // Выигрыш + возврат
               },
             },
           });
         } else {
-          // Вычитаем сумму ставки, если пользователь проиграл
+          // Вычитаем перекрытую сумму, если пользователь проиграл
+          const lostAmount = participant.overlap; // Перекрытая сумма теряется
+          const returnedAmount = (participant.amount - participant.overlap) * (1 - MARGIN); // Возврат не перекрытой суммы с учетом маржи
+
           await prisma.user.update({
             where: { id: participant.userId },
             data: {
               points: {
-                decrement: participant.amount, // Вычитаем сумму ставки
+                decrement: lostAmount - returnedAmount, // Потеря перекрытой суммы минус возврат
               },
             },
           });

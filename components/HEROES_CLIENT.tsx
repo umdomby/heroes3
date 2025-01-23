@@ -543,38 +543,56 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                             <h4 className="text-md font-semibold mb-2">
                                                 Ваши ставки на этот матч:
                                             </h4>
-                                            {userBets.map((participant) => (
-                                                <div key={participant.id}
-                                                     className="border border-gray-200 p-1 mb-1 rounded-md">
-                                                    <p>
-                                                        Ставка:{" "}
-                                                        <strong className={playerColors[participant.player]}>
-                                                            {participant.amount}
-                                                        </strong>{" "}
-                                                        на{" "}
-                                                        <strong className={playerColors[participant.player]}>
-                                                            {participant.player === PlayerChoice.PLAYER1
-                                                                ? bet.player1.name
-                                                                : bet.player2.name}
-                                                        </strong>
-                                                        {", "} Коэффициент:{" "}
-                                                        <span className={playerColors[participant.player]}>
-                {participant.odds.toFixed(2)}
-            </span>
-                                                        {", "} Прибыль:{" "}
-                                                        <span className={playerColors[participant.player]}>
-                {participant.profit.toFixed(2)}
-            </span>
-                                                        {", "} {new Date(participant.createdAt).toLocaleString()}
+                                            {userBets.map((participant) => {
+                                                // Рассчитываем процент перекрытия
+                                                const overlapPercentage = participant.overlap > 0
+                                                    ? ((participant.overlap / participant.amount) * 100).toFixed(2)
+                                                    : 0;
 
-                                                        {", "}{participant.isCovered && (
-                                                        <span className="text-green-500">Ваша ставка перекрыта!</span>
-                                                    )}
-                                                    </p>
-                                                </div>
-                                            ))}
+                                                return (
+                                                    <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
+                                                        <p>
+                                                            Ставка:{" "}
+                                                            <strong className={playerColors[participant.player]}>
+                                                                {participant.amount}
+                                                            </strong>{" "}
+                                                            на{" "}
+                                                            <strong className={playerColors[participant.player]}>
+                                                                {participant.player === PlayerChoice.PLAYER1
+                                                                    ? bet.player1.name
+                                                                    : bet.player2.name}
+                                                            </strong>
+                                                            {", "} Коэффициент:{" "}
+                                                            <span className={playerColors[participant.player]}>
+              {participant.odds.toFixed(2)}
+            </span>
+                                                            {", "} Прибыль:{" "}
+                                                            <span className={playerColors[participant.player]}>
+              {participant.profit.toFixed(2)}
+            </span>
+                                                            {", "} {new Date(participant.createdAt).toLocaleString()}
+                                                        </p>
+                                                        {/* Отображаем информацию о перекрытии */}
+                                                        {participant.overlap > 0 ? (
+                                                            <p>
+              <span className="text-green-500">
+                Ваша ставка перекрыта на {participant.overlap.toFixed(2)} Points (
+                  {overlapPercentage}%)
+              </span>
+                                                            </p>
+                                                        ) : (
+                                                            <p>
+              <span className="text-yellow-500">
+                Ваша ставка не перекрыта (0 Points, 0%)
+              </span>
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
+
 
                                     {bet.status === "OPEN" && (
                                         <div>

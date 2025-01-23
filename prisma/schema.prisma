@@ -72,8 +72,8 @@ model Bet {
   maxBetPlayer2   Float // Максимальная сумма ставок на игрока 2
   currentOdds1    Float // Текущий коэффициент для игрока 1
   currentOdds2    Float // Текущий коэффициент для игрока 2
-  totalBetAmount  Float            @default(0)
-  creator         User             @relation("BetsCreated", fields: [creatorId], references: [id])
+  totalBetAmount  Float            @default(0) // сумма всех ставок.
+  creator         User             @relation("BetsCreated", fields: [creatorId], references: [id]) // создатель события
   creatorId       Int
   status          BetStatus        @default(OPEN) // если статус = CLOSED то ставка закрыта, и перемещается в model BetCLOSED
   participants    BetParticipant[]
