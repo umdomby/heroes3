@@ -9,7 +9,15 @@ interface GlobalData {
     pointsStart: number;
     pointsAllUsers: number;
     margin: number;
-}
+    pointsPay: number;
+}import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"; // Импортируем компоненты таблицы из shadcn
 
 export const GlobalData = () => {
     const [globalData, setGlobalData] = useState<GlobalData | null>(null);
@@ -69,18 +77,29 @@ export const GlobalData = () => {
     }
 
     return (
-        <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-            <p>Users: {globalData.users}</p>
-            <span>|</span>
-            <p>Start Points: {globalData.pointsStart}</p>
-            <span>|</span>
-            <p>Bet Points: {globalData.pointsAllUsers}</p>
-            <span>|</span>
-            <p>Bet open: {globalData.usersPlay}</p>
-            <span>|</span>
-            <p>Bet Points: {globalData.pointsBet}</p>
-            <span>|</span>
-            <p>Margin: {globalData.margin}</p>
-        </div>
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead style={{ textAlign: 'center' }}>Users</TableHead>
+                    <TableHead style={{ textAlign: 'center' }}>Start</TableHead>
+                    <TableHead style={{ textAlign: 'center' }}>User</TableHead>
+                    <TableHead style={{ textAlign: 'center' }}>Pay</TableHead>
+                    <TableHead style={{ textAlign: 'center' }}>Open</TableHead>
+                    <TableHead style={{ textAlign: 'center' }}>Bet open</TableHead>
+                    <TableHead style={{ textAlign: 'center' }}>Margin</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                <TableRow>
+                    <TableCell style={{ textAlign: 'center' }}>{globalData.users}</TableCell>
+                    <TableCell style={{ textAlign: 'center' }}>{globalData.pointsStart}</TableCell>
+                    <TableCell style={{ textAlign: 'center' }}>{globalData.pointsAllUsers}</TableCell>
+                    <TableCell style={{ textAlign: 'center' }}>{globalData.pointsPay}</TableCell>
+                    <TableCell style={{ textAlign: 'center' }}>{globalData.usersPlay}</TableCell>
+                    <TableCell style={{ textAlign: 'center' }}>{globalData.pointsBet}</TableCell>
+                    <TableCell style={{ textAlign: 'center' }}>{globalData.margin}</TableCell>
+                </TableRow>
+            </TableBody>
+        </Table>
     );
 };
