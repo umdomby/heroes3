@@ -234,21 +234,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                 throw new Error("Пользователь не найден");
             }
 
-            // Сортируем участников по дате создания (от старых к новым)
-            const sortedParticipants = bet.participants.sort(
-                (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-            );
-
-            // Логика перекрытия ставок
-            for (const participant of sortedParticipants) {
-                if (participant.player !== player) {
-                    // Перекрываем ставку
-                    // Например, уменьшаем amount на сумму participant.amount
-                    amount -= participant.amount;
-                    if (amount <= 0) break; // Если сумма перекрыта, выходим из цикла
-                }
-            }
-
             const response = await placeBet({
                 betId: bet.id,
                 userId: user.id,

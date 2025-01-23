@@ -232,10 +232,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Проверка на минимальный коэффициент
     if (
-        (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.2) ||
-        (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.2)
+        (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.02) ||
+        (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.02)
     ) {
-      throw new Error('Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.2');
+      throw new Error('Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.02');
     }
 
     // Рассчитываем потенциальный выигрыш
@@ -291,7 +291,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         data: {
           betId,
           userId,
-          amount,
+          amount, // amount всегда положительное число
           player,
           odds: player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2,
           profit: potentialProfit,
@@ -303,7 +303,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       prisma.user.update({
         where: { id: userId },
         data: {
-          points: user.points - amount,
+          points: user.points - amount, // Вычитаем сумму ставки из баланса пользователя
         },
       }),
       prisma.bet.update({
@@ -346,7 +346,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to place bet. Please try again.');
   }
 }
-
 
 
 
