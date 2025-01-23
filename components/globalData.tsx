@@ -77,27 +77,27 @@ export const GlobalData = () => {
     }
 
     return (
-        <Table>
+        <Table style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
             <TableHeader>
-                <TableRow>
-                    <TableHead style={{ textAlign: 'center' }}>Users</TableHead>
-                    <TableHead style={{ textAlign: 'center' }}>Start</TableHead>
-                    <TableHead style={{ textAlign: 'center' }}>User</TableHead>
-                    <TableHead style={{ textAlign: 'center' }}>Pay</TableHead>
-                    <TableHead style={{ textAlign: 'center' }}>Open</TableHead>
-                    <TableHead style={{ textAlign: 'center' }}>Bet open</TableHead>
-                    <TableHead style={{ textAlign: 'center' }}>Margin</TableHead>
+                <TableRow style={{ backgroundColor: '#1f2937' }}>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Users</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Start</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>User</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Pay</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Open</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Bet open</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Margin</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
-                <TableRow>
-                    <TableCell style={{ textAlign: 'center' }}>{globalData.users}</TableCell>
-                    <TableCell style={{ textAlign: 'center' }}>{globalData.pointsStart}</TableCell>
-                    <TableCell style={{ textAlign: 'center' }}>{globalData.pointsAllUsers}</TableCell>
-                    <TableCell style={{ textAlign: 'center' }}>{globalData.pointsPay}</TableCell>
-                    <TableCell style={{ textAlign: 'center' }}>{globalData.usersPlay}</TableCell>
-                    <TableCell style={{ textAlign: 'center' }}>{globalData.pointsBet}</TableCell>
-                    <TableCell style={{ textAlign: 'center' }}>{globalData.margin}</TableCell>
+                <TableRow style={{ transition: 'background-color 0.3s', cursor: 'pointer' }}>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#868788' }}>{globalData.users}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.pointsStart}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#16a34a' }}>{globalData.pointsAllUsers}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#9333ea' }}>{globalData.pointsPay}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#dc2626' }}>{globalData.usersPlay}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#4f46e5' }}>{globalData.pointsBet}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#db2777' }}>{globalData.margin}</TableCell>
                 </TableRow>
             </TableBody>
         </Table>

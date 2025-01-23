@@ -344,7 +344,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     return (
         <div>
             <div className="flex justify-between items-center">
-                <p>Ваши баллы: {userUp?.points}</p>
+                <p>
+                    Points: <span className="text-red-500">{userUp?.points}</span>
+                </p>
             </div>
 
             {/* Отображение отфильтрованных ставок */}
