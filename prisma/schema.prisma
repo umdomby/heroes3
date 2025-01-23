@@ -75,7 +75,7 @@ model Bet {
   totalBetAmount  Float            @default(0)
   creator         User             @relation("BetsCreated", fields: [creatorId], references: [id])
   creatorId       Int
-  status          BetStatus        @default(OPEN)
+  status          BetStatus        @default(OPEN) // если статус = CLOSED то ставка закрыта, и перемещается в model BetCLOSED
   participants    BetParticipant[]
   categoryId      Int?
   category        Category?        @relation(fields: [categoryId], references: [id])
@@ -84,7 +84,7 @@ model Bet {
   productItemId   Int?
   productItem     ProductItem?     @relation(fields: [productItemId], references: [id])
   winnerId        Int?
-  margin          Float?
+  margin          Float? // сумма маржи model BetParticipant margin
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -98,11 +98,11 @@ model BetParticipant {
   amount    Float // ставка пользователя
   overlap   Float // на какую сумму перекрыто
   odds      Float // Коэффициент ставки
-  profit    Float
-  player    PlayerChoice
-  margin    Float
+  profit    Float // Выигрыш
+  player    PlayerChoice // ставка на выбранного пользователя
+  margin    Float // ставка пользователя
   isCovered Boolean      @default(false) // Перекрыта ли ставка
-  isWinner  Boolean      @default(false)
+  isWinner  Boolean      @default(false) // Победила ли ставка
   createdAt DateTime     @default(now())
 }
 
@@ -152,7 +152,7 @@ model BetParticipantCLOSED {
   player      PlayerChoice // Выбор игрока (PLAYER1 или PLAYER2)
   isCovered   Boolean      @default(false) // Перекрыта ли ставка
   isWinner    Boolean      @default(false) // Победитель ли?
-  margin      Float?
+  margin      Float? // ставка пользователя
   createdAt   DateTime     @default(now()) // Дата создания
 }
 
@@ -163,9 +163,9 @@ model GlobalData {
   users          Int // Количество зарегистрированных пользователей
   pointsStart    Float // Количество зарегистрированных пользователей * 1000 free
   pointsAllUsers Float // Сумма баллов у пользователей  pointsAllStart - pointsAllUsers = pointsSystem
-  pointsAllStart Float?   @default(1000000) // start constantpoints
+  pointsAllStart Float?   @default(1000000) // start constantpoints нигде не используется.
   pointsPay      Float? // сколько баллов куплено
-  margin         Float? // маржа
+  margin         Float? // сумма маржи model Bet margin
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

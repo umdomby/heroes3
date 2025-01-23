@@ -310,6 +310,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           profit: potentialProfit,
           margin: participantMargin,
           isCovered, // Указываем, перекрыта ли ставка
+          overlap: 0,    // на какую сумму перекрыто
         },
       }),
       prisma.user.update({
