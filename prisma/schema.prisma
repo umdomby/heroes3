@@ -95,7 +95,8 @@ model BetParticipant {
   bet       Bet          @relation(fields: [betId], references: [id])
   userId    Int
   user      User         @relation(fields: [userId], references: [id])
-  amount    Float
+  amount    Float // ставка пользователя
+  overlap   Float // на какую сумму перекрыто
   odds      Float // Коэффициент ставки
   profit    Float
   player    PlayerChoice
@@ -145,6 +146,7 @@ model BetParticipantCLOSED {
   userId      Int
   user        User         @relation(fields: [userId], references: [id])
   amount      Float // Сумма ставки
+  overlap     Float // на какую сумму перекрыто
   odds        Float // Коэффициент ставки
   profit      Float // Выигрыш
   player      PlayerChoice // Выбор игрока (PLAYER1 или PLAYER2)

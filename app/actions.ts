@@ -151,6 +151,10 @@ export async function clientCreateBet(formData: any) {
 
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(formData.initBetPlayer1, formData.initBetPlayer2);
 
+    // Рассчитываем разницу ставок перекрытия
+    const oddsBetPlayer1 = formData.initBetPlayer1 - formData.initBetPlayer2;
+    const oddsBetPlayer2 = formData.initBetPlayer2 - formData.initBetPlayer1;
+
     const newBet = await prisma.bet.create({
       data: {
         status: 'OPEN', // Устанавливаем статус ставки как "открытая"
@@ -170,6 +174,8 @@ export async function clientCreateBet(formData: any) {
         totalBetPlayer1: 0, // Инициализируем сумму ставок на игрока 1
         totalBetPlayer2: 0, // Инициализируем сумму ставок на игрока 2
         margin: 0, // Инициализируем общую маржу
+        oddsBetPlayer1: oddsBetPlayer1, // Разница ставок перекрытия на игрока 1
+        oddsBetPlayer2: oddsBetPlayer2, // Разница ставок перекрытия на игрока 2
       },
     });
 
@@ -254,6 +260,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const updatedTotalWithInitPlayer1 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER1] + (bet.initBetPlayer1 || 0)).toFixed(2));
     const updatedTotalWithInitPlayer2 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER2] + (bet.initBetPlayer2 || 0)).toFixed(2));
 
+// Рассчитываем разницу ставок перекрытия
+    const oddsBetPlayer1 = updatedTotalWithInitPlayer1 - updatedTotalWithInitPlayer2;
+    const oddsBetPlayer2 = updatedTotalWithInitPlayer2 - updatedTotalWithInitPlayer1;
+
     const { oddsPlayer1: updatedOdds1, oddsPlayer2: updatedOdds2 } = calculateOdds(updatedTotalWithInitPlayer1, updatedTotalWithInitPlayer2);
 
     const updatedOdds = {
@@ -319,6 +329,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           maxBetPlayer1: maxBetPlayer1,
           maxBetPlayer2: maxBetPlayer2,
           margin: totalMargin,
+          oddsBetPlayer1: oddsBetPlayer1, // Добавляем разницу ставок перекрытия для игрока 1
+          oddsBetPlayer2: oddsBetPlayer2, // Добавляем разницу ставок перекрытия для игрока 2
         },
       }),
     ]);

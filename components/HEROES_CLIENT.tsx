@@ -34,10 +34,12 @@ interface Bet extends PrismaBet {
     player1: Player;
     player2: Player;
     participants: BetParticipant[];
-    maxBetPlayer1: number; // Максимальная сумма ставок на игрока 1
-    maxBetPlayer2: number; // Максимальная сумма ставок на игрока 2
-    currentOdds1: number; // Текущий коэффициент для игрока 1
-    currentOdds2: number; // Текущий коэффициент для игрока 2
+    maxBetPlayer1: number;
+    maxBetPlayer2: number;
+    currentOdds1: number;
+    currentOdds2: number;
+    oddsBetPlayer1: number; // Добавляем разницу ставок перекрытия для игрока 1
+    oddsBetPlayer2: number; // Добавляем разницу ставок перекрытия для игрока 2
 }
 
 interface Props {
@@ -490,27 +492,48 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                             </p>
                                             <p>
                                                 Маржа:
-                                                <span className="text-yellow-400"> {bet.margin}</span>
+                                                <span className="text-yellow-400"> {bet.margin.toFixed(2)}</span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {bet.player1.name}
-            </span>
+        {bet.player1.name}
+      </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {bet.maxBetPlayer1.toFixed(2)}
-            </span>
+        {bet.maxBetPlayer1.toFixed(2)}
+      </span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-                {bet.player2.name}
-            </span>
+        {bet.player2.name}
+      </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-                {bet.maxBetPlayer2.toFixed(2)}
-            </span>
+        {bet.maxBetPlayer2.toFixed(2)}
+      </span>
+                                            </p>
+                                            {/* Добавляем отображение разницы ставок перекрытия */}
+                                            <p>
+                                                Разница ставок перекрытия для{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER1]}>
+        {bet.player1.name}
+      </span>
+                                                :{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER1]}>
+        {bet.oddsBetPlayer1.toFixed(2)}
+      </span>
+                                            </p>
+                                            <p>
+                                                Разница ставок перекрытия для{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER2]}>
+        {bet.player2.name}
+      </span>
+                                                :{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER2]}>
+        {bet.oddsBetPlayer2.toFixed(2)}
+      </span>
                                             </p>
                                         </div>
                                     )}
