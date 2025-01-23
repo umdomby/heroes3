@@ -8,22 +8,39 @@ async function up() {
 
     data: [
       {
-        fullName: 'Pi',
+        fullName: 'Pi2',
         email: 'umdom2@gmail.com',
         password: hashSync('123123', 10),
-        role: 'ADMIN',
+        role: 'USER',
+        points: 1000,
+      },
+      {
+        fullName: 'Pi33',
+        email: 'umdom33@gmail.com',
+        password: hashSync('123123', 10),
+        role: 'USER',
+        points: 1000,
+      },
+      {
+        fullName: 'Pi555',
+        email: 'umdom555@gmail.com',
+        password: hashSync('123123', 10),
+        role: 'USER',
+        points: 1000,
       },
       {
         fullName: 'Yatsyk',
         email: 'yatsyk@gmail.com',
         password: hashSync('123123', 10),
         role: 'USER',
+        points: 1000,
       },
       {
         fullName: '123',
         email: '123@123.com',
         password: hashSync('123123', 10),
         role: 'USER',
+        points: 1000,
       },
     ],
   });
