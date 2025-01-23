@@ -43,6 +43,14 @@ export async function updateGlobalData() {
     });
     const pointsAllUsers = parseFloat((pointsAllUsersResult._sum.points || 0).toFixed(2));
 
+    // 6. Общая маржа из всех закрытых ставок
+    const marginResult = await prisma.betCLOSED.aggregate({
+      _sum: {
+        margin: true,
+      },
+    });
+    const margin = parseFloat((marginResult._sum.margin || 0).toFixed(2));
+
     // Обновляем или создаем запись в GlobalData
     await prisma.globalData.upsert({
       where: { id: 1 },
@@ -52,6 +60,7 @@ export async function updateGlobalData() {
         users,
         pointsStart,
         pointsAllUsers,
+        margin, // Обновляем общую маржу
       },
       create: {
         id: 1,
@@ -60,6 +69,7 @@ export async function updateGlobalData() {
         users,
         pointsStart,
         pointsAllUsers,
+        margin, // Создаем запись с общей маржой
       },
     });
 
@@ -69,7 +79,6 @@ export async function updateGlobalData() {
     throw new Error('Failed to update GlobalData');
   }
 }
-
 
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
   try {
@@ -441,6 +450,16 @@ export async function closeBet(betId: number, winnerId: number) {
       await prisma.bet.delete({
         where: { id: betId },
       });
+
+      // Обновляем GlobalData, добавляя маржу из закрытой ставки
+      await prisma.globalData.update({
+        where: { id: 1 },
+        data: {
+          margin: {
+            increment: bet.margin || 0, // Используем 0, если bet.margin равно null
+          },
+        },
+      });
     });
 
     await updateGlobalData();
@@ -460,6 +479,7 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
 
 
 
