@@ -98,6 +98,7 @@ model BetParticipant {
   profit    Float
   player    PlayerChoice
   margin    Float
+  isCovered Boolean      @default(false) // Перекрыта ли ставка
   isWinner  Boolean      @default(false)
   createdAt DateTime     @default(now())
 }

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     Bet as PrismaBet,
     Player,
@@ -9,12 +9,12 @@ import {
     BetStatus,
 } from "@prisma/client";
 import useSWR from "swr";
-import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
-import { placeBet, closeBet } from "@/app/actions";
-import { unstable_batchedUpdates } from "react-dom";
-import { useUser } from "@/hooks/useUser";
+import {Button} from "@/components/ui/button";
+import {useSession} from "next-auth/react";
+import {redirect} from "next/navigation";
+import {placeBet, closeBet} from "@/app/actions";
+import {unstable_batchedUpdates} from "react-dom";
+import {useUser} from "@/hooks/useUser";
 
 import {
     Accordion,
@@ -22,7 +22,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
 
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
@@ -51,8 +51,20 @@ const playerColors = {
     [PlayerChoice.PLAYER2]: "text-red-400", // Красный для Player2
 };
 
-export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
-    const { data: session } = useSession();
+interface BetParticipant {
+    id: number;
+    userId: number;
+    betId: number;
+    player: PlayerChoice;
+    amount: number;
+    odds: number;
+    profit: number;
+    createdAt: Date;
+    isCovered: boolean; // Добавьте это поле
+}
+
+export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
+    const {data: session} = useSession();
     const {
         data: bets,
         error,
@@ -220,22 +232,39 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                 throw new Error("Пользователь не найден");
             }
 
-            await placeBet({
+            // Сортируем участников по дате создания (от старых к новым)
+            const sortedParticipants = bet.participants.sort(
+                (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
+
+            // Логика перекрытия ставок
+            for (const participant of sortedParticipants) {
+                if (participant.player !== player) {
+                    // Перекрываем ставку
+                    // Например, уменьшаем amount на сумму participant.amount
+                    amount -= participant.amount;
+                    if (amount <= 0) break; // Если сумма перекрыта, выходим из цикла
+                }
+            }
+
+            const response = await placeBet({
                 betId: bet.id,
                 userId: user.id,
                 amount,
                 player,
             });
 
-            // Обновляем данные ставок
-            mutate();
+            if (response.isCovered) {
+                alert("Ваша ставка перекрыта!");
+            } else {
+                alert("Ваша ставка не перекрыта. Вы получите свои баллы обратно с учетом маржи.");
+            }
 
-            // После успешной ставки блокируем кнопку
+            mutate();
             setIsBetDisabled((prev) => ({
                 ...prev,
                 [bet.id]: true,
             }));
-
             setPlaceBetErrors((prev) => ({
                 ...prev,
                 [bet.id]: null, // Очищаем ошибку при успешной ставке
@@ -255,6 +284,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             console.error("Error placing bet:", err);
         }
     };
+
+
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>, bet: Bet) => {
         event.preventDefault();
@@ -411,7 +442,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                 </TableCell>
 
                                                 {/* Прибыль/убыток */}
-                                                <TableCell className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
+                                                <TableCell
+                                                    className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
                                                     <div>
                             <span className={playerColors[PlayerChoice.PLAYER1]}>
                               {bet.player1.name}
@@ -489,10 +521,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                 Ваши ставки на этот матч:
                                             </h4>
                                             {userBets.map((participant) => (
-                                                <div
-                                                    key={participant.id}
-                                                    className="border border-gray-200 p-1 mb-1 rounded-md"
-                                                >
+                                                <div key={participant.id}
+                                                     className="border border-gray-200 p-1 mb-1 rounded-md">
                                                     <p>
                                                         Ставка:{" "}
                                                         <strong className={playerColors[participant.player]}>
@@ -504,15 +534,19 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                                 ? bet.player1.name
                                                                 : bet.player2.name}
                                                         </strong>
-                                                        {","} Коэффициент:{" "}
+                                                        {", "} Коэффициент:{" "}
                                                         <span className={playerColors[participant.player]}>
-                              {participant.odds.toFixed(2)}
-                            </span>
-                                                        {","} Прибыль:{" "}
+                {participant.odds.toFixed(2)}
+            </span>
+                                                        {", "} Прибыль:{" "}
                                                         <span className={playerColors[participant.player]}>
-                              {participant.profit.toFixed(2)}
-                            </span>
-                                                        {","} {new Date(participant.createdAt).toLocaleString()}
+                {participant.profit.toFixed(2)}
+            </span>
+                                                        {", "} {new Date(participant.createdAt).toLocaleString()}
+
+                                                        {", "}{participant.isCovered && (
+                                                        <span className="text-green-500">Ваша ставка перекрыта!</span>
+                                                    )}
                                                     </p>
                                                 </div>
                                             ))}

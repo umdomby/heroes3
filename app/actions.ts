@@ -231,15 +231,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           `Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.2`
       );
     }
-    const updatedTotalPlayer = {
-      [PlayerChoice.PLAYER1]: player === PlayerChoice.PLAYER1 ? parseFloat((totalPlayer1 + amount).toFixed(2)) : totalPlayer1,
-      [PlayerChoice.PLAYER2]: player === PlayerChoice.PLAYER2 ? parseFloat((totalPlayer2 + amount).toFixed(2)) : totalPlayer2,
-    };
-    const updatedTotalWithInitPlayer1 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER1] + (bet.initBetPlayer1 || 0)).toFixed(2));
-    const updatedTotalWithInitPlayer2 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER2] + (bet.initBetPlayer2 || 0)).toFixed(2));
-    const { oddsPlayer1: updatedOdds1, oddsPlayer2: updatedOdds2 } = calculateOdds(updatedTotalWithInitPlayer1, updatedTotalWithInitPlayer2);
 
-    const potentialProfit = parseFloat((amount * (player === PlayerChoice.PLAYER1 ? updatedOdds1 : updatedOdds2)).toFixed(2));
+    const potentialProfit = parseFloat((amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2)).toFixed(2));
     const userMaxBet = user.points;
 
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
@@ -252,6 +245,16 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     if (amount > maxAllowedBet[player]) {
       throw new Error(`Максимально допустимая ставка: ${maxAllowedBet[player].toFixed(2)}`);
     }
+
+    const updatedTotalPlayer = {
+      [PlayerChoice.PLAYER1]: player === PlayerChoice.PLAYER1 ? parseFloat((totalPlayer1 + amount).toFixed(2)) : totalPlayer1,
+      [PlayerChoice.PLAYER2]: player === PlayerChoice.PLAYER2 ? parseFloat((totalPlayer2 + amount).toFixed(2)) : totalPlayer2,
+    };
+
+    const updatedTotalWithInitPlayer1 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER1] + (bet.initBetPlayer1 || 0)).toFixed(2));
+    const updatedTotalWithInitPlayer2 = parseFloat((updatedTotalPlayer[PlayerChoice.PLAYER2] + (bet.initBetPlayer2 || 0)).toFixed(2));
+
+    const { oddsPlayer1: updatedOdds1, oddsPlayer2: updatedOdds2 } = calculateOdds(updatedTotalWithInitPlayer1, updatedTotalWithInitPlayer2);
 
     const updatedOdds = {
       [PlayerChoice.PLAYER1]: updatedOdds1,
@@ -270,6 +273,23 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Вычисляем общую сумму марж для данной ставки
     const totalMargin = bet.participants.reduce((sum, p) => sum + p.margin, 0) + participantMargin;
 
+    // Проверяем, есть ли противоположные ставки для перекрытия
+    const oppositeParticipants = bet.participants.filter(
+        (p) => p.player !== player && !p.isCovered
+    );
+
+    let isCovered = false;
+    if (oppositeParticipants.length > 0) {
+      // Перекрываем ставку
+      isCovered = true;
+      await prisma.betParticipant.update({
+        where: { id: oppositeParticipants[0].id },
+        data: {
+          isCovered: true,
+        },
+      });
+    }
+
     await prisma.$transaction([
       prisma.betParticipant.create({
         data: {
@@ -279,7 +299,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           player,
           odds: updatedOdds[player],
           profit: potentialProfit,
-          margin: participantMargin, // Сохраняем маржу участника
+          margin: participantMargin,
+          isCovered, // Указываем, перекрыта ли ставка
         },
       }),
       prisma.user.update({
@@ -298,7 +319,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           totalBetAmount: updatedTotalWithInitPlayer1 + updatedTotalWithInitPlayer2,
           maxBetPlayer1: maxBetPlayer1,
           maxBetPlayer2: maxBetPlayer2,
-          margin: totalMargin, // Обновляем общую маржу в Bet
+          margin: totalMargin,
         },
       }),
     ]);
@@ -306,6 +327,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     revalidatePath('/');
     console.log(`Пользователь ${userId} сделал ставку ${amount} на игрока ${player}`);
     await updateGlobalData();
+
+    // Уведомляем пользователя о перекрытии ставки
+    return { success: true, isCovered };
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error in placeBet:', {
@@ -320,6 +344,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to create bet. Please try again.');
   }
 }
+
 
 
 export async function closeBet(betId: number, winnerId: number) {
