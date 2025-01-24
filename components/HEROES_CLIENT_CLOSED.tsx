@@ -126,10 +126,6 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                     ? ((participant.overlap / participant.amount) * 100).toFixed(2)
                                                     : 0;
 
-                                                // Рассчитываем прибыль и возврат маржи
-                                                const profitFromOverlap = participant.overlap * participant.odds;
-                                                const returnedMargin = (participant.amount - participant.overlap) * participant.marginOverlap;
-
                                                 return (
                                                     <div key={participant.id}
                                                          className="border border-gray-200 p-1 mb-1 rounded-md">
@@ -153,11 +149,11 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                                 </span>
                                                                 <br/>
                                                                 <span className="text-green-500">
-                                                                    Прибыль от перекрытой части: {profitFromOverlap.toFixed(2)} Points
+                                                                    Прибыль от перекрытой части: {participant.profit.toFixed(2)} Points
                                                                 </span>
                                                                 <br/>
                                                                 <span className="text-green-500">
-                                                                    Возврат маржи: {returnedMargin.toFixed(2)} Points
+                                                                    Возврат маржи: {participant.marginOverlap.toFixed(2)} Points
                                                                 </span>
                                                             </p>
                                                         ) : (
@@ -167,7 +163,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                                 </span>
                                                                 <br/>
                                                                 <span className="text-yellow-500">
-                                                                    Возврат маржи: {returnedMargin.toFixed(2)} Points
+                                                                    Возврат маржи: {participant.marginOverlap.toFixed(2)} Points
                                                                 </span>
                                                             </p>
                                                         )}
@@ -185,3 +181,4 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
         </div>
     );
 };
+

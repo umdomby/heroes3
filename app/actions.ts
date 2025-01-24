@@ -353,8 +353,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
   }
 }
 
-
-
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
 
@@ -441,17 +439,21 @@ export async function closeBet(betId: number, winnerId: number) {
       });
 
       for (const participant of allParticipants) {
+        // Рассчитываем прибыль и возврат маржи
+        const profitFromOverlap = participant.overlap * participant.odds;
+        const returnedMargin = (participant.amount - participant.overlap) * MARGIN * 0.5; // Возврат 50% маржи от неперекрытой части
+
         await prisma.betParticipantCLOSED.create({
           data: {
             betCLOSEDId: betClosed.id, // Связываем с новой записью в BetCLOSED
             userId: participant.userId,
             amount: participant.amount,
             odds: participant.odds,
-            profit: participant.profit,
+            profit: profitFromOverlap, // Сохраняем рассчитанную прибыль
             player: participant.player,
             isWinner: participant.player === winningPlayer, // Указываем, выиграл ли участник
             margin: participant.margin,
-            marginOverlap: participant.marginOverlap, // Возврат маржи для неперекрытой части
+            marginOverlap: returnedMargin, // Сохраняем рассчитанный возврат маржи
             createdAt: participant.createdAt,
             isCovered: participant.isCovered,
             overlap: participant.overlap, // Добавляем сумму перекрытия
@@ -465,12 +467,13 @@ export async function closeBet(betId: number, winnerId: number) {
           // Начисляем выигрыш на перекрытую сумму
           const profitFromOverlap = participant.overlap * participant.odds;
           const returnedAmount = (participant.amount - participant.overlap) * (1 - MARGIN); // Возврат не перекрытой суммы с учетом маржи
+          const returnedMargin = (participant.amount - participant.overlap) * MARGIN * 0.5; // Возврат 50% маржи от неперекрытой части
 
           await prisma.user.update({
             where: { id: participant.userId },
             data: {
               points: {
-                increment: profitFromOverlap + returnedAmount, // Выигрыш + возврат
+                increment: profitFromOverlap + returnedAmount + returnedMargin, // Выигрыш + возврат + возврат маржи
               },
             },
           });
@@ -478,12 +481,13 @@ export async function closeBet(betId: number, winnerId: number) {
           // Вычитаем перекрытую сумму, если пользователь проиграл
           const lostAmount = participant.overlap; // Перекрытая сумма теряется
           const returnedAmount = (participant.amount - participant.overlap) * (1 - MARGIN); // Возврат не перекрытой суммы с учетом маржи
+          const returnedMargin = (participant.amount - participant.overlap) * MARGIN * 0.5; // Возврат 50% маржи от неперекрытой части
 
           await prisma.user.update({
             where: { id: participant.userId },
             data: {
               points: {
-                decrement: lostAmount - returnedAmount, // Потеря перекрытой суммы минус возврат
+                decrement: lostAmount - returnedAmount - returnedMargin, // Потеря перекрытой суммы минус возврат и возврат маржи
               },
             },
           });
@@ -528,6 +532,8 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
+
 
 
 

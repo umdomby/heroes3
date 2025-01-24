@@ -156,7 +156,7 @@ model BetParticipantCLOSED {
   profit        Float // Выигрыш или частичный выигрыш, в зависимости от перекрытия ставки "overlap Float"
   player        PlayerChoice // выбранный игрок в событии
   margin        Float // маржа пользователя
-  marginOverlap Float // если ставка перекрыта не полностью, это возврат пользователю неперекрытой маржи
+  marginOverlap Float // если ставка перекрыта не полностью, это возврат части неперекрытой маржи
   isCovered     Boolean      @default(false) // Перекрыта ли ставка
   isWinner      Boolean      @default(false) // Победила ли ставка
   createdAt     DateTime     @default(now())
