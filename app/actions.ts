@@ -450,6 +450,7 @@ export async function closeBet(betId: number, winnerId: number) {
             createdAt: participant.createdAt,
             isCovered: participant.isCovered,
             overlap: participant.overlap, // Добавляем сумму перекрытия
+            marginOverlap: bet.marginOverlap, // Добавляем маржу перекрытия, не перекрытая часть маржи возвращается пользователю.
           },
         });
       }

@@ -58,9 +58,9 @@ model ContactDataEnum {
 
 model Bet {
   id              Int              @id @default(autoincrement())
-  player1         Player           @relation(name: "Player1Bets", fields: [player1Id], references: [id])
+  player1         Player           @relation(name: "Player1Bets", fields: [player1Id], references: [id]) // ставки на игрока 1
   player1Id       Int
-  player2         Player           @relation(name: "Player2Bets", fields: [player2Id], references: [id])
+  player2         Player           @relation(name: "Player2Bets", fields: [player2Id], references: [id]) // ставки на игрока 2
   player2Id       Int
   initBetPlayer1  Float // инициализация ставок на игрока 1
   initBetPlayer2  Float // инициализация ставок на игрока 2
@@ -83,29 +83,31 @@ model Bet {
   product         Product?         @relation(fields: [productId], references: [id])
   productItemId   Int?
   productItem     ProductItem?     @relation(fields: [productItemId], references: [id])
-  winnerId        Int?
+  winnerId        Int? // кто победил PLAYER1 или PLAYER2
   margin          Float? // сумма маржи model BetParticipant margin
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
 
 model BetParticipant {
-  id        Int          @id @default(autoincrement())
-  betId     Int
-  bet       Bet          @relation(fields: [betId], references: [id])
-  userId    Int
-  user      User         @relation(fields: [userId], references: [id])
-  amount    Float // ставка пользователя
-  overlap   Float // на какую сумму перекрыто
-  odds      Float // Коэффициент ставки
-  profit    Float // Выигрыш
-  player    PlayerChoice // ставка на выбранного пользователя
-  margin    Float // ставка пользователя
-  isCovered Boolean      @default(false) // Перекрыта ли ставка
-  isWinner  Boolean      @default(false) // Победила ли ставка
-  createdAt DateTime     @default(now())
+  id            Int          @id @default(autoincrement())
+  betId         Int
+  bet           Bet          @relation(fields: [betId], references: [id])
+  userId        Int // пользователь который ставит ставку
+  user          User         @relation(fields: [userId], references: [id])
+  amount        Float // ставка пользователя
+  overlap       Float // на какую сумму перекрыто
+  odds          Float // Коэффициент ставки
+  profit        Float // Выигрыш или частичный выигрыш, в зависимости от перекрытия ставки "overlap Float"
+  player        PlayerChoice // выбранный игрок в событии
+  margin        Float // маржа пользователя
+  marginOverlap Float // если ставка перекрыта не полностью, это возврат пользователю неперекрытой маржи
+  isCovered     Boolean      @default(false) // Перекрыта ли ставка
+  isWinner      Boolean      @default(false) // Победила ли ставка
+  createdAt     DateTime     @default(now())
 }
 
+// закрытые ставки, после закрытия ставки model Bet переносится в model BetCLOSED
 model BetCLOSED {
   id                 Int                    @id @default(autoincrement())
   participantsCLOSED BetParticipantCLOSED[] @relation("BetCLOSEDParticipants") // Обратная связь
@@ -139,21 +141,23 @@ model BetCLOSED {
   updatedAt          DateTime               @updatedAt // Дата обновления
 }
 
+// закрыте ставки, после закрытия ставки model BetParticipant переносится в model BetParticipantCLOSED
 model BetParticipantCLOSED {
-  id          Int          @id @default(autoincrement())
-  betCLOSEDId Int
-  betCLOSED   BetCLOSED    @relation("BetCLOSEDParticipants", fields: [betCLOSEDId], references: [id]) // Обратная связь
-  userId      Int
-  user        User         @relation(fields: [userId], references: [id])
-  amount      Float // Сумма ставки
-  overlap     Float // на какую сумму перекрыто
-  odds        Float // Коэффициент ставки
-  profit      Float // Выигрыш
-  player      PlayerChoice // Выбор игрока (PLAYER1 или PLAYER2)
-  isCovered   Boolean      @default(false) // Перекрыта ли ставка
-  isWinner    Boolean      @default(false) // Победитель ли?
-  margin      Float? // ставка пользователя
-  createdAt   DateTime     @default(now()) // Дата создания
+  id            Int          @id @default(autoincrement())
+  betCLOSEDId   Int
+  betCLOSED     BetCLOSED    @relation("BetCLOSEDParticipants", fields: [betCLOSEDId], references: [id]) // Обратная связь
+  userId        Int
+  user          User         @relation(fields: [userId], references: [id])
+  amount        Float // ставка пользователя
+  overlap       Float // на какую сумму перекрыто
+  odds          Float // Коэффициент ставки
+  profit        Float // Выигрыш или частичный выигрыш, в зависимости от перекрытия ставки "overlap Float"
+  player        PlayerChoice // выбранный игрок в событии
+  margin        Float // маржа пользователя
+  marginOverlap Float // если ставка перекрыта не полностью, это возврат пользователю неперекрытой маржи
+  isCovered     Boolean      @default(false) // Перекрыта ли ставка
+  isWinner      Boolean      @default(false) // Победила ли ставка
+  createdAt     DateTime     @default(now())
 }
 
 model GlobalData {
