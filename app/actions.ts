@@ -435,15 +435,12 @@ export async function closeBet(betId: number, winnerId: number) {
         },
       });
 
-      // Переносим участников с isWinner = true в BetParticipantCLOSED
-      const winningParticipants = await prisma.betParticipant.findMany({
-        where: {
-          betId: betId,
-          isWinner: true,
-        },
+      // Переносим всех участников в BetParticipantCLOSED
+      const allParticipants = await prisma.betParticipant.findMany({
+        where: { betId: betId },
       });
 
-      for (const participant of winningParticipants) {
+      for (const participant of allParticipants) {
         await prisma.betParticipantCLOSED.create({
           data: {
             betCLOSEDId: betClosed.id, // Связываем с новой записью в BetCLOSED
@@ -452,7 +449,7 @@ export async function closeBet(betId: number, winnerId: number) {
             odds: participant.odds,
             profit: participant.profit,
             player: participant.player,
-            isWinner: participant.isWinner,
+            isWinner: participant.player === winningPlayer, // Указываем, выиграл ли участник
             margin: participant.margin,
             marginOverlap: participant.marginOverlap, // Возврат маржи для неперекрытой части
             createdAt: participant.createdAt,
@@ -531,6 +528,7 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
 
 
 
