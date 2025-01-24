@@ -26,7 +26,6 @@ interface BetParticipantCLOSED {
     margin: number;
     marginOverlap: number;
 }
-
 interface BetCLOSED {
     id: number;
     participantsCLOSED: BetParticipantCLOSED[];
@@ -37,8 +36,8 @@ interface BetCLOSED {
     currentOdds1: number;
     currentOdds2: number;
     createdAt: Date;
-    margin: number;
-    marginOverlap: number;
+    margin: number | null; // Разрешаем margin быть null
+    marginOverlap: number | null; // Разрешаем marginOverlap быть null
 }
 
 interface Props {
@@ -118,7 +117,8 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                         <div className="m-1 p-4 rounded-lg">
                                             <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
                                             {userBets.map((participant) => (
-                                                <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
+                                                <div key={participant.id}
+                                                     className="border border-gray-200 p-1 mb-1 rounded-md">
                                                     <p>
                                                         Ставка: <strong>{participant.amount}</strong> на{' '}
                                                         <strong>
@@ -126,7 +126,9 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         </strong>
                                                         {','} Коэффициент: <span>{participant.odds.toFixed(2)}</span>
                                                         {','} Прибыль: <span>{participant.profit.toFixed(2)}</span>
-                                                        {','} Маржа: <span>{participant.margin.toFixed(2)}</span>
+                                                        {','} Маржа: <span>{participant.margin !== null ? participant.margin.toFixed(2) : '0.00'}</span>
+                                                        {','} Возврат
+                                                        маржи: <span>{participant.marginOverlap !== null ? participant.marginOverlap.toFixed(2) : '0.00'}</span>
                                                         {','} {new Date(participant.createdAt).toLocaleString()}
                                                     </p>
                                                     {participant.profit === 0 && (

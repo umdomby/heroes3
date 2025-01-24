@@ -174,6 +174,7 @@ export async function clientCreateBet(formData: any) {
         totalBetPlayer1: 0, // Инициализируем сумму ставок на игрока 1
         totalBetPlayer2: 0, // Инициализируем сумму ставок на игрока 2
         margin: 0, // Инициализируем общую маржу
+        marginOverlap: 0, // Инициализируем возвращенную маржу от не до перекрытых ставок
         oddsBetPlayer1: oddsBetPlayer1, // Разница ставок перекрытия на игрока 1
         oddsBetPlayer2: oddsBetPlayer2, // Разница ставок перекрытия на игрока 2
       },
@@ -290,12 +291,13 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       prisma.betParticipant.create({
         data: {
           betId,
-          userId,
+          userId, // ID пользователя, который сделал ставку
           amount, // amount всегда положительное число
-          player,
+          player, // Игрок, на которого сделана ставка
           odds: player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2,
-          profit: potentialProfit,
-          margin: participantMargin,
+          profit: potentialProfit, // Потенциальный выигрыш, сюда входит и прибыль от перекрытой ставки
+          margin: participantMargin, // маржа от текущей ставки, отдаваемая заведению
+          marginOverlap: 0, // нужно создать вычисление маржи которая будет возвращаться пользователю не перекрытой части ставки
           isCovered: overlapAmount > 0, // Указываем, перекрыта ли ставка
           overlap: overlapAmount, // Сумма перекрытия
         },
@@ -315,6 +317,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           totalBetPlayer2: newTotalBetPlayer2, // Обновляем сумму ставок на игрока 2
           totalBetAmount: totalWithInitPlayer1 + totalWithInitPlayer2 + amount,
           margin: totalMargin,
+          marginOverlap: 0, // нужно создать вычисление маржи которая будет возвращаться пользователю не перекрытой части ставки
           oddsBetPlayer1: oddsBetPlayer1, // Обновляем разницу ставок перекрытия для игрока 1
           oddsBetPlayer2: oddsBetPlayer2, // Обновляем разницу ставок перекрытия для игрока 2
         },
@@ -399,6 +402,7 @@ export async function closeBet(betId: number, winnerId: number) {
           productItemId: bet.productItemId,
           winnerId: bet.winnerId,
           margin: bet.margin,
+          marginOverlap: bet.marginOverlap,
           createdAt: bet.createdAt,
           updatedAt: bet.updatedAt,
           oddsBetPlayer1: bet.oddsBetPlayer1,
@@ -447,10 +451,10 @@ export async function closeBet(betId: number, winnerId: number) {
             player: participant.player,
             isWinner: participant.isWinner,
             margin: participant.margin,
+            marginOverlap: 0, // Добавляем маржу перекрытия, не перекрытая часть маржи возвращается пользователю. Её нужно еще рассчитать.
             createdAt: participant.createdAt,
             isCovered: participant.isCovered,
             overlap: participant.overlap, // Добавляем сумму перекрытия
-            marginOverlap: bet.marginOverlap, // Добавляем маржу перекрытия, не перекрытая часть маржи возвращается пользователю.
           },
         });
       }
