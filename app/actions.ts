@@ -366,7 +366,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
 
 
-
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
 
@@ -450,8 +449,13 @@ export async function closeBet(betId: number, winnerId: number) {
       });
 
       for (const participant of allParticipants) {
+        // Прибыль от перекрытой части
         const profitFromOverlap = participant.overlap * participant.odds;
+
+        // Возврат неперекрытой части с учетом маржи (0.05%)
         const returnedAmount = (participant.amount - participant.overlap) * (1 - MARGIN);
+
+        // Возврат маржи (0.05%) от неперекрытой части
         const returnedMargin = (participant.amount - participant.overlap) * MARGIN * 0.5;
 
         // Создаем запись в BetParticipantCLOSED
@@ -474,6 +478,10 @@ export async function closeBet(betId: number, winnerId: number) {
 
         // Обновляем баллы пользователя
         if (participant.player === winningPlayer) {
+          // Для выигравших участников:
+          // 1. Прибыль от перекрытой части
+          // 2. Возврат неперекрытой части с учетом маржи
+          // 3. Возврат маржи от неперекрытой части
           await prisma.user.update({
             where: { id: participant.userId },
             data: {
@@ -483,12 +491,14 @@ export async function closeBet(betId: number, winnerId: number) {
             },
           });
         } else {
-          const lostAmount = participant.overlap;
+          // Для проигравших участников:
+          // 1. Возврат неперекрытой части с учетом маржи
+          // 2. Возврат маржи от неперекрытой части
           await prisma.user.update({
             where: { id: participant.userId },
             data: {
               points: {
-                decrement: lostAmount - returnedAmount - returnedMargin,
+                increment: returnedAmount + returnedMargin,
               },
             },
           });
@@ -532,6 +542,7 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
 
 
 
