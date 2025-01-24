@@ -250,10 +250,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
     }
 
-    // Логика частичного перекрытия
     const oppositeParticipants = bet.participants
         .filter(p => p.player !== player && !p.isCovered)
-        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); // Сортируем по времени создания
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
     let remainingAmount = amount;
     let overlapAmount = 0;
@@ -261,7 +260,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     for (const participant of oppositeParticipants) {
       if (remainingAmount <= 0) break;
 
-      const overlap = Math.min(participant.amount, remainingAmount);
+      // Рассчитываем прибыль участника, которого перекрываем
+      const participantProfit = participant.amount * participant.odds;
+
+      // Перекрываем сумму, равную прибыли участника
+      const overlap = Math.min(participantProfit, remainingAmount);
       overlapAmount += overlap;
       remainingAmount -= overlap;
 
@@ -330,9 +333,13 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Возврат баллов при частичном перекрытии
     if (overlapAmount > 0) {
+      // Рассчитываем прибыль на перекрытую сумму
       const profit = overlapAmount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
-      const returnedAmount = remainingAmount * (1 - MARGIN); // Возврат с учетом маржи
 
+      // Возврат не перекрытой суммы с учетом маржи
+      const returnedAmount = remainingAmount * (1 - MARGIN);
+
+      // Обновляем баланс пользователя
       await prisma.user.update({
         where: { id: userId },
         data: {
