@@ -264,6 +264,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
 
 
 
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>, bet: Bet) => {
         event.preventDefault();
 
@@ -515,13 +516,11 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
 
                                     {userBets.length > 0 && (
                                         <div className="m-1 p-4 rounded-lg">
-                                            <h4 className="text-md font-semibold mb-2">
-                                                Ваши ставки на этот матч:
-                                            </h4>
+                                            <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
                                             {userBets.map((participant) => {
-                                                // Рассчитываем процент перекрытия
+                                                // Рассчитываем процент перекрытия на основе прибыли
                                                 const overlapPercentage = participant.overlap > 0
-                                                    ? ((participant.overlap / participant.amount) * 100).toFixed(2)
+                                                    ? ((participant.overlap / (participant.amount * participant.odds)) * 100).toFixed(2)
                                                     : 0;
 
                                                 return (
