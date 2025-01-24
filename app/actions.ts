@@ -151,10 +151,6 @@ export async function clientCreateBet(formData: any) {
 
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(formData.initBetPlayer1, formData.initBetPlayer2);
 
-    // Рассчитываем разницу ставок перекрытия
-    const oddsBetPlayer1 = formData.initBetPlayer1 - formData.initBetPlayer2;
-    const oddsBetPlayer2 = formData.initBetPlayer2 - formData.initBetPlayer1;
-
     const newBet = await prisma.bet.create({
       data: {
         status: 'OPEN', // Устанавливаем статус ставки как "открытая"
@@ -175,8 +171,8 @@ export async function clientCreateBet(formData: any) {
         totalBetPlayer2: 0, // Инициализируем сумму ставок на игрока 2
         margin: 0, // Инициализируем общую маржу
         marginOverlap: 0, // Инициализируем возвращенную маржу от не до перекрытых ставок
-        oddsBetPlayer1: oddsBetPlayer1, // Разница ставок перекрытия на игрока 1
-        oddsBetPlayer2: oddsBetPlayer2, // Разница ставок перекрытия на игрока 2
+        oddsBetPlayer1: 0, // Инициализируем разницу ставок перекрытия на игрока 1
+        oddsBetPlayer2: 0, // Инициализируем разницу ставок перекрытия на игрока 2
       },
     });
 
@@ -257,14 +253,15 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     let remainingAmount = amount;
     let overlapAmount = 0;
 
+    // Перекрываем только одну ставку полностью или частично
     for (const participant of oppositeParticipants) {
       if (remainingAmount <= 0) break;
 
       // Рассчитываем прибыль участника, которого перекрываем
       const participantProfit = participant.amount * participant.odds;
 
-      // Перекрываем сумму, равную прибыли участника
-      const overlap = Math.min(participantProfit, remainingAmount);
+      // Перекрываем сумму, равную прибыли участника, но не более 100% от суммы ставки
+      const overlap = Math.min(participantProfit, remainingAmount, participant.amount); // Не более 100% от суммы ставки
       overlapAmount += overlap;
       remainingAmount -= overlap;
 
@@ -276,6 +273,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           overlap: participant.overlap + overlap, // Увеличиваем сумму перекрытия
         },
       });
+
+      // Прерываем цикл после перекрытия одной ставки
+      break;
     }
 
     // Создаем новую ставку
@@ -330,7 +330,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       }),
     ]);
 
-
     // Возврат баллов при частичном перекрытии
     if (overlapAmount > 0) {
       // Рассчитываем прибыль на перекрытую сумму
@@ -360,6 +359,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to place bet. Please try again.');
   }
 }
+
 
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
