@@ -318,7 +318,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           currentOdds2: oddsPlayer2,
           totalBetPlayer1: newTotalBetPlayer1, // Обновляем сумму ставок на игрока 1
           totalBetPlayer2: newTotalBetPlayer2, // Обновляем сумму ставок на игрока 2
-          totalBetAmount: totalWithInitPlayer1 + totalWithInitPlayer2 + amount,
+          totalBetAmount: totalPlayer1 + totalPlayer2 + amount, // Учитываем только суммы ставок участников
           margin: totalMargin,
           marginOverlap: bet.marginOverlap + marginOverlap, // Обновляем возврат маржи
           oddsBetPlayer1: oddsBetPlayer1, // Обновляем разницу ставок перекрытия для игрока 1
@@ -326,6 +326,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         },
       }),
     ]);
+
 
     // Возврат баллов при частичном перекрытии
     if (overlapAmount > 0) {
