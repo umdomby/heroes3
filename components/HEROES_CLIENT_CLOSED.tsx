@@ -23,6 +23,7 @@ interface BetParticipantCLOSED {
     player: string; // Assuming PlayerChoice is a string enum
     isWinner: boolean;
     createdAt: Date;
+    margin: number;
 }
 
 interface BetCLOSED {
@@ -47,12 +48,16 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
         <div>
             <div className="flex justify-between items-center">
                 <div>
-                    <p>Ваши баллы: {user.points}</p>
+                    <p>Ваши баллы: {user.points.toFixed(2)}</p>
                 </div>
             </div>
 
             {closedBets.map((bet) => {
+                // Фильтруем ставки, в которых участвовал текущий пользователь
                 const userBets = bet.participantsCLOSED.filter((p: BetParticipantCLOSED) => p.userId === user.id);
+
+                // Если пользователь не участвовал в этой ставке, пропускаем её
+                if (userBets.length === 0) return null;
 
                 return (
                     <div key={bet.id} className="border border-gray-700 mt-1">
@@ -64,32 +69,20 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                             <TableRow>
                                                 {/* Игрок 1 */}
                                                 <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
-                                                    <div>
-                                                        {bet.player1.name}
-                                                    </div>
-                                                    <div>
-                                                        {bet.totalBetPlayer1}
-                                                    </div>
+                                                    <div>{bet.player1.name}</div>
+                                                    <div>{bet.totalBetPlayer1}</div>
                                                 </TableCell>
 
                                                 {/* Игрок 2 */}
                                                 <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
-                                                    <div>
-                                                        {bet.player2.name}
-                                                    </div>
-                                                    <div>
-                                                        {bet.totalBetPlayer2}
-                                                    </div>
+                                                    <div>{bet.player2.name}</div>
+                                                    <div>{bet.totalBetPlayer2}</div>
                                                 </TableCell>
 
-                                                {/* Коэффициент для игрока 1 и 2*/}
+                                                {/* Коэффициент для игрока 1 и 2 */}
                                                 <TableCell className="w-[15%]">
-                                                    <div>
-                                                        {bet.currentOdds1.toFixed(2)}
-                                                    </div>
-                                                    <div>
-                                                        {bet.currentOdds2.toFixed(2)}
-                                                    </div>
+                                                    <div>{bet.currentOdds1.toFixed(2)}</div>
+                                                    <div>{bet.currentOdds2.toFixed(2)}</div>
                                                 </TableCell>
 
                                                 {/* Прибыль/убыток */}
@@ -97,14 +90,20 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                     <div>
                                                         <span>{bet.player1.name}</span> :{' '}
                                                         <span>
-                                                            {userBets.filter(p => p.player === 'PLAYER1').reduce((sum, p) => sum + p.profit, 0).toFixed(2)}
-                                                        </span>
+                              {userBets
+                                  .filter((p) => p.player === 'PLAYER1')
+                                  .reduce((sum, p) => sum + p.profit, 0)
+                                  .toFixed(2)}
+                            </span>
                                                     </div>
                                                     <div>
                                                         <span>{bet.player2.name}</span> :{' '}
                                                         <span>
-                                                            {userBets.filter(p => p.player === 'PLAYER2').reduce((sum, p) => sum + p.profit, 0).toFixed(2)}
-                                                        </span>
+                              {userBets
+                                  .filter((p) => p.player === 'PLAYER2')
+                                  .reduce((sum, p) => sum + p.profit, 0)
+                                  .toFixed(2)}
+                            </span>
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
@@ -121,11 +120,15 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         Ставка: <strong>{participant.amount}</strong> на{' '}
                                                         <strong>
                                                             {participant.player === 'PLAYER1' ? bet.player1.name : bet.player2.name}
-                                                        </strong>{','}
-                                                        {' '}Коэффициент: <span>{participant.odds.toFixed(2)}</span>{','}
-                                                        {' '}Прибыль: <span>{participant.profit.toFixed(2)}</span>{','}
-                                                        {' '}{new Date(participant.createdAt).toLocaleString()}
+                                                        </strong>
+                                                        {','} Коэффициент: <span>{participant.odds.toFixed(2)}</span>
+                                                        {','} Прибыль: <span>{participant.profit.toFixed(2)}</span>
+                                                        {','} Маржа: <span>{participant.margin.toFixed(2)}</span>
+                                                        {','} {new Date(participant.createdAt).toLocaleString()}
                                                     </p>
+                                                    {participant.profit === 0 && (
+                                                        <p>Ставка не перебитая, прибыль 0</p>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -139,3 +142,4 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
         </div>
     );
 };
+

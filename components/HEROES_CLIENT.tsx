@@ -363,7 +363,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
         <div>
             <div className="flex justify-between items-center">
                 <p>
-                    Points: <span className="text-red-500">{userUp?.points}</span>
+                    Points: <span className="text-red-500">{userUp?.points.toFixed(2)}</span>
                 </p>
             </div>
 
