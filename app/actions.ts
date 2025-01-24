@@ -293,6 +293,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Рассчитываем возврат маржи для неперекрытой части ставки
     const marginOverlap = remainingAmount * MARGIN; // Возврат маржи для неперекрытой части
 
+    // Увеличиваем максимальную ставку для противоположного игрока
+    const newMaxBetPlayer1 = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount;
+    const newMaxBetPlayer2 = player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount;
+
     await prisma.$transaction([
       prisma.betParticipant.create({
         data: {
@@ -326,6 +330,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           marginOverlap: bet.marginOverlap + marginOverlap, // Обновляем возврат маржи
           oddsBetPlayer1: oddsBetPlayer1, // Обновляем разницу ставок перекрытия для игрока 1
           oddsBetPlayer2: oddsBetPlayer2, // Обновляем разницу ставок перекрытия для игрока 2
+          maxBetPlayer1: newMaxBetPlayer1, // Обновляем максимальную ставку для игрока 1
+          maxBetPlayer2: newMaxBetPlayer2, // Обновляем максимальную ставку для игрока 2
         },
       }),
     ]);
@@ -359,6 +365,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to place bet. Please try again.');
   }
 }
+
 
 
 export async function closeBet(betId: number, winnerId: number) {
