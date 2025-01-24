@@ -196,6 +196,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
   try {
     const { betId, userId, amount, player } = formData;
 
+    // Находим ставку и пользователя
     const bet = await prisma.bet.findUnique({
       where: { id: betId },
       include: { participants: true },
@@ -225,6 +226,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
     const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
 
+    // Рассчитываем коэффициенты
     const { oddsPlayer1, oddsPlayer2 } = calculateOdds(totalWithInitPlayer1, totalWithInitPlayer2);
 
     // Проверка на минимальный коэффициент
@@ -308,7 +310,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const newMaxBetPlayer1 = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount;
     const newMaxBetPlayer2 = player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount;
 
+    // Выполняем транзакцию
     await prisma.$transaction([
+      // Создаем новую ставку
       prisma.betParticipant.create({
         data: {
           betId,
@@ -323,12 +327,14 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           overlap: overlapAmount,
         },
       }),
+      // Вычитаем сумму ставки из баллов пользователя
       prisma.user.update({
         where: { id: userId },
         data: {
           points: user.points - amount,
         },
       }),
+      // Обновляем данные ставки
       prisma.bet.update({
         where: { id: betId },
         data: {
@@ -347,20 +353,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       }),
     ]);
 
-    if (overlapAmount > 0) {
-      const profit = overlapAmount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
-      const returnedAmount = remainingAmount * (1 - MARGIN);
-
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          points: {
-            increment: profit + returnedAmount,
-          },
-        },
-      });
-    }
-
+    // Ревалидируем данные
     revalidatePath('/');
     await updateGlobalData();
 
@@ -370,6 +363,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to place bet. Please try again.');
   }
 }
+
+
 
 
 export async function closeBet(betId: number, winnerId: number) {
