@@ -24,6 +24,7 @@ interface BetParticipantCLOSED {
     isWinner: boolean;
     createdAt: Date;
     margin: number;
+    marginOverlap: number;
 }
 
 interface BetCLOSED {
@@ -36,6 +37,8 @@ interface BetCLOSED {
     currentOdds1: number;
     currentOdds2: number;
     createdAt: Date;
+    margin: number;
+    marginOverlap: number;
 }
 
 interface Props {

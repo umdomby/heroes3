@@ -85,6 +85,7 @@ model Bet {
   productItem     ProductItem?     @relation(fields: [productItemId], references: [id])
   winnerId        Int? // кто победил PLAYER1 или PLAYER2
   margin          Float? // сумма маржи model BetParticipant margin
+  marginOverlap   Float? // возвращенная маржа пользователю от перекрытия ставки, та часть маржи которая не перекрыта
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -129,14 +130,15 @@ model BetCLOSED {
   creator            User                   @relation("BetsCLOSEDCreated", fields: [creatorId], references: [id])
   creatorId          Int
   status             BetStatus              @default(CLOSED) // Статус ставки
-  categoryId         Int?
+  categoryId         Int
   category           Category?              @relation(fields: [categoryId], references: [id])
-  productId          Int?
+  productId          Int
   product            Product?               @relation(fields: [productId], references: [id])
-  productItemId      Int?
+  productItemId      Int
   productItem        ProductItem?           @relation(fields: [productItemId], references: [id])
-  winnerId           Int? // ID победителя (без связи)
-  margin             Float?
+  winnerId           Int // ID победителя (без связи)
+  margin             Float // вся маржа события
+  marginOverlap      Float // возвращенная маржа пользователю от перекрытия ставки, та часть маржи которая не перекрыта
   createdAt          DateTime               @default(now()) // Дата создания
   updatedAt          DateTime               @updatedAt // Дата обновления
 }
