@@ -96,11 +96,12 @@ model BetParticipant {
   bet           Bet          @relation(fields: [betId], references: [id])
   userId        Int // пользователь который ставит ставку
   user          User         @relation(fields: [userId], references: [id])
+  player        PlayerChoice // выбранный игрок в событии
   amount        Float // ставка пользователя
-  overlap       Float // на какую сумму перекрыто
   odds          Float // Коэффициент ставки
   profit        Float // Выигрыш или частичный выигрыш, в зависимости от перекрытия ставки "overlap Float"
-  player        PlayerChoice // выбранный игрок в событии
+  overlap       Float // на какую сумму перекрыто
+  overlapRemain Float // если ставка перекрыта не полностью, остсаток для перекрытия будущих ставок.
   margin        Float // маржа пользователя
   marginOverlap Float // если ставка перекрыта не полностью, это возврат пользователю неперекрытой маржи
   isCovered     Boolean      @default(false) // Перекрыта ли ставка
@@ -148,15 +149,16 @@ model BetParticipantCLOSED {
   id            Int          @id @default(autoincrement())
   betCLOSEDId   Int
   betCLOSED     BetCLOSED    @relation("BetCLOSEDParticipants", fields: [betCLOSEDId], references: [id]) // Обратная связь
-  userId        Int
+  userId        Int // пользователь который ставит ставку
   user          User         @relation(fields: [userId], references: [id])
+  player        PlayerChoice // выбранный игрок в событии
   amount        Float // ставка пользователя
-  overlap       Float // на какую сумму перекрыто
   odds          Float // Коэффициент ставки
   profit        Float // Выигрыш или частичный выигрыш, в зависимости от перекрытия ставки "overlap Float"
-  player        PlayerChoice // выбранный игрок в событии
+  overlap       Float // на какую сумму перекрыто
+  overlapRemain Float // если ставка перекрыта не полностью, остсаток для перекрытия будущих ставок.
   margin        Float // маржа пользователя
-  marginOverlap Float // если ставка перекрыта не полностью, это возврат части неперекрытой маржи
+  marginOverlap Float // если ставка перекрыта не полностью, это возврат пользователю неперекрытой маржи
   isCovered     Boolean      @default(false) // Перекрыта ли ставка
   isWinner      Boolean      @default(false) // Победила ли ставка
   createdAt     DateTime     @default(now())

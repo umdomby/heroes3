@@ -325,7 +325,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           margin: participantMargin,
           marginOverlap,
           isCovered: overlapAmount > 0,
-          overlap: overlapAmount,
+          overlap: overlapAmount, // нужна доработка, перекрытия ставок
+          overlapRemain: 0, // нужна доработка, остатка для будущих перекрытий.
         },
       }),
       // Вычитаем сумму ставки из баллов пользователя
@@ -474,6 +475,7 @@ export async function closeBet(betId: number, winnerId: number) {
             createdAt: participant.createdAt,
             isCovered: participant.isCovered,
             overlap: participant.overlap,
+            overlapRemain: participant.overlapRemain,
           },
         });
 
