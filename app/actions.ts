@@ -265,6 +265,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         where: { id: partiallyCoveredBet.id },
         data: {
           overlap: partiallyCoveredBet.overlap + overlap,
+          isCovered: partiallyCoveredBet.overlap + overlap >= partiallyCoveredBet.amount, // Помечаем как перекрытую, если перекрыта полностью
         },
       });
     }
@@ -272,7 +273,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Если осталась сумма для перекрытия, перекрываем другие ставки
     if (remainingAmount > 0) {
       const oppositeParticipants = bet.participants
-          .filter(p => p.player !== player && !p.isCovered)
+          .filter(p => p.player !== player && !p.isCovered) // Убедитесь, что фильтруются только не перекрытые ставки
           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
       for (const participant of oppositeParticipants) {

@@ -133,7 +133,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                             {userBets.map((participant) => {
                                                 // Рассчитываем процент перекрытия
                                                 const overlapPercentage = participant.overlap > 0
-                                                    ? ((participant.overlap / participant.amount) * 100).toFixed(2)
+                                                    ? ((participant.overlap / (participant.amount * participant.odds)) * 100).toFixed(2)
                                                     : 0;
 
                                                 return (
