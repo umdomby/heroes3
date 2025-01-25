@@ -275,8 +275,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     };
 
 
-
-
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>, bet: Bet) => {
         event.preventDefault();
 
@@ -527,8 +525,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                             <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
                                             {userBets.map((participant) => {
                                                 // Рассчитываем процент перекрытия на основе прибыли
+                                                const profitToCover = participant.amount * (participant.odds - 1);
                                                 const overlapPercentage = participant.overlap > 0
-                                                    ? ((participant.overlap / (participant.amount * participant.odds)) * 100).toFixed(2)
+                                                    ? ((participant.overlap / profitToCover) * 100).toFixed(2)
                                                     : 0;
 
                                                 // Определяем статус перекрытия
@@ -565,31 +564,32 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                             </strong>
                                                             {", "} Коэффициент:{" "}
                                                             <span className={playerColors[participant.player]}>
-                                {participant.odds.toFixed(2)}
-                              </span>
+                    {participant.odds.toFixed(2)}
+                </span>
                                                             {", "} Прибыль:{" "}
                                                             <span className={playerColors[participant.player]}>
-                                {participant.profit.toFixed(2)}
-                              </span>
+                    {participant.profit.toFixed(2)}
+                </span>
                                                             {", "} {new Date(participant.createdAt).toLocaleString()}
                                                         </p>
                                                         {/* Отображаем информацию о перекрытии */}
                                                         <p>
-                              <span
-                                  className={
-                                      participant.isCovered === "OPEN"
-                                          ? "text-yellow-500"
-                                          : participant.isCovered === "CLOSED" || participant.isCovered === "CP"
-                                              ? "text-green-500"
-                                              : "text-blue-500"
-                                  }
-                              >
-                                {overlapStatus}
-                              </span>
+                <span
+                    className={
+                        participant.isCovered === "OPEN"
+                            ? "text-yellow-500"
+                            : participant.isCovered === "CLOSED" || participant.isCovered === "CP"
+                                ? "text-green-500"
+                                : "text-blue-500"
+                    }
+                >
+                    {overlapStatus}
+                </span>
                                                         </p>
                                                     </div>
                                                 );
                                             })}
+
                                         </div>
                                     )}
 
