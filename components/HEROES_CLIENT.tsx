@@ -231,10 +231,22 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                 player,
             });
 
-            if (response.isCovered === "OPEN") {
-                alert("Ваша ставка не перекрыта!");
-            } else {
-                alert("Ваша ставка перекрыта!");
+            // Уведомление пользователя в зависимости от статуса перекрытия
+            switch (response.isCovered) {
+                case "OPEN":
+                    alert("Ваша ставка не перекрыта!");
+                    break;
+                case "CLOSED":
+                    alert("Ваша ставка полностью перекрыта!");
+                    break;
+                case "PENDING":
+                    alert("Ваша ставка частично перекрыта!");
+                    break;
+                case "CP":
+                    alert("Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий!");
+                    break;
+                default:
+                    alert("Неизвестный статус перекрытия.");
             }
 
             mutate();
@@ -519,6 +531,25 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                     ? ((participant.overlap / (participant.amount * participant.odds)) * 100).toFixed(2)
                                                     : 0;
 
+                                                // Определяем статус перекрытия
+                                                let overlapStatus = "";
+                                                switch (participant.isCovered) {
+                                                    case "OPEN":
+                                                        overlapStatus = "Ваша ставка не перекрыта (0 Points, 0%)";
+                                                        break;
+                                                    case "CLOSED":
+                                                        overlapStatus = `Ваша ставка полностью перекрыта на ${participant.overlap.toFixed(2)} Points (${overlapPercentage}%)`;
+                                                        break;
+                                                    case "PENDING":
+                                                        overlapStatus = `Ваша ставка частично перекрыта на ${participant.overlap.toFixed(2)} Points (${overlapPercentage}%)`;
+                                                        break;
+                                                    case "CP":
+                                                        overlapStatus = `Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий (${participant.overlapRemain?.toFixed(2)} Points)`;
+                                                        break;
+                                                    default:
+                                                        overlapStatus = "Неизвестный статус перекрытия.";
+                                                }
+
                                                 return (
                                                     <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
                                                         <p>
@@ -534,29 +565,28 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                             </strong>
                                                             {", "} Коэффициент:{" "}
                                                             <span className={playerColors[participant.player]}>
-              {participant.odds.toFixed(2)}
-            </span>
+                                {participant.odds.toFixed(2)}
+                              </span>
                                                             {", "} Прибыль:{" "}
                                                             <span className={playerColors[participant.player]}>
-              {participant.profit.toFixed(2)}
-            </span>
+                                {participant.profit.toFixed(2)}
+                              </span>
                                                             {", "} {new Date(participant.createdAt).toLocaleString()}
                                                         </p>
                                                         {/* Отображаем информацию о перекрытии */}
-                                                        {participant.overlap > 0 ? (
-                                                            <p>
-              <span className="text-green-500">
-                Ваша ставка перекрыта на {participant.overlap.toFixed(2)} Points (
-                  {overlapPercentage}%)
-              </span>
-                                                            </p>
-                                                        ) : (
-                                                            <p>
-              <span className="text-yellow-500">
-                Ваша ставка не перекрыта (0 Points, 0%)
-              </span>
-                                                            </p>
-                                                        )}
+                                                        <p>
+                              <span
+                                  className={
+                                      participant.isCovered === "OPEN"
+                                          ? "text-yellow-500"
+                                          : participant.isCovered === "CLOSED" || participant.isCovered === "CP"
+                                              ? "text-green-500"
+                                              : "text-blue-500"
+                                  }
+                              >
+                                {overlapStatus}
+                              </span>
+                                                        </p>
                                                     </div>
                                                 );
                                             })}
