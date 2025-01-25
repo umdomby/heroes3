@@ -296,9 +296,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     const { overlapAmount } = await coverBets(betId, amount, player, player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
 
-    const participantMargin = amount * MARGIN;
-    const totalMargin = bet.participants.reduce((sum, p) => sum + p.margin, 0) + participantMargin;
-
     const newTotalBetPlayer1 = player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1;
     const newTotalBetPlayer2 = player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2;
 
@@ -317,7 +314,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           player,
           odds: player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2,
           profit: potentialProfit,
-          margin: participantMargin,
+          margin: 0,
           isCovered: overlapAmount > 0 ? IsCovered.PENDING : IsCovered.OPEN,
           overlap: overlapAmount,
           overlapRemain: 0,
@@ -337,7 +334,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           totalBetPlayer1: newTotalBetPlayer1,
           totalBetPlayer2: newTotalBetPlayer2,
           totalBetAmount: totalPlayer1 + totalPlayer2 + amount,
-          margin: totalMargin,
+          margin: 0,
           oddsBetPlayer1,
           oddsBetPlayer2,
           maxBetPlayer1: newMaxBetPlayer1,

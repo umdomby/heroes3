@@ -234,7 +234,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
             if (response.isCovered) {
                 alert("Ваша ставка перекрыта!");
             } else {
-                alert("Ваша ставка не перекрыта. Вы получите свои баллы обратно с учетом маржи.");
+                alert("Ваша ставка не перекрыта!");
             }
 
             mutate();
@@ -465,10 +465,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                             <p>
                                                 Общая сумма ставок на это событие:
                                                 <span className="text-green-400"> {bet.totalBetAmount}</span>
-                                            </p>
-                                            <p>
-                                                Маржа:
-                                                <span className="text-yellow-400"> {bet.margin.toFixed(2)}</span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
