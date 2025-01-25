@@ -238,10 +238,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
     const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
 
-    // Рассчитываем коэффициенты
+    // Calculate odds
     const { oddsPlayer1, oddsPlayer2 } = calculateOdds(totalWithInitPlayer1, totalWithInitPlayer2);
 
-    // Проверка на минимальный коэффициент
+    // Check for minimum odds
     if (
         (player === PlayerChoice.PLAYER1 && oddsPlayer1 <= 1.02) ||
         (player === PlayerChoice.PLAYER2 && oddsPlayer2 <= 1.02)
@@ -249,10 +249,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.02');
     }
 
-    // Рассчитываем потенциальный выигрыш (чистая прибыль)
+    // Calculate potential profit
     const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 - 1 : oddsPlayer2 - 1);
 
-    // Проверка на максимальную допустимую ставку
+    // Check for maximum allowed bet
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
     const maxAllowedBet = player === PlayerChoice.PLAYER1 ? maxBetPlayer1 : maxBetPlayer2;
 
@@ -260,39 +260,42 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
     }
 
-    // Находим частично перекрытую ставку, если она существует
+    // Find partially covered bet
     const partiallyCoveredBet = bet.participants.find(p => p.isCovered && p.overlap < p.amount);
 
     let remainingAmount = amount;
     let overlapAmount = 0;
 
     if (partiallyCoveredBet) {
-      // Перекрываем частично перекрытую ставку
-      const overlap = Math.min(partiallyCoveredBet.amount - partiallyCoveredBet.overlap, remainingAmount);
+      // Cover the profit of the partially covered bet
+      const profitToCover = partiallyCoveredBet.amount * (partiallyCoveredBet.odds - 1);
+      const overlap = Math.min(profitToCover - partiallyCoveredBet.overlap, remainingAmount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 - 1 : oddsPlayer2 - 1));
       overlapAmount += overlap;
-      remainingAmount -= overlap;
+      remainingAmount -= overlap / (player === PlayerChoice.PLAYER1 ? oddsPlayer1 - 1 : oddsPlayer2 - 1);
 
-      // Обновляем частично перекрытую ставку
+      // Update the partially covered bet
       await prisma.betParticipant.update({
         where: { id: partiallyCoveredBet.id },
         data: {
           overlap: partiallyCoveredBet.overlap + overlap,
-          isCovered: partiallyCoveredBet.overlap + overlap >= partiallyCoveredBet.amount ? "CLOSED" : "PENDING",
+          isCovered: partiallyCoveredBet.overlap + overlap >= profitToCover ? "CLOSED" : "PENDING",
         },
       });
     }
 
-    // Если осталась сумма для перекрытия, перекрываем другие ставки
+    // Cover other bets if remaining amount is greater than zero
     if (remainingAmount > 0) {
       const oppositeParticipants = bet.participants
-          .filter(p => p.player !== player && !p.isCovered) // Убедитесь, что фильтруются только не перекрытые ставки
+          .filter(p => p.player !== player && !p.isCovered)
           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
       for (const participant of oppositeParticipants) {
         if (remainingAmount <= 0) break;
 
-        // Рассчитываем прибыль для перекрытия
-        const profitToCover = participant.amount * (participant.odds - 1); // Чистая прибыль
+        // Calculate profit to cover
+        const profitToCover = participant.amount * (participant.odds - 1);
+
+        // Cover the profit
         const overlap = Math.min(profitToCover, remainingAmount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 - 1 : oddsPlayer2 - 1));
 
         overlapAmount += overlap;
@@ -308,7 +311,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       }
     }
 
-    // Создаем новую ставку
+    // Remaining overlap for future bets
+    const overlapRemain = remainingAmount > 0 ? remainingAmount : 0;
+
+    // Create new bet
     const participantMargin = amount * MARGIN;
     const totalMargin = bet.participants.reduce((sum, p) => sum + p.margin, 0) + participantMargin;
 
@@ -321,9 +327,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const newMaxBetPlayer1 = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount;
     const newMaxBetPlayer2 = player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount;
 
-    // Выполняем транзакцию
+    // Execute transaction
     await prisma.$transaction([
-      // Создаем новую ставку
+      // Create new bet participant
       prisma.betParticipant.create({
         data: {
           betId,
@@ -331,21 +337,21 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           amount,
           player,
           odds: player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2,
-          profit: potentialProfit, // Чистая прибыль
+          profit: potentialProfit,
           margin: participantMargin,
           isCovered: overlapAmount > 0 ? "PENDING" : "OPEN",
           overlap: overlapAmount,
-          overlapRemain: remainingAmount > 0 ? remainingAmount : 0,
+          overlapRemain: overlapRemain,
         },
       }),
-      // Вычитаем сумму ставки из баллов пользователя
+      // Deduct bet amount from user's points
       prisma.user.update({
         where: { id: userId },
         data: {
           points: user.points - amount,
         },
       }),
-      // Обновляем данные ставки
+      // Update bet data
       prisma.bet.update({
         where: { id: betId },
         data: {
@@ -363,7 +369,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       }),
     ]);
 
-    // Ревалидируем данные
+    // Revalidate data
     revalidatePath('/');
     await updateGlobalData();
 
@@ -381,6 +387,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to place bet. Please try again.');
   }
 }
+
+
 
 
 
