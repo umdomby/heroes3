@@ -194,7 +194,6 @@ function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { max
 
 
 
-// Упрощенная функция для перекрытия ставок
 async function coverBets(betId: number, amount: number, player: PlayerChoice, odds: number) {
   const bet = await prisma.bet.findUnique({
     where: { id: betId },
@@ -237,8 +236,6 @@ async function coverBets(betId: number, amount: number, player: PlayerChoice, od
   return { overlapAmount, remainingAmount };
 }
 
-
-// Упрощенная функция для создания ставки
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
     // Validate formData
