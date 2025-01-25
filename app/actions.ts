@@ -290,7 +290,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.02');
     }
 
-    const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
+    // Рассчитываем чистую прибыль (без учета суммы ставки)
+    const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2) - amount;
 
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
     const maxAllowedBet = player === PlayerChoice.PLAYER1 ? maxBetPlayer1 : maxBetPlayer2;
@@ -318,7 +319,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           amount,
           player,
           odds: player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2,
-          profit: potentialProfit,
+          profit: potentialProfit, // Теперь profit содержит только чистую прибыль
           margin: 0,
           isCovered: overlapAmount > 0 ? IsCovered.PENDING : IsCovered.OPEN,
           overlap: overlapAmount,
@@ -361,6 +362,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Failed to place bet. Please try again.');
   }
 }
+
 
 
 // закрытие ставок
