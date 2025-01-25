@@ -42,7 +42,6 @@ interface Bet extends PrismaBet {
     oddsBetPlayer1: number; // Добавляем разницу ставок перекрытия для игрока 1
     oddsBetPlayer2: number; // Добавляем разницу ставок перекрытия для игрока 2
     margin: number;
-    marginOverlap: number;
 }
 
 interface Props {

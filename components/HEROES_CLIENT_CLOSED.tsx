@@ -25,8 +25,7 @@ interface BetParticipantCLOSED {
     isWinner: boolean;
     createdAt: Date;
     margin: number;
-    marginOverlap: number;
-    isCovered: boolean;
+    isCovered: string;
     overlap: number;
 }
 
@@ -41,7 +40,6 @@ interface BetCLOSED {
     currentOdds2: number;
     createdAt: Date;
     margin: number | null; // Разрешаем margin быть null
-    marginOverlap: number | null; // Разрешаем marginOverlap быть null
     winnerId: number | null; // ID победителя
 }
 
@@ -147,8 +145,6 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                             {','} Коэффициент: <span>{participant.odds.toFixed(2)}</span>
                                                             {','} Прибыль: <span>{participant.profit.toFixed(2)}</span>
                                                             {','} Маржа: <span>{participant.margin !== null ? participant.margin.toFixed(2) : '0.00'}</span>
-                                                            {','} Возврат
-                                                            маржи: <span>{participant.marginOverlap !== null ? participant.marginOverlap.toFixed(2) : '0.00'}</span>
                                                             {','} {new Date(participant.createdAt).toLocaleString()}
                                                         </p>
                                                         {participant.isCovered ? (
@@ -162,9 +158,6 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                                     Прибыль от перекрытой части: {participant.profit.toFixed(2)} Points
                                                                 </span>
                                                                 <br/>
-                                                                <span className="text-green-500">
-                                                                    Возврат маржи: {participant.marginOverlap.toFixed(2)} Points
-                                                                </span>
                                                             </p>
                                                         ) : (
                                                             <p>
@@ -172,9 +165,6 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                                     Ваша ставка не перекрыта (0 Points, 0%)
                                                                 </span>
                                                                 <br/>
-                                                                <span className="text-yellow-500">
-                                                                    Возврат маржи: {participant.marginOverlap.toFixed(2)} Points
-                                                                </span>
                                                             </p>
                                                         )}
                                                     </div>
