@@ -56,6 +56,7 @@ model ContactDataEnum {
   name String @unique
 }
 
+// export async function clientCreateBet(formData: any) actions.ts
 model Bet {
   id              Int              @id @default(autoincrement())
   player1         Player           @relation(name: "Player1Bets", fields: [player1Id], references: [id]) // ставки на игрока 1
@@ -84,11 +85,12 @@ model Bet {
   productItemId   Int?
   productItem     ProductItem?     @relation(fields: [productItemId], references: [id])
   winnerId        Int? // кто победил PLAYER1 или PLAYER2
-  margin          Float? // сумма маржи model BetParticipant margin
+  margin          Float? // в placeBet = 0
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
 
+// export async function placeBet actions.ts
 model BetParticipant {
   id            Int          @id @default(autoincrement())
   betId         Int
@@ -101,7 +103,7 @@ model BetParticipant {
   profit        Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
   overlap       Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
   overlapRemain Float // если ставка перекрыта сверх положенного ocerlap, остаток для перекрытия будущих ставок.
-  margin        Float // маржа пользователя, снимается после закрытия ставки, и только с чистой прибыли, из по ля overlap
+  margin        Float // в placeBet = 0
   isCovered     IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
   isWinner      Boolean      @default(false) // Победила ли ставка
   createdAt     DateTime     @default(now())

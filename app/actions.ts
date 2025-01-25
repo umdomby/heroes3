@@ -192,6 +192,9 @@ function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { max
   return { maxBetPlayer1, maxBetPlayer2 };
 }
 
+
+
+// Упрощенная функция для перекрытия ставок
 async function coverBets(betId: number, amount: number, player: PlayerChoice, odds: number) {
   const bet = await prisma.bet.findUnique({
     where: { id: betId },
@@ -212,18 +215,21 @@ async function coverBets(betId: number, amount: number, player: PlayerChoice, od
   for (const participant of oppositeParticipants) {
     if (remainingAmount <= 0) break;
 
-    const overlap = Math.min(participant.amount, remainingAmount);
-    overlapAmount += overlap;
-    remainingAmount -= overlap;
+    const profitToCover = participant.amount * participant.odds;
+    const overlap = Math.min(profitToCover, remainingAmount * odds);
 
-    const isFullyCovered = overlap >= participant.amount;
-    const isPartiallyCovered = overlap > 0 && overlap < participant.amount;
+    overlapAmount += overlap;
+    remainingAmount -= overlap / odds;
+
+    const isFullyCovered = overlap >= participant.profit;
+    const isPartiallyCovered = overlap > 0 && overlap < participant.profit;
 
     await prisma.betParticipant.update({
       where: { id: participant.id },
       data: {
         isCovered: isFullyCovered ? IsCovered.CLOSED : isPartiallyCovered ? IsCovered.PENDING : IsCovered.OPEN,
         overlap: participant.overlap + overlap,
+        overlapRemain: isPartiallyCovered ? participant.profit - overlap : 0,
       },
     });
   }
@@ -231,6 +237,8 @@ async function coverBets(betId: number, amount: number, player: PlayerChoice, od
   return { overlapAmount, remainingAmount };
 }
 
+
+// Упрощенная функция для создания ставки
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
     // Validate formData
@@ -531,6 +539,7 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
 
 
 
