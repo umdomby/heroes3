@@ -85,7 +85,7 @@ model Bet {
   productItem     ProductItem?     @relation(fields: [productItemId], references: [id])
   winnerId        Int? // кто победил PLAYER1 или PLAYER2
   margin          Float? // сумма маржи model BetParticipant margin
-  marginOverlap   Float? // возвращенная маржа пользователю от перекрытия ставки, та часть маржи которая не перекрыта
+  marginOverlap   Float? //  это поле нужно в проекте упразднить, маржа снимается, только с выигарнной суммой, и не должны учитыватсья при ставках.
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -99,12 +99,12 @@ model BetParticipant {
   player        PlayerChoice // выбранный игрок в событии
   amount        Float // ставка пользователя
   odds          Float // Коэффициент ставки
-  profit        Float // Выигрыш или частичный выигрыш, в зависимости от перекрытия ставки "overlap Float"
-  overlap       Float // на какую сумму перекрыто
-  overlapRemain Float // если ставка перекрыта не полностью, остсаток для перекрытия будущих ставок.
-  margin        Float // маржа пользователя
-  marginOverlap Float // если ставка перекрыта не полностью, это возврат пользователю неперекрытой маржи
-  isCovered     Boolean      @default(false) // Перекрыта ли ставка
+  profit        Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
+  overlap       Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
+  overlapRemain Float // если ставка перекрыта сверх положенного ocerlap, остаток для перекрытия будущих ставок.
+  margin        Float // маржа пользователя, снимается после закрытия ставки, и только с выигарнной суммой, из поля overlap
+  marginOverlap Float //  это поле нужно в проекте упразднить, маржа снимается, только с выигарнной суммой, и не должны учитыватсья при ставках.
+  isCovered     Boolean      @default(false) //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
   isWinner      Boolean      @default(false) // Победила ли ставка
   createdAt     DateTime     @default(now())
 }
@@ -154,12 +154,12 @@ model BetParticipantCLOSED {
   player        PlayerChoice // выбранный игрок в событии
   amount        Float // ставка пользователя
   odds          Float // Коэффициент ставки
-  profit        Float // Выигрыш или частичный выигрыш, в зависимости от перекрытия ставки "overlap Float"
-  overlap       Float // на какую сумму перекрыто
-  overlapRemain Float // если ставка перекрыта не полностью, остсаток для перекрытия будущих ставок.
-  margin        Float // маржа пользователя
-  marginOverlap Float // если ставка перекрыта не полностью, это возврат пользователю неперекрытой маржи
-  isCovered     Boolean      @default(false) // Перекрыта ли ставка
+  profit        Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
+  overlap       Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
+  overlapRemain Float // если ставка перекрыта сверх положенного ocerlap, остаток для перекрытия будущих ставок.
+  margin        Float // маржа пользователя, снимается после закрытия ставки, и только с выигарнной суммой, из поля overlap
+  marginOverlap Float //  это поле нужно в проекте упразднить, маржа снимается, только с выигарнной суммой, и не должны учитыватсья при ставках.
+  isCovered     Boolean      @default(false) //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
   isWinner      Boolean      @default(false) // Победила ли ставка
   createdAt     DateTime     @default(now())
 }
@@ -223,6 +223,12 @@ enum BetStatus {
 enum UserRole {
   USER
   ADMIN
+}
+enum IsCovered {
+  OPEN // overlap = 0
+  CLOSED // overlap = profit
+  PENDING // overlap < profit
+  CP // CLOSEDPENDING обозначает что есть в наличии overlapRemain, положительный остаток перекрытия.
 }
 
 enum PlayerChoice {

@@ -1,3 +1,4 @@
+//export const HEROES_CLIENT
 "use client";
 import React, {useEffect, useState} from "react";
 import {

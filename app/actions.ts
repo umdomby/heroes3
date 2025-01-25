@@ -192,6 +192,7 @@ export async function clientCreateBet(formData: any) {
   }
 }
 
+// приём ставок на открытые события
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
     const { betId, userId, amount, player } = formData;
@@ -367,7 +368,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 }
 
 
-
+// закрытие ставок и создание записи в BetCLOSED
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
 

@@ -1,3 +1,4 @@
+// клиент HEROES_CLIENT_CLOSED
 "use client";
 import React from 'react';
 import {
