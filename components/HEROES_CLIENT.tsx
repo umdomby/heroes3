@@ -231,10 +231,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                 player,
             });
 
-            if (response.isCovered) {
-                alert("Ваша ставка перекрыта!");
-            } else {
+            if (response.isCovered === "OPEN") {
                 alert("Ваша ставка не перекрыта!");
+            } else {
+                alert("Ваша ставка перекрыта!");
             }
 
             mutate();
