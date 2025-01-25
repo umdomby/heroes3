@@ -214,8 +214,8 @@ async function coverBets(betId: number, amount: number, player: PlayerChoice, od
   for (const participant of oppositeParticipants) {
     if (remainingAmount <= 0) break;
 
-    const profitToCover = participant.amount * participant.odds;
-    const overlap = Math.min(profitToCover, remainingAmount * odds);
+    // Calculate the overlap based on the net profit (profit field)
+    const overlap = Math.min(participant.profit, remainingAmount * odds);
 
     overlapAmount += overlap;
     remainingAmount -= overlap / odds;
@@ -228,7 +228,7 @@ async function coverBets(betId: number, amount: number, player: PlayerChoice, od
       data: {
         isCovered: isFullyCovered ? IsCovered.CLOSED : isPartiallyCovered ? IsCovered.PENDING : IsCovered.OPEN,
         overlap: participant.overlap + overlap,
-        overlapRemain: isPartiallyCovered ? participant.profit - overlap : 0,
+        overlapRemain: isPartiallyCovered ? participant.profit - overlap : 0, // Update overlapRemain for partially covered bets
       },
     });
   }
@@ -236,8 +236,11 @@ async function coverBets(betId: number, amount: number, player: PlayerChoice, od
   return { overlapAmount, remainingAmount };
 }
 
+
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
+    console.log('Starting placeBet function with formData:', formData);
+
     // Validate formData
     if (!formData || typeof formData !== 'object') {
       throw new Error('Invalid form data');
@@ -250,6 +253,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Missing required fields in form data');
     }
 
+    console.log('Fetching bet details for betId:', betId);
     const bet = await prisma.bet.findUnique({
       where: { id: betId },
       include: { participants: true },
@@ -259,6 +263,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Ставка недоступна для участия');
     }
 
+    console.log('Fetching user details for userId:', userId);
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -267,6 +272,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Недостаточно баллов для совершения ставки');
     }
 
+    console.log('Calculating total bets for Player 1 and Player 2');
     const totalPlayer1 = bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER1)
         .reduce((sum, p) => sum + p.amount, 0);
@@ -278,6 +284,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
     const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
 
+    console.log('Calculating odds for Player 1 and Player 2');
     const { oddsPlayer1, oddsPlayer2 } = calculateOdds(totalWithInitPlayer1, totalWithInitPlayer2);
 
     if (
@@ -287,9 +294,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error('Ставка невозможна: коэффициент для выбранного игрока уже равен или ниже 1.02');
     }
 
-    // Рассчитываем чистую прибыль (без учета суммы ставки)
+    console.log('Calculating potential profit');
     const potentialProfit = amount * (player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2) - amount;
 
+    console.log('Calculating max allowed bets');
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
     const maxAllowedBet = player === PlayerChoice.PLAYER1 ? maxBetPlayer1 : maxBetPlayer2;
 
@@ -297,8 +305,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
     }
 
+    console.log('Calculating overlap for the new bet');
     const { overlapAmount } = await coverBets(betId, amount, player, player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2);
 
+    console.log('Updating totals for Player 1 and Player 2');
     const newTotalBetPlayer1 = player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1;
     const newTotalBetPlayer2 = player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2;
 
@@ -308,6 +318,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const newMaxBetPlayer1 = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount;
     const newMaxBetPlayer2 = player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount;
 
+    console.log('Starting database transaction');
     await prisma.$transaction([
       prisma.betParticipant.create({
         data: {
@@ -316,11 +327,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           amount,
           player,
           odds: player === PlayerChoice.PLAYER1 ? oddsPlayer1 : oddsPlayer2,
-          profit: potentialProfit, // Теперь profit содержит только чистую прибыль
+          profit: potentialProfit,
           margin: 0,
           isCovered: overlapAmount > 0 ? IsCovered.PENDING : IsCovered.OPEN,
           overlap: overlapAmount,
-          overlapRemain: 0,
+          overlapRemain: overlapAmount > 0 ? potentialProfit - overlapAmount : 0,
         },
       }),
       prisma.user.update({
@@ -346,19 +357,20 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       }),
     ]);
 
+    console.log('Revalidating path and updating global data');
     revalidatePath('/');
     await updateGlobalData();
 
     return { success: true, isCovered: overlapAmount > 0, overlapAmount };
   } catch (error) {
+    console.error('Error in placeBet:', error);
     if (error instanceof Error) {
-      console.error('Error in placeBet:', error.message, error.stack);
-    } else {
-      console.error('Error in placeBet:', 'An unknown error occurred');
+      console.error('Error stack:', error.stack);
     }
     throw new Error('Failed to place bet. Please try again.');
   }
 }
+
 
 
 
