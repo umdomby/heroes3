@@ -388,10 +388,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
 
 
-
-
-
-
 // Функция для закрытия ставки
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
