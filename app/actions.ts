@@ -295,7 +295,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Обработка перекрестных ставок
     const oppositeParticipants = bet.participants
-        .filter(p => p.player !== player && p.isCovered !== "CLOSED")
+        .filter(p => p.player !== player && (p.isCovered === "OPEN" || p.isCovered === "PENDING"))
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
     for (const participant of oppositeParticipants) {
@@ -305,10 +305,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
       const overlap = Math.min(profitToCover, remainingAmount * (currentOdds - 1));
 
-      overlapAmount += overlap;
-      remainingAmount -= overlap / (currentOdds - 1);
-
-      // Обновляем данные участника
+      // Обновляем противоположный overlap
       await prisma.betParticipant.update({
         where: { id: participant.id },
         data: {
@@ -316,6 +313,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           overlap: participant.overlap + overlap,
         },
       });
+
+      remainingAmount -= overlap / (currentOdds - 1);
 
       if (overlap > 0 && overlap < profitToCover) {
         break;
@@ -391,6 +390,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
