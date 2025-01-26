@@ -198,63 +198,102 @@ export async function placeBet(formData: { betId: number; userId: number; amount
   try {
     console.log('Запуск функции placeBet с formData:', formData);
 
+    // Проверка валидности данных формы
     if (!formData || typeof formData !== 'object') {
       throw new Error('Неверные данные формы');
     }
 
     const { betId, userId, amount, player } = formData;
 
+    // Проверка наличия всех обязательных полей
     if (!betId || !userId || !amount || !player) {
       throw new Error('Отсутствуют обязательные поля в данных формы');
     }
 
+    // Получаем информацию о ставке
     const bet = await prisma.bet.findUnique({
       where: { id: betId },
       include: { participants: true },
     });
 
+    // Проверка доступности ставки
     if (!bet || bet.status !== 'OPEN') {
       throw new Error('Ставка недоступна для участия');
     }
 
+    // Получаем информацию о пользователе
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
 
+    // Проверка наличия достаточного количества баллов у пользователя
     if (!user || user.points < amount) {
       throw new Error('Недостаточно баллов для совершения ставки');
     }
 
+    // Подсчет общей суммы ставок на игрока 1
     const totalPlayer1 = bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER1)
         .reduce((sum, p) => sum + p.amount, 0);
 
+    // Подсчет общей суммы ставок на игрока 2
     const totalPlayer2 = bet.participants
         .filter(p => p.player === PlayerChoice.PLAYER2)
         .reduce((sum, p) => sum + p.amount, 0);
 
+    // Учитываем начальные ставки
     const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
     const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
 
-    // Используем текущие коэффициенты из модели Bet
+    // Получаем текущие коэффициенты
     const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
 
     // Расчет потенциальной прибыли
     const potentialProfit = amount * (currentOdds - 1);
 
+    // Расчет максимальных ставок
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
     const maxAllowedBet = player === PlayerChoice.PLAYER1 ? maxBetPlayer1 : maxBetPlayer2;
 
+    // Проверка превышения максимальной допустимой ставки
     if (amount > maxAllowedBet) {
       throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
     }
 
+    // Расчет маржи для участника
     const participantMargin = amount * MARGIN;
 
     let remainingAmount = amount;
     let overlapAmount = 0;
 
-    // Filter participants to only include those betting on the opposite player
+    // Обработка перекрестных ставок
+    const oppositeParticipants = bet.participants
+        .filter(p => p.player !== player && p.isCovered !== "CLOSED")
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+    for (const participant of oppositeParticipants) {
+      if (remainingAmount <= 0) break;
+
+      const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
+      const overlap = Math.min(profitToCover, remainingAmount * (currentOdds - 1));
+
+      overlapAmount += overlap;
+      remainingAmount -= overlap / (currentOdds - 1);
+
+      await prisma.betParticipant.update({
+        where: { id: participant.id },
+        data: {
+          isCovered: overlap >= profitToCover ? "CLOSED" : "PENDING",
+          overlap: participant.overlap + overlap,
+        },
+      });
+
+      if (overlap > 0 && overlap < profitToCover) {
+        break;
+      }
+    }
+
+    // Проверка и обработка оставшихся сумм в overlapRemain
     const participantsWithRemain = bet.participants.filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player);
 
     for (const participant of participantsWithRemain) {
@@ -268,51 +307,19 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         where: { id: participant.id },
         data: {
           overlapRemain: (participant.overlapRemain ?? 0) - coverableAmount,
-          isCovered: ((participant.overlapRemain ?? 0) - coverableAmount) > 0 ? "CP" : "CLOSED",
+          isCovered: ((participant.overlapRemain ?? 0) - coverableAmount) > 0 ? "PENDING" : "CLOSED",
         },
       });
     }
 
-    // Apply overlap to one participant at a time
-    const oppositeParticipants = bet.participants
-        .filter(p => p.player !== player && p.isCovered !== "CLOSED")
-        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-
-    for (const participant of oppositeParticipants) {
-      if (remainingAmount <= 0) break;
-
-      const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
-
-      const overlap = Math.min(profitToCover, remainingAmount * (currentOdds - 1));
-
-      overlapAmount += overlap;
-      remainingAmount -= overlap / (currentOdds - 1);
-
-      // Check if there is already a PENDING participant for this player
-      const existingPending = bet.participants.find(p => p.player === participant.player && p.isCovered === "PENDING");
-
-      await prisma.betParticipant.update({
-        where: { id: participant.id },
-        data: {
-          isCovered: overlap >= profitToCover ? "CLOSED" : (existingPending ? "OPEN" : "PENDING"),
-          overlap: participant.overlap + overlap,
-        },
-      });
-
-      // Ensure only one participant has a non-zero overlap that is not fully covered
-      if (overlap > 0 && overlap < profitToCover) {
-        break;
-      }
-    }
-
-    // Создаем нового участника с текущими коэффициентами
+    // Создание нового участника
     const newParticipant = await prisma.betParticipant.create({
       data: {
         betId,
         userId,
         amount,
         player,
-        odds: currentOdds, // Устанавливаем текущий коэффициент
+        odds: currentOdds,
         profit: potentialProfit,
         margin: participantMargin,
         isCovered: overlapAmount > 0 ? "PENDING" : "OPEN",
@@ -320,9 +327,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       },
     });
 
-    const allOppositeCovered = oppositeParticipants.every(p => p.isCovered === "CLOSED");
-
-    if (allOppositeCovered && remainingAmount > 0) {
+    if (remainingAmount > 0) {
       await prisma.betParticipant.update({
         where: { id: newParticipant.id },
         data: {
@@ -331,6 +336,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       });
     }
 
+    // Обновление баллов пользователя
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -338,9 +344,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       },
     });
 
-    // Пересчитываем коэффициенты после добавления новой ставки
+    // Пересчет коэффициентов после добавления новой ставки
     const { oddsPlayer1, oddsPlayer2 } = calculateOdds(totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? amount : 0), totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? amount : 0));
 
+    // Обновление данных ставки
     await prisma.bet.update({
       where: { id: betId },
       data: {
@@ -355,6 +362,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       },
     });
 
+    // Ревалидация данных
     revalidatePath('/');
     await updateGlobalData();
 
@@ -372,6 +380,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
