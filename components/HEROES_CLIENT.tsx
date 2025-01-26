@@ -480,43 +480,43 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                             <p>
                                                 Максимальная ставка на{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                          {bet.player1.name}
-                        </span>
+                {bet.player1.name}
+            </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                          {bet.maxBetPlayer1.toFixed(2)}
-                        </span>
+                {bet.maxBetPlayer1.toFixed(2)}
+            </span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-                          {bet.player2.name}
-                        </span>
+                {bet.player2.name}
+            </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-                          {bet.maxBetPlayer2.toFixed(2)}
-                        </span>
+                {bet.maxBetPlayer2.toFixed(2)}
+            </span>
                                             </p>
-                                            {/* Добавляем отображение разницы ставок перекрытия */}
+                                            {/* Calculate and display the difference in coverage bets as points */}
                                             <p>
                                                 Разница ставок перекрытия для{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                          {bet.player1.name}
-                        </span>
+                {bet.player1.name}
+            </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                          {bet.oddsBetPlayer1.toFixed(2)}
-                        </span>
+                {(bet.totalBetPlayer1 - bet.totalBetPlayer2).toFixed(2)} Points
+            </span>
                                             </p>
                                             <p>
                                                 Разница ставок перекрытия для{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-                          {bet.player2.name}
-                        </span>
+                {bet.player2.name}
+            </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-                          {bet.oddsBetPlayer2.toFixed(2)}
-                        </span>
+                {(bet.totalBetPlayer2 - bet.totalBetPlayer1).toFixed(2)} Points
+            </span>
                                             </p>
                                         </div>
                                     )}

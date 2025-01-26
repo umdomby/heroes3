@@ -254,6 +254,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     let remainingAmount = amount;
     let overlapAmount = 0;
 
+    // Filter participants to only include those betting on the opposite player
     const participantsWithRemain = bet.participants.filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player);
 
     for (const participant of participantsWithRemain) {
@@ -272,6 +273,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       });
     }
 
+    // Apply overlap to one participant at a time
     const oppositeParticipants = bet.participants
         .filter(p => p.player !== player && p.isCovered !== "CLOSED")
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -286,13 +288,21 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       overlapAmount += overlap;
       remainingAmount -= overlap / (currentOdds - 1);
 
+      // Check if there is already a PENDING participant for this player
+      const existingPending = bet.participants.find(p => p.player === participant.player && p.isCovered === "PENDING");
+
       await prisma.betParticipant.update({
         where: { id: participant.id },
         data: {
-          isCovered: overlap >= profitToCover ? "CLOSED" : "PENDING",
+          isCovered: overlap >= profitToCover ? "CLOSED" : (existingPending ? "OPEN" : "PENDING"),
           overlap: participant.overlap + overlap,
         },
       });
+
+      // Ensure only one participant has a non-zero overlap that is not fully covered
+      if (overlap > 0 && overlap < profitToCover) {
+        break;
+      }
     }
 
     // Создаем нового участника с текущими коэффициентами
@@ -362,6 +372,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
+
 
 
 // Функция для закрытия ставки
