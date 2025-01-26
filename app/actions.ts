@@ -254,20 +254,20 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     let remainingAmount = amount;
     let overlapAmount = 0;
 
-    const participantsWithRemain = bet.participants.filter(p => p.overlapRemain > 0 && p.player !== player);
+    const participantsWithRemain = bet.participants.filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player);
 
     for (const participant of participantsWithRemain) {
       if (remainingAmount <= 0) break;
 
-      const coverableAmount = Math.min(participant.overlapRemain, remainingAmount);
+      const coverableAmount = Math.min(participant.overlapRemain ?? 0, remainingAmount);
       overlapAmount += coverableAmount;
       remainingAmount -= coverableAmount;
 
       await prisma.betParticipant.update({
         where: { id: participant.id },
         data: {
-          overlapRemain: participant.overlapRemain - coverableAmount,
-          isCovered: participant.overlapRemain - coverableAmount > 0 ? "CP" : "CLOSED",
+          overlapRemain: (participant.overlapRemain ?? 0) - coverableAmount,
+          isCovered: ((participant.overlapRemain ?? 0) - coverableAmount) > 0 ? "CP" : "CLOSED",
         },
       });
     }
@@ -339,7 +339,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
         totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
         totalBetAmount: totalPlayer1 + totalPlayer2 + amount,
-        margin: bet.margin + participantMargin,
+        margin: (bet.margin ?? 0) + participantMargin,
         maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
         maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
       },
@@ -468,7 +468,7 @@ export async function closeBet(betId: number, winnerId: number) {
             createdAt: participant.createdAt,
             isCovered: participant.isCovered,
             overlap: participant.overlap,
-            overlapRemain: participant.overlapRemain,
+            overlapRemain: participant.overlapRemain ?? 0, // Provide a default value of 0 if null
           },
         });
 
