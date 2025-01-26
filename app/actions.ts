@@ -272,10 +272,12 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     for (const participant of participantsWithRemain) {
       if (remainingAmount <= 0) break;
 
-      // Определяем сумму, которую можно покрыть
-      const coverableAmount = Math.min(participant.overlapRemain ?? 0, remainingAmount);
+      // Определяем, сколько нужно для достижения полного покрытия
+      const profitToCover = potentialProfit - overlapAmount;
+      const coverableAmount = Math.min(participant.overlapRemain ?? 0, profitToCover);
+
       overlapAmount += coverableAmount;
-      remainingAmount -= coverableAmount;
+      remainingAmount -= coverableAmount / (currentOdds - 1);
 
       // Обновляем данные участника
       await prisma.betParticipant.update({
@@ -285,6 +287,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           isCovered: ((participant.overlapRemain ?? 0) - coverableAmount) > 0 ? "PENDING" : "CLOSED",
         },
       });
+
+      if (overlapAmount >= potentialProfit) {
+        break;
+      }
     }
 
     // Обработка перекрестных ставок
@@ -385,6 +391,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
