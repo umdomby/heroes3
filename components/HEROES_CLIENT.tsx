@@ -1,6 +1,5 @@
-//export const HEROES_CLIENT
 "use client";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
     Bet as PrismaBet,
     Player,
@@ -10,12 +9,12 @@ import {
     BetStatus,
 } from "@prisma/client";
 import useSWR from "swr";
-import {Button} from "@/components/ui/button";
-import {useSession} from "next-auth/react";
-import {redirect} from "next/navigation";
-import {placeBet, closeBet} from "@/app/actions";
-import {unstable_batchedUpdates} from "react-dom";
-import {useUser} from "@/hooks/useUser";
+import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { placeBet, closeBet } from "@/app/actions";
+import { unstable_batchedUpdates } from "react-dom";
+import { useUser } from "@/hooks/useUser";
 
 import {
     Accordion,
@@ -23,7 +22,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
@@ -37,10 +36,8 @@ interface Bet extends PrismaBet {
     participants: BetParticipant[];
     maxBetPlayer1: number;
     maxBetPlayer2: number;
-    currentOdds1: number;
-    currentOdds2: number;
-    oddsBetPlayer1: number; // Добавляем разницу ставок перекрытия для игрока 1
-    oddsBetPlayer2: number; // Добавляем разницу ставок перекрытия для игрока 2
+    oddsBetPlayer1: number; // Текущий коэффициент для игрока 1
+    oddsBetPlayer2: number; // Текущий коэффициент для игрока 2
     margin: number;
 }
 
@@ -55,8 +52,8 @@ const playerColors = {
     [PlayerChoice.PLAYER2]: "text-red-400", // Красный для Player2
 };
 
-export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
-    const {data: session} = useSession();
+export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
+    const { data: session } = useSession();
     const {
         data: bets,
         error,
@@ -95,7 +92,11 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
             const data = JSON.parse(event.data);
 
             unstable_batchedUpdates(() => {
-                if (data.type === "create" || data.type === "update" || data.type === "delete") {
+                if (
+                    data.type === "create" ||
+                    data.type === "update" ||
+                    data.type === "delete"
+                ) {
                     mutate(); // Обновляем данные ставок
                     mutateUser(); // Обновляем данные пользователя
                 }
@@ -120,7 +121,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
     if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
 
     // Фильтрация ставок по статусу OPEN
-    const filteredBets = bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
+    const filteredBets =
+        bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
 
     const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
         const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2;
@@ -146,19 +148,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
             return;
         }
 
-        // Проверка, как изменится коэффициент после ставки
-        // if (newOdds < MIN_ODDS) {
-        //     setOddsErrors((prev) => ({
-        //         ...prev,
-        //         [bet.id]: `Ставка приведет к снижению коэффициента ниже минимального допустимого значения (${MIN_ODDS})`,
-        //     }));
-        //     setIsBetDisabled((prev) => ({
-        //         ...prev,
-        //         [bet.id]: true,
-        //     }));
-        //     return;
-        // }
-
         // Если проверка пройдена, очищаем ошибки и разблокируем кнопку
         setOddsErrors((prev) => ({
             ...prev,
@@ -183,8 +172,12 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
             handleValidation(bet, value, selectedPlayer);
 
             // Рассчитываем потенциальную прибыль для каждого игрока
-            const potentialProfitPlayer1 = parseFloat((value * bet.currentOdds1).toFixed(2));
-            const potentialProfitPlayer2 = parseFloat((value * bet.currentOdds2).toFixed(2));
+            const potentialProfitPlayer1 = parseFloat(
+                (value * bet.oddsBetPlayer1).toFixed(2)
+            );
+            const potentialProfitPlayer2 = parseFloat(
+                (value * bet.oddsBetPlayer2).toFixed(2)
+            );
 
             setPotentialProfit((prev) => ({
                 ...prev,
@@ -205,8 +198,12 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
             handleValidation(bet, amount, selectedPlayer);
 
             // Рассчитываем потенциальную прибыль для каждого игрока
-            const potentialProfitPlayer1 = parseFloat((amount * bet.currentOdds1).toFixed(2));
-            const potentialProfitPlayer2 = parseFloat((amount * bet.currentOdds2).toFixed(2));
+            const potentialProfitPlayer1 = parseFloat(
+                (amount * bet.oddsBetPlayer1).toFixed(2)
+            );
+            const potentialProfitPlayer2 = parseFloat(
+                (amount * bet.oddsBetPlayer2).toFixed(2)
+            );
 
             setPotentialProfit((prev) => ({
                 ...prev,
@@ -243,7 +240,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                     alert("Ваша ставка частично перекрыта!");
                     break;
                 case "CP":
-                    alert("Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий!");
+                    alert(
+                        "Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий!"
+                    );
                     break;
                 default:
                     alert("Неизвестный статус перекрытия.");
@@ -273,7 +272,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
             console.error("Error placing bet:", err);
         }
     };
-
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>, bet: Bet) => {
         event.preventDefault();
@@ -420,18 +418,17 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                     <div
                                                         className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                     >
-                                                        {bet.currentOdds1.toFixed(2)}
+                                                        {bet.oddsBetPlayer1.toFixed(2)}
                                                     </div>
                                                     <div
                                                         className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                     >
-                                                        {bet.currentOdds2.toFixed(2)}
+                                                        {bet.oddsBetPlayer2.toFixed(2)}
                                                     </div>
                                                 </TableCell>
 
                                                 {/* Прибыль/убыток */}
-                                                <TableCell
-                                                    className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
+                                                <TableCell className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
                                                     <div>
                             <span className={playerColors[PlayerChoice.PLAYER1]}>
                               {bet.player1.name}
@@ -439,7 +436,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                         :{" "}
                                                         <span
                                                             className={
-                                                                profitIfPlayer1Wins >= 0 ? "text-green-600" : "text-red-600"
+                                                                profitIfPlayer1Wins >= 0
+                                                                    ? "text-green-600"
+                                                                    : "text-red-600"
                                                             }
                                                         >
                               {profitIfPlayer1Wins >= 0
@@ -455,7 +454,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                         :{" "}
                                                         <span
                                                             className={
-                                                                profitIfPlayer2Wins >= 0 ? "text-green-600" : "text-red-600"
+                                                                profitIfPlayer2Wins >= 0
+                                                                    ? "text-green-600"
+                                                                    : "text-red-600"
                                                             }
                                                         >
                               {profitIfPlayer2Wins >= 0
@@ -479,78 +480,94 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                             <p>
                                                 Максимальная ставка на{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-        {bet.player1.name}
-      </span>
+                          {bet.player1.name}
+                        </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-        {bet.maxBetPlayer1.toFixed(2)}
-      </span>
+                          {bet.maxBetPlayer1.toFixed(2)}
+                        </span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-        {bet.player2.name}
-      </span>
+                          {bet.player2.name}
+                        </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-        {bet.maxBetPlayer2.toFixed(2)}
-      </span>
+                          {bet.maxBetPlayer2.toFixed(2)}
+                        </span>
                                             </p>
                                             {/* Добавляем отображение разницы ставок перекрытия */}
                                             <p>
                                                 Разница ставок перекрытия для{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-        {bet.player1.name}
-      </span>
+                          {bet.player1.name}
+                        </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-        {bet.oddsBetPlayer1.toFixed(2)}
-      </span>
+                          {bet.oddsBetPlayer1.toFixed(2)}
+                        </span>
                                             </p>
                                             <p>
                                                 Разница ставок перекрытия для{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-        {bet.player2.name}
-      </span>
+                          {bet.player2.name}
+                        </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-        {bet.oddsBetPlayer2.toFixed(2)}
-      </span>
+                          {bet.oddsBetPlayer2.toFixed(2)}
+                        </span>
                                             </p>
                                         </div>
                                     )}
 
                                     {userBets.length > 0 && (
                                         <div className="m-1 p-4 rounded-lg">
-                                            <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
+                                            <h4 className="text-md font-semibold mb-2">
+                                                Ваши ставки на этот матч:
+                                            </h4>
                                             {userBets.map((participant) => {
                                                 // Рассчитываем процент перекрытия на основе прибыли
-                                                const profitToCover = participant.amount * (participant.odds - 1);
-                                                const overlapPercentage = participant.overlap > 0
-                                                    ? ((participant.overlap / profitToCover) * 100).toFixed(2)
-                                                    : 0;
+                                                const profitToCover =
+                                                    participant.amount * (participant.odds - 1);
+                                                const overlapPercentage =
+                                                    participant.overlap > 0
+                                                        ? ((participant.overlap / profitToCover) * 100).toFixed(
+                                                            2
+                                                        )
+                                                        : 0;
 
                                                 // Определяем статус перекрытия
                                                 let overlapStatus = "";
                                                 switch (participant.isCovered) {
                                                     case "OPEN":
-                                                        overlapStatus = "Ваша ставка не перекрыта (0 Points, 0%)";
+                                                        overlapStatus =
+                                                            "Ваша ставка не перекрыта (0 Points, 0%)";
                                                         break;
                                                     case "CLOSED":
-                                                        overlapStatus = `Ваша ставка полностью перекрыта на ${participant.overlap.toFixed(2)} Points (${overlapPercentage}%)`;
+                                                        overlapStatus = `Ваша ставка полностью перекрыта на ${participant.overlap.toFixed(
+                                                            2
+                                                        )} Points (${overlapPercentage}%)`;
                                                         break;
                                                     case "PENDING":
-                                                        overlapStatus = `Ваша ставка частично перекрыта на ${participant.overlap.toFixed(2)} Points (${overlapPercentage}%)`;
+                                                        overlapStatus = `Ваша ставка частично перекрыта на ${participant.overlap.toFixed(
+                                                            2
+                                                        )} Points (${overlapPercentage}%)`;
                                                         break;
                                                     case "CP":
-                                                        overlapStatus = `Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий (${participant.overlapRemain?.toFixed(2)} Points)`;
+                                                        overlapStatus = `Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий (${participant.overlapRemain?.toFixed(
+                                                            2
+                                                        )} Points)`;
                                                         break;
                                                     default:
                                                         overlapStatus = "Неизвестный статус перекрытия.";
                                                 }
 
                                                 return (
-                                                    <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
+                                                    <div
+                                                        key={participant.id}
+                                                        className="border border-gray-200 p-1 mb-1 rounded-md"
+                                                    >
                                                         <p>
                                                             Ставка:{" "}
                                                             <strong className={playerColors[participant.player]}>
@@ -564,35 +581,34 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                             </strong>
                                                             {", "} Коэффициент:{" "}
                                                             <span className={playerColors[participant.player]}>
-                    {participant.odds.toFixed(2)}
-                </span>
+                                {participant.odds.toFixed(2)}
+                              </span>
                                                             {", "} Прибыль:{" "}
                                                             <span className={playerColors[participant.player]}>
-                    {participant.profit.toFixed(2)}
-                </span>
+                                {participant.profit.toFixed(2)}
+                              </span>
                                                             {", "} {new Date(participant.createdAt).toLocaleString()}
                                                         </p>
                                                         {/* Отображаем информацию о перекрытии */}
                                                         <p>
-                <span
-                    className={
-                        participant.isCovered === "OPEN"
-                            ? "text-yellow-500"
-                            : participant.isCovered === "CLOSED" || participant.isCovered === "CP"
-                                ? "text-green-500"
-                                : "text-blue-500"
-                    }
-                >
-                    {overlapStatus}
-                </span>
+                              <span
+                                  className={
+                                      participant.isCovered === "OPEN"
+                                          ? "text-yellow-500"
+                                          : participant.isCovered === "CLOSED" ||
+                                          participant.isCovered === "CP"
+                                              ? "text-green-500"
+                                              : "text-blue-500"
+                                  }
+                              >
+                                {overlapStatus}
+                              </span>
                                                         </p>
                                                     </div>
                                                 );
                                             })}
-
                                         </div>
                                     )}
-
 
                                     {bet.status === "OPEN" && (
                                         <div>
@@ -612,7 +628,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
-                                                            {"("}{bet.currentOdds1.toFixed(2)}{") "}
+                                                            {"("}
+                                                            {bet.oddsBetPlayer1.toFixed(2)}
+                                                            {") "}
                                                             {potentialProfit[bet.id]?.player1
                                                                 ? `+${potentialProfit[bet.id].player1.toFixed(2)}`
                                                                 : ""}
@@ -634,7 +652,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
-                                                            {"("}{bet.currentOdds2.toFixed(2)}{") "}
+                                                            {"("}
+                                                            {bet.oddsBetPlayer2.toFixed(2)}
+                                                            {") "}
                                                             {potentialProfit[bet.id]?.player2
                                                                 ? `+${potentialProfit[bet.id].player2.toFixed(2)}`
                                                                 : ""}
@@ -653,7 +673,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                                     </label>
                                                     <Button
                                                         className={`mt-2 w-[20%] ${
-                                                            isBetDisabled[bet.id] ? "bg-gray-400 cursor-not-allowed" : ""
+                                                            isBetDisabled[bet.id]
+                                                                ? "bg-gray-400 cursor-not-allowed"
+                                                                : ""
                                                         }`}
                                                         type="submit"
                                                         disabled={isBetDisabled[bet.id] || !user}
@@ -705,7 +727,9 @@ export const HEROES_CLIENT: React.FC<Props> = ({className, user}) => {
                                             >
                                                 Закрыть ставку
                                             </Button>
-                                            {closeBetError && <p className="text-red-500">{closeBetError}</p>}
+                                            {closeBetError && (
+                                                <p className="text-red-500">{closeBetError}</p>
+                                            )}
                                         </div>
                                     )}
                                 </AccordionContent>

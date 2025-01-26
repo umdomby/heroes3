@@ -70,13 +70,13 @@ export const CreateBetForm: React.FC<Props> = ({ user, categories, products, pro
 
         // Рассчитываем коэффициенты
         const totalBets = initBetPlayer1 + initBetPlayer2;
-        const currentOdds1 = totalBets / initBetPlayer1;
-        const currentOdds2 = totalBets / initBetPlayer2;
+        const oddsBetPlayer1 = totalBets / initBetPlayer1;
+        const oddsBetPlayer2 = totalBets / initBetPlayer2;
 
         const betData = {
             ...values,
-            currentOdds1,
-            currentOdds2,
+            oddsBetPlayer1,
+            oddsBetPlayer2,
             creatorId: user.id,
             totalBetPlayer1: initBetPlayer1,
             totalBetPlayer2: initBetPlayer2,

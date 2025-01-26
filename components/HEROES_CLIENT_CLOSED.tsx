@@ -1,4 +1,3 @@
-// клиент HEROES_CLIENT_CLOSED
 "use client";
 import React from 'react';
 import {
@@ -36,8 +35,8 @@ interface BetCLOSED {
     player2: { name: string };
     totalBetPlayer1: number;
     totalBetPlayer2: number;
-    currentOdds1: number;
-    currentOdds2: number;
+    oddsBetPlayer1: number; // Текущий коэффициент для игрока 1
+    oddsBetPlayer2: number; // Текущий коэффициент для игрока 2
     createdAt: Date;
     margin: number | null; // Разрешаем margin быть null
     winnerId: number | null; // ID победителя
@@ -88,8 +87,8 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
 
                                                 {/* Коэффициент для игрока 1 и 2 */}
                                                 <TableCell className="w-[15%]">
-                                                    <div>{bet.currentOdds1.toFixed(2)}</div>
-                                                    <div>{bet.currentOdds2.toFixed(2)}</div>
+                                                    <div>{bet.oddsBetPlayer1.toFixed(2)}</div>
+                                                    <div>{bet.oddsBetPlayer2.toFixed(2)}</div>
                                                 </TableCell>
 
                                                 {/* Прибыль/убыток */}
