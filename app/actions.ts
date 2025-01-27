@@ -273,13 +273,13 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const oppParticipant of oppositeParticipants) {
-      // Убираем ограничение на potentialProfit, чтобы использовать весь доступный overlapRemain
+      // Используем весь доступный overlapRemain
       const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain);
 
       if (coverableAmount <= 0) continue;
 
-      const newOverlap = Math.min(oppParticipant.overlap + coverableAmount, oppParticipant.profit);
-      const newOverlapRemain = oppParticipant.overlapRemain - (newOverlap - oppParticipant.overlap);
+      const newOverlap = oppParticipant.overlap + coverableAmount;
+      const newOverlapRemain = oppParticipant.overlapRemain - coverableAmount;
       const newIsCovered = newOverlap >= oppParticipant.profit ? 'CLOSED' : (newOverlap > 0 ? 'PENDING' : 'OPEN');
 
       await prisma.betParticipant.update({
@@ -328,8 +328,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
         if (coverableAmount <= 0) continue;
 
-        const newOverlap = Math.min(oppParticipant.overlap + coverableAmount, oppParticipant.profit);
-        const newOverlapRemain = oppParticipant.overlapRemain - (newOverlap - oppParticipant.overlap);
+        const newOverlap = oppParticipant.overlap + coverableAmount;
+        const newOverlapRemain = oppParticipant.overlapRemain - coverableAmount;
         const newIsCovered = newOverlap >= oppParticipant.profit ? 'CLOSED' : 'PENDING';
 
         await prisma.betParticipant.update({
@@ -400,6 +400,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
