@@ -263,8 +263,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Расчет маржи для участника
     const participantMargin = amount * MARGIN;
 
-    let remainingAmount = amount;
-    let overlapAmount = 0;
+    let remainingAmount = amount; // Оставшаяся сумма для перекрытия
+    let overlapAmount = 0; // Сумма, которая уже перекрыта
 
     // Попробуем сначала перекрыть свои собственные противоположные ставки
     const ownOppositeParticipants = bet.participants
@@ -272,7 +272,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const ownOppParticipant of ownOppositeParticipants) {
-      const coverableAmount = Math.min(remainingAmount, ownOppParticipant.overlapRemain);
+      // Вычисляем максимальную сумму, которую можно перекрыть, чтобы overlap не превышал profit
+      const maxCoverable = ownOppParticipant.profit - ownOppParticipant.overlap;
+      const coverableAmount = Math.min(remainingAmount, ownOppParticipant.overlapRemain, maxCoverable);
       if (coverableAmount <= 0) break;
 
       // Обновляем собственную противоположную ставку
@@ -296,7 +298,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const oppParticipant of oppositeParticipants) {
-      const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain);
+      // Вычисляем максимальную сумму, которую можно перекрыть, чтобы overlap не превышал profit
+      const maxCoverable = oppParticipant.profit - oppParticipant.overlap;
+      const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
       if (coverableAmount <= 0) break;
 
       // Обновляем противоположную ставку
@@ -373,6 +377,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
+
 
 
 
