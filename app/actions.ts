@@ -388,7 +388,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
 
     // Определяем прибыль, которую нужно покрыть
     const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
-    const overlap = Math.min(profitToCover, remainingAmount * (currentOdds - 1));
+    const overlap = Math.min(profitToCover, remainingAmount);
 
     console.log(`Обработка участника ${participant.id}:`);
     console.log("Прибыль для покрытия:", profitToCover);
@@ -403,7 +403,8 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       },
     });
 
-    remainingAmount -= overlap / (currentOdds - 1);
+    // Исправленный расчет remainingAmount
+    remainingAmount -= overlap;
     console.log("Обновлённое значение remainingAmount:", remainingAmount);
 
     if (overlap > 0 && overlap < profitToCover) {
@@ -411,6 +412,9 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       break;
     }
   }
+
+  return remainingAmount;
+}
 
   return remainingAmount;
 }
