@@ -266,20 +266,18 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     let remainingAmount = amount; // Оставшаяся сумма для перекрытия
     let overlapAmount = 0; // Сумма, которая уже перекрыта
 
-// Попробуем перекрыть свою собственную ставку, используя ВСЕ противоположные overlapRemain по дате создания
+    // Попробуем перекрыть свою собственную ставку, используя все доступные противоположные ставки
     const oppositePlayer = player === PlayerChoice.PLAYER1 ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER1;
     const oppositeParticipants = bet.participants
         .filter(p => p.player === oppositePlayer && p.overlapRemain > 0)
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const oppParticipant of oppositeParticipants) {
-      // Рассчитываем, сколько мы можем перекрыть из этой ставки
-      const maxCoverable = potentialProfit - overlapAmount; // Сколько еще нужно для полного перекрытия
+      const maxCoverable = potentialProfit - overlapAmount;
       const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
 
-      if (coverableAmount <= 0) continue; // Если нечего перекрывать, переходим к следующей
+      if (coverableAmount <= 0) continue;
 
-      // Обновляем противоположную ставку
       const newOverlap = oppParticipant.overlap + coverableAmount;
       const newOverlapRemain = oppParticipant.overlapRemain - coverableAmount;
       const newIsCovered = newOverlap >= oppParticipant.profit ? 'CLOSED' : (newOverlap > 0 ? 'PENDING' : 'OPEN');
@@ -293,43 +291,35 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         },
       });
 
-      // Обновляем нашу ставку
       overlapAmount += coverableAmount;
       remainingAmount -= coverableAmount;
 
-      // Если наша ставка полностью перекрыта, выходим из цикла
       if (overlapAmount >= potentialProfit) {
         break;
       }
     }
 
-// Проверяем, что наша ставка полностью перекрыта
-    if (overlapAmount < potentialProfit) {
-      console.warn('Не удалось полностью перекрыть ставку. Проверьте логику перекрытия.');
-    }
-
-// Создаем новую запись для нашей ставки
+    // Создаем новую запись для нашей ставки
     await prisma.betParticipant.create({
       data: {
         betId,
         userId,
-        amount, // Сохраняем изначальную сумму ставки
+        amount,
         player,
         odds: currentOdds,
         profit: potentialProfit,
         margin: participantMargin,
         isCovered: overlapAmount >= potentialProfit ? 'CLOSED' : (overlapAmount > 0 ? 'PENDING' : 'OPEN'),
         overlap: overlapAmount,
-        overlapRemain: remainingAmount, // Оставшаяся сумма для будущих перекрытий
+        overlapRemain: remainingAmount,
       },
     });
 
-
-// Цикл для перекрытия чужих противоположных ставок по дате создания
+    // Цикл для перекрытия чужих противоположных ставок по дате создания
     while (remainingAmount > 0) {
       const oppositeParticipants = bet.participants
           .filter(p => p.player === oppositePlayer && p.overlap < p.profit)
-          .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()); // Сортировка по дате создания
+          .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
       let allCovered = true;
 
@@ -338,7 +328,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
         if (coverableAmount <= 0) continue;
 
-        // Обновляем противоположную ставку
         await prisma.betParticipant.update({
           where: { id: oppParticipant.id },
           data: {
@@ -363,7 +352,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         break;
       }
     }
-
 
     // Обновление баллов пользователя
     await prisma.user.update({
@@ -409,6 +397,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
