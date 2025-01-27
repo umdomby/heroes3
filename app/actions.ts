@@ -273,13 +273,13 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const oppParticipant of oppositeParticipants) {
-      const maxCoverable = potentialProfit - overlapAmount;
-      const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
+      // Убираем ограничение на potentialProfit, чтобы использовать весь доступный overlapRemain
+      const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain);
 
       if (coverableAmount <= 0) continue;
 
-      const newOverlap = oppParticipant.overlap + coverableAmount;
-      const newOverlapRemain = oppParticipant.overlapRemain - coverableAmount;
+      const newOverlap = Math.min(oppParticipant.overlap + coverableAmount, oppParticipant.profit);
+      const newOverlapRemain = oppParticipant.overlapRemain - (newOverlap - oppParticipant.overlap);
       const newIsCovered = newOverlap >= oppParticipant.profit ? 'CLOSED' : (newOverlap > 0 ? 'PENDING' : 'OPEN');
 
       await prisma.betParticipant.update({
@@ -294,7 +294,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       overlapAmount += coverableAmount;
       remainingAmount -= coverableAmount;
 
-      if (overlapAmount >= potentialProfit) {
+      if (remainingAmount <= 0) {
         break;
       }
     }
@@ -328,27 +328,30 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
         if (coverableAmount <= 0) continue;
 
+        const newOverlap = Math.min(oppParticipant.overlap + coverableAmount, oppParticipant.profit);
+        const newOverlapRemain = oppParticipant.overlapRemain - (newOverlap - oppParticipant.overlap);
+        const newIsCovered = newOverlap >= oppParticipant.profit ? 'CLOSED' : 'PENDING';
+
         await prisma.betParticipant.update({
           where: { id: oppParticipant.id },
           data: {
-            overlap: oppParticipant.overlap + coverableAmount,
-            overlapRemain: oppParticipant.overlapRemain - coverableAmount,
-            isCovered: oppParticipant.overlap + coverableAmount >= oppParticipant.profit ? 'CLOSED' : 'PENDING',
+            overlap: newOverlap,
+            overlapRemain: newOverlapRemain,
+            isCovered: newIsCovered,
           },
         });
 
         overlapAmount += coverableAmount;
         remainingAmount -= coverableAmount;
 
-        // Если ставка полностью перекрыта, продолжаем
         if (oppParticipant.overlap + coverableAmount < oppParticipant.profit) {
           allCovered = false;
           break;
         }
       }
 
-      // Если все противоположные ставки полностью перекрыты, выходим из цикла
-      if (allCovered) {
+      // Если все противоположные ставки полностью перекрыты или закончился свой amount, выходим из цикла
+      if (allCovered || remainingAmount <= 0) {
         break;
       }
     }
