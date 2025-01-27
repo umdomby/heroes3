@@ -266,72 +266,52 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     let remainingAmount = amount; // Оставшаяся сумма для перекрытия
     let overlapAmount = 0; // Сумма, которая уже перекрыта
 
-    // Попробуем сначала перекрыть свои собственные противоположные ставки
-    const ownOppositeParticipants = bet.participants
-        .filter(p => p.player !== player && p.userId === userId && p.overlapRemain > 0)
+    // Попробуем сначала перекрыть частично перекрытые ставки
+    const partialOppositeParticipants = bet.participants
+        .filter(p => p.player !== player && p.isCovered === 'PENDING')
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
-    for (const ownOppParticipant of ownOppositeParticipants) {
-      // Вычисляем максимальную сумму, которую можно перекрыть, чтобы overlap не превышал profit
-      const maxCoverable = ownOppParticipant.profit - ownOppParticipant.overlap;
-      const coverableAmount = Math.min(remainingAmount, ownOppParticipant.overlapRemain, maxCoverable);
+    for (const partialOppParticipant of partialOppositeParticipants) {
+      const maxCoverable = partialOppParticipant.profit - partialOppParticipant.overlap;
+      const coverableAmount = Math.min(remainingAmount, partialOppParticipant.overlapRemain, maxCoverable);
       if (coverableAmount <= 0) break;
 
-      // Обновляем собственную противоположную ставку
+      // Обновляем частично перекрытую ставку
       await prisma.betParticipant.update({
-        where: { id: ownOppParticipant.id },
+        where: { id: partialOppParticipant.id },
         data: {
-          overlap: ownOppParticipant.overlap + coverableAmount,
-          overlapRemain: ownOppParticipant.overlapRemain - coverableAmount,
-          isCovered: ownOppParticipant.overlap + coverableAmount >= ownOppParticipant.profit ? 'CLOSED' : 'PENDING',
+          overlap: partialOppParticipant.overlap + coverableAmount,
+          overlapRemain: partialOppParticipant.overlapRemain - coverableAmount,
+          isCovered: partialOppParticipant.overlap + coverableAmount >= partialOppParticipant.profit ? 'CLOSED' : 'PENDING',
         },
       });
 
       overlapAmount += coverableAmount;
       remainingAmount -= coverableAmount;
+
+      // Если ставка полностью перекрыта, выходим из цикла
+      if (partialOppParticipant.overlap + coverableAmount >= partialOppParticipant.profit) {
+        break;
+      }
     }
 
-    // Затем попробуем перекрыть чужие противоположные ставки
-    const oppositePlayer = player === PlayerChoice.PLAYER1 ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER1;
-    const oppositeParticipants = bet.participants
-        .filter(p => p.player === oppositePlayer && p.overlapRemain > 0)
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-
-    for (const oppParticipant of oppositeParticipants) {
-      // Вычисляем максимальную сумму, которую можно перекрыть, чтобы overlap не превышал profit
-      const maxCoverable = oppParticipant.profit - oppParticipant.overlap;
-      const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
-      if (coverableAmount <= 0) break;
-
-      // Обновляем противоположную ставку
-      await prisma.betParticipant.update({
-        where: { id: oppParticipant.id },
+    // Если осталась непокрытая сумма, создаем новую запись
+    if (remainingAmount > 0) {
+      await prisma.betParticipant.create({
         data: {
-          overlap: oppParticipant.overlap + coverableAmount,
-          overlapRemain: oppParticipant.overlapRemain - coverableAmount,
-          isCovered: oppParticipant.overlap + coverableAmount >= oppParticipant.profit ? 'CLOSED' : 'PENDING',
+          betId,
+          userId,
+          amount: remainingAmount,
+          player,
+          odds: currentOdds,
+          profit: potentialProfit,
+          margin: participantMargin,
+          isCovered: overlapAmount >= potentialProfit ? 'CLOSED' : (overlapAmount > 0 ? 'PENDING' : 'OPEN'),
+          overlap: overlapAmount,
+          overlapRemain: remainingAmount,
         },
       });
-
-      overlapAmount += coverableAmount;
-      remainingAmount -= coverableAmount;
     }
-
-    // Создание нового участника
-    const newParticipant = await prisma.betParticipant.create({
-      data: {
-        betId,
-        userId,
-        amount,
-        player,
-        odds: currentOdds,
-        profit: potentialProfit,
-        margin: participantMargin,
-        isCovered: overlapAmount >= potentialProfit ? 'CLOSED' : (overlapAmount > 0 ? 'PENDING' : 'OPEN'),
-        overlap: overlapAmount,
-        overlapRemain: remainingAmount,
-      },
-    });
 
     // Обновление баллов пользователя
     await prisma.user.update({
@@ -377,6 +357,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
