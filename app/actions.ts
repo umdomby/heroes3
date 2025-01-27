@@ -416,8 +416,6 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
   return remainingAmount;
 }
 
-  return remainingAmount;
-}
 
 
 
