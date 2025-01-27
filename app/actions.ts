@@ -295,7 +295,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Обработка перекрестных ставок
     const oppositeParticipants = bet.participants
-        .filter(p => p.player !== player && (p.isCovered === "OPEN" || p.isCovered === "PENDING"))
+        .filter(p => p.player !== player && (p.isCovered === "OPEN" || p.isCovered === "PENDING") && p.overlap < p.amount * (p.odds - 1))
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
     for (const participant of oppositeParticipants) {
@@ -390,6 +390,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
+
 
 
 
