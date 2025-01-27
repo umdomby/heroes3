@@ -273,9 +273,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const oppParticipant of oppositeParticipants) {
-      const maxCoverable = potentialProfit - overlapAmount;
+      // Рассчитываем, сколько мы можем перекрыть из этой ставки
+      const maxCoverable = potentialProfit - overlapAmount; // Сколько еще нужно для полного перекрытия
       const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
-      if (coverableAmount <= 0) continue;
+
+      if (coverableAmount <= 0) continue; // Если нечего перекрывать, переходим к следующей
 
       // Обновляем противоположную ставку
       const newOverlap = oppParticipant.overlap + coverableAmount;
@@ -291,14 +293,37 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         },
       });
 
+      // Обновляем нашу ставку
       overlapAmount += coverableAmount;
       remainingAmount -= coverableAmount;
 
-      // Если ставка полностью перекрыта, выходим из цикла
+      // Если наша ставка полностью перекрыта, выходим из цикла
       if (overlapAmount >= potentialProfit) {
         break;
       }
     }
+
+// Проверяем, что наша ставка полностью перекрыта
+    if (overlapAmount < potentialProfit) {
+      console.warn('Не удалось полностью перекрыть ставку. Проверьте логику перекрытия.');
+    }
+
+// Создаем новую запись для нашей ставки
+    await prisma.betParticipant.create({
+      data: {
+        betId,
+        userId,
+        amount, // Сохраняем изначальную сумму ставки
+        player,
+        odds: currentOdds,
+        profit: potentialProfit,
+        margin: participantMargin,
+        isCovered: overlapAmount >= potentialProfit ? 'CLOSED' : (overlapAmount > 0 ? 'PENDING' : 'OPEN'),
+        overlap: overlapAmount,
+        overlapRemain: remainingAmount, // Оставшаяся сумма для будущих перекрытий
+      },
+    });
+
 
 // Цикл для перекрытия чужих противоположных ставок по дате создания
     while (remainingAmount > 0) {
@@ -338,23 +363,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         break;
       }
     }
-
-
-    // Создаем новую запись в любом случае
-    await prisma.betParticipant.create({
-      data: {
-        betId,
-        userId,
-        amount, // Сохраняем изначальную сумму ставки
-        player,
-        odds: currentOdds,
-        profit: potentialProfit,
-        margin: participantMargin,
-        isCovered: overlapAmount >= potentialProfit ? 'CLOSED' : (overlapAmount > 0 ? 'PENDING' : 'OPEN'),
-        overlap: overlapAmount,
-        overlapRemain: remainingAmount, // Оставшаяся сумма для будущих перекрытий
-      },
-    });
 
 
     // Обновление баллов пользователя
