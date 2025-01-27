@@ -270,7 +270,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const oppositePlayer = player === PlayerChoice.PLAYER1 ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER1;
     const oppositeParticipants = bet.participants
         .filter(p => p.player === oppositePlayer && p.overlapRemain > 0)
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()); // Сортировка по дате создания
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const oppParticipant of oppositeParticipants) {
       const maxCoverable = potentialProfit - overlapAmount;
@@ -295,6 +295,22 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         break;
       }
     }
+
+// Создаем новую запись в любом случае
+    await prisma.betParticipant.create({
+      data: {
+        betId,
+        userId,
+        amount, // Сохраняем изначальную сумму ставки
+        player,
+        odds: currentOdds,
+        profit: potentialProfit,
+        margin: participantMargin,
+        isCovered: overlapAmount >= potentialProfit ? 'CLOSED' : (overlapAmount > 0 ? 'PENDING' : 'OPEN'),
+        overlap: overlapAmount,
+        overlapRemain: remainingAmount, // Оставшаяся сумма для будущих перекрытий
+      },
+    });
 
 // Цикл для перекрытия чужих противоположных ставок по дате создания
     while (remainingAmount > 0) {
