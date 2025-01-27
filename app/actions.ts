@@ -266,60 +266,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     let remainingAmount = amount;
     let overlapAmount = 0;
 
-    // Проверка и использование overlapRemain у противоположных участников
-    const participantsWithRemain = bet.participants.filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player);
 
-    for (const participant of participantsWithRemain) {
-      if (remainingAmount <= 0) break;
-
-      // Определяем, сколько нужно для достижения полного покрытия
-      const profitToCover = potentialProfit - overlapAmount;
-      const coverableAmount = Math.min(participant.overlapRemain ?? 0, profitToCover);
-
-      overlapAmount += coverableAmount;
-      remainingAmount -= coverableAmount / (currentOdds - 1);
-
-      // Обновляем данные участника
-      await prisma.betParticipant.update({
-        where: { id: participant.id },
-        data: {
-          overlapRemain: (participant.overlapRemain ?? 0) - coverableAmount,
-          isCovered: ((participant.overlapRemain ?? 0) - coverableAmount) > 0 ? "PENDING" : "CLOSED",
-        },
-      });
-
-      if (overlapAmount >= potentialProfit) {
-        break;
-      }
-    }
-
-    // Обработка перекрестных ставок
-    const oppositeParticipants = bet.participants
-        .filter(p => p.player !== player && (p.isCovered === "OPEN" || p.isCovered === "PENDING") && p.overlap < p.amount * (p.odds - 1))
-        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-
-    for (const participant of oppositeParticipants) {
-      if (remainingAmount <= 0) break;
-
-      // Определяем прибыль, которую нужно покрыть
-      const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
-      const overlap = Math.min(profitToCover, remainingAmount * (currentOdds - 1));
-
-      // Обновляем противоположный overlap
-      await prisma.betParticipant.update({
-        where: { id: participant.id },
-        data: {
-          isCovered: overlap >= profitToCover ? "CLOSED" : "PENDING",
-          overlap: participant.overlap + overlap,
-        },
-      });
-
-      remainingAmount -= overlap / (currentOdds - 1);
-
-      if (overlap > 0 && overlap < profitToCover) {
-        break;
-      }
-    }
 
     // Создание нового участника
     const newParticipant = await prisma.betParticipant.create({
