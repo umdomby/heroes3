@@ -335,23 +335,21 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       }
     }
 
-    // Если осталась непокрытая сумма, создаем новую запись
-    if (remainingAmount > 0) {
-      await prisma.betParticipant.create({
-        data: {
-          betId,
-          userId,
-          amount, // Сохраняем изначальную сумму ставки
-          player,
-          odds: currentOdds,
-          profit: potentialProfit,
-          margin: participantMargin,
-          isCovered: overlapAmount >= potentialProfit ? 'CLOSED' : (overlapAmount > 0 ? 'PENDING' : 'OPEN'),
-          overlap: overlapAmount,
-          overlapRemain: remainingAmount, // Оставшаяся сумма для будущих перекрытий
-        },
-      });
-    }
+    // Создаем новую запись в любом случае
+    await prisma.betParticipant.create({
+      data: {
+        betId,
+        userId,
+        amount, // Сохраняем изначальную сумму ставки
+        player,
+        odds: currentOdds,
+        profit: potentialProfit,
+        margin: participantMargin,
+        isCovered: overlapAmount >= potentialProfit ? 'CLOSED' : (overlapAmount > 0 ? 'PENDING' : 'OPEN'),
+        overlap: overlapAmount,
+        overlapRemain: remainingAmount, // Оставшаяся сумма для будущих перекрытий
+      },
+    });
 
     // Обновление баллов пользователя
     await prisma.user.update({
@@ -397,6 +395,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
