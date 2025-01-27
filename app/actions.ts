@@ -295,32 +295,42 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       }
     }
 
-    // Затем попробуем перекрыть чужие противоположные ставки
-    const oppositePlayer = player === PlayerChoice.PLAYER1 ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER1;
-    const oppositeParticipants = bet.participants
-        .filter(p => p.player === oppositePlayer && (p.overlap === 0 || p.overlap < p.profit))
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    // Цикл для перекрытия чужих противоположных ставок
+    while (remainingAmount > 0) {
+      const oppositePlayer = player === PlayerChoice.PLAYER1 ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER1;
+      const oppositeParticipants = bet.participants
+          .filter(p => p.player === oppositePlayer && (p.overlap === 0 || p.overlap < p.profit))
+          .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
-    for (const oppParticipant of oppositeParticipants) {
-      const maxCoverable = oppParticipant.profit - oppParticipant.overlap;
-      const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
-      if (coverableAmount <= 0) break;
+      let allCovered = true;
 
-      // Обновляем противоположную ставку
-      await prisma.betParticipant.update({
-        where: { id: oppParticipant.id },
-        data: {
-          overlap: oppParticipant.overlap + coverableAmount,
-          overlapRemain: oppParticipant.overlapRemain - coverableAmount,
-          isCovered: oppParticipant.overlap + coverableAmount >= oppParticipant.profit ? 'CLOSED' : 'PENDING',
-        },
-      });
+      for (const oppParticipant of oppositeParticipants) {
+        const maxCoverable = oppParticipant.profit - oppParticipant.overlap;
+        const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
+        if (coverableAmount <= 0) continue;
 
-      overlapAmount += coverableAmount;
-      remainingAmount -= coverableAmount;
+        // Обновляем противоположную ставку
+        await prisma.betParticipant.update({
+          where: { id: oppParticipant.id },
+          data: {
+            overlap: oppParticipant.overlap + coverableAmount,
+            overlapRemain: oppParticipant.overlapRemain - coverableAmount,
+            isCovered: oppParticipant.overlap + coverableAmount >= oppParticipant.profit ? 'CLOSED' : 'PENDING',
+          },
+        });
 
-      // Если ставка полностью перекрыта, выходим из цикла
-      if (oppParticipant.overlap + coverableAmount >= oppParticipant.profit) {
+        overlapAmount += coverableAmount;
+        remainingAmount -= coverableAmount;
+
+        // Если ставка полностью перекрыта, продолжаем
+        if (oppParticipant.overlap + coverableAmount < oppParticipant.profit) {
+          allCovered = false;
+          break;
+        }
+      }
+
+      // Если все противоположные ставки полностью перекрыты, выходим из цикла
+      if (allCovered) {
         break;
       }
     }
@@ -331,14 +341,14 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         data: {
           betId,
           userId,
-          amount,
+          amount, // Сохраняем изначальную сумму ставки
           player,
           odds: currentOdds,
           profit: potentialProfit,
           margin: participantMargin,
           isCovered: overlapAmount >= potentialProfit ? 'CLOSED' : (overlapAmount > 0 ? 'PENDING' : 'OPEN'),
           overlap: overlapAmount,
-          overlapRemain: remainingAmount,
+          overlapRemain: remainingAmount, // Оставшаяся сумма для будущих перекрытий
         },
       });
     }
@@ -387,6 +397,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
