@@ -331,7 +331,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         data: {
           betId,
           userId,
-          amount: remainingAmount,
+          amount,
           player,
           odds: currentOdds,
           profit: potentialProfit,
@@ -387,15 +387,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
-
-
-
-
-
-
-
-
-
 
 
 
