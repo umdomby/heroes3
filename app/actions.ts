@@ -266,16 +266,16 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     let remainingAmount = amount; // Оставшаяся сумма для перекрытия
     let overlapAmount = 0; // Сумма, которая уже перекрыта
 
-    // Попробуем перекрыть свою собственную ставку, используя противоположные overlapRemain
+// Попробуем перекрыть свою собственную ставку, используя ВСЕ противоположные overlapRemain по дате создания
     const oppositePlayer = player === PlayerChoice.PLAYER1 ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER1;
     const oppositeParticipants = bet.participants
         .filter(p => p.player === oppositePlayer && p.overlapRemain > 0)
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()); // Сортировка по дате создания
 
     for (const oppParticipant of oppositeParticipants) {
       const maxCoverable = potentialProfit - overlapAmount;
       const coverableAmount = Math.min(remainingAmount, oppParticipant.overlapRemain, maxCoverable);
-      if (coverableAmount <= 0) break;
+      if (coverableAmount <= 0) continue;
 
       // Обновляем противоположную ставку
       await prisma.betParticipant.update({
@@ -296,11 +296,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       }
     }
 
-    // Цикл для перекрытия чужих противоположных ставок
+// Цикл для перекрытия чужих противоположных ставок по дате создания
     while (remainingAmount > 0) {
       const oppositeParticipants = bet.participants
-          .filter(p => p.player === oppositePlayer && (p.overlap === 0 || p.overlap < p.profit))
-          .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+          .filter(p => p.player === oppositePlayer && p.overlap < p.profit)
+          .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()); // Сортировка по дате создания
 
       let allCovered = true;
 
@@ -334,6 +334,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         break;
       }
     }
+
 
     // Создаем новую запись в любом случае
     await prisma.betParticipant.create({
