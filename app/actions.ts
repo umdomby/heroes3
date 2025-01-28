@@ -349,6 +349,13 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
   let overlapAmount = 0;
   const participantsWithRemain = bet.participants.filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player);
 
+  // Проверяем, есть ли участники с isCovered = PENDING
+  const pendingParticipants = participantsWithRemain.filter(p => p.isCovered === "PENDING");
+  if (pendingParticipants.length > 0) {
+    console.log("Найдены участники с isCovered = PENDING, не можем использовать overlapRemain");
+    return overlapAmount; // Возвращаем 0, так как не можем использовать overlapRemain
+  }
+
   for (const participant of participantsWithRemain) {
     if (remainingAmount <= 0) break;
 
@@ -398,6 +405,13 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       .filter(p => p.player !== player && (p.isCovered === "OPEN" || p.isCovered === "PENDING") && p.overlap < p.amount * (p.odds - 1))
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
+  // Проверяем, есть ли участники с isCovered = PENDING
+  const pendingParticipants = oppositeParticipants.filter(p => p.isCovered === "PENDING");
+  if (pendingParticipants.length > 0) {
+    console.log("Найдены участники с isCovered = PENDING, не можем обрабатывать перекрестные ставки");
+    return remainingAmount; // Возвращаем оставшуюся сумму, так как не можем обрабатывать перекрестные ставки
+  }
+
   console.log("Начальное значение remainingAmount:", remainingAmount);
 
   for (const participant of oppositeParticipants) {
@@ -446,6 +460,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
 
   return remainingAmount;
 }
+
 
 // Функция для закрытия ставки
 export async function closeBet(betId: number, winnerId: number) {
