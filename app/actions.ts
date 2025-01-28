@@ -325,6 +325,32 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       },
     });
 
+// Проверка всех записей на isCovered
+    const participants = await prisma.betParticipant.findMany({
+      where: { betId },
+    });
+
+    for (const participant of participants) {
+      let newIsCoveredStatus = "OPEN";
+      const roundedOverlap = parseFloat(participant.overlap.toFixed(2));
+      const roundedProfit = parseFloat(participant.profit.toFixed(2));
+
+      if (roundedOverlap === 0) {
+        newIsCoveredStatus = "OPEN";
+      } else if (roundedOverlap >= roundedProfit) {
+        newIsCoveredStatus = "CLOSED";
+      } else {
+        newIsCoveredStatus = "PENDING";
+      }
+
+      if (participant.isCovered !== newIsCoveredStatus) {
+        await prisma.betParticipant.update({
+          where: { id: participant.id },
+          data: { isCovered: newIsCoveredStatus },
+        });
+      }
+    }
+
     // Ревалидация данных
     revalidatePath('/');
     await updateGlobalData();
@@ -343,6 +369,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 // Функция для использования overlapRemain у противоположных участников
 async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount) {
   let overlapAmount = 0;
