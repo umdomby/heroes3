@@ -268,6 +268,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Использование overlapRemain у противоположных участников
     overlapAmount = await useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount);
+    overlapAmount = Math.min(overlapAmount, potentialProfit); // Убедитесь, что overlap не превышает потенциальную прибыль
 
     // Обработка перекрестных ставок
     remainingAmount = await processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount);
@@ -358,9 +359,11 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
     overlapAmount += coverableAmount;
     remainingAmount -= coverableAmount / (currentOdds - 1);
 
+    // Убедитесь, что overlap не превышает прибыль
+    const newOverlap = Math.min(participant.overlap + coverableAmount, participant.amount * (participant.odds - 1));
+
     // Округляем до двух знаков после запятой
     const overlapRemainRounded = parseFloat(((participant.overlapRemain ?? 0) - coverableAmount).toFixed(2));
-    const newOverlap = parseFloat((participant.overlap + coverableAmount).toFixed(2));
     const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
 
     // Определяем новое значение isCovered
@@ -408,8 +411,10 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
     console.log("Прибыль для покрытия:", profitToCover);
     console.log("Рассчитанный overlap:", overlap);
 
+    // Убедитесь, что overlap не превышает прибыль
+    const newOverlap = Math.min(participant.overlap + overlap, participant.amount * (participant.odds - 1));
+
     // Округляем до двух знаков после запятой
-    const newOverlap = parseFloat((participant.overlap + overlap).toFixed(2));
     const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
 
     // Определяем новое значение isCovered
