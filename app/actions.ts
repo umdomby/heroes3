@@ -193,7 +193,6 @@ function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { max
   return { maxBetPlayer1, maxBetPlayer2 };
 }
 
-// Функция для размещения ставки
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
     console.log('Запуск функции placeBet с formData:', formData);
@@ -325,9 +324,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       },
     });
 
-// Проверка всех записей на isCovered
+    // Проверка всех записей на isCovered
     const participants = await prisma.betParticipant.findMany({
       where: { betId },
+      orderBy: { createdAt: 'asc' }, // Сортировка по дате создания
     });
 
     for (const participant of participants) {
@@ -373,7 +373,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 // Функция для использования overlapRemain у противоположных участников
 async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount) {
   let overlapAmount = 0;
-  const participantsWithRemain = bet.participants.filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player);
+  const participantsWithRemain = bet.participants
+      .filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); // Сортировка по дате создания
 
   // Сначала обрабатываем участников с isCovered = PENDING
   for (const participant of participantsWithRemain.filter(p => p.isCovered === "PENDING")) {
@@ -459,7 +461,7 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
 async function processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount) {
   const oppositeParticipants = bet.participants
       .filter(p => p.player !== player && (p.isCovered === "OPEN" || p.isCovered === "PENDING") && p.overlap < p.amount * (p.odds - 1))
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); // Сортировка по дате создания
 
   // Сначала обрабатываем участников с isCovered = PENDING
   for (const participant of oppositeParticipants.filter(p => p.isCovered === "PENDING")) {
