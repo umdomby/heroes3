@@ -266,11 +266,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     let overlapAmount = 0;
 
     // Использование overlapRemain у противоположных участников
-    overlapAmount = await useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount);
+    overlapAmount = await useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount, userId);
     overlapAmount = Math.min(overlapAmount, potentialProfit); // Убедитесь, что overlap не превышает потенциальную прибыль
 
     // Обработка перекрестных ставок
-    remainingAmount = await processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount);
+    remainingAmount = await processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount, userId);
 
     // Создание нового участника
     const newParticipant = await prisma.betParticipant.create({
@@ -371,10 +371,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 }
 
 // Функция для использования overlapRemain у противоположных участников
-async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount) {
+async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount, userId) {
   let overlapAmount = 0;
   const participantsWithRemain = bet.participants
-      .filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player)
+      .filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player && p.userId !== userId) // Исключаем участников с тем же userId
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); // Сортировка по дате создания
 
   // Сначала обрабатываем участников с isCovered = PENDING
@@ -457,13 +457,13 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
   return overlapAmount;
 }
 
-// Функция для обработки перекрестных ставок
-async function processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount) {
-  const oppositeParticipants = bet.participants
-      .filter(p => p.player !== player && (p.isCovered === "OPEN" || p.isCovered === "PENDING") && p.overlap < p.amount * (p.odds - 1))
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); // Сортировка по дате создания
 
-  // Сначала обрабатываем участников с isCovered = PENDING
+async function processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount, userId) {
+  const oppositeParticipants = bet.participants
+      .filter(p => p.player !== player && p.userId !== userId && (p.isCovered === "OPEN" || p.isCovered === "PENDING") && p.overlap < p.amount * (p.odds - 1))
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+  // Process participants with isCovered = PENDING first
   for (const participant of oppositeParticipants.filter(p => p.isCovered === "PENDING")) {
     if (remainingAmount <= 0) break;
 
@@ -496,7 +496,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
     }
   }
 
-  // Затем обрабатываем остальных участников
+  // Process remaining participants
   for (const participant of oppositeParticipants.filter(p => p.isCovered !== "PENDING")) {
     if (remainingAmount <= 0) break;
 
@@ -507,13 +507,10 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
     console.log("Прибыль для покрытия:", profitToCover);
     console.log("Рассчитанный overlap:", overlap);
 
-    // Убедитесь, что overlap не превышает прибыль
     const newOverlap = Math.min(participant.overlap + overlap, participant.amount * (participant.odds - 1));
 
-    // Округляем до двух знаков после запятой
     const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
 
-    // Определяем новое значение isCovered
     let isCoveredStatus = "OPEN";
     if (newOverlap >= profitToCoverRounded) {
       isCoveredStatus = "CLOSED";
@@ -521,7 +518,6 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       isCoveredStatus = "PENDING";
     }
 
-    // Обновляем противоположный overlap
     await prisma.betParticipant.update({
       where: { id: participant.id },
       data: {
@@ -530,7 +526,6 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       },
     });
 
-    // Исправленный расчет remainingAmount
     remainingAmount -= overlap;
     console.log("Обновлённое значение remainingAmount:", remainingAmount);
 
@@ -542,6 +537,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
 
   return remainingAmount;
 }
+
 
 
 
