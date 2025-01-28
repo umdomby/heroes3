@@ -63,7 +63,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                 // Если пользователь не участвовал в этой ставке, пропускаем её
                 if (userBets.length === 0) return null;
 
-                const winnerName = bet.winnerId?.toString() === bet.player1.name ? bet.player1.name : bet.player2.name;
+                const winnerName = bet.winnerId === bet.player1.name ? bet.player1.name : bet.player2.name;
 
                 return (
                     <div key={bet.id} className="border border-gray-700 mt-1">
@@ -98,7 +98,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         <span>
                               {userBets
                                   .filter((p) => p.player === 'PLAYER1')
-                                  .reduce((sum, p) => sum + p.profit, 0)
+                                  .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0)
                                   .toFixed(2)}
                             </span>
                                                     </div>
@@ -107,7 +107,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         <span>
                               {userBets
                                   .filter((p) => p.player === 'PLAYER2')
-                                  .reduce((sum, p) => sum + p.profit, 0)
+                                  .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0)
                                   .toFixed(2)}
                             </span>
                                                     </div>
