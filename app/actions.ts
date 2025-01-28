@@ -403,13 +403,15 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
       isCoveredStatus = "PENDING";
     }
 
-    // Обновляем данные участника
+    const newMargin = parseFloat((newOverlap * MARGIN).toFixed(2));
+
     await prisma.betParticipant.update({
       where: { id: participant.id },
       data: {
         overlapRemain: overlapRemainRounded,
         overlap: newOverlap,
         isCovered: isCoveredStatus,
+        margin: newMargin,
       },
     });
 
@@ -429,7 +431,6 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
     remainingAmount -= coverableAmount / (currentOdds - 1);
 
     const newOverlap = Math.min(participant.overlap + coverableAmount, participant.amount * (participant.odds - 1));
-
     const overlapRemainRounded = parseFloat(((participant.overlapRemain ?? 0) - coverableAmount).toFixed(2));
     const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
 
@@ -440,12 +441,15 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
       isCoveredStatus = "PENDING";
     }
 
+    const newMargin = parseFloat((newOverlap * MARGIN).toFixed(2));
+
     await prisma.betParticipant.update({
       where: { id: participant.id },
       data: {
         overlapRemain: overlapRemainRounded,
         overlap: newOverlap,
         isCovered: isCoveredStatus,
+        margin: newMargin,
       },
     });
 
@@ -456,7 +460,6 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
 
   return overlapAmount;
 }
-
 
 async function processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount, userId) {
   const oppositeParticipants = bet.participants
@@ -471,7 +474,6 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
     const overlap = Math.min(profitToCover, remainingAmount);
 
     const newOverlap = Math.min(participant.overlap + overlap, participant.amount * (participant.odds - 1));
-
     const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
 
     let isCoveredStatus = "OPEN";
@@ -481,11 +483,14 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       isCoveredStatus = "PENDING";
     }
 
+    const newMargin = parseFloat((newOverlap * MARGIN).toFixed(2));
+
     await prisma.betParticipant.update({
       where: { id: participant.id },
       data: {
         isCovered: isCoveredStatus,
         overlap: newOverlap,
+        margin: newMargin,
       },
     });
 
@@ -508,7 +513,6 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
     console.log("Рассчитанный overlap:", overlap);
 
     const newOverlap = Math.min(participant.overlap + overlap, participant.amount * (participant.odds - 1));
-
     const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
 
     let isCoveredStatus = "OPEN";
@@ -518,11 +522,14 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       isCoveredStatus = "PENDING";
     }
 
+    const newMargin = parseFloat((newOverlap * MARGIN).toFixed(2));
+
     await prisma.betParticipant.update({
       where: { id: participant.id },
       data: {
         isCovered: isCoveredStatus,
         overlap: newOverlap,
+        margin: newMargin,
       },
     });
 
@@ -537,8 +544,6 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
 
   return remainingAmount;
 }
-
-
 
 
 // Функция для закрытия ставки
