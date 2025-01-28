@@ -343,24 +343,17 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
-
 // Функция для использования overlapRemain у противоположных участников
 async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount) {
   let overlapAmount = 0;
   const participantsWithRemain = bet.participants.filter(p => (p.overlapRemain ?? 0) > 0 && p.player !== player);
 
-  // Проверяем, есть ли участники с isCovered = PENDING
-  const pendingParticipants = participantsWithRemain.filter(p => p.isCovered === "PENDING");
-  if (pendingParticipants.length > 0) {
-    console.log("Найдены участники с isCovered = PENDING, не можем использовать overlapRemain");
-    return overlapAmount; // Возвращаем 0, так как не можем использовать overlapRemain
-  }
-
-  for (const participant of participantsWithRemain) {
+  // Сначала обрабатываем участников с isCovered = PENDING
+  for (const participant of participantsWithRemain.filter(p => p.isCovered === "PENDING")) {
     if (remainingAmount <= 0) break;
 
-    // Определяем, сколько нужно для достижения полного покрытия
-    const profitToCover = potentialProfit - overlapAmount;
+    // Определяем прибыль, которую нужно покрыть
+    const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
     const coverableAmount = Math.min(participant.overlapRemain ?? 0, profitToCover);
 
     overlapAmount += coverableAmount;
@@ -396,6 +389,42 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
     }
   }
 
+  // Затем обрабатываем остальных участников
+  for (const participant of participantsWithRemain.filter(p => p.isCovered !== "PENDING")) {
+    if (remainingAmount <= 0) break;
+
+    const profitToCover = potentialProfit - overlapAmount;
+    const coverableAmount = Math.min(participant.overlapRemain ?? 0, profitToCover);
+
+    overlapAmount += coverableAmount;
+    remainingAmount -= coverableAmount / (currentOdds - 1);
+
+    const newOverlap = Math.min(participant.overlap + coverableAmount, participant.amount * (participant.odds - 1));
+
+    const overlapRemainRounded = parseFloat(((participant.overlapRemain ?? 0) - coverableAmount).toFixed(2));
+    const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
+
+    let isCoveredStatus = "OPEN";
+    if (newOverlap >= profitToCoverRounded) {
+      isCoveredStatus = "CLOSED";
+    } else if (newOverlap > 0) {
+      isCoveredStatus = "PENDING";
+    }
+
+    await prisma.betParticipant.update({
+      where: { id: participant.id },
+      data: {
+        overlapRemain: overlapRemainRounded,
+        overlap: newOverlap,
+        isCovered: isCoveredStatus,
+      },
+    });
+
+    if (overlapAmount >= potentialProfit) {
+      break;
+    }
+  }
+
   return overlapAmount;
 }
 
@@ -405,19 +434,43 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       .filter(p => p.player !== player && (p.isCovered === "OPEN" || p.isCovered === "PENDING") && p.overlap < p.amount * (p.odds - 1))
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
-  // Проверяем, есть ли участники с isCovered = PENDING
-  const pendingParticipants = oppositeParticipants.filter(p => p.isCovered === "PENDING");
-  if (pendingParticipants.length > 0) {
-    console.log("Найдены участники с isCovered = PENDING, не можем обрабатывать перекрестные ставки");
-    return remainingAmount; // Возвращаем оставшуюся сумму, так как не можем обрабатывать перекрестные ставки
-  }
-
-  console.log("Начальное значение remainingAmount:", remainingAmount);
-
-  for (const participant of oppositeParticipants) {
+  // Сначала обрабатываем участников с isCovered = PENDING
+  for (const participant of oppositeParticipants.filter(p => p.isCovered === "PENDING")) {
     if (remainingAmount <= 0) break;
 
-    // Определяем прибыль, которую нужно покрыть
+    const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
+    const overlap = Math.min(profitToCover, remainingAmount);
+
+    const newOverlap = Math.min(participant.overlap + overlap, participant.amount * (participant.odds - 1));
+
+    const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
+
+    let isCoveredStatus = "OPEN";
+    if (newOverlap >= profitToCoverRounded) {
+      isCoveredStatus = "CLOSED";
+    } else if (newOverlap > 0) {
+      isCoveredStatus = "PENDING";
+    }
+
+    await prisma.betParticipant.update({
+      where: { id: participant.id },
+      data: {
+        isCovered: isCoveredStatus,
+        overlap: newOverlap,
+      },
+    });
+
+    remainingAmount -= overlap;
+
+    if (overlap > 0 && overlap < profitToCover) {
+      break;
+    }
+  }
+
+  // Затем обрабатываем остальных участников
+  for (const participant of oppositeParticipants.filter(p => p.isCovered !== "PENDING")) {
+    if (remainingAmount <= 0) break;
+
     const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
     const overlap = Math.min(profitToCover, remainingAmount);
 
@@ -460,6 +513,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
 
   return remainingAmount;
 }
+
 
 
 // Функция для закрытия ставки
