@@ -282,7 +282,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         odds: currentOdds,
         profit: potentialProfit,
         margin: participantMargin,
-        isCovered: overlapAmount > 0 ? "PENDING" : "OPEN",
+        isCovered: overlapAmount >= potentialProfit ? "CLOSED" : (overlapAmount > 0 ? "PENDING" : "OPEN"),
         overlap: overlapAmount,
       },
     });
@@ -365,7 +365,7 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
 
     // Определяем новое значение isCovered
     let isCoveredStatus = "OPEN";
-    if (newOverlap === profitToCoverRounded) {
+    if (newOverlap >= profitToCoverRounded) {
       isCoveredStatus = "CLOSED";
     } else if (newOverlap > 0) {
       isCoveredStatus = "PENDING";
@@ -388,7 +388,6 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
 
   return overlapAmount;
 }
-
 
 // Функция для обработки перекрестных ставок
 async function processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount) {
@@ -415,7 +414,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
 
     // Определяем новое значение isCovered
     let isCoveredStatus = "OPEN";
-    if (newOverlap === profitToCoverRounded) {
+    if (newOverlap >= profitToCoverRounded) {
       isCoveredStatus = "CLOSED";
     } else if (newOverlap > 0) {
       isCoveredStatus = "PENDING";
