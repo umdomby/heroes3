@@ -259,9 +259,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
     }
 
-    // Расчет маржи для участника
-    const participantMargin = parseFloat((amount * MARGIN).toFixed(2));
-
     let remainingAmount = amount;
     let overlapAmount = 0;
 
@@ -272,6 +269,9 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Обработка перекрестных ставок
     remainingAmount = await processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount, userId);
 
+    // Расчет маржи для участника на основе фактического overlap
+    const participantMargin = parseFloat((overlapAmount * MARGIN).toFixed(2));
+
     // Создание нового участника
     const newParticipant = await prisma.betParticipant.create({
       data: {
@@ -281,7 +281,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         player,
         odds: currentOdds,
         profit: potentialProfit,
-        margin: participantMargin,
+        margin: participantMargin, // Используем актуальную маржу
         isCovered: overlapAmount >= potentialProfit ? "CLOSED" : (overlapAmount > 0 ? "PENDING" : "OPEN"),
         overlap: overlapAmount,
       },
@@ -369,6 +369,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 // Функция для использования overlapRemain у противоположных участников
 async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount, userId) {
