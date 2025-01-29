@@ -635,14 +635,13 @@ export async function closeBet(betId: number, winnerId: number) {
 
         if (participant.isWinner) {
           if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
-            pointsToReturn = participant.overlap + participant.amount - participant.margin;
-            margin = participant.margin;
+            margin = participant.overlap * MARGIN;
+            pointsToReturn = participant.overlap + participant.amount - margin;
           } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
             pointsToReturn = participant.amount;
           } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-            const compensation = participant.amount + participant.overlap;
-            pointsToReturn = compensation - (compensation * MARGIN);
-            margin = compensation * MARGIN;
+            margin = participant.overlap * MARGIN;
+            pointsToReturn = participant.overlap + participant.amount - margin;
           }
           totalMargin += margin;
         } else {
