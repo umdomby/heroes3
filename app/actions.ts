@@ -548,6 +548,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
 
 
 // Функция для закрытия ставки
+// Функция для закрытия ставки
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
 
@@ -643,7 +644,14 @@ export async function closeBet(betId: number, winnerId: number) {
           }
           totalMargin += participant.margin;
         } else {
-          pointsToReturn = 0;
+          if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
+            pointsToReturn = 0;
+          } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
+            pointsToReturn = participant.amount;
+          } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
+            const unusedAmount = participant.amount * (1 - (participant.overlap / participant.profit));
+            pointsToReturn = unusedAmount;
+          }
         }
 
         // Обновляем баллы пользователя
@@ -723,4 +731,5 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
 

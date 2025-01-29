@@ -26,6 +26,7 @@ interface BetParticipantCLOSED {
     margin: number;
     isCovered: string;
     overlap: number;
+    return: number; // Add the return field
 }
 
 interface BetCLOSED {
@@ -160,22 +161,24 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         {participant.isCovered ? (
                                                             <p>
                     <span className="text-green-500">
-                        Ваша ставка перекрыта на {participant.overlap.toFixed(2)} Points (
+                        Ваша ставка была перекрыта на {participant.overlap.toFixed(2)} Points (
                         {overlapPercentage}%)
                     </span>
                                                                 <br/>
-                                                                {participant.isWinner && (
+                                                                {participant.isWinner ? (
                                                                     <span className="text-green-500">
-                            Прибыль от перекрытой части: {participant.profit.toFixed(2)} Points
+                            Прибыль: {(participant.return + participant.amount).toFixed(2)} Чистая прибыль {(participant.return).toFixed(2)}
+                        </span>
+                                                                ) : (
+                                                                    <span className="text-red-500">
+                            Прибыль: {(participant.return - participant.amount).toFixed(2)} Points
                         </span>
                                                                 )}
-
-
                                                             </p>
                                                         ) : (
                                                             <p>
                     <span className="text-yellow-500">
-                        Ваша ставка не перекрыта (0 Points, 0%)
+                        Ваша ставка не была перекрыта (0 Points, 0%)
                     </span>
                                                                 <br/>
                                                             </p>
