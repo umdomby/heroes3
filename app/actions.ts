@@ -631,6 +631,7 @@ export async function closeBet(betId: number, winnerId: number) {
 
       for (const participant of allParticipants) {
         let pointsToReturn = 0;
+        let margin = 0;
 
         if (participant.isWinner) {
           if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
@@ -638,18 +639,20 @@ export async function closeBet(betId: number, winnerId: number) {
           } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
             pointsToReturn = participant.amount;
           } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-            const usedAmount = participant.amount * (participant.overlap / participant.profit);
-            pointsToReturn = (participant.overlap - participant.margin) + (participant.amount - usedAmount);
+            const compensation = (participant.profit - participant.overlap) + (participant.amount - participant.overlap / participant.odds);
+            pointsToReturn = compensation - (compensation * MARGIN);
+            margin = compensation * MARGIN;
           }
-          totalMargin += participant.margin;
+          totalMargin += margin;
         } else {
           if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
             pointsToReturn = 0;
           } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
             pointsToReturn = participant.amount;
           } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-            const unusedAmount = participant.amount * (1 - (participant.overlap / participant.profit));
-            pointsToReturn = unusedAmount;
+            const compensation = (participant.profit - participant.overlap) + (participant.amount - participant.overlap / participant.odds);
+            pointsToReturn = compensation;
+            margin = compensation * MARGIN;
           }
         }
 
@@ -675,7 +678,7 @@ export async function closeBet(betId: number, winnerId: number) {
             profit: participant.profit,
             player: participant.player,
             isWinner: participant.isWinner,
-            margin: participant.margin,
+            margin: margin,
             createdAt: participant.createdAt,
             isCovered: participant.isCovered,
             overlap: participant.overlap,
