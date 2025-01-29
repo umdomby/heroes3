@@ -167,7 +167,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                                 <br/>
                                                                 {participant.isWinner ? (
                                                                     <span className="text-green-500">
-                            Прибыль: {(participant.return + participant.amount).toFixed(2)} Чистая прибыль {(participant.return).toFixed(2)}
+                            Прибыль: {(participant.return ).toFixed(2)} Points
                         </span>
                                                                 ) : (
                                                                     <span className="text-red-500">
