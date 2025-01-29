@@ -193,6 +193,9 @@ function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { max
   return { maxBetPlayer1, maxBetPlayer2 };
 }
 
+function roundDownToTwoDecimals(value: number): number {
+  return Math.floor(value * 100) / 100;
+}
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
     console.log('Запуск функции placeBet с formData:', formData);
@@ -241,14 +244,14 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         .reduce((sum, p) => sum + p.amount, 0);
 
     // Учитываем начальные ставки
-    const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
-    const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
+    const totalWithInitPlayer1 = roundDownToTwoDecimals(totalPlayer1 + (bet.initBetPlayer1 || 0));
+    const totalWithInitPlayer2 = roundDownToTwoDecimals(totalPlayer2 + (bet.initBetPlayer2 || 0));
 
     // Получаем текущие коэффициенты
     const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
 
     // Расчет потенциальной прибыли
-    const potentialProfit = parseFloat((amount * (currentOdds - 1)).toFixed(2));
+    const potentialProfit = roundDownToTwoDecimals(amount * (currentOdds - 1));
 
     // Расчет максимальных ставок
     const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
@@ -256,7 +259,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     // Проверка превышения максимальной допустимой ставки
     if (amount > maxAllowedBet) {
-      throw new Error(`Максимально допустимая ставка: ${maxAllowedBet.toFixed(2)}`);
+      throw new Error(`Максимально допустимая ставка: ${roundDownToTwoDecimals(maxAllowedBet)}`);
     }
 
     let remainingAmount = amount;
@@ -274,7 +277,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     overlapAmount = Math.min(overlapAmount, potentialProfit); // Убедитесь, что overlap не превышает потенциальную прибыль
 
     // Расчет маржи для участника на основе фактического overlap
-    const participantMargin = parseFloat((overlapAmount * MARGIN).toFixed(2));
+    const participantMargin = roundDownToTwoDecimals(overlapAmount * MARGIN);
 
     // Создание нового участника
     const newParticipant = await prisma.betParticipant.create({
@@ -297,7 +300,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       await prisma.betParticipant.update({
         where: { id: newParticipant.id },
         data: {
-          overlapRemain: parseFloat(remainingAmount.toFixed(2)),
+          overlapRemain: roundDownToTwoDecimals(remainingAmount),
         },
       });
     }
@@ -306,7 +309,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     await prisma.user.update({
       where: { id: userId },
       data: {
-        points: parseFloat((user.points - amount).toFixed(2)),
+        points: roundDownToTwoDecimals(user.points - amount),
       },
     });
 
@@ -319,12 +322,12 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       data: {
         oddsBetPlayer1: oddsPlayer1,
         oddsBetPlayer2: oddsPlayer2,
-        totalBetPlayer1: player === PlayerChoice.PLAYER1 ? parseFloat((totalPlayer1 + amount).toFixed(2)) : parseFloat(totalPlayer1.toFixed(2)),
-        totalBetPlayer2: player === PlayerChoice.PLAYER2 ? parseFloat((totalPlayer2 + amount).toFixed(2)) : parseFloat(totalPlayer2.toFixed(2)),
-        totalBetAmount: parseFloat((totalPlayer1 + totalPlayer2 + amount).toFixed(2)),
-        margin: parseFloat(((bet.margin ?? 0) + participantMargin).toFixed(2)),
-        maxBetPlayer1: player === PlayerChoice.PLAYER1 ? parseFloat(bet.maxBetPlayer1.toFixed(2)) : parseFloat((bet.maxBetPlayer1 + amount).toFixed(2)),
-        maxBetPlayer2: player === PlayerChoice.PLAYER2 ? parseFloat(bet.maxBetPlayer2.toFixed(2)) : parseFloat((bet.maxBetPlayer2 + amount).toFixed(2)),
+        totalBetPlayer1: player === PlayerChoice.PLAYER1 ? roundDownToTwoDecimals(totalPlayer1 + amount) : roundDownToTwoDecimals(totalPlayer1),
+        totalBetPlayer2: player === PlayerChoice.PLAYER2 ? roundDownToTwoDecimals(totalPlayer2 + amount) : roundDownToTwoDecimals(totalPlayer2),
+        totalBetAmount: roundDownToTwoDecimals(totalPlayer1 + totalPlayer2 + amount),
+        margin: roundDownToTwoDecimals((bet.margin ?? 0) + participantMargin),
+        maxBetPlayer1: player === PlayerChoice.PLAYER1 ? roundDownToTwoDecimals(bet.maxBetPlayer1) : roundDownToTwoDecimals(bet.maxBetPlayer1 + amount),
+        maxBetPlayer2: player === PlayerChoice.PLAYER2 ? roundDownToTwoDecimals(bet.maxBetPlayer2) : roundDownToTwoDecimals(bet.maxBetPlayer2 + amount),
       },
     });
 
@@ -336,8 +339,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
     for (const participant of participants) {
       let newIsCoveredStatus = "OPEN";
-      const roundedOverlap = parseFloat(participant.overlap.toFixed(2));
-      const roundedProfit = parseFloat(participant.profit.toFixed(2));
+      const roundedOverlap = roundDownToTwoDecimals(participant.overlap);
+      const roundedProfit = roundDownToTwoDecimals(participant.profit);
 
       if (roundedOverlap === 0) {
         newIsCoveredStatus = "OPEN";
@@ -374,8 +377,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
   }
 }
 
-
-
 // Функция для использования overlapRemain у противоположных участников
 async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount, userId) {
   let overlapAmount = 0;
@@ -388,7 +389,7 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
     if (remainingAmount <= 0) break;
 
     // Определяем прибыль, которую нужно покрыть
-    const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
+    const profitToCover = roundDownToTwoDecimals(participant.amount * (participant.odds - 1) - participant.overlap);
     const coverableAmount = Math.min(participant.overlapRemain ?? 0, profitToCover);
 
     overlapAmount += coverableAmount;
@@ -398,8 +399,8 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
     const newOverlap = Math.min(participant.overlap + coverableAmount, participant.amount * (participant.odds - 1));
 
     // Округляем до двух знаков после запятой
-    const overlapRemainRounded = parseFloat(((participant.overlapRemain ?? 0) - coverableAmount).toFixed(2));
-    const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
+    const overlapRemainRounded = roundDownToTwoDecimals((participant.overlapRemain ?? 0) - coverableAmount);
+    const profitToCoverRounded = roundDownToTwoDecimals(profitToCover);
 
     // Определяем новое значение isCovered
     let isCoveredStatus = "OPEN";
@@ -409,7 +410,7 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
       isCoveredStatus = "PENDING";
     }
 
-    const newMargin = parseFloat((newOverlap * MARGIN).toFixed(2));
+    const newMargin = roundDownToTwoDecimals(newOverlap * MARGIN);
 
     await prisma.betParticipant.update({
       where: { id: participant.id },
@@ -430,15 +431,15 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
   for (const participant of participantsWithRemain.filter(p => p.isCovered !== "PENDING")) {
     if (remainingAmount <= 0) break;
 
-    const profitToCover = potentialProfit - overlapAmount;
+    const profitToCover = roundDownToTwoDecimals(potentialProfit - overlapAmount);
     const coverableAmount = Math.min(participant.overlapRemain ?? 0, profitToCover);
 
     overlapAmount += coverableAmount;
     remainingAmount -= coverableAmount / (currentOdds - 1);
 
     const newOverlap = Math.min(participant.overlap + coverableAmount, participant.amount * (participant.odds - 1));
-    const overlapRemainRounded = parseFloat(((participant.overlapRemain ?? 0) - coverableAmount).toFixed(2));
-    const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
+    const overlapRemainRounded = roundDownToTwoDecimals((participant.overlapRemain ?? 0) - coverableAmount);
+    const profitToCoverRounded = roundDownToTwoDecimals(profitToCover);
 
     let isCoveredStatus = "OPEN";
     if (newOverlap >= profitToCoverRounded) {
@@ -447,7 +448,7 @@ async function useOverlapRemain(bet, player, potentialProfit, currentOdds, remai
       isCoveredStatus = "PENDING";
     }
 
-    const newMargin = parseFloat((newOverlap * MARGIN).toFixed(2));
+    const newMargin = roundDownToTwoDecimals(newOverlap * MARGIN);
 
     await prisma.betParticipant.update({
       where: { id: participant.id },
@@ -476,11 +477,11 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
   for (const participant of oppositeParticipants.filter(p => p.isCovered === "PENDING")) {
     if (remainingAmount <= 0) break;
 
-    const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
+    const profitToCover = roundDownToTwoDecimals(participant.amount * (participant.odds - 1) - participant.overlap);
     const overlap = Math.min(profitToCover, remainingAmount);
 
     const newOverlap = Math.min(participant.overlap + overlap, participant.amount * (participant.odds - 1));
-    const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
+    const profitToCoverRounded = roundDownToTwoDecimals(profitToCover);
 
     let isCoveredStatus = "OPEN";
     if (newOverlap >= profitToCoverRounded) {
@@ -489,7 +490,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       isCoveredStatus = "PENDING";
     }
 
-    const newMargin = parseFloat((newOverlap * MARGIN).toFixed(2));
+    const newMargin = roundDownToTwoDecimals(newOverlap * MARGIN);
 
     await prisma.betParticipant.update({
       where: { id: participant.id },
@@ -511,7 +512,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
   for (const participant of oppositeParticipants.filter(p => p.isCovered !== "PENDING")) {
     if (remainingAmount <= 0) break;
 
-    const profitToCover = participant.amount * (participant.odds - 1) - participant.overlap;
+    const profitToCover = roundDownToTwoDecimals(participant.amount * (participant.odds - 1) - participant.overlap);
     const overlap = Math.min(profitToCover, remainingAmount);
 
     console.log(`Обработка участника ${participant.id}:`);
@@ -519,7 +520,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
     console.log("Рассчитанный overlap:", overlap);
 
     const newOverlap = Math.min(participant.overlap + overlap, participant.amount * (participant.odds - 1));
-    const profitToCoverRounded = parseFloat(profitToCover.toFixed(2));
+    const profitToCoverRounded = roundDownToTwoDecimals(profitToCover);
 
     let isCoveredStatus = "OPEN";
     if (newOverlap >= profitToCoverRounded) {
@@ -528,7 +529,7 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
       isCoveredStatus = "PENDING";
     }
 
-    const newMargin = parseFloat((newOverlap * MARGIN).toFixed(2));
+    const newMargin = roundDownToTwoDecimals(newOverlap * MARGIN);
 
     await prisma.betParticipant.update({
       where: { id: participant.id },
@@ -550,7 +551,6 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
 
   return remainingAmount;
 }
-
 
 // Функция для закрытия ставки
 export async function closeBet(betId: number, winnerId: number) {
@@ -638,30 +638,27 @@ export async function closeBet(betId: number, winnerId: number) {
         let pointsToReturn = 0;
         let margin = 0;
 
-        if (participant.isWinner) {
-          const roundedProfit = parseFloat(participant.profit.toFixed(2));
-          const roundedOverlap = parseFloat(participant.overlap.toFixed(2));
+        const roundedProfit = roundDownToTwoDecimals(participant.profit);
+        const roundedOverlap = roundDownToTwoDecimals(participant.overlap);
 
+        if (participant.isWinner) {
           if (participant.isCovered === "CLOSED" && roundedProfit === roundedOverlap) {
-            margin = parseFloat((roundedOverlap * MARGIN).toFixed(2));
-            pointsToReturn = parseFloat((roundedOverlap + participant.amount - margin).toFixed(2));
+            margin = roundDownToTwoDecimals(roundedOverlap * MARGIN);
+            pointsToReturn = roundDownToTwoDecimals(roundedOverlap + participant.amount - margin);
           } else if (participant.isCovered === "OPEN" && roundedOverlap === 0) {
-            pointsToReturn = parseFloat(participant.amount.toFixed(2));
+            pointsToReturn = roundDownToTwoDecimals(participant.amount);
           } else if (participant.isCovered === "PENDING" && roundedProfit > roundedOverlap) {
-            margin = parseFloat((roundedOverlap * MARGIN).toFixed(2));
-            pointsToReturn = parseFloat((roundedOverlap + participant.amount - margin).toFixed(2));
+            margin = roundDownToTwoDecimals(roundedOverlap * MARGIN);
+            pointsToReturn = roundDownToTwoDecimals(roundedOverlap + participant.amount - margin);
           }
           totalMargin += margin;
         } else {
-          const roundedProfit = parseFloat(participant.profit.toFixed(2));
-          const roundedOverlap = parseFloat(participant.overlap.toFixed(2));
-
           if (participant.isCovered === "CLOSED" && roundedProfit === roundedOverlap) {
             pointsToReturn = 0;
           } else if (participant.isCovered === "OPEN" && roundedOverlap === 0) {
-            pointsToReturn = parseFloat(participant.amount.toFixed(2));
+            pointsToReturn = roundDownToTwoDecimals(participant.amount);
           } else if (participant.isCovered === "PENDING" && roundedProfit > roundedOverlap) {
-            pointsToReturn = parseFloat((participant.amount - roundedOverlap).toFixed(2));
+            pointsToReturn = roundDownToTwoDecimals(participant.amount - roundedOverlap);
           }
         }
 
@@ -671,7 +668,7 @@ export async function closeBet(betId: number, winnerId: number) {
             where: { id: participant.userId },
             data: {
               points: {
-                increment: parseFloat(pointsToReturn.toFixed(2)),
+                increment: roundDownToTwoDecimals(pointsToReturn),
               },
             },
           });
@@ -692,7 +689,7 @@ export async function closeBet(betId: number, winnerId: number) {
             isCovered: participant.isCovered,
             overlap: participant.overlap,
             overlapRemain: participant.overlapRemain ?? 0,
-            return: parseFloat(pointsToReturn.toFixed(2)),
+            return: roundDownToTwoDecimals(pointsToReturn),
           },
         });
       }
@@ -719,13 +716,13 @@ export async function closeBet(betId: number, winnerId: number) {
         where: { id: 1 },
         data: {
           margin: {
-            increment: parseFloat((bet.margin || 0).toFixed(2)),
+            increment: roundDownToTwoDecimals(bet.margin || 0),
           },
         },
       });
     });
 
-    // Ревалидируем данные
+    // Ревалидация данных
     await updateGlobalData();
     revalidatePath('/');
     revalidateTag('bets');
@@ -742,5 +739,6 @@ export async function closeBet(betId: number, winnerId: number) {
     }
   }
 }
+
 
 
