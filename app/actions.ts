@@ -668,6 +668,7 @@ export async function closeBet(betId: number, winnerId: number) {
             isCovered: participant.isCovered,
             overlap: participant.overlap,
             overlapRemain: participant.overlapRemain ?? 0,
+            return: 0, // изменяем код для вычисления и заполнения
           },
         });
       }

@@ -128,14 +128,18 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                         <div className="m-1 p-4 rounded-lg">
                                             <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
                                             {userBets.map((participant) => {
-                                                // Рассчитываем процент перекрытия
-                                                const overlapPercentage = participant.overlap > 0
-                                                    ? ((participant.overlap / (participant.amount * participant.odds)) * 100).toFixed(2)
-                                                    : 0;
+                                                // Calculate the overlap percentage
+                                                const profitToCover =
+                                                    participant.amount * (participant.odds - 1);
+                                                const overlapPercentage =
+                                                    participant.overlap > 0
+                                                        ? ((participant.overlap / profitToCover) * 100).toFixed(
+                                                            2
+                                                        )
+                                                        : 0;
 
                                                 return (
-                                                    <div key={participant.id}
-                                                         className="border border-gray-200 p-1 mb-1 rounded-md">
+                                                    <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
                                                         <p>
                                                             Ставка: <strong>{participant.amount}</strong> на{' '}
                                                             <strong>
@@ -146,23 +150,33 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                             {','} Маржа: <span>{participant.margin !== null ? participant.margin.toFixed(2) : '0.00'}</span>
                                                             {','} {new Date(participant.createdAt).toLocaleString()}
                                                         </p>
+                                                        <p>
+                                                            {participant.isWinner ? (
+                                                                <span className="text-green-500">Ставка выиграла</span>
+                                                            ) : (
+                                                                <span className="text-red-500">Ставка проиграла</span>
+                                                            )}
+                                                        </p>
                                                         {participant.isCovered ? (
                                                             <p>
-                                                                <span className="text-green-500">
-                                                                    Ваша ставка перекрыта на {participant.overlap.toFixed(2)} Points (
-                                                                    {overlapPercentage}%)
-                                                                </span>
+                    <span className="text-green-500">
+                        Ваша ставка перекрыта на {participant.overlap.toFixed(2)} Points (
+                        {overlapPercentage}%)
+                    </span>
                                                                 <br/>
-                                                                <span className="text-green-500">
-                                                                    Прибыль от перекрытой части: {participant.profit.toFixed(2)} Points
-                                                                </span>
-                                                                <br/>
+                                                                {participant.isWinner && (
+                                                                    <span className="text-green-500">
+                            Прибыль от перекрытой части: {participant.profit.toFixed(2)} Points
+                        </span>
+                                                                )}
+
+
                                                             </p>
                                                         ) : (
                                                             <p>
-                                                                <span className="text-yellow-500">
-                                                                    Ваша ставка не перекрыта (0 Points, 0%)
-                                                                </span>
+                    <span className="text-yellow-500">
+                        Ваша ставка не перекрыта (0 Points, 0%)
+                    </span>
                                                                 <br/>
                                                             </p>
                                                         )}

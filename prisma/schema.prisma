@@ -153,6 +153,7 @@ model BetParticipantCLOSED {
   overlapRemain Float // если ставка перекрыта сверх положенного ocerlap, остаток для перекрытия будущих ставок.
   margin        Float // маржа пользователя, снимается после закрытия ставки, и только с выигарнной суммой, из поля overlap
   isCovered     IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
+  return        Float // возвращаемая сумма пользователю после победы
   isWinner      Boolean      @default(false) // Победила ли ставка
   createdAt     DateTime     @default(now())
 }
