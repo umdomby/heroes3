@@ -269,6 +269,10 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Обработка перекрестных ставок
     remainingAmount = await processCrossBets(bet, player, currentOdds, remainingAmount, overlapAmount, userId);
 
+    // Повторное использование overlapRemain после обработки перекрестных ставок
+    overlapAmount += await useOverlapRemain(bet, player, potentialProfit, currentOdds, remainingAmount, userId);
+    overlapAmount = Math.min(overlapAmount, potentialProfit); // Убедитесь, что overlap не превышает потенциальную прибыль
+
     // Расчет маржи для участника на основе фактического overlap
     const participantMargin = parseFloat((overlapAmount * MARGIN).toFixed(2));
 
@@ -369,6 +373,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 // Функция для использования overlapRemain у противоположных участников
@@ -634,23 +639,29 @@ export async function closeBet(betId: number, winnerId: number) {
         let margin = 0;
 
         if (participant.isWinner) {
-          if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
-            margin = participant.overlap * MARGIN;
-            pointsToReturn = participant.overlap + participant.amount - margin;
-          } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
-            pointsToReturn = participant.amount;
-          } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-            margin = participant.overlap * MARGIN;
-            pointsToReturn = participant.overlap + participant.amount - margin;
+          const roundedProfit = parseFloat(participant.profit.toFixed(2));
+          const roundedOverlap = parseFloat(participant.overlap.toFixed(2));
+
+          if (participant.isCovered === "CLOSED" && roundedProfit === roundedOverlap) {
+            margin = parseFloat((roundedOverlap * MARGIN).toFixed(2));
+            pointsToReturn = parseFloat((roundedOverlap + participant.amount - margin).toFixed(2));
+          } else if (participant.isCovered === "OPEN" && roundedOverlap === 0) {
+            pointsToReturn = parseFloat(participant.amount.toFixed(2));
+          } else if (participant.isCovered === "PENDING" && roundedProfit > roundedOverlap) {
+            margin = parseFloat((roundedOverlap * MARGIN).toFixed(2));
+            pointsToReturn = parseFloat((roundedOverlap + participant.amount - margin).toFixed(2));
           }
           totalMargin += margin;
         } else {
-          if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
+          const roundedProfit = parseFloat(participant.profit.toFixed(2));
+          const roundedOverlap = parseFloat(participant.overlap.toFixed(2));
+
+          if (participant.isCovered === "CLOSED" && roundedProfit === roundedOverlap) {
             pointsToReturn = 0;
-          } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
-            pointsToReturn = participant.amount;
-          } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-            pointsToReturn = participant.amount - participant.overlap;
+          } else if (participant.isCovered === "OPEN" && roundedOverlap === 0) {
+            pointsToReturn = parseFloat(participant.amount.toFixed(2));
+          } else if (participant.isCovered === "PENDING" && roundedProfit > roundedOverlap) {
+            pointsToReturn = parseFloat((participant.amount - roundedOverlap).toFixed(2));
           }
         }
 
