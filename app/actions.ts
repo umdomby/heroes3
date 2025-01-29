@@ -188,8 +188,8 @@ function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: numbe
 
 // Функция для расчета максимальных ставок
 function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { maxBetPlayer1: number, maxBetPlayer2: number } {
-  const maxBetPlayer1 = parseFloat((initBetPlayer2 * 2.00).toFixed(2)); // 100% от суммы ставок на Player2
-  const maxBetPlayer2 = parseFloat((initBetPlayer1 * 2.00).toFixed(2)); // 100% от суммы ставок на Player1
+  const maxBetPlayer1 = parseFloat((initBetPlayer2 * 1.00).toFixed(2)); // 100% от суммы ставок на Player2
+  const maxBetPlayer2 = parseFloat((initBetPlayer1 * 1.00).toFixed(2)); // 100% от суммы ставок на Player1
   return { maxBetPlayer1, maxBetPlayer2 };
 }
 
@@ -547,7 +547,6 @@ async function processCrossBets(bet, player, currentOdds, remainingAmount, overl
 }
 
 
-// Функция для закрытия ставки
 // Функция для закрытия ставки
 export async function closeBet(betId: number, winnerId: number) {
   'use server';
