@@ -355,6 +355,16 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Пересчет коэффициентов после добавления новой ставки
     const { oddsPlayer1, oddsPlayer2 } = calculateOdds(totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? amount : 0), totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? amount : 0));
 
+    // Суммируем все margin из BetParticipant для обновления margin в Bet
+    const totalMargin = await prisma.betParticipant.aggregate({
+      _sum: {
+        margin: true,
+      },
+      where: {
+        betId: betId,
+      },
+    });
+
     // Обновление данных ставки
     await prisma.bet.update({
       where: { id: betId },
@@ -364,7 +374,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         totalBetPlayer1: player === PlayerChoice.PLAYER1 ? roundDownToTwoDecimals(totalPlayer1 + amount) : roundDownToTwoDecimals(totalPlayer1),
         totalBetPlayer2: player === PlayerChoice.PLAYER2 ? roundDownToTwoDecimals(totalPlayer2 + amount) : roundDownToTwoDecimals(totalPlayer2),
         totalBetAmount: roundDownToTwoDecimals(totalPlayer1 + totalPlayer2 + amount),
-        margin: roundDownToTwoDecimals((bet.margin ?? 0) + roundDownToTwoDecimals(overlapAmount * 0.05)), // Обновляем маржу
+        margin: roundDownToTwoDecimals(totalMargin._sum.margin || 0), // Обновляем маржу
         maxBetPlayer1: player === PlayerChoice.PLAYER1 ? roundDownToTwoDecimals(bet.maxBetPlayer1) : roundDownToTwoDecimals(bet.maxBetPlayer1 + amount),
         maxBetPlayer2: player === PlayerChoice.PLAYER2 ? roundDownToTwoDecimals(bet.maxBetPlayer2) : roundDownToTwoDecimals(bet.maxBetPlayer2 + amount),
       },
@@ -415,6 +425,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
