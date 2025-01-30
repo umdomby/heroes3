@@ -39,6 +39,8 @@ interface Bet extends PrismaBet {
     oddsBetPlayer1: number; // Текущий коэффициент для игрока 1
     oddsBetPlayer2: number; // Текущий коэффициент для игрока 2
     margin: number;
+    overlapPlayer1: number;
+    overlapPlayer2: number;
 }
 
 interface Props {
@@ -505,7 +507,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {(bet.totalBetPlayer1 - bet.totalBetPlayer2).toFixed(2)} Points
+                {(bet.overlapPlayer1).toFixed(2)} Points
             </span>
                                             </p>
                                             <p>
@@ -515,7 +517,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
-                {(bet.totalBetPlayer2 - bet.totalBetPlayer1).toFixed(2)} Points
+                 {(bet.overlapPlayer2).toFixed(2)} Points Points
             </span>
                                             </p>
                                         </div>

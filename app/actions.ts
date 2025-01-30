@@ -277,6 +277,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         points: user.points - amount,
       },
     });
+
     const { oddsPlayer1, oddsPlayer2 } = calculateOdds(totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? amount : 0), totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? amount : 0));
     const totalMargin = await prisma.betParticipant.aggregate({
       _sum: {
@@ -286,7 +287,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         betId: betId,
       },
     });
-    // Обновление полей перекрытия
+
     const updatedBetData = {
       oddsBetPlayer1: oddsPlayer1,
       oddsBetPlayer2: oddsPlayer2,
@@ -305,7 +306,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       data: updatedBetData,
     });
 
-    // Балансировка перекрытий
     await balanceOverlaps(betId);
 
     // Обновление статуса isCovered
@@ -315,7 +315,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     });
 
     for (const participant of participants) {
-      let newIsCoveredStatus: IsCovered; // Use the IsCovered type
+      let newIsCoveredStatus: IsCovered;
 
       if (areNumbersEqual(participant.overlap, 0)) {
         newIsCoveredStatus = IsCovered.OPEN;
@@ -353,6 +353,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
 // Функция для балансировки перекрытий
 async function balanceOverlaps(betId: number) {
+  console.log(`Начало balanceOverlaps для betId: ${betId}`);
   // Получаем всех участников с данным betId, отсортированных по дате создания
   const participants = await prisma.betParticipant.findMany({
     where: { betId },
@@ -380,8 +381,9 @@ async function balanceOverlaps(betId: number) {
     let allProfitEqualOverlap = false;
 
     // Цикл продолжается, пока не будет достигнуто равенство profit и overlap для всех участников
-    while (!allProfitEqualOverlap) {
-      allProfitEqualOverlap = true; // Предполагаем, что все равны, пока не найдём исключение
+    // или пока не исчерпаны ресурсы для перекрытия
+    // while (!allProfitEqualOverlap && bet[overlapField] > 0) {
+    // allProfitEqualOverlap = true; // Предполагаем, что все равны, пока не найдём исключение
 
       // Проходим по всем участникам-источникам
       for (const source of sourceParticipants) {
@@ -396,6 +398,10 @@ async function balanceOverlaps(betId: number) {
           const neededOverlap = truncateToTwoDecimals(target.profit - target.overlap);
           // Определяем, сколько можно добавить в overlap, учитывая доступные ресурсы
           const overlapToAdd = truncateToTwoDecimals(Math.min(source.amount, neededOverlap, bet[overlapField]));
+
+          console.log('id: ' + target.id +', profit: ' + target.profit + ', overlap: ' + target.overlap + ', betOverlapPlayer: ' + bet[overlapField]);
+
+          console.log(`Источник: ${source.id}, Цель: ${target.id}, Необходимо: ${neededOverlap}, Добавить: ${overlapToAdd}`);
 
           // Если есть возможность добавить overlap
           if (overlapToAdd > 0) {
@@ -431,17 +437,22 @@ async function balanceOverlaps(betId: number) {
         }
       }
     }
-  }
+  //}
 
   // Разделяем участников на две группы: те, кто ставил на PLAYER1, и те, кто ставил на PLAYER2
   const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
   const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
 
   // Переносим перекрытия от участников PLAYER1 к участникам PLAYER2
+  console.log('Переносим перекрытия от участников PLAYER1');
   await transferOverlap(participantsPlayer1, participantsPlayer2, 'overlapPlayer2', bet);
   // Переносим перекрытия от участников PLAYER2 к участникам PLAYER1
+  console.log('Переносим перекрытия от участников PLAYER2');
   await transferOverlap(participantsPlayer2, participantsPlayer1, 'overlapPlayer1', bet);
+
+  console.log(`Завершение balanceOverlaps для betId: ${betId}`);
 }
+
 
 
 // Функция для закрытия ставки
