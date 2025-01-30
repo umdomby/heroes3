@@ -1,7 +1,7 @@
 'use server';
 import { prisma } from '@/prisma/prisma-client';
 import { getUserSession } from '@/components/lib/get-user-session';
-import {PlayerChoice, Prisma, IsCovered, BetParticipant} from '@prisma/client';
+import {PlayerChoice, Prisma, IsCovered, BetParticipant, Bet} from '@prisma/client';
 import { hashSync } from 'bcrypt';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import requestIp from 'request-ip';
@@ -373,7 +373,8 @@ async function balanceOverlaps(betId: number) {
   async function transferOverlap(
       sourceParticipants: BetParticipant[],
       targetParticipants: BetParticipant[],
-      overlapField: 'overlapPlayer1' | 'overlapPlayer2'
+      overlapField: 'overlapPlayer1' | 'overlapPlayer2',
+      bet: Bet
   ) {
     // Флаг, указывающий, что все участники имеют profit, равный overlap
     let allProfitEqualOverlap = false;
@@ -394,7 +395,7 @@ async function balanceOverlaps(betId: number) {
           // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
           const neededOverlap = truncateToTwoDecimals(target.profit - target.overlap);
           // Определяем, сколько можно добавить в overlap, учитывая доступные ресурсы
-          const overlapToAdd = truncateToTwoDecimals(Math.min(source.amount, neededOverlap, bet[overlapField]!));
+          const overlapToAdd = truncateToTwoDecimals(Math.min(source.amount, neededOverlap, bet[overlapField]));
 
           // Если есть возможность добавить overlap
           if (overlapToAdd > 0) {
@@ -420,7 +421,7 @@ async function balanceOverlaps(betId: number) {
             await prisma.bet.update({
               where: { id: betId },
               data: {
-                [overlapField]: truncateToTwoDecimals(bet[overlapField]! - overlapToAdd),
+                [overlapField]: truncateToTwoDecimals(bet[overlapField] - overlapToAdd),
               },
             });
 
@@ -437,11 +438,10 @@ async function balanceOverlaps(betId: number) {
   const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
 
   // Переносим перекрытия от участников PLAYER1 к участникам PLAYER2
-  await transferOverlap(participantsPlayer1, participantsPlayer2, 'overlapPlayer2');
+  await transferOverlap(participantsPlayer1, participantsPlayer2, 'overlapPlayer2', bet);
   // Переносим перекрытия от участников PLAYER2 к участникам PLAYER1
-  await transferOverlap(participantsPlayer2, participantsPlayer1, 'overlapPlayer1');
+  await transferOverlap(participantsPlayer2, participantsPlayer1, 'overlapPlayer1', bet);
 }
-
 
 
 // Функция для закрытия ставки

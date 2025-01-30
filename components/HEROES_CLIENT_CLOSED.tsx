@@ -64,7 +64,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                 // Если пользователь не участвовал в этой ставке, пропускаем её
                 if (userBets.length === 0) return null;
 
-                const winnerName = bet.winnerId === bet.player1.name ? bet.player1.name : bet.player2.name;
+                // const winnerName = bet.winnerId === bet.player1.name ? bet.player1.name : bet.player2.name;
 
                 return (
                     <div key={bet.id} className="border border-gray-700 mt-1">
@@ -121,7 +121,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                     <div className="m-1 p-4 rounded-lg">
                                         <h4 className="text-md font-semibold mb-2">Итоги матча:</h4>
                                         <p>
-                                            Победитель: <strong>{winnerName}</strong>
+                                            {/*Победитель: <strong>{winnerName}</strong>*/}
                                         </p>
                                     </div>
 
