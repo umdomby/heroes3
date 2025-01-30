@@ -250,7 +250,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     const maxAllowedBet = player === PlayerChoice.PLAYER1 ? maxBetPlayer1 : maxBetPlayer2;
 
     if (amount > maxAllowedBet) {
-      throw new Error(`Максимально допустимая ставка: ${roundDownToTwoDecimals(maxAllowedBet)}`);
+      throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
     }
 
     let remainingAmount = amount;
@@ -313,49 +313,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       });
     }
 
-    async function processParticipants(participants, remainingAmount) {
-      let allOverlapRemainZero = true;
-      let allProfitEqualOverlap = true;
-
-      for (const participant of participants) {
-        if (remainingAmount <= 0) break;
-
-        if (participant.overlapRemain > 0) {
-          allOverlapRemainZero = false;
-        }
-
-        if (!areNumbersEqual(participant.profit, participant.overlap)) {
-          allProfitEqualOverlap = false;
-        }
-
-        const neededOverlap = participant.profit - participant.overlap;
-        const overlapToAdd = Math.min(participant.overlapRemain, neededOverlap);
-
-        if (overlapToAdd > 0) {
-          const newOverlap = participant.overlap + overlapToAdd;
-          if (newOverlap > participant.profit) {
-            throw new Error('Ошибка: overlap не может быть больше profit');
-          }
-
-          await prisma.betParticipant.update({
-            where: { id: participant.id },
-            data: {
-              overlap: newOverlap,
-              overlapRemain: participant.overlapRemain - overlapToAdd,
-            },
-          });
-
-          remainingAmount -= overlapToAdd;
-        }
-
-        if (allOverlapRemainZero || allProfitEqualOverlap) {
-          break;
-        }
-      }
-
-      return remainingAmount;
-    }
-
+    // Функция для балансировки overlap между участниками
     async function balanceOverlaps(betId: number) {
       // Получаем всех участников с данным betId
       const participants = await prisma.betParticipant.findMany({
@@ -363,22 +321,48 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         orderBy: { createdAt: 'asc' },
       });
 
-      // Обрабатываем участников для PLAYER1
-      let remainingAmountPlayer1 = 0;
-      const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
-      for (const participant of participantsPlayer1) {
-        remainingAmountPlayer1 = await processParticipants(participants.filter(p => p.player === PlayerChoice.PLAYER2), participant.overlapRemain);
+      // Функция для переноса overlapRemain в overlap
+      async function transferOverlap(sourceParticipants, targetParticipants) {
+        for (const source of sourceParticipants) {
+          if (source.overlapRemain <= 0) continue;
+
+          for (const target of targetParticipants) {
+            if (areNumbersEqual(target.profit, target.overlap)) continue;
+
+            const neededOverlap = target.profit - target.overlap;
+            const overlapToAdd = Math.min(source.overlapRemain, neededOverlap);
+
+            if (overlapToAdd > 0) {
+              const newOverlap = target.overlap + overlapToAdd;
+              if (newOverlap > target.profit) {
+                throw new Error('Ошибка: overlap не может быть больше profit');
+              }
+
+              await prisma.betParticipant.update({
+                where: { id: target.id },
+                data: {
+                  overlap: newOverlap,
+                },
+              });
+
+              source.overlapRemain -= overlapToAdd;
+
+              if (source.overlapRemain <= 0) break;
+            }
+          }
+        }
       }
 
-      // Обрабатываем участников для PLAYER2
-      let remainingAmountPlayer2 = 0;
+      // Переносим overlapRemain от PLAYER1 к PLAYER2
+      const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
       const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
-      for (const participant of participantsPlayer2) {
-        remainingAmountPlayer2 = await processParticipants(participants.filter(p => p.player === PlayerChoice.PLAYER1), participant.overlapRemain);
-      }
+      await transferOverlap(participantsPlayer1, participantsPlayer2);
+
+      // Переносим overlapRemain от PLAYER2 к PLAYER1
+      await transferOverlap(participantsPlayer2, participantsPlayer1);
     }
 
-// Вызов функции для балансировки overlap
+    // Вызов функции для балансировки overlap
     await balanceOverlaps(betId);
 
     await prisma.user.update({
@@ -454,6 +438,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
