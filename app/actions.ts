@@ -268,7 +268,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     // Определяем противоположного игрока
     const oppositePlayer = player === PlayerChoice.PLAYER1 ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER1;
 
-    // Обрабатываем перекрытие ставок
+// Обрабатываем перекрытие ставок
     const oppositeParticipants = bet.participants
         .filter(p => p.player === oppositePlayer)
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
@@ -283,7 +283,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       // Если у всех пользователей поставивших на другого игрока profit = overlap, выходим из цикла
       if (neededOverlap <= 0) continue;
 
-      const overlapToAdd = Math.min(remainingAmount, neededOverlap);
+      // Рассчитываем, сколько можно добавить к overlap
+      const overlapToAdd = roundDownToTwoDecimals(Math.min(remainingAmount, neededOverlap));
 
       if (overlapToAdd > 0) {
         // Обновляем поле overlap у противоположного участника
@@ -343,12 +344,12 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       }
 
       // Проверяем, если у всех profit равен overlap
-      if (participant.profit !== participant.overlap) {
+      if (roundDownToTwoDecimals(participant.profit) !== roundDownToTwoDecimals(participant.overlap)) {
         allProfitEqualOverlap = false;
       }
 
       const neededOverlap = roundDownToTwoDecimals(participant.profit - participant.overlap);
-      const overlapToAdd = Math.min(participant.overlapRemain, neededOverlap);
+      const overlapToAdd = roundDownToTwoDecimals(Math.min(participant.overlapRemain, neededOverlap));
 
       if (overlapToAdd > 0) {
         await prisma.betParticipant.update({
