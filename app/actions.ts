@@ -287,11 +287,17 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       const overlapToAdd = roundDownToTwoDecimals(Math.min(remainingAmount, neededOverlap));
 
       if (overlapToAdd > 0) {
+        // Проверяем, чтобы overlap не превышал profit
+        const newOverlap = roundDownToTwoDecimals(participant.overlap + overlapToAdd);
+        if (newOverlap > roundDownToTwoDecimals(participant.profit)) {
+          throw new Error('Ошибка: overlap не может быть больше profit');
+        }
+
         // Обновляем поле overlap у противоположного участника
         await prisma.betParticipant.update({
           where: { id: participant.id },
           data: {
-            overlap: roundDownToTwoDecimals(participant.overlap + overlapToAdd),
+            overlap: newOverlap,
           },
         });
 
@@ -352,10 +358,16 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       const overlapToAdd = roundDownToTwoDecimals(Math.min(participant.overlapRemain, neededOverlap));
 
       if (overlapToAdd > 0) {
+        // Проверяем, чтобы overlap не превышал profit
+        const newOverlap = roundDownToTwoDecimals(participant.overlap + overlapToAdd);
+        if (newOverlap > roundDownToTwoDecimals(participant.profit)) {
+          throw new Error('Ошибка: overlap не может быть больше profit');
+        }
+
         await prisma.betParticipant.update({
           where: { id: participant.id },
           data: {
-            overlap: roundDownToTwoDecimals(participant.overlap + overlapToAdd),
+            overlap: newOverlap,
             overlapRemain: roundDownToTwoDecimals(participant.overlapRemain - overlapToAdd),
           },
         });
