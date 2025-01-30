@@ -371,7 +371,7 @@ async function balanceOverlaps(betId: number) {
     });
 
     // Получаем текущие значения overlap для ставки
-    const bet = await prisma.bet.findUnique({
+    let bet = await prisma.bet.findUnique({
         where: { id: betId },
     });
 
@@ -433,6 +433,9 @@ async function balanceOverlaps(betId: number) {
                         },
                     });
 
+                    // Обновляем объект bet в памяти
+                    bet[overlapField] = truncateToTwoDecimals(bet[overlapField] - overlapToAdd);
+
                     // Если у источника больше нет доступной суммы, выходим из внутреннего цикла
                     if (bet[overlapField] <= 0) break;
                 }
@@ -452,6 +455,7 @@ async function balanceOverlaps(betId: number) {
 
     console.log(`Завершение balanceOverlaps для betId: ${betId}`);
 }
+
 
 
 // Функция для закрытия ставки
