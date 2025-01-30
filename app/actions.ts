@@ -7,7 +7,7 @@ import {revalidatePath, revalidateTag} from 'next/cache';
 import requestIp from 'request-ip';
 import axios from 'axios';
 
-const MARGIN = 0.05; // Маржа 5%
+const MARGIN = 0.05; // Маржа 10%
 
 // Функция для обновления глобальных данных
 export async function updateGlobalData() {
@@ -294,8 +294,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         });
 
         const updatedBetData = {
-            oddsBetPlayer1: oddsPlayer1,
-            oddsBetPlayer2: oddsPlayer2,
+            oddsBetPlayer1: oddsPlayer1 * 0.8,
+            oddsBetPlayer2: oddsPlayer2 * 0.8,
             totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
             totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
             totalBetAmount: totalPlayer1 + totalPlayer2 + amount,
@@ -569,7 +569,7 @@ export async function closeBet(betId: number, winnerId: number) {
                     } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
                         pointsToReturn = participant.amount;
                     } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-                        pointsToReturn = participant.amount - (participant.overlap / participant.odds);
+                        pointsToReturn = (participant.amount - (participant.overlap / participant.odds))/2;
                     }
                 }
 
