@@ -266,7 +266,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         margin: 0,
         isCovered: "OPEN",
         overlap: 0,
-        overlapRemain: amount,
       },
     });
 
@@ -344,12 +343,22 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
 // Функция для балансировки перекрытий
 async function balanceOverlaps(betId: number) {
+  // Получаем всех участников с данным betId, отсортированных по дате создания
   const participants = await prisma.betParticipant.findMany({
     where: { betId },
     orderBy: { createdAt: 'asc' },
   });
 
-  async function transferOverlap(sourceParticipants, targetParticipants) {
+  // Получаем текущие значения overlap для ставки
+  const bet = await prisma.bet.findUnique({
+    where: { id: betId },
+  });
+
+  if (!bet) {
+    throw new Error('Ставка не найдена');
+  }
+
+  async function transferOverlap(sourceParticipants, targetParticipants, overlapField: 'overlapPlayer1' | 'overlapPlayer2') {
     let allOverlapRemainZero = false;
     let allProfitEqualOverlap = false;
 
@@ -357,53 +366,18 @@ async function balanceOverlaps(betId: number) {
       allOverlapRemainZero = true;
       allProfitEqualOverlap = true;
 
-      for (const source of sourceParticipants) {
-        if (source.overlapRemain > 0) {
-          allOverlapRemainZero = false;
-        }
-
-        for (const target of targetParticipants) {
-          if (!areNumbersEqual(target.profit, target.overlap)) {
-            allProfitEqualOverlap = false;
-          }
-
-          const neededOverlap = target.profit - target.overlap;
-          const overlapToAdd = Math.min(source.overlapRemain, neededOverlap);
-
-          if (overlapToAdd > 0) {
-            const newOverlap = target.overlap + overlapToAdd;
-            if (newOverlap > target.profit) {
-              throw new Error('Ошибка: overlap не может быть больше profit');
-            }
-
-            await prisma.betParticipant.update({
-              where: { id: target.id },
-              data: {
-                overlap: newOverlap,
-              },
-            });
-
-            source.overlapRemain -= overlapToAdd;
-
-            await prisma.betParticipant.update({
-              where: { id: source.id },
-              data: {
-                overlapRemain: source.overlapRemain,
-              },
-            });
-
-            if (source.overlapRemain <= 0) break;
-          }
-        }
-      }
     }
   }
 
+
   const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
   const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
-  await transferOverlap(participantsPlayer1, participantsPlayer2);
-  await transferOverlap(participantsPlayer2, participantsPlayer1);
+  await transferOverlap(participantsPlayer1, participantsPlayer2, 'overlapPlayer2');
+
+  // Переносим overlapRemain от участников PLAYER2 к участникам PLAYER1
+  await transferOverlap(participantsPlayer2, participantsPlayer1, 'overlapPlayer1');
 }
+
 
 
 // Функция для закрытия ставки
