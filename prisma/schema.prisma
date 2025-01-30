@@ -123,6 +123,8 @@ model BetCLOSED {
   oddsBetPlayer2     Float // разница ставок перекрытия на игрока 2
   maxBetPlayer1      Float // Максимальная сумма ставок на игрока 1
   maxBetPlayer2      Float // Максимальная сумма ставок на игрока 2
+  overlapPlayer1     Float // Перекрытие на игрока 1
+  overlapPlayer2     Float // Перекрытие на игрока 2
   totalBetAmount     Float                  @default(0) // Общая сумма ставок
   creator            User                   @relation("BetsCLOSEDCreated", fields: [creatorId], references: [id])
   creatorId          Int

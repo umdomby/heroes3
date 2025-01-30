@@ -206,10 +206,6 @@ function areNumbersEqual(num1: number, num2: number): boolean {
     return Math.abs(num1 - num2) < Number.EPSILON;
 }
 
-function truncateToTwoDecimals(value: number): number {
-    return Math.floor(value * 100) / 100;
-}
-
 
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
     try {
@@ -244,11 +240,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
         const totalPlayer1 = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.amount, 0);
+            .reduce((sum, p) => sum + p.profit, 0);
 
         const totalPlayer2 = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.amount, 0);
+            .reduce((sum, p) => sum + p.profit, 0);
 
         const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
         const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
@@ -519,6 +515,8 @@ export async function closeBet(betId: number, winnerId: number) {
                     updatedAt: bet.updatedAt,
                     oddsBetPlayer1: bet.oddsBetPlayer1,
                     oddsBetPlayer2: bet.oddsBetPlayer2,
+                    overlapPlayer1: bet.overlapPlayer1,
+                    overlapPlayer2: bet.overlapPlayer2,
                 },
             });
 
