@@ -326,13 +326,26 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       });
     }
 
-    // Используем overlapRemain для заполнения overlap в записях противоположного игрока
+// Используем overlapRemain для заполнения overlap в записях противоположного игрока
     const participantsWithOverlapRemain = bet.participants
-        .filter(p => p.player === oppositePlayer && p.overlapRemain > 0)
+        .filter(p => p.player === oppositePlayer)
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+    let allOverlapRemainZero = true;
+    let allProfitEqualOverlap = true;
 
     for (const participant of participantsWithOverlapRemain) {
       if (remainingAmount <= 0) break;
+
+      // Проверяем, если у всех overlapRemain равен 0
+      if (participant.overlapRemain > 0) {
+        allOverlapRemainZero = false;
+      }
+
+      // Проверяем, если у всех profit равен overlap
+      if (participant.profit !== participant.overlap) {
+        allProfitEqualOverlap = false;
+      }
 
       const neededOverlap = roundDownToTwoDecimals(participant.profit - participant.overlap);
       const overlapToAdd = Math.min(participant.overlapRemain, neededOverlap);
@@ -348,7 +361,13 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
         remainingAmount = roundDownToTwoDecimals(remainingAmount - overlapToAdd);
       }
+
+      // Если одно из условий выполнено, выходим из цикла
+      if (allOverlapRemainZero || allProfitEqualOverlap) {
+        break;
+      }
     }
+
 
     // Обновление баллов пользователя
     await prisma.user.update({
