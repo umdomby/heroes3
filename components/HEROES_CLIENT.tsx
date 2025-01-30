@@ -590,8 +590,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                             className={
                                 participant.isCovered === "OPEN"
                                     ? "text-yellow-500"
-                                    : participant.isCovered === "CLOSED" ||
-                                    participant.isCovered === "CP"
+                                    : participant.isCovered === "CLOSED"
                                         ? "text-green-500"
                                         : "text-blue-500"
                             }

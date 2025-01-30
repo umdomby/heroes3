@@ -305,14 +305,14 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     });
 
     for (const participant of participants) {
-      let newIsCoveredStatus = "OPEN";
+      let newIsCoveredStatus: IsCovered; // Use the IsCovered type
 
       if (areNumbersEqual(participant.overlap, 0)) {
-        newIsCoveredStatus = "OPEN";
+        newIsCoveredStatus = IsCovered.OPEN;
       } else if (participant.overlap >= participant.profit) {
-        newIsCoveredStatus = "CLOSED";
+        newIsCoveredStatus = IsCovered.CLOSED;
       } else {
-        newIsCoveredStatus = "PENDING";
+        newIsCoveredStatus = IsCovered.PENDING;
       }
 
       if (participant.isCovered !== newIsCoveredStatus) {

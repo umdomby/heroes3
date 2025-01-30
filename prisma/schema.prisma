@@ -222,6 +222,7 @@ enum IsCovered {
   OPEN // overlap = 0
   CLOSED // overlap = profit
   PENDING // overlap < profit
+  CP
 }
 
 enum PlayerChoice {
