@@ -320,13 +320,16 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       });
     }
 
-    // Используем overlapRemain для заполнения overlap в записях противоположного игрока
+// Используем overlapRemain для заполнения overlap в записях противоположного игрока
     const participantsWithOverlapRemain = bet.participants
-        .filter(p => p.player === oppositePlayer && p.overlapRemain > 0)
+        .filter(p => p.player === oppositePlayer && p.overlapRemain > 0) // Ищем участников противоположного игрока с overlapRemain
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const participant of participantsWithOverlapRemain) {
       if (remainingAmount <= 0) break;
+
+      // Пропускаем, если userId одинаковый
+      if (participant.userId === userId) continue;
 
       const neededOverlap = roundDownToTwoDecimals(participant.profit - participant.overlap);
       const overlapToAdd = Math.min(participant.overlapRemain, neededOverlap);
