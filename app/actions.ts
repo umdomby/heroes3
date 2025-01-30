@@ -252,45 +252,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     if (amount > maxAllowedBet) {
       throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
     }
-
-    let remainingAmount = amount;
-    let overlapAmount = 0;
-
-    const oppositePlayer = player === PlayerChoice.PLAYER1 ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER1;
-
-    const oppositeParticipants = bet.participants
-        .filter(p => p.player === oppositePlayer)
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-
-    for (const participant of oppositeParticipants) {
-      if (remainingAmount <= 0) break;
-
-      const neededOverlap = participant.profit - participant.overlap;
-
-      if (neededOverlap <= 0) continue;
-
-      const overlapToAdd = Math.min(remainingAmount, neededOverlap);
-
-      if (overlapToAdd > 0) {
-        const newOverlap = participant.overlap + overlapToAdd;
-        if (newOverlap > participant.profit) {
-          throw new Error('Ошибка: overlap не может быть больше profit');
-        }
-
-        await prisma.betParticipant.update({
-          where: { id: participant.id },
-          data: {
-            overlap: newOverlap,
-            margin: newOverlap * 0.05, // 5% от нового overlap
-          },
-        });
-
-        remainingAmount -= overlapToAdd;
-        overlapAmount += overlapToAdd;
-      }
-    }
-
-    const newParticipant = await prisma.betParticipant.create({
+    await prisma.betParticipant.create({
       data: {
         betId,
         userId,
@@ -298,21 +260,13 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         player,
         odds: currentOdds,
         profit: potentialProfit,
-        margin: overlapAmount * 0.05,
-        isCovered: overlapAmount >= potentialProfit ? "CLOSED" : (overlapAmount > 0 ? "PENDING" : "OPEN"),
-        overlap: overlapAmount,
+        margin: 0,
+        isCovered: "OPEN",
+        overlap: 0,
+        overlapRemain: amount,
       },
     });
 
-    if (remainingAmount > 0) {
-      console.log("Оставшееся значение после обработки всех участников:", remainingAmount);
-      await prisma.betParticipant.update({
-        where: { id: newParticipant.id },
-        data: {
-          overlapRemain: remainingAmount,
-        },
-      });
-    }
 
 // Функция для балансировки overlap между участниками
     async function balanceOverlaps(betId: number) {
@@ -372,9 +326,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       // Переносим overlapRemain от PLAYER2 к PLAYER1
       await transferOverlap(participantsPlayer2, participantsPlayer1);
     }
-
-// Вызов функции для балансировки overlap
+    // Вызов функции для балансировки overlap
     await balanceOverlaps(betId);
+
+
+
 
     await prisma.user.update({
       where: { id: userId },
@@ -435,7 +391,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     revalidatePath('/');
     await updateGlobalData();
 
-    return { success: true, isCovered: overlapAmount > 0 ? "PENDING" : "OPEN" };
+    return { success: true };
   } catch (error) {
     if (error === null || error === undefined) {
       console.error('Ошибка в placeBet: Неизвестная ошибка (error is null или undefined)');

@@ -229,24 +229,24 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
             });
 
             // Уведомление пользователя в зависимости от статуса перекрытия
-            switch (response.isCovered) {
-                case "OPEN":
-                    alert("Ваша ставка не перекрыта!");
-                    break;
-                case "CLOSED":
-                    alert("Ваша ставка полностью перекрыта!");
-                    break;
-                case "PENDING":
-                    alert("Ваша ставка частично перекрыта!");
-                    break;
-                case "CP":
-                    alert(
-                        "Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий!"
-                    );
-                    break;
-                default:
-                    alert("Неизвестный статус перекрытия.");
-            }
+            // switch (response.isCovered) {
+            //     case "OPEN":
+            //         alert("Ваша ставка не перекрыта!");
+            //         break;
+            //     case "CLOSED":
+            //         alert("Ваша ставка полностью перекрыта!");
+            //         break;
+            //     case "PENDING":
+            //         alert("Ваша ставка частично перекрыта!");
+            //         break;
+            //     case "CP":
+            //         alert(
+            //             "Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий!"
+            //         );
+            //         break;
+            //     default:
+            //         alert("Неизвестный статус перекрытия.");
+            // }
 
             mutate();
             setIsBetDisabled((prev) => ({
