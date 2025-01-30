@@ -367,13 +367,13 @@ async function balanceOverlaps(betId: number) {
 
     // Получаем всех участников с данным betId, отсортированных по дате создания
     const participants = await prisma.betParticipant.findMany({
-        where: { betId },
-        orderBy: { createdAt: 'asc' },
+        where: {betId},
+        orderBy: {createdAt: 'asc'},
     });
 
     // Получаем текущие значения overlap для ставки
     let bet = await prisma.bet.findUnique({
-        where: { id: betId },
+        where: {id: betId},
     });
 
     // Проверяем, что ставка существует
@@ -389,7 +389,7 @@ async function balanceOverlaps(betId: number) {
     ) {
         // Цикл продолжается, пока не будет достигнуто равенство profit и overlap для всех участников
         // или пока не исчерпаны ресурсы для перекрытия
-        // while (bet[overlapField] > 0) {
+        while (bet[overlapField] > 0) {
             let allProfitEqualOverlap = true; // Предполагаем, что все равны, пока не найдём исключение
 
             // Проходим по всем участникам-целям
@@ -402,7 +402,7 @@ async function balanceOverlaps(betId: number) {
                     // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
                     const neededOverlap = target.profit - target.overlap;
 
-                    console.log('( profit: ' + target.profit + " ), не равен (overlap: " + target.overlap + " ), profit - overlap : " + neededOverlap);
+                    console.log('( profit: ' + target.profit + " ), не равен (overlap: " + target.overlap + " ), profit - overlap : " + neededOverlap + ", bet[overlapField] " + bet[overlapField]);
                     // Определяем, сколько можно добавить в overlap, учитывая доступные ресурсы
                     const overlapToAdd = Math.min(neededOverlap, bet[overlapField]);
 
@@ -445,14 +445,14 @@ async function balanceOverlaps(betId: number) {
                         bet[overlapField] = bet[overlapField] - overlapToAdd;
 
                         // Если у источника больше нет доступной суммы, выходим из внутреннего цикла
-                        // if (bet[overlapField] <= 0) break;
+                        if (bet[overlapField] <= 0) break;
                     }
                 }
             }
 
             // Если все profit равны overlap, выходим из внешнего цикла
-            // if (allProfitEqualOverlap) break;
-       // }
+            if (allProfitEqualOverlap) break;
+        }
     }
 
     // Разделяем участников на две группы: те, кто ставил на PLAYER1, и те, кто ставил на PLAYER2
@@ -467,7 +467,6 @@ async function balanceOverlaps(betId: number) {
 
     console.log(`Завершение balanceOverlaps для betId: ${betId}`);
 }
-
 
 
 // Функция для закрытия ставки
