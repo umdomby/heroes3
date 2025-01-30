@@ -1,7 +1,7 @@
 'use server';
 import { prisma } from '@/prisma/prisma-client';
 import { getUserSession } from '@/components/lib/get-user-session';
-import { PlayerChoice, Prisma, IsCovered } from '@prisma/client';
+import {PlayerChoice, Prisma, IsCovered, BetParticipant} from '@prisma/client';
 import { hashSync } from 'bcrypt';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import requestIp from 'request-ip';
@@ -194,14 +194,16 @@ function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { max
   const maxBetPlayer2 = parseFloat((initBetPlayer1 * 1.00).toFixed(2)); // 100% от суммы ставок на Player1
   return { maxBetPlayer1, maxBetPlayer2 };
 }
-
 function roundDownToTwoDecimals(value: number): number {
   return Math.floor(value * 100) / 100;
 }
-
 function areNumbersEqual(num1: number, num2: number): boolean {
   return Math.abs(num1 - num2) < Number.EPSILON;
 }
+function truncateToTwoDecimals(value: number): number {
+  return Math.floor(value * 100) / 100;
+}
+
 
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
   try {
@@ -275,15 +277,23 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         points: user.points - amount,
       },
     });
-
+    const { oddsPlayer1, oddsPlayer2 } = calculateOdds(totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? amount : 0), totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? amount : 0));
+    const totalMargin = await prisma.betParticipant.aggregate({
+      _sum: {
+        margin: true,
+      },
+      where: {
+        betId: betId,
+      },
+    });
     // Обновление полей перекрытия
     const updatedBetData = {
-      oddsBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer1,
-      oddsBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer2,
+      oddsBetPlayer1: oddsPlayer1,
+      oddsBetPlayer2: oddsPlayer2,
       totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
       totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
       totalBetAmount: totalPlayer1 + totalPlayer2 + amount,
-      margin: 0,
+      margin: totalMargin._sum.margin || 0,
       maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
       maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
       overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
@@ -341,11 +351,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
   }
 }
 
-// Функция для обрезки числа до двух знаков после запятой без округления
-function truncateToTwoDecimals(value: number): number {
-  return Math.floor(value * 100) / 100;
-}
-
 // Функция для балансировки перекрытий
 async function balanceOverlaps(betId: number) {
   // Получаем всех участников с данным betId, отсортированных по дате создания
@@ -365,7 +370,11 @@ async function balanceOverlaps(betId: number) {
   }
 
   // Вложенная функция для переноса перекрытий между участниками
-  async function transferOverlap(sourceParticipants, targetParticipants, overlapField: 'overlapPlayer1' | 'overlapPlayer2') {
+  async function transferOverlap(
+      sourceParticipants: BetParticipant[],
+      targetParticipants: BetParticipant[],
+      overlapField: 'overlapPlayer1' | 'overlapPlayer2'
+  ) {
     // Флаг, указывающий, что все участники имеют profit, равный overlap
     let allProfitEqualOverlap = false;
 
@@ -385,7 +394,7 @@ async function balanceOverlaps(betId: number) {
           // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
           const neededOverlap = truncateToTwoDecimals(target.profit - target.overlap);
           // Определяем, сколько можно добавить в overlap, учитывая доступные ресурсы
-          const overlapToAdd = truncateToTwoDecimals(Math.min(source.amount, neededOverlap, bet[overlapField]));
+          const overlapToAdd = truncateToTwoDecimals(Math.min(source.amount, neededOverlap, bet[overlapField]!));
 
           // Если есть возможность добавить overlap
           if (overlapToAdd > 0) {
@@ -411,7 +420,7 @@ async function balanceOverlaps(betId: number) {
             await prisma.bet.update({
               where: { id: betId },
               data: {
-                [overlapField]: truncateToTwoDecimals(bet[overlapField] - overlapToAdd),
+                [overlapField]: truncateToTwoDecimals(bet[overlapField]! - overlapToAdd),
               },
             });
 
