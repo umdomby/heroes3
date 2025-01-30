@@ -274,10 +274,15 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const participant of oppositeParticipants) {
+      // Выходим из цикла, если размер нашей ставки стал 0
       if (remainingAmount <= 0) break;
 
       // Вычисляем, сколько нужно для полного перекрытия
       const neededOverlap = roundDownToTwoDecimals(participant.profit - participant.overlap);
+
+      // Если у всех пользователей поставивших на другого игрока profit = overlap, выходим из цикла
+      if (neededOverlap <= 0) continue;
+
       const overlapToAdd = Math.min(remainingAmount, neededOverlap);
 
       if (overlapToAdd > 0) {
@@ -291,6 +296,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
         // Уменьшаем оставшуюся сумму на добавленное перекрытие
         remainingAmount = roundDownToTwoDecimals(remainingAmount - overlapToAdd);
+        overlapAmount += overlapToAdd;
       }
     }
 
@@ -320,16 +326,13 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       });
     }
 
-// Используем overlapRemain для заполнения overlap в записях противоположного игрока
+    // Используем overlapRemain для заполнения overlap в записях противоположного игрока
     const participantsWithOverlapRemain = bet.participants
-        .filter(p => p.player === oppositePlayer && p.overlapRemain > 0) // Ищем участников противоположного игрока с overlapRemain
+        .filter(p => p.player === oppositePlayer && p.overlapRemain > 0)
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     for (const participant of participantsWithOverlapRemain) {
       if (remainingAmount <= 0) break;
-
-      // Пропускаем, если userId одинаковый
-      if (participant.userId === userId) continue;
 
       const neededOverlap = roundDownToTwoDecimals(participant.profit - participant.overlap);
       const overlapToAdd = Math.min(participant.overlapRemain, neededOverlap);
@@ -428,6 +431,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
   }
 }
+
 
 
 
