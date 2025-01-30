@@ -386,13 +386,10 @@ async function balanceOverlaps(betId: number) {
         overlapField: 'overlapPlayer1' | 'overlapPlayer2',
         bet: Bet
     ) {
-        // Флаг, указывающий, что все участники имеют profit, равный overlap
-        let allProfitEqualOverlap = false;
-
         // Цикл продолжается, пока не будет достигнуто равенство profit и overlap для всех участников
         // или пока не исчерпаны ресурсы для перекрытия
-        while (!allProfitEqualOverlap && bet[overlapField] > 0) {
-            allProfitEqualOverlap = true; // Предполагаем, что все равны, пока не найдём исключение
+        while (bet[overlapField] > 0) {
+            let allProfitEqualOverlap = true; // Предполагаем, что все равны, пока не найдём исключение
 
             // Проходим по всем участникам-целям
             for (const target of targetParticipants) {
@@ -440,6 +437,9 @@ async function balanceOverlaps(betId: number) {
                     if (bet[overlapField] <= 0) break;
                 }
             }
+
+            // Если все profit равны overlap, выходим из внешнего цикла
+            if (allProfitEqualOverlap) break;
         }
     }
 
