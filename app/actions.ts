@@ -369,12 +369,10 @@ async function balanceOverlaps(betId: number) {
     }
   }
 
-
   const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
   const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
   await transferOverlap(participantsPlayer1, participantsPlayer2, 'overlapPlayer2');
 
-  // Переносим overlapRemain от участников PLAYER2 к участникам PLAYER1
   await transferOverlap(participantsPlayer2, participantsPlayer1, 'overlapPlayer1');
 }
 
@@ -516,7 +514,6 @@ export async function closeBet(betId: number, winnerId: number) {
             createdAt: participant.createdAt,
             isCovered: participant.isCovered,
             overlap: participant.overlap,
-            overlapRemain: participant.overlapRemain ?? 0,
             return: roundDownToTwoDecimals(pointsToReturn),
           },
         });

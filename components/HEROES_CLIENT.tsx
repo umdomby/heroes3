@@ -554,14 +554,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                             2
                                                         )} Points (${overlapPercentage}%)`;
                                                         break;
-                                                    case "CP":
-                                                        const overlapRemainPercentage = participant.overlapRemain
-                                                            ? ((participant.overlapRemain / profitToCover) * 100).toFixed(2)
-                                                            : "0.00";
-                                                        overlapStatus = `Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий (${participant.overlapRemain?.toFixed(
-                                                            2
-                                                        )} Points, ${overlapRemainPercentage}%)`;
-                                                        break;
                                                     default:
                                                         overlapStatus = "Неизвестный статус перекрытия.";
                                                 }
