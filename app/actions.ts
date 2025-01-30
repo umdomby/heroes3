@@ -193,6 +193,10 @@ function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): { max
   return { maxBetPlayer1, maxBetPlayer2 };
 }
 
+function roundDownToTwoDecimals(value: number): number {
+  return Math.floor(value * 100) / 100;
+}
+
 function areNumbersEqual(num1: number, num2: number): boolean {
   return Math.abs(num1 - num2) < Number.EPSILON;
 }
