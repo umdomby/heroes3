@@ -423,23 +423,15 @@ async function balanceOverlaps(betId: number) {
                             data: {
                                 overlap: newOverlap,
                             },
-                        }).then(async () => {
-                            //Обновляем значение overlap в ставке
-                            await prisma.bet.update({
-                                where: {id: betId},
-                                data: {
-                                    [overlapField]: bet[overlapField] - overlapToAdd,
-                                },
-                            });
-                        });
+                        })
 
                         // Обновляем значение overlap в ставке
-                        // await prisma.bet.update({
-                        //     where: {id: betId},
-                        //     data: {
-                        //         [overlapField]: bet[overlapField] - overlapToAdd,
-                        //     },
-                        // });
+                        await prisma.bet.update({
+                            where: {id: betId},
+                            data: {
+                                [overlapField]: bet[overlapField] - overlapToAdd,
+                            },
+                        });
 
                         // Обновляем объект bet в памяти
                         bet[overlapField] = bet[overlapField] - overlapToAdd;
