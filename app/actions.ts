@@ -341,6 +341,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
   }
 }
 
+// Функция для обрезки числа до двух знаков после запятой без округления
+function truncateToTwoDecimals(value: number): number {
+  return Math.floor(value * 100) / 100;
+}
+
 // Функция для балансировки перекрытий
 async function balanceOverlaps(betId: number) {
   // Получаем всех участников с данным betId, отсортированных по дате создания
@@ -354,25 +359,77 @@ async function balanceOverlaps(betId: number) {
     where: { id: betId },
   });
 
+  // Проверяем, что ставка существует
   if (!bet) {
     throw new Error('Ставка не найдена');
   }
 
+  // Вложенная функция для переноса перекрытий между участниками
   async function transferOverlap(sourceParticipants, targetParticipants, overlapField: 'overlapPlayer1' | 'overlapPlayer2') {
-    let allOverlapRemainZero = false;
+    // Флаг, указывающий, что все участники имеют profit, равный overlap
     let allProfitEqualOverlap = false;
 
-    while (!allOverlapRemainZero && !allProfitEqualOverlap) {
-      allOverlapRemainZero = true;
-      allProfitEqualOverlap = true;
+    // Цикл продолжается, пока не будет достигнуто равенство profit и overlap для всех участников
+    while (!allProfitEqualOverlap) {
+      allProfitEqualOverlap = true; // Предполагаем, что все равны, пока не найдём исключение
 
+      // Проходим по всем участникам-источникам
+      for (const source of sourceParticipants) {
+        // Проходим по всем участникам-целям
+        for (const target of targetParticipants) {
+          // Проверяем, что profit не равен overlap
+          if (!areNumbersEqual(target.profit, target.overlap)) {
+            allProfitEqualOverlap = false; // Если найдена запись, где profit не равен overlap, продолжаем цикл
+          }
+
+          // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
+          const neededOverlap = truncateToTwoDecimals(target.profit - target.overlap);
+          // Определяем, сколько можно добавить в overlap, учитывая доступные ресурсы
+          const overlapToAdd = truncateToTwoDecimals(Math.min(source.amount, neededOverlap, bet[overlapField]));
+
+          // Если есть возможность добавить overlap
+          if (overlapToAdd > 0) {
+            // Вычисляем новое значение overlap
+            const newOverlap = truncateToTwoDecimals(target.overlap + overlapToAdd);
+            // Проверяем, что новое значение overlap не превышает profit
+            if (newOverlap > target.profit) {
+              throw new Error('Ошибка: overlap не может быть больше profit');
+            }
+
+            // Обновляем overlap у участника-цели
+            await prisma.betParticipant.update({
+              where: { id: target.id },
+              data: {
+                overlap: newOverlap,
+              },
+            });
+
+            // Уменьшаем доступную сумму у участника-источника
+            source.amount = truncateToTwoDecimals(source.amount - overlapToAdd);
+
+            // Обновляем значение overlap в ставке
+            await prisma.bet.update({
+              where: { id: betId },
+              data: {
+                [overlapField]: truncateToTwoDecimals(bet[overlapField] - overlapToAdd),
+              },
+            });
+
+            // Если у источника больше нет доступной суммы, выходим из внутреннего цикла
+            if (source.amount <= 0) break;
+          }
+        }
+      }
     }
   }
 
+  // Разделяем участников на две группы: те, кто ставил на PLAYER1, и те, кто ставил на PLAYER2
   const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
   const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
-  await transferOverlap(participantsPlayer1, participantsPlayer2, 'overlapPlayer2');
 
+  // Переносим перекрытия от участников PLAYER1 к участникам PLAYER2
+  await transferOverlap(participantsPlayer1, participantsPlayer2, 'overlapPlayer2');
+  // Переносим перекрытия от участников PLAYER2 к участникам PLAYER1
   await transferOverlap(participantsPlayer2, participantsPlayer1, 'overlapPlayer1');
 }
 
