@@ -363,15 +363,16 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 // Функция для балансировки перекрытий
 async function balanceOverlaps(betId: number) {
     console.log(`Начало balanceOverlaps для betId: ${betId}`);
+
     // Получаем всех участников с данным betId, отсортированных по дате создания
     const participants = await prisma.betParticipant.findMany({
-        where: {betId},
-        orderBy: {createdAt: 'asc'},
+        where: { betId },
+        orderBy: { createdAt: 'asc' },
     });
 
     // Получаем текущие значения overlap для ставки
     const bet = await prisma.bet.findUnique({
-        where: {id: betId},
+        where: { id: betId },
     });
 
     // Проверяем, что ставка существует
@@ -388,49 +389,53 @@ async function balanceOverlaps(betId: number) {
         // Флаг, указывающий, что все участники имеют profit, равный overlap
         let allProfitEqualOverlap = false;
 
-        // Проходим по всем участникам-целям
-        for (const target of targetParticipants) {
-            // Проверяем, что profit не равен overlap
-            if (!areNumbersEqual(target.profit, target.overlap)) {
-                allProfitEqualOverlap = false; // Если найдена запись, где profit не равен overlap, продолжаем цикл
-            }
+        // Цикл продолжается, пока не будет достигнуто равенство profit и overlap для всех участников
+        // или пока не исчерпаны ресурсы для перекрытия
+        while (!allProfitEqualOverlap && bet[overlapField] > 0) {
+            allProfitEqualOverlap = true; // Предполагаем, что все равны, пока не найдём исключение
 
-            // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
-            const neededOverlap = truncateToTwoDecimals(target.profit - target.overlap);
-
-            console.log('id: ' + target.id + ', profit: ' + target.profit + ', overlap: ' + target.overlap + ', betOverlapPlayer: ' + bet[overlapField]);
-
-            console.log(`Цель: ${target.id}, Необходимо: ${neededOverlap}, Добавить: ${neededOverlap}`);
-
-            // Если есть возможность добавить overlap
-            if (neededOverlap > 0) {
-                // Вычисляем новое значение overlap
-                const newOverlap = truncateToTwoDecimals(target.overlap + neededOverlap);
-                // Проверяем, что новое значение overlap не превышает profit
-                if (newOverlap > target.profit) {
-                    throw new Error('Ошибка: overlap не может быть больше profit');
+            // Проходим по всем участникам-целям
+            for (const target of targetParticipants) {
+                // Проверяем, что profit не равен overlap
+                if (!areNumbersEqual(target.profit, target.overlap)) {
+                    allProfitEqualOverlap = false; // Если найдена запись, где profit не равен overlap, продолжаем цикл
                 }
-                // Обновляем overlap у участника-цели
-                await prisma.betParticipant.update({
-                    where: {id: target.id},
-                    data: {
-                        overlap: newOverlap,
-                    },
-                });
 
-                // Уменьшаем доступную сумму у участника-источника
-                target.amount = truncateToTwoDecimals(target.amount - neededOverlap);
+                // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
+                const neededOverlap = truncateToTwoDecimals(target.profit - target.overlap);
+                // Определяем, сколько можно добавить в overlap, учитывая доступные ресурсы
+                const overlapToAdd = truncateToTwoDecimals(Math.min(neededOverlap, bet[overlapField]));
 
-                // Обновляем значение overlap в ставке
-                await prisma.bet.update({
-                    where: {id: betId},
-                    data: {
-                        [overlapField]: truncateToTwoDecimals(bet[overlapField] - neededOverlap),
-                    },
-                });
+                console.log(`Цель: ${target.id}, Необходимо: ${neededOverlap}, Добавить: ${overlapToAdd}`);
 
-                // Если у источника больше нет доступной суммы, выходим из внутреннего цикла
-                if (target.amount <= 0) break;
+                // Если есть возможность добавить overlap
+                if (overlapToAdd > 0) {
+                    // Вычисляем новое значение overlap
+                    const newOverlap = truncateToTwoDecimals(target.overlap + overlapToAdd);
+                    // Проверяем, что новое значение overlap не превышает profit
+                    if (newOverlap > target.profit) {
+                        throw new Error('Ошибка: overlap не может быть больше profit');
+                    }
+
+                    // Обновляем overlap у участника-цели
+                    await prisma.betParticipant.update({
+                        where: { id: target.id },
+                        data: {
+                            overlap: newOverlap,
+                        },
+                    });
+
+                    // Обновляем значение overlap в ставке
+                    await prisma.bet.update({
+                        where: { id: betId },
+                        data: {
+                            [overlapField]: truncateToTwoDecimals(bet[overlapField] - overlapToAdd),
+                        },
+                    });
+
+                    // Если у источника больше нет доступной суммы, выходим из внутреннего цикла
+                    if (bet[overlapField] <= 0) break;
+                }
             }
         }
     }
@@ -438,7 +443,6 @@ async function balanceOverlaps(betId: number) {
     // Разделяем участников на две группы: те, кто ставил на PLAYER1, и те, кто ставил на PLAYER2
     const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
     const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
-
 
     console.log('Переносим перекрытия от участников PLAYER1');
     await transferOverlap(participantsPlayer1, 'overlapPlayer2', bet);
