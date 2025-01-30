@@ -70,6 +70,8 @@ model Bet {
   oddsBetPlayer2  Float // Текущий коэффициент для игрока 2
   maxBetPlayer1   Float // Максимальная сумма ставок на игрока 1
   maxBetPlayer2   Float // Максимальная сумма ставок на игрока 2
+  overlapPlayer1  Float // Перекрытие на игрока 1
+  overlapPlayer2  Float // Перекрытие на игрока 2
   totalBetAmount  Float            @default(0) // сумма всех ставок.
   creator         User             @relation("BetsCreated", fields: [creatorId], references: [id]) // создатель события
   creatorId       Int
