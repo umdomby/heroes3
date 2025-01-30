@@ -352,17 +352,30 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       return remainingAmount;
     }
 
-    const participantsPlayer1 = bet.participants
-        .filter(p => p.player === PlayerChoice.PLAYER1)
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    async function balanceOverlaps(betId: number) {
+      // Получаем всех участников с данным betId
+      const participants = await prisma.betParticipant.findMany({
+        where: { betId },
+        orderBy: { createdAt: 'asc' },
+      });
 
-    await processParticipants(participantsPlayer1, remainingAmount);
+      // Обрабатываем участников для PLAYER1
+      let remainingAmountPlayer1 = 0;
+      const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
+      for (const participant of participantsPlayer1) {
+        remainingAmountPlayer1 = await processParticipants(participants.filter(p => p.player === PlayerChoice.PLAYER2), participant.overlapRemain);
+      }
 
-    const participantsPlayer2 = bet.participants
-        .filter(p => p.player === PlayerChoice.PLAYER2)
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+      // Обрабатываем участников для PLAYER2
+      let remainingAmountPlayer2 = 0;
+      const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
+      for (const participant of participantsPlayer2) {
+        remainingAmountPlayer2 = await processParticipants(participants.filter(p => p.player === PlayerChoice.PLAYER1), participant.overlapRemain);
+      }
+    }
 
-    await processParticipants(participantsPlayer2, remainingAmount);
+// Вызов функции для балансировки overlap
+    await balanceOverlaps(betId);
 
     await prisma.user.update({
       where: { id: userId },
