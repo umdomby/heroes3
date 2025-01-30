@@ -303,7 +303,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         player,
         odds: currentOdds,
         profit: potentialProfit,
-        margin: 0, // Инициализируем маржу
+        margin: roundDownToTwoDecimals(overlapAmount * 0.05), // Рассчитываем маржу как 5% от overlap
         isCovered: overlapAmount >= potentialProfit ? "CLOSED" : (overlapAmount > 0 ? "PENDING" : "OPEN"),
         overlap: overlapAmount,
       },
@@ -364,7 +364,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         totalBetPlayer1: player === PlayerChoice.PLAYER1 ? roundDownToTwoDecimals(totalPlayer1 + amount) : roundDownToTwoDecimals(totalPlayer1),
         totalBetPlayer2: player === PlayerChoice.PLAYER2 ? roundDownToTwoDecimals(totalPlayer2 + amount) : roundDownToTwoDecimals(totalPlayer2),
         totalBetAmount: roundDownToTwoDecimals(totalPlayer1 + totalPlayer2 + amount),
-        margin: roundDownToTwoDecimals((bet.margin ?? 0) + 0), // Обновляем маржу
+        margin: roundDownToTwoDecimals((bet.margin ?? 0) + roundDownToTwoDecimals(overlapAmount * 0.05)), // Обновляем маржу
         maxBetPlayer1: player === PlayerChoice.PLAYER1 ? roundDownToTwoDecimals(bet.maxBetPlayer1) : roundDownToTwoDecimals(bet.maxBetPlayer1 + amount),
         maxBetPlayer2: player === PlayerChoice.PLAYER2 ? roundDownToTwoDecimals(bet.maxBetPlayer2) : roundDownToTwoDecimals(bet.maxBetPlayer2 + amount),
       },
