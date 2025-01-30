@@ -554,27 +554,24 @@ export async function closeBet(betId: number, winnerId: number) {
                 let pointsToReturn = 0;
                 let margin = 0;
 
-                const roundedProfit = roundDownToTwoDecimals(participant.profit);
-                const roundedOverlap = roundDownToTwoDecimals(participant.overlap);
-
                 if (participant.isWinner) {
-                    if (participant.isCovered === "CLOSED" && roundedProfit === roundedOverlap) {
-                        margin = roundDownToTwoDecimals(roundedOverlap * MARGIN);
-                        pointsToReturn = roundDownToTwoDecimals(roundedOverlap + participant.amount - margin);
-                    } else if (participant.isCovered === "OPEN" && roundedOverlap === 0) {
-                        pointsToReturn = roundDownToTwoDecimals(participant.amount);
-                    } else if (participant.isCovered === "PENDING" && roundedProfit > roundedOverlap) {
-                        margin = roundDownToTwoDecimals(roundedOverlap * MARGIN);
-                        pointsToReturn = roundDownToTwoDecimals(roundedOverlap + participant.amount - margin);
+                    if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
+                        margin = participant.overlap * MARGIN;
+                        pointsToReturn = participant.overlap + participant.amount - margin;
+                    } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
+                        pointsToReturn = participant.amount;
+                    } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
+                        margin = participant.overlap * MARGIN;
+                        pointsToReturn = participant.overlap + participant.amount - margin;
                     }
                     totalMargin += margin;
                 } else {
-                    if (participant.isCovered === "CLOSED" && roundedProfit === roundedOverlap) {
+                    if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
                         pointsToReturn = 0;
-                    } else if (participant.isCovered === "OPEN" && roundedOverlap === 0) {
-                        pointsToReturn = roundDownToTwoDecimals(participant.amount);
-                    } else if (participant.isCovered === "PENDING" && roundedProfit > roundedOverlap) {
-                        pointsToReturn = roundDownToTwoDecimals(participant.amount - roundedOverlap);
+                    } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
+                        pointsToReturn = participant.amount;
+                    } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
+                        pointsToReturn = participant.amount - (participant.overlap / participant.odds);
                     }
                 }
 
