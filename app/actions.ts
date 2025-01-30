@@ -268,7 +268,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
     });
 
 
-// Функция для балансировки overlap между участниками
+    // Функция для балансировки overlap между участниками
     async function balanceOverlaps(betId: number) {
       // Получаем всех участников с данным betId
       const participants = await prisma.betParticipant.findMany({
@@ -320,6 +320,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
                   },
                 });
 
+                // Если overlapRemain у текущего source равен 0, выходим из внутреннего цикла
                 if (source.overlapRemain <= 0) break;
               }
             }
@@ -341,11 +342,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
       await transferOverlap(participantsPlayer2, participantsPlayer1);
     }
 
-// Вызов функции для балансировки overlap
+    // Вызов функции для балансировки overlap
     await balanceOverlaps(betId);
-
-
-
 
     await prisma.user.update({
       where: { id: userId },
