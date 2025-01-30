@@ -281,6 +281,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
           where: { id: participant.id },
           data: {
             overlap: newOverlap,
+            margin: newOverlap * 0.05, // 5% от нового overlap
           },
         });
 
