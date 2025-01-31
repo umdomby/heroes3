@@ -77,22 +77,27 @@ export const Header: React.FC<Props> = ({className}) => {
                                             MY BET CLOSED
                                         </DropdownMenuRadioItem>
                                     </Link>
-                                    <Link href="/bet-closed">
+                                    <Link href="/bet-all-closed">
                                         <DropdownMenuRadioItem value="bet-closed">
-                                            ALL BET CLOSED
+                                            BET ALL CLOSED
                                         </DropdownMenuRadioItem>
                                     </Link>
-                                    <Link href="/bet-closed">
+                                    <Link href="/transfer-points">
                                         <DropdownMenuRadioItem value="bet-closed">
                                             TRANSFER POINTS
                                         </DropdownMenuRadioItem>
                                     </Link>
-                                    <Link href="/bet-closed">
+                                    <Link href="/buy-pay-points">
                                         <DropdownMenuRadioItem value="bet-closed">
                                             BUY/PAY POINTS
                                         </DropdownMenuRadioItem>
                                     </Link>
-                                    <Link href="/bet-closed">
+                                    {/*<Link href="/bet-closed">*/}
+                                    {/*    <DropdownMenuRadioItem value="bet-closed">*/}
+                                    {/*        ALL POINTS*/}
+                                    {/*    </DropdownMenuRadioItem>*/}
+                                    {/*</Link>*/}
+                                    <Link href="/contacts">
                                         <DropdownMenuRadioItem value="bet-closed">
                                             CONTACTS
                                         </DropdownMenuRadioItem>
