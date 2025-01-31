@@ -4,8 +4,6 @@ import {getUserSession} from '@/components/lib/get-user-session';
 import {PlayerChoice, Prisma, IsCovered, BetParticipant, Bet} from '@prisma/client';
 import {hashSync} from 'bcrypt';
 import {revalidatePath, revalidateTag} from 'next/cache';
-import requestIp from 'request-ip';
-import axios from 'axios';
 
 const MARGIN = (parseFloat(process.env.MARGIN || '0.05'));
 
