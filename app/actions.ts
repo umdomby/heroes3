@@ -251,11 +251,15 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
+        // Check if the odds are too low
+        if (currentOdds <= 1.01) {
+            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.02');
+        }
+
         const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
 
-        //const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
-        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
 
+        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
         if (amount > maxAllowedBet) {
             throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
         }

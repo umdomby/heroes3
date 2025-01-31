@@ -28,7 +28,7 @@ const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
 
 // Константа для минимального допустимого коэффициента
-const MIN_ODDS = 1.01;
+const MIN_ODDS = 1.02;
 
 interface Bet extends PrismaBet {
     player1: Player;
@@ -136,6 +136,20 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
         // Рассчитываем новый коэффициент после добавления ставки
         const newOdds = totalBets / totalBetOnPlayer;
+
+        // Проверка на минимальный допустимый коэффициент
+        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
+        if (currentOdds < MIN_ODDS) {
+            setOddsErrors((prev) => ({
+                ...prev,
+                [bet.id]: `Коэффициент слишком низкий. Минимально допустимый коэффициент: ${MIN_ODDS}`,
+            }));
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
+            }));
+            return;
+        }
 
         // Проверка на максимальную допустимую ставку
         const maxAllowedBet =
@@ -628,8 +642,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                             onChange={(e) => handlePlayerChange(e, bet)}
                                                         />
                                                         <span className={playerColors[PlayerChoice.PLAYER1]}>
-                              {bet.player1.name}
-                            </span>
+                {bet.player1.name}
+            </span>
                                                     </label>
 
                                                     <label className="border p-2 rounded w-[30%] text-center">
@@ -652,14 +666,12 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                             onChange={(e) => handlePlayerChange(e, bet)}
                                                         />
                                                         <span className={playerColors[PlayerChoice.PLAYER2]}>
-                              {bet.player2.name}
-                            </span>
+                {bet.player2.name}
+            </span>
                                                     </label>
                                                     <Button
                                                         className={`mt-2 w-[20%] ${
-                                                            isBetDisabled[bet.id]
-                                                                ? "bg-gray-400 cursor-not-allowed"
-                                                                : ""
+                                                            isBetDisabled[bet.id] ? "bg-gray-400 cursor-not-allowed" : ""
                                                         }`}
                                                         type="submit"
                                                         disabled={isBetDisabled[bet.id] || !user}
@@ -674,6 +686,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                     <p className="text-red-500">{placeBetErrors[bet.id]}</p>
                                                 )}
                                             </form>
+
                                         </div>
                                     )}
 
