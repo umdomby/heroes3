@@ -100,32 +100,32 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         <span>{bet.player1.name}</span> :{' '}
                                                         <span
                                                             className={
-                                                                Math.floor(userBets
+                                                                userBets
                                                                     .filter((p) => p.player === 'PLAYER1')
-                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.overlap), 0) * 100) / 100 >= 0
+                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0) >= 0
                                                                     ? 'text-green-500'
                                                                     : 'text-red-500'
                                                             }
                                                         >
             {Math.floor(userBets
                 .filter((p) => p.player === 'PLAYER1')
-                .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.overlap), 0) * 100) / 100}
+                .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0) * 100) / 100}
         </span>
                                                     </div>
                                                     <div>
                                                         <span>{bet.player2.name}</span> :{' '}
                                                         <span
                                                             className={
-                                                                Math.floor(userBets
+                                                                userBets
                                                                     .filter((p) => p.player === 'PLAYER2')
-                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.overlap), 0) * 100) / 100 >= 0
+                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0) >= 0
                                                                     ? 'text-green-500'
                                                                     : 'text-red-500'
                                                             }
                                                         >
             {Math.floor(userBets
                 .filter((p) => p.player === 'PLAYER2')
-                .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.overlap), 0) * 100) / 100}
+                .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0) * 100) / 100}
         </span>
                                                     </div>
                                                 </TableCell>
@@ -161,7 +161,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                                 {participant.player === 'PLAYER1' ? bet.player1.name : bet.player2.name}
                                                             </strong>
                                                             {','} Коэффициент: <span>{Math.floor(participant.odds * 100) / 100}</span>
-                                                            {','} Прибыль: <span>{Math.floor(participant.profit * 100) / 100}</span>
+                                                            {','} Чистая прибыль: <span>{Math.floor(participant.profit * 100) / 100}</span>
                                                             {','} Маржа: <span>{participant.margin !== null ? Math.floor(participant.margin * 100) / 100 : '0.00'}</span>
                                                             {','} {new Date(participant.createdAt).toLocaleString()}
                                                         </p>

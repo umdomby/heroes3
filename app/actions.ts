@@ -251,7 +251,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
-        const potentialProfit = amount * (currentOdds - 1);
+        const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
 
         const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
         const maxAllowedBet = player === PlayerChoice.PLAYER1 ? maxBetPlayer1 : maxBetPlayer2;
@@ -401,7 +401,7 @@ async function balanceOverlaps(betId: number) {
                     allProfitEqualOverlap = false; // Если найдена запись, где profit не равен overlap, продолжаем цикл
 
                     // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
-                    const neededOverlap = target.profit - target.overlap;
+                    const neededOverlap = Math.floor((target.profit - target.overlap) * 100) / 100;
                     // Определяем, сколько можно добавить в overlap, учитывая доступные ресурсы
                     const overlapToAdd = Math.min(neededOverlap, bet[overlapField]);
 
