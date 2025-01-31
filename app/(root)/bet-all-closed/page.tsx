@@ -22,21 +22,17 @@ export default async function Home() {
 
     // Получаем все закрытые ставки, в которых участвовал пользователь
     const closedBets = await prisma.betCLOSED.findMany({
-        where: {
-            participantsCLOSED: {
-                some: {
-                    userId: user.id
-                }
-            }
-        },
         include: {
-            participantsCLOSED: true, // Получаем всех участников, чтобы отобразить выигранные и проигранные ставки
+            participantsCLOSED: true,
             player1: true,
             player2: true,
             creator: true,
             category: true,
             product: true,
             productItem: true
+        },
+        orderBy: {
+            createdAt: 'desc'
         }
     });
 
