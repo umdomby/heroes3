@@ -75,15 +75,17 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                         <TableBody>
                                             <TableRow>
                                                 {/* Игрок 1 */}
-                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
+                                                <TableCell
+                                                    className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
                                                     <div>{bet.player1.name}</div>
-                                                    <div>{bet.totalBetPlayer1}</div>
+                                                    <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                                 </TableCell>
 
                                                 {/* Игрок 2 */}
-                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
+                                                <TableCell
+                                                    className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
                                                     <div>{bet.player2.name}</div>
-                                                    <div>{bet.totalBetPlayer2}</div>
+                                                    <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                                 </TableCell>
 
                                                 {/* Коэффициент для игрока 1 и 2 */}
@@ -96,19 +98,35 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                 <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
                                                     <div>
                                                         <span>{bet.player1.name}</span> :{' '}
-                                                        <span>
-                              {Math.floor(userBets
-                                  .filter((p) => p.player === 'PLAYER1')
-                                  .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0) * 100) / 100}
-                            </span>
+                                                        <span
+                                                            className={
+                                                                Math.floor(userBets
+                                                                    .filter((p) => p.player === 'PLAYER1')
+                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.overlap), 0) * 100) / 100 >= 0
+                                                                    ? 'text-green-500'
+                                                                    : 'text-red-500'
+                                                            }
+                                                        >
+            {Math.floor(userBets
+                .filter((p) => p.player === 'PLAYER1')
+                .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.overlap), 0) * 100) / 100}
+        </span>
                                                     </div>
                                                     <div>
                                                         <span>{bet.player2.name}</span> :{' '}
-                                                        <span>
-                              {Math.floor(userBets
-                                  .filter((p) => p.player === 'PLAYER2')
-                                  .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0) * 100) / 100}
-                            </span>
+                                                        <span
+                                                            className={
+                                                                Math.floor(userBets
+                                                                    .filter((p) => p.player === 'PLAYER2')
+                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.overlap), 0) * 100) / 100 >= 0
+                                                                    ? 'text-green-500'
+                                                                    : 'text-red-500'
+                                                            }
+                                                        >
+            {Math.floor(userBets
+                .filter((p) => p.player === 'PLAYER2')
+                .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.overlap), 0) * 100) / 100}
+        </span>
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
@@ -156,19 +174,33 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         </p>
                                                         {participant.isCovered ? (
                                                             <p>
-                    <span className="text-green-500">
-                        Ваша ставка была перекрыта на {Math.floor(participant.overlap * 100) / 100} Points (
-                        {overlapPercentage}%)
-                    </span>
+    <span
+        className={
+            overlapPercentage === 0
+                ? 'text-purple-500'
+                : overlapPercentage === 100
+                    ? 'text-green-500'
+                    : 'text-yellow-500'
+        }
+    >
+        Ваша ставка была перекрыта на {Math.floor(participant.overlap * 100) / 100} Points (
+        {overlapPercentage}%)
+    </span>
                                                                 <br/>
                                                                 {participant.isWinner ? (
                                                                     <span className="text-green-500">
-                            Прибыль: {Math.floor(participant.return * 100) / 100} Points
-                        </span>
+            Прибыль: {Math.floor(participant.return * 100) / 100} Points
+        </span>
                                                                 ) : (
-                                                                    <span className="text-red-500">
-                            Потеря: {Math.floor((participant.return - participant.amount) * 100) / 100} Points
-                        </span>
+                                                                    <span
+                                                                        className={
+                                                                            Math.floor((participant.return - participant.amount) * 100) / 100 === 0
+                                                                                ? 'text-purple-500'
+                                                                                : 'text-red-500'
+                                                                        }
+                                                                    >
+            Потеря: {Math.floor((participant.return - participant.amount) * 100) / 100} Points
+        </span>
                                                                 )}
                                                             </p>
                                                         ) : (
