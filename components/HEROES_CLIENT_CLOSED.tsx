@@ -53,7 +53,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
         <div>
             <div className="flex justify-between items-center">
                 <div>
-                    <p>Ваши баллы: {user.points.toFixed(2)}</p>
+                    <p>Ваши баллы: {Math.floor(user.points * 100) / 100}</p>
                 </div>
             </div>
 
@@ -88,8 +88,8 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
 
                                                 {/* Коэффициент для игрока 1 и 2 */}
                                                 <TableCell className="w-[15%]">
-                                                    <div>{bet.oddsBetPlayer1.toFixed(2)}</div>
-                                                    <div>{bet.oddsBetPlayer2.toFixed(2)}</div>
+                                                    <div>{Math.floor(bet.oddsBetPlayer1 * 100) / 100}</div>
+                                                    <div>{Math.floor(bet.oddsBetPlayer2 * 100) / 100}</div>
                                                 </TableCell>
 
                                                 {/* Прибыль/убыток */}
@@ -97,19 +97,17 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                     <div>
                                                         <span>{bet.player1.name}</span> :{' '}
                                                         <span>
-                              {userBets
+                              {Math.floor(userBets
                                   .filter((p) => p.player === 'PLAYER1')
-                                  .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0)
-                                  .toFixed(2)}
+                                  .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0) * 100) / 100}
                             </span>
                                                     </div>
                                                     <div>
                                                         <span>{bet.player2.name}</span> :{' '}
                                                         <span>
-                              {userBets
+                              {Math.floor(userBets
                                   .filter((p) => p.player === 'PLAYER2')
-                                  .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0)
-                                  .toFixed(2)}
+                                  .reduce((sum, p) => sum + (p.isWinner ? p.profit : -p.amount), 0) * 100) / 100}
                             </span>
                                                     </div>
                                                 </TableCell>
@@ -134,7 +132,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                     participant.amount * (participant.odds - 1);
                                                 const overlapPercentage =
                                                     participant.overlap > 0
-                                                        ? ((participant.overlap / profitToCover) * 100).toFixed(2)
+                                                        ? Math.floor((participant.overlap / profitToCover) * 10000) / 100
                                                         : 0;
 
                                                 return (
@@ -144,9 +142,9 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                             <strong>
                                                                 {participant.player === 'PLAYER1' ? bet.player1.name : bet.player2.name}
                                                             </strong>
-                                                            {','} Коэффициент: <span>{participant.odds.toFixed(2)}</span>
-                                                            {','} Прибыль: <span>{participant.profit.toFixed(2)}</span>
-                                                            {','} Маржа: <span>{participant.margin !== null ? participant.margin.toFixed(2) : '0.00'}</span>
+                                                            {','} Коэффициент: <span>{Math.floor(participant.odds * 100) / 100}</span>
+                                                            {','} Прибыль: <span>{Math.floor(participant.profit * 100) / 100}</span>
+                                                            {','} Маржа: <span>{participant.margin !== null ? Math.floor(participant.margin * 100) / 100 : '0.00'}</span>
                                                             {','} {new Date(participant.createdAt).toLocaleString()}
                                                         </p>
                                                         <p>
@@ -159,17 +157,17 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         {participant.isCovered ? (
                                                             <p>
                     <span className="text-green-500">
-                        Ваша ставка была перекрыта на {participant.overlap.toFixed(2)} Points (
+                        Ваша ставка была перекрыта на {Math.floor(participant.overlap * 100) / 100} Points (
                         {overlapPercentage}%)
                     </span>
                                                                 <br/>
                                                                 {participant.isWinner ? (
                                                                     <span className="text-green-500">
-                            Прибыль: {(participant.return ).toFixed(2)} Points
+                            Прибыль: {Math.floor(participant.return * 100) / 100} Points
                         </span>
                                                                 ) : (
                                                                     <span className="text-red-500">
-                            Потеря: {(participant.return - participant.amount).toFixed(2)} Points
+                            Потеря: {Math.floor((participant.return - participant.amount) * 100) / 100} Points
                         </span>
                                                                 )}
                                                             </p>
