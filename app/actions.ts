@@ -384,6 +384,9 @@ async function balanceOverlaps(betId: number) {
         overlapField: 'overlapPlayer1' | 'overlapPlayer2',
         bet: Bet
     ) {
+        let processedParticipants = 0; // Счетчик обработанных участников
+        const totalParticipants = targetParticipants.length; // Общее количество участников
+
         // Цикл продолжается, пока не будет достигнуто равенство profit и overlap для всех участников
         // или пока не исчерпаны ресурсы для перекрытия
         while (bet[overlapField] > 0) {
@@ -399,12 +402,8 @@ async function balanceOverlaps(betId: number) {
 
                     // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
                     const neededOverlap = target.profit - target.overlap;
-
-                    console.log('( profit: ' + target.profit + " ), не равен (overlap: " + target.overlap + " ), profit - overlap : " + neededOverlap + ", bet[overlapField] " + bet[overlapField]);
                     // Определяем, сколько можно добавить в overlap, учитывая доступные ресурсы
                     const overlapToAdd = Math.min(neededOverlap, bet[overlapField]);
-
-                    console.log(`Цель: ${target.id}, Необходимо: ${neededOverlap}, Добавить: ${overlapToAdd}`);
 
                     // Если есть возможность добавить overlap
                     if (overlapToAdd > 0) {
@@ -441,10 +440,15 @@ async function balanceOverlaps(betId: number) {
                         if (bet[overlapField] <= 0) break;
                     }
                 }
+
+                processedParticipants++; // Увеличиваем счетчик обработанных участников
+
+                // Выходим из цикла, если все участники обработаны
+                if (processedParticipants >= totalParticipants) break;
             }
 
-            // Если все profit равны overlap, выходим из внешнего цикла
-            if (allProfitEqualOverlap) break;
+            // Если все profit равны overlap или все участники обработаны, выходим из внешнего цикла
+            if (allProfitEqualOverlap || processedParticipants >= totalParticipants) break;
         }
     }
 
