@@ -134,9 +134,7 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                     participant.amount * (participant.odds - 1);
                                                 const overlapPercentage =
                                                     participant.overlap > 0
-                                                        ? ((participant.overlap / profitToCover) * 100).toFixed(
-                                                            2
-                                                        )
+                                                        ? ((participant.overlap / profitToCover) * 100).toFixed(2)
                                                         : 0;
 
                                                 return (

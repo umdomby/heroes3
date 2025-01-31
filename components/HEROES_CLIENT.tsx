@@ -41,6 +41,8 @@ interface Bet extends PrismaBet {
     margin: number;
     overlapPlayer1: number;
     overlapPlayer2: number;
+    totalBetPlayer1: number;
+    totalBetPlayer2: number;
 }
 
 interface Props {
@@ -530,13 +532,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                             </h4>
                                             {userBets.map((participant) => {
                                                 // Рассчитываем процент перекрытия на основе прибыли
-                                                const profitToCover =
-                                                    participant.amount * (participant.odds - 1);
+                                                const profitToCover = participant.amount * (participant.odds - 1);
                                                 const overlapPercentage =
                                                     participant.overlap > 0
-                                                        ? ((participant.overlap / profitToCover) * 100).toFixed(
-                                                            2
-                                                        )
+                                                        ? ((participant.overlap / profitToCover) * 100).toFixed(2)
                                                         : 0;
 
                                                 // Определяем статус перекрытия
@@ -547,14 +546,10 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                             "Ваша ставка не перекрыта (0 Points, 0%)";
                                                         break;
                                                     case "CLOSED":
-                                                        overlapStatus = `Ваша ставка полностью перекрыта на ${participant.overlap.toFixed(
-                                                            2
-                                                        )} Points (${overlapPercentage}%)`;
+                                                        overlapStatus = `Ваша ставка полностью перекрыта на ${participant.overlap.toFixed(2)} Points (${overlapPercentage}%)`;
                                                         break;
                                                     case "PENDING":
-                                                        overlapStatus = `Ваша ставка частично перекрыта на ${participant.overlap.toFixed(
-                                                            2
-                                                        )} Points (${overlapPercentage}%)`;
+                                                        overlapStatus = `Ваша ставка частично перекрыта на ${participant.overlap.toFixed(2)} Points (${overlapPercentage}%)`;
                                                         break;
                                                     default:
                                                         overlapStatus = "Неизвестный статус перекрытия.";
@@ -627,7 +622,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                             {"("}
                                                             {bet.oddsBetPlayer1.toFixed(2)}
                                                             {") "}
-                                                            {potentialProfit[bet.id]?.player1
+                                                            {potentialProfit[bet.id]?.player1.toFixed(2)
                                                                 ? `+${potentialProfit[bet.id].player1.toFixed(2)}`
                                                                 : ""}
                                                         </div>
