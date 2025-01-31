@@ -631,7 +631,7 @@ export async function closeBet(betId: number, winnerId: number) {
                 data: {
                     // Округляем до двух знаков после запятой
                     margin: {
-                        increment: Math.floor(bet.margin * 100) / 100,
+                        increment: Math.floor((bet.margin ?? 0) * 100) / 100,
                     },
                 },
             });
