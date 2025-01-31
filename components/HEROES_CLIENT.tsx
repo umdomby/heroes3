@@ -399,7 +399,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                     className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[25%]`}
                                                 >
                                                     <div>{bet.player1.name}</div>
-                                                    <div>{bet.totalBetPlayer1}</div>
+                                                    <div>{Math.floor(bet.totalBetPlayer1* 100) / 100}</div>
                                                 </TableCell>
 
                                                 {/* Игрок 2 */}
@@ -407,7 +407,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                     className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[25%]`}
                                                 >
                                                     <div>{bet.player2.name}</div>
-                                                    <div>{bet.totalBetPlayer2}</div>
+                                                    <div>{Math.floor(bet.totalBetPlayer2* 100) / 100}</div>
                                                 </TableCell>
 
                                                 {/* Коэффициент для игрока 1 и 2*/}
