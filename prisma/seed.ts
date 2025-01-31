@@ -11,7 +11,7 @@ async function up() {
         fullName: 'Pi2',
         email: 'umdom2@gmail.com',
         password: hashSync('123123', 10),
-        role: 'USER',
+        role: 'ADMIN',
         points: 1000,
       },
       {
