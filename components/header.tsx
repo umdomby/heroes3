@@ -72,15 +72,36 @@ export const Header: React.FC<Props> = ({className}) => {
                                            CREATE BET
                                         </DropdownMenuRadioItem>
                                     </Link>
+                                    <Link href="/bet-closed">
+                                        <DropdownMenuRadioItem value="bet-closed">
+                                            MY BET CLOSED
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-closed">
+                                        <DropdownMenuRadioItem value="bet-closed">
+                                            ALL BET CLOSED
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-closed">
+                                        <DropdownMenuRadioItem value="bet-closed">
+                                            TRANSFER POINTS
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-closed">
+                                        <DropdownMenuRadioItem value="bet-closed">
+                                            BUY/PAY POINTS
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-closed">
+                                        <DropdownMenuRadioItem value="bet-closed">
+                                            CONTACTS
+                                        </DropdownMenuRadioItem>
+                                    </Link>
                                     <Link href="/rating">
                                         <DropdownMenuRadioItem value="rating">
                                             RATING
                                         </DropdownMenuRadioItem>
                                     </Link>
-                                    <Link href="/bet-closed">
-                                        <DropdownMenuRadioItem value="bet-closed">
-                                            BET CLOSED
-                                        </DropdownMenuRadioItem> </Link>
                                     <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
                                 </DropdownMenuRadioGroup>
                             </DropdownMenuContent>
