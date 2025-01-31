@@ -28,6 +28,7 @@ export async function updateGlobalData() {
                 status: 'OPEN', // Только открытые ставки
             },
         });
+        // Округляем до двух знаков после запятой
         const pointsBet = Math.floor((pointsBetResult._sum.totalBetAmount || 0) * 100) / 100;
 
         // 3. Количество зарегистрированных пользователей
@@ -42,6 +43,7 @@ export async function updateGlobalData() {
                 points: true,
             },
         });
+        // Округляем до двух знаков после запятой
         const pointsAllUsers = Math.floor((pointsAllUsersResult._sum.points || 0) * 100) / 100;
 
         // 6. Общая маржа из всех закрытых ставок
@@ -50,6 +52,7 @@ export async function updateGlobalData() {
                 margin: true,
             },
         });
+        // Округляем до двух знаков после запятой
         const margin = Math.floor((marginResult._sum.margin || 0) * 100) / 100;
 
         // Обновляем или создаем запись в GlobalData
@@ -126,6 +129,7 @@ export async function clientCreateBet(formData: any) {
             throw new Error("Пользователь не найден");
         }
 
+        // Округляем до двух знаков после запятой
         const totalBetAmount = Math.floor((formData.initBetPlayer1 + formData.initBetPlayer2) * 100) / 100;
         if (totalBetAmount > 100) {
             throw new Error("Сумма начальных ставок не должна превышать 100 баллов");
@@ -139,10 +143,12 @@ export async function clientCreateBet(formData: any) {
                 totalBetAmount: 0, // Общая сумма начальных ставок
                 maxBetPlayer1: maxBetPlayer1, // Максимальная сумма ставок на игрока 1
                 maxBetPlayer2: maxBetPlayer2, // Максимальная сумма ставок на игрока 2
+                // Округляем до двух знаков после запятой
                 oddsBetPlayer1: Math.floor((parseFloat(formData.oddsBetPlayer1) * 100)) / 100, // Инициализируем текущие коэффициенты
                 oddsBetPlayer2: Math.floor((parseFloat(formData.oddsBetPlayer2) * 100)) / 100, // Инициализируем текущие коэффициенты
                 player1Id: formData.player1Id,
                 player2Id: formData.player2Id,
+                // Округляем до двух знаков после запятой
                 initBetPlayer1: Math.floor((parseFloat(formData.initBetPlayer1) * 100)) / 100,
                 initBetPlayer2: Math.floor((parseFloat(formData.initBetPlayer2) * 100)) / 100,
                 overlapPlayer1: 0, // Перекрытие на игрока 1
@@ -181,6 +187,7 @@ function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: numbe
     const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : totalWithInit / totalWithInitPlayer2;
 
     return {
+        // Округляем до двух знаков после запятой
         oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
         oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
     };
@@ -191,6 +198,7 @@ function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): {
     maxBetPlayer1: number,
     maxBetPlayer2: number
 } {
+    // Округляем до двух знаков после запятой
     const maxBetPlayer1 = Math.floor((initBetPlayer2 * 1.00) * 100) / 100; // 100% от суммы ставок на Player2
     const maxBetPlayer2 = Math.floor((initBetPlayer1 * 1.00) * 100) / 100; // 100% от суммы ставок на Player1
     return { maxBetPlayer1, maxBetPlayer2 };
@@ -287,6 +295,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         });
 
         const updatedBetData = {
+            // Округляем до двух знаков после запятой
             oddsBetPlayer1: Math.floor((oddsPlayer1 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
             oddsBetPlayer2: Math.floor((oddsPlayer2 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
             totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
@@ -350,7 +359,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 }
 
 // Функция для балансировки перекрытий
-// Функция для балансировки перекрытий
 async function balanceOverlaps(betId: number) {
     console.log(`Начало balanceOverlaps для betId: ${betId}`);
 
@@ -386,7 +394,7 @@ async function balanceOverlaps(betId: number) {
                 const target = targetParticipants[i];
 
                 // Проверяем, что profit не равен overlap
-                if (Math.floor(target.profit) !== Math.floor(target.overlap)) {
+                if (Math.floor(target.profit * 100) / 100 !== Math.floor(target.overlap * 100) / 100) {
                     allProfitEqualOverlap = false; // Если найдена запись, где profit не равен overlap, продолжаем цикл
 
                     // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
@@ -401,7 +409,7 @@ async function balanceOverlaps(betId: number) {
                     // Если есть возможность добавить overlap
                     if (overlapToAdd > 0) {
                         // Вычисляем новое значение overlap
-                        const newOverlap = Math.floor(target.overlap + overlapToAdd);
+                        const newOverlap = Math.floor((target.overlap + overlapToAdd) * 100) / 100;
                         // Проверяем, что новое значение overlap не превышает profit
                         if (newOverlap > target.profit) {
                             throw new Error('Ошибка: overlap не может быть больше profit');
@@ -419,12 +427,12 @@ async function balanceOverlaps(betId: number) {
                         await prisma.bet.update({
                             where: { id: betId },
                             data: {
-                                [overlapField]: Math.floor(bet[overlapField] - overlapToAdd),
+                                [overlapField]: Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100,
                             },
                         });
 
                         // Обновляем объект bet в памяти
-                        bet[overlapField] = Math.floor(bet[overlapField] - overlapToAdd);
+                        bet[overlapField] = Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100;
 
                         // Обновляем локальные данные участника
                         targetParticipants[i].overlap = newOverlap;
@@ -452,7 +460,6 @@ async function balanceOverlaps(betId: number) {
 
     console.log(`Завершение balanceOverlaps для betId: ${betId}`);
 }
-
 
 // Функция для закрытия ставки
 export async function closeBet(betId: number, winnerId: number) {
@@ -568,6 +575,7 @@ export async function closeBet(betId: number, winnerId: number) {
                     await prisma.user.update({
                         where: { id: participant.userId },
                         data: {
+                            // Округляем до двух знаков после запятой
                             points: {
                                 increment: Math.floor(pointsToReturn * 100) / 100,
                             },
@@ -589,6 +597,7 @@ export async function closeBet(betId: number, winnerId: number) {
                         createdAt: participant.createdAt,
                         isCovered: participant.isCovered,
                         overlap: participant.overlap,
+                        // Округляем до двух знаков после запятой
                         return: Math.floor(pointsToReturn * 100) / 100,
                     },
                 });
@@ -598,6 +607,7 @@ export async function closeBet(betId: number, winnerId: number) {
             await prisma.betCLOSED.update({
                 where: { id: betClosed.id },
                 data: {
+                    // Округляем до двух знаков после запятой
                     margin: Math.floor(totalMargin * 100) / 100,
                 },
             });
@@ -615,6 +625,7 @@ export async function closeBet(betId: number, winnerId: number) {
             await prisma.globalData.update({
                 where: { id: 1 },
                 data: {
+                    // Округляем до двух знаков после запятой
                     margin: {
                         increment: Math.floor(bet.margin * 100) / 100,
                     },
