@@ -253,8 +253,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
         const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
 
-        const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
-        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? maxBetPlayer1 : maxBetPlayer2;
+        //const { maxBetPlayer1, maxBetPlayer2 } = calculateMaxBets(totalWithInitPlayer1, totalWithInitPlayer2);
+        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
 
         if (amount > maxAllowedBet) {
             throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
