@@ -350,6 +350,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 }
 
 // Функция для балансировки перекрытий
+// Функция для балансировки перекрытий
 async function balanceOverlaps(betId: number) {
     console.log(`Начало balanceOverlaps для betId: ${betId}`);
 
@@ -385,8 +386,7 @@ async function balanceOverlaps(betId: number) {
                 const target = targetParticipants[i];
 
                 // Проверяем, что profit не равен overlap
-                if (!areNumbersEqual(target.profit, target.overlap)) {
-
+                if (Math.floor(target.profit) !== Math.floor(target.overlap)) {
                     allProfitEqualOverlap = false; // Если найдена запись, где profit не равен overlap, продолжаем цикл
 
                     // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
@@ -401,7 +401,7 @@ async function balanceOverlaps(betId: number) {
                     // Если есть возможность добавить overlap
                     if (overlapToAdd > 0) {
                         // Вычисляем новое значение overlap
-                        const newOverlap = target.overlap + overlapToAdd;
+                        const newOverlap = Math.floor(target.overlap + overlapToAdd);
                         // Проверяем, что новое значение overlap не превышает profit
                         if (newOverlap > target.profit) {
                             throw new Error('Ошибка: overlap не может быть больше profit');
@@ -419,12 +419,12 @@ async function balanceOverlaps(betId: number) {
                         await prisma.bet.update({
                             where: { id: betId },
                             data: {
-                                [overlapField]: bet[overlapField] - overlapToAdd,
+                                [overlapField]: Math.floor(bet[overlapField] - overlapToAdd),
                             },
                         });
 
                         // Обновляем объект bet в памяти
-                        bet[overlapField] = bet[overlapField] - overlapToAdd;
+                        bet[overlapField] = Math.floor(bet[overlapField] - overlapToAdd);
 
                         // Обновляем локальные данные участника
                         targetParticipants[i].overlap = newOverlap;
@@ -452,6 +452,7 @@ async function balanceOverlaps(betId: number) {
 
     console.log(`Завершение balanceOverlaps для betId: ${betId}`);
 }
+
 
 // Функция для закрытия ставки
 export async function closeBet(betId: number, winnerId: number) {
