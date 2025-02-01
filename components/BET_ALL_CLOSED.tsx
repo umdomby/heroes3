@@ -20,18 +20,12 @@ interface BetCLOSED {
 }
 
 interface Props {
-    user: any;
     closedBets: BetCLOSED[];
 }
 
-export const BET_ALL_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
+export const BET_ALL_CLOSED: React.FC<Props> = ({ closedBets }) => {
     return (
         <div>
-            <div className="flex justify-between items-center">
-                <div>
-                    <p>Ваши баллы: {Math.floor(user.points * 100) / 100}</p>
-                </div>
-            </div>
 
             {closedBets.map((bet) => {
                 const formattedDate = new Date(bet.createdAt).toLocaleDateString();

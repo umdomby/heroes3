@@ -1,5 +1,3 @@
-'use admin';
-
 import React from 'react';
 import Link from 'next/link';
 import {ModeToggle} from "@/components/buttonTheme";
@@ -12,41 +10,26 @@ import {
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {getUserSession} from "@/components/lib/get-user-session";
-import {redirect} from "next/navigation";
-import {prisma} from "@/prisma/prisma-client";
+
 
 interface Props {
     className?: string;
 }
 
-export const Admin: React.FC<Props> = async ({className}) => {
-    const session = await getUserSession();
+export const Access_user: React.FC<Props> = ({className}) => {
 
-    if (!session) {
-        return redirect('/not-auth');
-    }
-
-
-    const user = await prisma.user.findFirst({where: {id: Number(session?.id)}});
-    if (user.role === 'ADMIN') {
         return (
-            <div className="flex items-center absolute right-[44%] mt-8">
+
                 <div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className="width-[20%]">
-                            <Button variant="outline" className="h-5">ADMIN</Button>
+                            <Button variant="outline" className="h-5">USER</Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56">
                             <DropdownMenuRadioGroup>
                                 <Link href="/">
                                     <DropdownMenuRadioItem value="home">
                                         HOME
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/bet-create">
-                                    <DropdownMenuRadioItem value="create-bet">
-                                        CREATE BET
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-closed">
@@ -83,8 +66,6 @@ export const Admin: React.FC<Props> = async ({className}) => {
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                </div>
             </div>
         );
-    }
 };

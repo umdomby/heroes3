@@ -1,5 +1,4 @@
 import { Header } from '@/components/header';
-import { Admin } from '@/components/admin';
 import type { Metadata } from 'next';
 import React, { Suspense } from 'react';
 
@@ -14,7 +13,6 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
     return (
         <main className="min-h-screen">
             <Suspense>
-                <Admin/>
                 <Header/>
             </Suspense>
             {children}

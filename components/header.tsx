@@ -19,6 +19,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {useSession} from "next-auth/react";
+import {Access_admin} from "@/components/access_admin";
+import {Access_user} from "@/components/access_user";
+import {Access_no} from "@/components/access_no";
 
 
 interface Props {
@@ -26,6 +30,8 @@ interface Props {
 }
 
 export const Header: React.FC<Props> = ({className}) => {
+
+    const { data: session } = useSession();
     const [openAuthModal, setOpenAuthModal] = React.useState(false);
 
     return (
@@ -54,63 +60,10 @@ export const Header: React.FC<Props> = ({className}) => {
                 {/* Правая часть */}
                 <div className="flex items-center gap-3">
                     <div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild className="width-[20%]">
-                                <Button variant="outline" className="h-5">SYSTEM</Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56">
-                                {/*<DropdownMenuLabel>Panel</DropdownMenuLabel>*/}
-                                {/*<DropdownMenuSeparator/>*/}
-                                <DropdownMenuRadioGroup>
-                                    <Link href="/">
-                                        <DropdownMenuRadioItem value="home">
-                                            HOME
-                                        </DropdownMenuRadioItem>
-                                    </Link>
-                                    <Link href="/bet-create">
-                                        <DropdownMenuRadioItem value="create-bet">
-                                           CREATE BET
-                                        </DropdownMenuRadioItem>
-                                    </Link>
-                                    <Link href="/bet-closed">
-                                        <DropdownMenuRadioItem value="bet-closed">
-                                            MY BET CLOSED
-                                        </DropdownMenuRadioItem>
-                                    </Link>
-                                    <Link href="/bet-all-closed">
-                                        <DropdownMenuRadioItem value="bet-closed">
-                                            BET ALL CLOSED
-                                        </DropdownMenuRadioItem>
-                                    </Link>
-                                    <Link href="/transfer-points">
-                                        <DropdownMenuRadioItem value="bet-closed">
-                                            TRANSFER POINTS
-                                        </DropdownMenuRadioItem>
-                                    </Link>
-                                    <Link href="/buy-pay-points">
-                                        <DropdownMenuRadioItem value="bet-closed">
-                                            BUY/PAY POINTS
-                                        </DropdownMenuRadioItem>
-                                    </Link>
-                                    {/*<Link href="/bet-closed">*/}
-                                    {/*    <DropdownMenuRadioItem value="bet-closed">*/}
-                                    {/*        ALL POINTS*/}
-                                    {/*    </DropdownMenuRadioItem>*/}
-                                    {/*</Link>*/}
-                                    <Link href="/contacts">
-                                        <DropdownMenuRadioItem value="bet-closed">
-                                            CONTACTS
-                                        </DropdownMenuRadioItem>
-                                    </Link>
-                                    <Link href="/rating">
-                                        <DropdownMenuRadioItem value="rating">
-                                            RATING
-                                        </DropdownMenuRadioItem>
-                                    </Link>
-                                    <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
-                                </DropdownMenuRadioGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {session?.user?.role === 'ADMIN' && <Access_admin/>}
+                        {session?.user?.role === 'USER' && <Access_user/>}
+                        {!session && <Access_no/>}
+
                     </div>
                     <div>
                         <AuthModal open={openAuthModal} onClose={() => setOpenAuthModal(false)}/>
@@ -119,6 +72,5 @@ export const Header: React.FC<Props> = ({className}) => {
                 </div>
             </Container>
         </header>
-    )
-        ;
+    );
 };
