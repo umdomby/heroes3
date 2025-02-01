@@ -49,11 +49,20 @@ interface Props {
 }
 
 export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
+    // Подсчитываем общую прибыль/потерю
+    const totalProfitLoss = closedBets.reduce((total, bet) => {
+        const userBets = bet.participantsCLOSED.filter((p) => p.userId === user.id);
+        return total + userBets.reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0);
+    }, 0);
+
     return (
         <div>
             <div className="flex justify-between items-center">
                 <div>
                     <p>Ваши баллы: {Math.floor(user.points * 100) / 100}</p>
+                    <p className={totalProfitLoss >= 0 ? 'text-green-500' : 'text-red-500'}>
+                        Общая прибыль/потеря: {Math.floor(totalProfitLoss * 100) / 100}
+                    </p>
                 </div>
             </div>
 
