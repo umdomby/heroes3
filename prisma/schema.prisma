@@ -26,8 +26,8 @@ model User {
   loginHistory      Json? // поле для хранения истории входов
   betsCreated       Bet[]                  @relation("BetsCreated")
   betsCLOSEDCreated BetCLOSED[]            @relation("BetsCLOSEDCreated")
-  orderP2PUser1     OrderP2P[]             @relation("OrderP2PUser1")
-  orderP2PUser2     OrderP2P[]             @relation("OrderP2PUser2") // Добавляем обратное отношение для user2
+  orderP2PUser1     OrderP2P[]             @relation("OrderP2PUser1") // Отношение для user1
+  orderP2PUser2     OrderP2P[]             @relation("OrderP2PUser2") // Отношение для user2
   betsPlaced        BetParticipant[]
   betsCLOSEDPlaced  BetParticipantCLOSED[]
   createdAt         DateTime               @default(now())
@@ -35,15 +35,16 @@ model User {
 }
 
 model OrderP2P {
-  id              Int      @id @default(autoincrement())
-  orderP2PUser1   User     @relation("OrderP2PUser1", fields: [orderP2PUser1Id], references: [id]) // создатель события
-  orderP2PUser1Id Int
-  orderP2PUser2   User     @relation("OrderP2PUser2", fields: [orderP2PUser2Id], references: [id]) // создатель события
-  orderP2PUser2Id Int
-  buySell         BuySell
-  pointsP2P       Float
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                Int            @id @default(autoincrement())
+  orderP2PUser1     User           @relation("OrderP2PUser1", fields: [orderP2PUser1Id], references: [id])
+  orderP2PUser1Id   Int
+  orderP2PUser2     User?          @relation("OrderP2PUser2", fields: [orderP2PUser2Id], references: [id])
+  orderP2PUser2Id   Int?
+  orderP2PBuySell   BuySell?
+  orderP2PPointsP2P Float?
+  orderP2PStatus    OrderP2PStatus @default(OPEN)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 model ContactDataEnum {
@@ -222,12 +223,16 @@ enum IsCovered {
   PENDING // overlap < profit
   CP
 }
-
 enum BuySell {
   BUY
   SELL
 }
-
+enum OrderP2PStatus {
+  OPEN
+  CLOSED
+  RETURN
+  CONTROL
+}
 enum PlayerChoice {
   PLAYER1
   PLAYER2
