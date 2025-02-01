@@ -152,6 +152,7 @@ export const authOptions: AuthOptions = {
           email: findUser.email,
           name: findUser.fullName,
           role: findUser.role,
+          cardId: findUser.cardId,
         };
       },
     }),
@@ -299,6 +300,7 @@ export const authOptions: AuthOptions = {
         token.id = String(findUser.id);
         token.email = findUser.email;
         token.role = findUser.role;
+        token.cardId = findUser.cardId;
       }
 
       return token;
@@ -307,6 +309,7 @@ export const authOptions: AuthOptions = {
       if (session?.user) {
         session.user.id = token.id;
         session.user.role = token.role;
+        token.cardId = findUser.cardId;
       }
 
       return session;
