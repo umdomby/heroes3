@@ -7,18 +7,17 @@ import Loading from "@/app/(root)/loading";
 import {HEROES_CLIENT} from "@/components/HEROES_CLIENT";
 import {getUserSession} from "@/components/lib/get-user-session";
 import {GlobalData} from "@/components/globalData";
+import {HEROES_CLIENT_NO_REG} from "@/components/HEROES_CLIENT_NO_REG";
 
 
 export default async function Home() {
 
     const session = await getUserSession();
+    let user = null
 
-    if (!session) {
-        return redirect('/not-auth');
+    if (session) {
+        user = await prisma.user.findFirst({where: {id: Number(session?.id)}});
     }
-
-
-    const user = await prisma.user.findFirst({where: {id: Number(session?.id)}});
 
     if (user) {
         return (
@@ -31,9 +30,12 @@ export default async function Home() {
         );
     } else {
         return (
-            <div>
-                123
-            </div>
+            <Container className="w-[100%]">
+                <Suspense fallback={<Loading/>}>
+                    <GlobalData />
+                    <HEROES_CLIENT_NO_REG />
+                </Suspense>
+            </Container>
         )
     }
 }

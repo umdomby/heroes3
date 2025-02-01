@@ -38,14 +38,14 @@ export const BET_ALL_CLOSED: React.FC<Props> = ({ closedBets }) => {
                         <Table>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[25%] ${player1Class}`}>
+                                    <TableCell className={`text-right overflow-hidden whitespace-nowrap w-[25%] ${player1Class}`}>
                                         <div>{bet.player1.name}</div>
                                     </TableCell>
-                                    <TableCell className={`text-left overflow-hidden whitespace-nowrap w-[15%] ${player1Class}`}>
-                                        <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
-                                    </TableCell>
-                                    <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[25%] ${player2Class}`}>
+                                    <TableCell className={`text-left overflow-hidden whitespace-nowrap w-[25%] ${player2Class}`}>
                                         <div>{bet.player2.name}</div>
+                                    </TableCell>
+                                    <TableCell className={`text-right overflow-hidden whitespace-nowrap w-[15%] ${player1Class}`}>
+                                        <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                     </TableCell>
                                     <TableCell className={`text-left overflow-hidden whitespace-nowrap w-[15%] ${player2Class}`}>
                                         <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
