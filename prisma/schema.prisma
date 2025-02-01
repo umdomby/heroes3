@@ -11,9 +11,9 @@ datasource db {
 
 model User {
   id                Int                    @id @default(autoincrement())
+  email             String                 @unique
   cardId            String                 @unique @default(uuid()) // Используем UUID для уникальности
   fullName          String
-  email             String                 @unique
   provider          String?
   providerId        String?
   password          String
