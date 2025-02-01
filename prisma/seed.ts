@@ -2,6 +2,14 @@ import { categories, products, productsItem, players } from './constants';
 import { prisma } from './prisma-client';
 import { hashSync } from 'bcrypt';
 
+function generateCardId() {
+  const length = 16; // Длина идентификатора, например, 16 цифр
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += Math.floor(Math.random() * 10); // Добавляем случайную цифру
+  }
+  return result;
+}
 
 async function up() {
   await prisma.user.createMany({
@@ -13,6 +21,7 @@ async function up() {
         password: hashSync('123123', 10),
         role: 'ADMIN',
         points: 1000,
+        cardId: generateCardId(),
       },
       {
         fullName: 'Pi33',
@@ -20,6 +29,7 @@ async function up() {
         password: hashSync('123123', 10),
         role: 'USER',
         points: 1000,
+        cardId: generateCardId(),
       },
       {
         fullName: 'Pi555',
@@ -27,6 +37,7 @@ async function up() {
         password: hashSync('123123', 10),
         role: 'USER',
         points: 1000,
+        cardId: generateCardId(),
       },
       {
         fullName: 'Yatsyk',
@@ -34,6 +45,7 @@ async function up() {
         password: hashSync('123123', 10),
         role: 'USER',
         points: 1000,
+        cardId: generateCardId(),
       },
       {
         fullName: '123',
@@ -41,6 +53,7 @@ async function up() {
         password: hashSync('123123', 10),
         role: 'USER',
         points: 1000,
+        cardId: generateCardId(),
       },
     ],
   });

@@ -11,6 +11,7 @@ datasource db {
 
 model User {
   id                Int                    @id @default(autoincrement())
+  cardId            String                 @unique @default(uuid()) // Используем UUID для уникальности
   fullName          String
   email             String                 @unique
   provider          String?
@@ -25,29 +26,22 @@ model User {
   loginHistory      Json? // поле для хранения истории входов
   betsCreated       Bet[]                  @relation("BetsCreated")
   betsCLOSEDCreated BetCLOSED[]            @relation("BetsCLOSEDCreated")
+  orderP2P          OrderP2P[]             @relation("CreatorOrderP2P")
   betsPlaced        BetParticipant[]
   betsCLOSEDPlaced  BetParticipantCLOSED[]
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
 }
 
-model PageP2P {
-  id        Int      @id @default(autoincrement())
-  user1     Int
-  user2     Int
-  chatP2P   Json?
-  points    Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model OrderP2P {
-  id        Int      @id @default(autoincrement())
-  user1     Int
-  user2     Int
-  points    Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                Int      @id @default(autoincrement())
+  creatorOrderP2P   User     @relation("CreatorOrderP2P", fields: [creatorOrderP2PId], references: [id]) // создатель события
+  creatorOrderP2PId Int
+  user1             Int
+  user2             Int
+  points            Float
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model ContactDataEnum {

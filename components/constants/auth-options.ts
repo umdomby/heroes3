@@ -9,6 +9,15 @@ import { prisma } from '@/prisma/prisma-client';
 import { compare, hashSync } from 'bcrypt';
 import { UserRole } from '@prisma/client';
 
+function generateCardId() {
+  const length = 16; // Длина идентификатора, например, 16 цифр
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += Math.floor(Math.random() * 10); // Добавляем случайную цифру
+  }
+  return result;
+}
+
 // Функция для проверки VPN
 async function checkVPN(ip: string): Promise<boolean> {
   try {
@@ -196,6 +205,7 @@ export const authOptions: AuthOptions = {
               provider: account?.provider,
               providerId: account?.providerAccountId,
               points: 0, // Устанавливаем points = 0, если используется VPN
+              cardId: generateCardId(),
               loginHistory: [
                 {
                   ip,
@@ -238,6 +248,7 @@ export const authOptions: AuthOptions = {
             provider: account?.provider,
             providerId: account?.providerAccountId,
             points, // Устанавливаем points
+            cardId: generateCardId(),
             loginHistory: [
               {
                 ip,
