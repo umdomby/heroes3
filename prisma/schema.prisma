@@ -26,7 +26,8 @@ model User {
   loginHistory      Json? // поле для хранения истории входов
   betsCreated       Bet[]                  @relation("BetsCreated")
   betsCLOSEDCreated BetCLOSED[]            @relation("BetsCLOSEDCreated")
-  orderP2P          OrderP2P[]             @relation("CreatorOrderP2P")
+  orderP2PUser1     OrderP2P[]             @relation("OrderP2PUser1")
+  orderP2PUser2     OrderP2P[]             @relation("OrderP2PUser2") // Добавляем обратное отношение для user2
   betsPlaced        BetParticipant[]
   betsCLOSEDPlaced  BetParticipantCLOSED[]
   createdAt         DateTime               @default(now())
@@ -34,14 +35,15 @@ model User {
 }
 
 model OrderP2P {
-  id                Int      @id @default(autoincrement())
-  creatorOrderP2P   User     @relation("CreatorOrderP2P", fields: [creatorOrderP2PId], references: [id]) // создатель события
-  creatorOrderP2PId Int
-  user1             Int
-  user2             Int
-  points            Float
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  orderP2PUser1   User     @relation("OrderP2PUser1", fields: [orderP2PUser1Id], references: [id]) // создатель события
+  orderP2PUser1Id Int
+  orderP2PUser2   User     @relation("OrderP2PUser2", fields: [orderP2PUser2Id], references: [id]) // создатель события
+  orderP2PUser2Id Int
+  buySell         BuySell
+  pointsP2P       Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model ContactDataEnum {
@@ -219,6 +221,11 @@ enum IsCovered {
   CLOSED // overlap = profit
   PENDING // overlap < profit
   CP
+}
+
+enum BuySell {
+  BUY
+  SELL
 }
 
 enum PlayerChoice {
