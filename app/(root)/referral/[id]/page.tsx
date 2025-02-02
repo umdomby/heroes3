@@ -2,33 +2,46 @@
 import { redirect } from 'next/navigation';
 import { getUserSession } from "@/components/lib/get-user-session";
 import { prisma } from "@/prisma/prisma-client";
-import axios from 'axios';
+import {getIpAddress, referralUserIpAddress} from "@/app/actions";
 
 export default async function ReferralPage({
-                                                params
-                                           }:{
-                                                params: Promise<{ id: string }>;
+                                               params,
+                                               req
+                                           }: {
+    params: { id: string };
+    req: any; // Убедитесь, что req имеет правильный тип
 }) {
-    const { id } = await params;
+    const userId = Number(params.id);
+    console.log("1111111111111111111111111 ");
+    console.log(req);
+    console.log('userId:', userId);
+
+    if (isNaN(userId)) {
+        console.error('Некорректный формат параметра id:', params.id);
+        return redirect('/');
+    }
+
     const session = await getUserSession();
 
     if (session) {
         return redirect('/');
     }
 
-    let ip = 'unknown';
+    // Получаем IP-адрес из заголовков запроса
+    const ip = await getIpAddress(req);
+    console.log('IP:', ip);
 
-    try {
-        const response = await axios.get('https://api.ipify.org?format=json');
-        ip = response.data.ip;
-    } catch (error) {
-        console.error('Ошибка при получении IP-адреса:', error);
+    // Проверяем, существует ли уже запись с таким IP-адресом для данного пользователя
+    const referralIpExists = await prisma.referralUserIpAddress.findFirst({
+        where: { referralIpAddress: ip }
+    });
+    console.log('referralIpExists:', referralIpExists);
+
+    if (referralIpExists) {
         return redirect('/');
     }
 
-    const userId = Number(id);
-    console.log('userId ' + userId)
-
+    // Проверяем, существует ли уже запись с таким IP-адресом в истории входов пользователей
     const allUsers = await prisma.user.findMany();
     let ipExists = false;
     for (const user of allUsers) {
@@ -45,26 +58,14 @@ export default async function ReferralPage({
         return redirect('/');
     }
 
-    const referralIpExists = await prisma.referralUserIpAddress.findFirst({
-        where: { referralIpAddress: String(ip) }
-    });
-    console.log('referralIpExists ' + referralIpExists)
-    if (referralIpExists) {
-        return redirect('/');
-    }
-
+    // Сохраняем IP-адрес пользователя
     try {
-        await prisma.referralUserIpAddress.create({
-            data: {
-                referralUserId: userId,
-                referralIpAddress: ip
-            }
-        });
+        await referralUserIpAddress(userId, ip);
     } catch (error) {
         console.error('Ошибка при сохранении IP адреса:', error);
         throw new Error('Не удалось сохранить IP адрес');
     }
 
-
     return redirect('/');
 }
+

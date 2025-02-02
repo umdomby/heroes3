@@ -707,6 +707,20 @@ export async function deletePlayer(playerId: number) {
     }
 }
 
+// Функция для получения IP-адреса из заголовков запроса
+export async function getIpAddress(req: any): Promise<string> {
+    let ip = 'unknown';
+    if (req && req.headers) {
+        ip =
+            (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+            (req.headers['x-real-ip'] as string) ||
+            req.socket?.remoteAddress ||
+            'unknown';
+    }
+    return ip;
+}
+
+// Функция для сохранения IP-адреса пользователя
 export async function referralUserIpAddress(userId: number, ipAddress: string) {
     try {
         // Проверяем, существует ли уже запись с таким IP-адресом для данного пользователя
@@ -733,7 +747,7 @@ export async function referralUserIpAddress(userId: number, ipAddress: string) {
         console.log('IP адрес успешно сохранен для пользователя:', userId);
 
         // Обновляем кэш
-        revalidatePath('/users');
+        // revalidatePath('/');
     } catch (error) {
         console.error('Ошибка при сохранении IP адреса:', error);
         throw new Error('Не удалось сохранить IP адрес');
