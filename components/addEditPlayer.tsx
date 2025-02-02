@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { addEditPlayer, deletePlayer, fetchPlayers } from '@/app/actions';
+import React, { useState } from 'react';
+import { addEditPlayer, deletePlayer } from '@/app/actions';
 import { Player, User } from "@prisma/client";
 import { Input, Button } from "@/components/ui";
 import {
@@ -14,12 +14,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 
 interface Props {
     user: User;
-    initialPlayers: Player[];
+    players: Player[];
     className?: string;
 }
 
-export const AddEditPlayer: React.FC<Props> = ({ user, initialPlayers, className }) => {
-    const [players, setPlayers] = useState<Player[]>(initialPlayers);
+export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => {
     const [playerName, setPlayerName] = useState('');
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
     const [message, setMessage] = useState('');
@@ -28,17 +27,9 @@ export const AddEditPlayer: React.FC<Props> = ({ user, initialPlayers, className
     const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
     const [confirmName, setConfirmName] = useState('');
 
-    const updatePlayersList = async () => {
-        try {
-            const updatedPlayers = await fetchPlayers();
-            setPlayers(updatedPlayers);
-        } catch (error) {
-            console.error('Ошибка при обновлении списка игроков:', error);
-        }
-    };
-
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
+        console.log('Отправка:', { selectedPlayerId, playerName }); // Логирование значений
         if (!playerName.trim()) {
             setMessage('Имя игрока не может быть пустым');
             setMessageType('error');
@@ -48,11 +39,6 @@ export const AddEditPlayer: React.FC<Props> = ({ user, initialPlayers, className
             const response = await addEditPlayer(selectedPlayerId, playerName);
             setMessage(response.message);
             setMessageType(response.success ? 'success' : 'error');
-            if (response.success) {
-                await updatePlayersList(); // Обновляем список игроков
-                setPlayerName('');
-                setSelectedPlayerId(null);
-            }
         } catch (error) {
             console.error('Не удалось сохранить игрока:', error);
             setMessage('Не удалось сохранить игрока');
@@ -78,7 +64,6 @@ export const AddEditPlayer: React.FC<Props> = ({ user, initialPlayers, className
                 setMessageType('success');
                 setIsDialogOpen(false);
                 setConfirmName('');
-                await updatePlayersList(); // Обновляем список игроков
             } catch (error) {
                 console.error('Не удалось удалить игрока:', error);
                 setMessage('Не удалось удалить игрока');
