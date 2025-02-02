@@ -125,7 +125,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                             <div className="space-y-1">
                                 {referrals.map((referral, index) => (
                                     <div key={index} className="p-1 border border-gray-300 rounded-lg">
-                                        <p><strong>IP адрес:</strong> {referral.referralIpAddress}, <strong>Дата создания:</strong> {new Date(referral.createdAt).toLocaleString()}</p>
+                                        <p><strong>IP:</strong> {referral.referralIpAddress}, <strong>Дата:</strong> {new Date(referral.createdAt).toLocaleString()}</p>
                                     </div>
                                 ))}
                             </div>

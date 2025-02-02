@@ -195,6 +195,7 @@ model ReferralUserIpAddress {
   userReferral      User     @relation(fields: [referralUserId], references: [id])
   referralUserId    Int
   referralIpAddress String
+  referralStatus    Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
