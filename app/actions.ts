@@ -660,29 +660,34 @@ export async function closeBet(betId: number, winnerId: number) {
 }
 
 // Функция для добавления и редактирование имен игроков, админом
+export async function fetchPlayers() {
+    try {
+        const players = await prisma.player.findMany();
+        return players;
+    } catch (error) {
+        console.error('Ошибка при получении списка игроков:', error);
+        throw new Error('Не удалось получить список игроков');
+    }
+}
 export async function addEditPlayer(playerId: number | null, playerName: string) {
     if (!playerName) {
         throw new Error('Имя игрока обязательно');
     }
     try {
-        // Проверяем, существует ли игрок с таким именем
         const existingPlayer = await prisma.player.findUnique({
             where: { name: playerName },
         });
 
         if (existingPlayer) {
-            // Уведомляем клиента, что игрок с таким именем уже существует
             return { success: false, message: 'Игрок с таким именем уже существует' };
         }
 
         if (playerId) {
-            // Редактируем существующего игрока
             await prisma.player.update({
                 where: { id: playerId },
                 data: { name: playerName },
             });
         } else {
-            // Добавляем нового игрока
             await prisma.player.create({
                 data: { name: playerName },
             });
