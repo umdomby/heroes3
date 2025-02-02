@@ -4,6 +4,7 @@ import { getUserSession } from '@/components/lib/get-user-session';
 import { PlayerChoice, Prisma, IsCovered, BetParticipant, Bet } from '@prisma/client';
 import { hashSync } from 'bcrypt';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import axios from "axios";
 
 const MARGIN = parseFloat(process.env.MARGIN || '0.05');
 
@@ -708,14 +709,15 @@ export async function deletePlayer(playerId: number) {
 }
 
 // Функция для получения IP-адреса из заголовков запроса
-export async function getIpAddress(req: any): Promise<string> {
+export async function getIpAddress() {
     let ip = 'unknown';
-    if (req && req.headers) {
-        ip =
-            (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
-            (req.headers['x-real-ip'] as string) ||
-            req.socket?.remoteAddress ||
-            'unknown';
+    try {
+        const response = await axios.get('https://api.ipify.org?format=json');
+        ip = response.data.ip;
+        console.error('IP-адрес:', ip);
+    } catch (error) {
+        console.error('Ошибка при получении IP-адреса:', error);
+        ip = 'unknown';
     }
     return ip;
 }

@@ -5,19 +5,16 @@ import { prisma } from "@/prisma/prisma-client";
 import {getIpAddress, referralUserIpAddress} from "@/app/actions";
 
 export default async function ReferralPage({
-                                               params,
-                                               req
+                                               params
                                            }: {
-    params: { id: string };
-    req: any; // Убедитесь, что req имеет правильный тип
+    params: Promise<{ id: string }>;
 }) {
-    const userId = Number(params.id);
-    console.log("1111111111111111111111111 ");
-    console.log(req);
+    const { id } = await params;
+    const userId = Number(id);
     console.log('userId:', userId);
 
     if (isNaN(userId)) {
-        console.error('Некорректный формат параметра id:', params.id);
+        console.error('Некорректный формат параметра id:', id);
         return redirect('/');
     }
 
@@ -28,7 +25,7 @@ export default async function ReferralPage({
     }
 
     // Получаем IP-адрес из заголовков запроса
-    const ip = await getIpAddress(req);
+    const ip = await getIpAddress();
     console.log('IP:', ip);
 
     // Проверяем, существует ли уже запись с таким IP-адресом для данного пользователя
@@ -55,6 +52,10 @@ export default async function ReferralPage({
     }
 
     if (ipExists) {
+        return redirect('/');
+    }
+
+    if(ip === 'unknown' || ip === 'undefined') {
         return redirect('/');
     }
 

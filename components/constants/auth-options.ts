@@ -154,23 +154,24 @@ export const authOptions: AuthOptions = {
         }
 
         let ip = '';
-        if (req && req.headers) {
-          // Получаем IP-адрес из заголовков запроса
-          ip =
-              (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
-              (req.headers['x-real-ip'] as string) ||
-              req.socket?.remoteAddress ||
-              'unknown';
-        } else {
+        // if (req && req.headers) {
+        //   // Получаем IP-адрес из заголовков запроса
+        //   ip =
+        //       (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+        //       (req.headers['x-real-ip'] as string) ||
+        //       req.socket?.remoteAddress ||
+        //       'unknown';
+        // } else {
           // Если req недоступен, используем сторонний сервис для получения IP-адреса
           try {
             const response = await axios.get('https://api.ipify.org?format=json');
             ip = response.data.ip;
+            console.error('IP-адрес:', ip);
           } catch (error) {
             console.error('Ошибка при получении IP-адреса:', error);
             ip = 'unknown';
           }
-        }
+        //}
 
         console.log('IP-адрес:', ip);
 
