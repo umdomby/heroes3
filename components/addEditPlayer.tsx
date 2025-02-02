@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { addEditPlayer, deletePlayer } from '@/app/actions';
 import { Player, User } from "@prisma/client";
 import { Input, Button } from "@/components/ui";
@@ -19,6 +19,7 @@ interface Props {
 }
 
 export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => {
+    const [player, setPlayer] = React.useState<Player[]>(players);
     const [playerName, setPlayerName] = useState('');
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
     const [message, setMessage] = useState('');
@@ -26,6 +27,10 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
     const [confirmName, setConfirmName] = useState('');
+
+    useEffect(() => {
+        setPlayer(players);
+    }, [players]);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -106,7 +111,7 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {players.map((player) => (
+                    {player.map((player) => (
                         <TableRow key={player.id}>
                             <TableCell>{player.name}</TableCell>
                             <TableCell>
