@@ -194,7 +194,7 @@ model ReferralUserIpAddress {
   id                Int      @id @default(autoincrement())
   userReferral      User     @relation(fields: [referralUserId], references: [id])
   referralUserId    Int
-  referralIpAddress Json?
+  referralIpAddress String
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

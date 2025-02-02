@@ -709,9 +709,30 @@ export async function deletePlayer(playerId: number) {
 
 export async function referralUserIpAddress(userId: number, ipAddress: string) {
     try {
-        // await prisma.referralUserIpAddress.update({
-        //     where: { referralUserId: userId },
-        // });
+        // Проверяем, существует ли уже запись с таким IP-адресом для данного пользователя
+        const existingEntry = await prisma.referralUserIpAddress.findFirst({
+            where: {
+                referralUserId: userId,
+                referralIpAddress: ipAddress,
+            },
+        });
+
+        if (existingEntry) {
+            console.log('Запись с таким IP-адресом уже существует для данного пользователя');
+            return;
+        }
+
+        // Создаем новую запись в таблице ReferralUserIpAddress
+        await prisma.referralUserIpAddress.create({
+            data: {
+                referralUserId: userId,
+                referralIpAddress: ipAddress,
+            },
+        });
+
+        console.log('IP адрес успешно сохранен для пользователя:', userId);
+
+        // Обновляем кэш
         revalidatePath('/users');
     } catch (error) {
         console.error('Ошибка при сохранении IP адреса:', error);

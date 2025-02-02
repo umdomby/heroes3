@@ -4,6 +4,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import axios from 'axios';
 import { prisma } from '@/prisma/prisma-client';
 import { compare, hashSync } from 'bcrypt';
+import { checkVPN } from '@/components/constants/checkVPN';
 // Функция для генерации уникального идентификатора карты
 async function generateUniqueCardId(): Promise<string> {
   const length = 16; // Длина идентификатора карты
@@ -28,21 +29,6 @@ async function generateUniqueCardId(): Promise<string> {
   }
 
   return cardId;
-}
-
-// Функция для проверки VPN
-async function checkVPN(ip: string): Promise<boolean> {
-  try {
-    const response = await axios.get(`https://v2.api.iphub.info/ip/${ip}`, {
-      headers: {
-        'X-Key': process.env.IPHUB_API_KEY!, // Ваш API-ключ от IPHub
-      },
-    });
-    return response.data.block === 1; // Если block === 1, то это VPN/прокси
-  } catch (error) {
-    console.error('Ошибка при проверке VPN:', error);
-    return false;
-  }
 }
 
 // Функция для обновления истории входов
