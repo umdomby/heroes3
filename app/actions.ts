@@ -771,6 +771,11 @@ export async function referralGet() {
             },
         });
 
+        // Check if the user was found
+        if (!findUser) {
+            throw new Error('Пользователь не найден в базе данных');
+        }
+
         // Fetch referral IP addresses associated with the user
         const referrals = await prisma.referralUserIpAddress.findMany({
             where: {
