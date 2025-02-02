@@ -22,6 +22,11 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
+        console.log('Submitting:', { selectedPlayerId, playerName }); // Логирование значений
+        if (!playerName.trim()) {
+            alert('Player name cannot be empty');
+            return;
+        }
         try {
             await addEditPlayer(selectedPlayerId, playerName);
             alert('Player saved successfully');

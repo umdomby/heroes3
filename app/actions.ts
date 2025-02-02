@@ -661,6 +661,9 @@ export async function closeBet(betId: number, winnerId: number) {
 
 // Функция для добавления и редактирование имен игроков, админом
 export async function addEditPlayer(playerId: number | null, playerName: string) {
+    if (!playerName) {
+        throw new Error('Player name is required');
+    }
     try {
         if (playerId) {
             // Edit existing player
@@ -676,6 +679,6 @@ export async function addEditPlayer(playerId: number | null, playerName: string)
         }
     } catch (error) {
         console.error('Error:', error);
-        throw new Error('Failed to update');
+        throw new Error('Failed to update player');
     }
 }
