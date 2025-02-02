@@ -1,8 +1,8 @@
+"use server";
 import { redirect } from 'next/navigation';
-import { getSession } from 'next-auth/react';
-import AddEditPlayer from "@/components/addEditPlayer";
 import {getUserSession} from "@/components/lib/get-user-session";
 import {prisma} from "@/prisma/prisma-client";
+import {AddEditPlayer} from "@/components/addEditPlayer";
 
 
 export default async function AddPlayerPage() {
@@ -17,6 +17,7 @@ export default async function AddPlayerPage() {
     if (user?.role !== 'ADMIN') {
         return redirect('/');
     }
+    const players = await prisma.player.findMany();
 
-    return <AddEditPlayer />;
+    return <AddEditPlayer user={user} players={players} />;
 }
