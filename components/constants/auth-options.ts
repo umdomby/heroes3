@@ -1,14 +1,9 @@
 import { AuthOptions } from 'next-auth';
-import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import requestIp from 'request-ip';
 import axios from 'axios';
-
 import { prisma } from '@/prisma/prisma-client';
 import { compare, hashSync } from 'bcrypt';
-import { UserRole } from '@prisma/client';
-
 // Функция для генерации уникального идентификатора карты
 async function generateUniqueCardId(): Promise<string> {
   const length = 16; // Длина идентификатора карты
