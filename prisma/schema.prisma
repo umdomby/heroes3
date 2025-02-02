@@ -196,6 +196,7 @@ model ReferralUserIpAddress {
   referralUserId    Int
   referralIpAddress String
   referralStatus    Boolean  @default(false)
+  referralPoints    Float    @default(0)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

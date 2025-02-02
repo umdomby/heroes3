@@ -128,6 +128,45 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
+        // Получаем IP-адрес пользователя
+        // let ip = '';
+        // try {
+        //   const response = await axios.get('https://api.ipify.org?format=json');
+        //   ip = response.data.ip;
+        //   console.error('IP-адрес:', ip);
+        // } catch (error) {
+        //   console.error('Ошибка при получении IP-адреса:', error);
+        //   ip = 'unknown';
+        // }
+        //
+        // // Проверяем, существует ли IP-адрес в модели ReferralUserIpAddress
+        // const referralEntry = await prisma.referralUserIpAddress.findFirst({
+        //   where: {
+        //     referralStatus: false,
+        //     referralIpAddress: ip,
+        //   },
+        // });
+        //
+        // if (referralEntry) {
+        //   // Если IP-адрес существует, увеличиваем баллы для пользователя, связанного с рефералом
+        //   await prisma.user.update({
+        //     where: { id: referralEntry.referralUserId },
+        //     data: {
+        //       points: {
+        //         increment: Number(process.env.REFERRAL) || 10, // Преобразуем в число и добавляем 10 баллов по умолчанию
+        //       },
+        //     },
+        //   });
+        //   // Обновляем статус реферала отдельно
+        //   await prisma.referralUserIpAddress.update({
+        //     where: { id: referralEntry.id }, // Указываем уникальный идентификатор записи
+        //     data: {
+        //       referralStatus: true, // Устанавливаем referralStatus в true
+        //       referralPoints: Number(process.env.REFERRAL) || 10,
+        //     },
+        //   });
+        // }
+
         return {
           id: findUser.id,
           email: findUser.email,
@@ -154,26 +193,43 @@ export const authOptions: AuthOptions = {
         }
 
         let ip = '';
-        // if (req && req.headers) {
-        //   // Получаем IP-адрес из заголовков запроса
-        //   ip =
-        //       (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
-        //       (req.headers['x-real-ip'] as string) ||
-        //       req.socket?.remoteAddress ||
-        //       'unknown';
-        // } else {
-          // Если req недоступен, используем сторонний сервис для получения IP-адреса
-          try {
-            const response = await axios.get('https://api.ipify.org?format=json');
-            ip = response.data.ip;
-            console.error('IP-адрес:', ip);
-          } catch (error) {
-            console.error('Ошибка при получении IP-адреса:', error);
-            ip = 'unknown';
-          }
-        //}
-
+        try {
+          const response = await axios.get('https://api.ipify.org?format=json');
+          ip = response.data.ip;
+          console.error('IP-адрес:', ip);
+        } catch (error) {
+          console.error('Ошибка при получении IP-адреса:', error);
+          ip = 'unknown';
+        }
         console.log('IP-адрес:', ip);
+
+        // Проверяем, существует ли IP-адрес в модели ReferralUserIpAddress
+        const referralEntry = await prisma.referralUserIpAddress.findFirst({
+          where: {
+            referralStatus: false,
+            referralIpAddress: ip,
+          },
+        });
+
+        if (referralEntry) {
+          // Если IP-адрес существует, увеличиваем баллы для пользователя, связанного с рефералом
+          await prisma.user.update({
+            where: { id: referralEntry.referralUserId },
+            data: {
+              points: {
+                increment: Number(process.env.REFERRAL) || 10, // Преобразуем в число и добавляем 10 баллов по умолчанию
+              },
+            },
+          });
+          // Обновляем статус реферала отдельно
+          await prisma.referralUserIpAddress.update({
+            where: { id: referralEntry.id }, // Указываем уникальный идентификатор записи
+            data: {
+              referralStatus: true, // Устанавливаем referralStatus в true
+              referralPoints: Number(process.env.REFERRAL) || 10,
+            },
+          });
+        }
 
         const isVPN = await checkVPN(ip); // Проверяем VPN
         console.log('Результат проверки VPN:', isVPN); // Логируем результат проверки VPN
@@ -198,7 +254,7 @@ export const authOptions: AuthOptions = {
         // Если используется VPN, points = 0
         if (isVPN) {
           console.log('Используется VPN. Устанавливаем points = 0');
-          const newUser = await prisma.user.create({
+          await prisma.user.create({
             data: {
               email: user.email,
               fullName: user.name || 'User #' + user.id,
@@ -241,7 +297,7 @@ export const authOptions: AuthOptions = {
         console.log('IP уже был в истории входов:', ipExists);
         console.log('Устанавливаем points:', points);
 
-        const newUser = await prisma.user.create({
+        await prisma.user.create({
           data: {
             email: user.email,
             fullName: user.name || 'User #' + user.id,

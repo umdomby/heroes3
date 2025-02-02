@@ -76,16 +76,17 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                 <div className="flex flex-col md:flex-row gap-3 w-full">
                     {/* Левая колонка: Форма */}
                     <div className="w-full md:w-1/2 p-4 rounded-lg">
-                        <Title text={`Личные данные | #${data.id}`} size="md" className="font-bold" />
+                        <Title text={`Личные данные | #${data.id}`} size="md" className="font-bold"/>
 
                         <FormProvider {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
-                                <FormInput name="email" label="E-Mail" required />
-                                <FormInput name="fullName" label="Полное имя" required />
-                                <FormInput type="password" name="password" label="Новый пароль" required />
-                                <FormInput type="password" name="confirmPassword" label="Повторите пароль" required />
+                                <FormInput name="email" label="E-Mail" required/>
+                                <FormInput name="fullName" label="Полное имя" required/>
+                                <FormInput type="password" name="password" label="Новый пароль" required/>
+                                <FormInput type="password" name="confirmPassword" label="Повторите пароль" required/>
 
-                                <Button disabled={form.formState.isSubmitting} className="text-base mt-10" type="submit">
+                                <Button disabled={form.formState.isSubmitting} className="text-base mt-10"
+                                        type="submit">
                                     Сохранить
                                 </Button>
 
@@ -104,12 +105,14 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
                     {/* Правая колонка: История входов */}
                     <div className="w-full md:w-1/2 p-4 rounded-lg">
-                        <Title text="История входов" size="md" className="font-bold mb-4" />
+                        <Title text="История входов" size="md" className="font-bold mb-4"/>
                         {loginHistory.length > 0 ? (
                             <div className="space-y-1">
                                 {loginHistory.map((entry: any, index: number) => (
                                     <div key={index} className="p-1 border border-gray-300 rounded-lg">
-                                        <p><strong>IP:</strong> {entry.ip}, {new Date(entry.lastLogin).toLocaleString()}, <strong>VPN:</strong> {entry.vpn ? 'Да' : 'Нет'}, {entry.loginCount}</p>
+                                        <p>
+                                            <strong>IP:</strong> {entry.ip}, {new Date(entry.lastLogin).toLocaleString()}, <strong>VPN:</strong> {entry.vpn ? 'Да' : 'Нет'}, {entry.loginCount}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
@@ -120,12 +123,14 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
                     {/* IP address */}
                     <div className="w-full md:w-1/2 p-4 rounded-lg">
-                        <Title text="IP адреса рефералов" size="md" className="font-bold mb-4" />
+                        <Title text="IP адреса рефералов" size="md" className="font-bold mb-4"/>
                         {referrals.length > 0 ? (
                             <div className="space-y-1">
                                 {referrals.map((referral, index) => (
                                     <div key={index} className="p-1 border border-gray-300 rounded-lg">
-                                        <p><strong>IP:</strong> {referral.referralIpAddress}, <strong>Дата:</strong> {new Date(referral.createdAt).toLocaleString()}</p>
+                                        <p className={referral.referralStatus ? 'text-green-600' : 'text-gray-400'}>
+                                            <strong>IP:</strong> {referral.referralIpAddress}, <strong>Дата:</strong> {new Date(referral.createdAt).toLocaleString()}, +{referral.referralPoints}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
