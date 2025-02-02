@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { TFormRegisterValues, formRegisterSchema } from './modals/auth-modal/forms/schemas';
 import { User } from '@prisma/client';
@@ -11,7 +11,7 @@ import { Container } from './container';
 import { Title } from './title';
 import { FormInput } from './form';
 import { Button } from '@/components/ui';
-import {referralGet, updateUserInfo} from '@/app/actions';
+import { referralGet, updateUserInfo } from '@/app/actions';
 
 interface Props {
     data: User;
@@ -28,6 +28,21 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         },
     });
 
+    const [referrals, setReferrals] = useState<any[]>([]); // State to hold referral data
+
+    useEffect(() => {
+        const fetchReferrals = async () => {
+            try {
+                const referralData = await referralGet();
+                setReferrals(referralData);
+            } catch (error) {
+                console.error('Error fetching referral data:', error);
+            }
+        };
+
+        fetchReferrals();
+    }, []);
+
     const onSubmit = async (data: TFormRegisterValues) => {
         try {
             await updateUserInfo({
@@ -36,11 +51,11 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                 password: data.password,
             });
 
-            toast.error('Данные обновлены 📝', {
+            toast.success('Данные обновлены 📝', {
                 icon: '✅',
             });
         } catch (error) {
-            return toast.error('Ошибка при обновлении данных', {
+            toast.error('Ошибка при обновлении данных', {
                 icon: '❌',
             });
         }
@@ -52,18 +67,8 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         });
     };
 
-    const referral = async () => {
-        try {
-         await referralGet();
-        }catch (e) {
-            console.log(e)
-        }
-        return data
-    }
-    console.log(referral)
     // Проверяем, что data.loginHistory является массивом
     const loginHistory = Array.isArray(data.loginHistory) ? data.loginHistory : [];
-
 
     return (
         <Container className="w-[98%]">
@@ -77,7 +82,6 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                             <form onSubmit={form.handleSubmit(onSubmit)}>
                                 <FormInput name="email" label="E-Mail" required />
                                 <FormInput name="fullName" label="Полное имя" required />
-
                                 <FormInput type="password" name="password" label="Новый пароль" required />
                                 <FormInput type="password" name="confirmPassword" label="Повторите пароль" required />
 
@@ -101,7 +105,6 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                     {/* Правая колонка: История входов */}
                     <div className="w-full md:w-1/2 p-4 rounded-lg">
                         <Title text="История входов" size="md" className="font-bold mb-4" />
-                        {/*<Title text="Для получения бонусов не злоупотребляйте созданием аккаунтов :) Хороших ставок!" size="xs" className="font-bold mb-4" />*/}
                         {loginHistory.length > 0 ? (
                             <div className="space-y-1">
                                 {loginHistory.map((entry: any, index: number) => (
@@ -114,9 +117,21 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                             <p>История входов отсутствует.</p>
                         )}
                     </div>
+
                     {/* IP address */}
                     <div className="w-full md:w-1/2 p-4 rounded-lg">
-                            {/*const referral*/}
+                        <Title text="IP адреса рефералов" size="md" className="font-bold mb-4" />
+                        {referrals.length > 0 ? (
+                            <div className="space-y-1">
+                                {referrals.map((referral, index) => (
+                                    <div key={index} className="p-1 border border-gray-300 rounded-lg">
+                                        <p><strong>IP адрес:</strong> {referral.referralIpAddress}, <strong>Дата создания:</strong> {new Date(referral.createdAt).toLocaleString()}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p>Нет данных о рефералах.</p>
+                        )}
                     </div>
                 </div>
             </div>

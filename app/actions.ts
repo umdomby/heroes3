@@ -714,7 +714,7 @@ export async function getIpAddress() {
     try {
         const response = await axios.get('https://api.ipify.org?format=json');
         ip = response.data.ip;
-        console.error('IP-адрес:', ip);
+        console.log('IP-адрес:', ip);
     } catch (error) {
         console.error('Ошибка при получении IP-адреса:', error);
         ip = 'unknown';
@@ -763,20 +763,24 @@ export async function referralGet() {
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
+
+        // Find the user based on the current session
         const findUser = await prisma.user.findFirst({
             where: {
                 id: Number(currentUser.id),
             },
         });
 
-        const referal = await prisma.referralUserIpAddress.findMany({
+        // Fetch referral IP addresses associated with the user
+        const referrals = await prisma.referralUserIpAddress.findMany({
             where: {
-               referralIpAddress: findUser.id,
+                referralUserId: findUser.id, // Corrected to use referralUserId
             },
         });
-        return referal
+
+        return referrals; // Return the list of referral IP addresses
     } catch (error) {
-        console.error('Ошибка при сохранении IP адреса:', error);
-        throw new Error('Не удалось сохранить IP адрес');
+        console.error('Ошибка при получении IP адресов:', error);
+        throw new Error('Не удалось получить IP адреса');
     }
 }
