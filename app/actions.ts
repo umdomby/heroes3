@@ -756,3 +756,27 @@ export async function referralUserIpAddress(userId: number, ipAddress: string) {
     }
 }
 
+
+export async function referralGet() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+        const findUser = await prisma.user.findFirst({
+            where: {
+                id: Number(currentUser.id),
+            },
+        });
+
+        const referal = await prisma.referralUserIpAddress.findMany({
+            where: {
+               referralIpAddress: findUser.id,
+            },
+        });
+        return referal
+    } catch (error) {
+        console.error('Ошибка при сохранении IP адреса:', error);
+        throw new Error('Не удалось сохранить IP адрес');
+    }
+}

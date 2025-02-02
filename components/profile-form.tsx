@@ -11,7 +11,7 @@ import { Container } from './container';
 import { Title } from './title';
 import { FormInput } from './form';
 import { Button } from '@/components/ui';
-import { updateUserInfo } from '@/app/actions';
+import {referralGet, updateUserInfo} from '@/app/actions';
 
 interface Props {
     data: User;
@@ -52,11 +52,21 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         });
     };
 
+    const referral = async () => {
+        try {
+         await referralGet();
+        }catch (e) {
+            console.log(e)
+        }
+        return data
+    }
+    console.log(referral)
     // Проверяем, что data.loginHistory является массивом
     const loginHistory = Array.isArray(data.loginHistory) ? data.loginHistory : [];
 
+
     return (
-        <Container className="my-10">
+        <Container className="w-[98%]">
             <div className="flex flex-col gap-3 w-full mt-10">
                 <div className="flex flex-col md:flex-row gap-3 w-full">
                     {/* Левая колонка: Форма */}
@@ -103,6 +113,10 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                         ) : (
                             <p>История входов отсутствует.</p>
                         )}
+                    </div>
+                    {/* IP address */}
+                    <div className="w-full md:w-1/2 p-4 rounded-lg">
+                            {/*const referral*/}
                     </div>
                 </div>
             </div>
