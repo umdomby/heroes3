@@ -691,7 +691,6 @@ export async function addEditPlayer(playerId: number | null, playerName: string)
         throw new Error('Не удалось обновить игрока');
     }
 }
-
 export async function deletePlayer(playerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {throw new Error('У вас нет прав для выполнения этой операции');}
@@ -705,6 +704,18 @@ export async function deletePlayer(playerId: number) {
     } catch (error) {
         console.error('Ошибка при удалении игрока:', error);
         throw new Error('Не удалось удалить игрока');
+    }
+}
+
+export async function referralUserIpAddress(userId: number, ipAddress: string) {
+    try {
+        // await prisma.referralUserIpAddress.update({
+        //     where: { referralUserId: userId },
+        // });
+        revalidatePath('/users');
+    } catch (error) {
+        console.error('Ошибка при сохранении IP адреса:', error);
+        throw new Error('Не удалось сохранить IP адрес');
     }
 }
 

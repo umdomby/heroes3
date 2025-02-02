@@ -10,31 +10,32 @@ datasource db {
 }
 
 model User {
-  id                Int                    @id @default(autoincrement())
-  email             String                 @unique
-  cardId            String                 @unique @default(uuid()) // Используем UUID для уникальности
-  fullName          String
-  provider          String?
-  providerId        String?
-  password          String
-  role              UserRole               @default(USER)
-  img               String?
-  points            Float                  @default(1000) // баллы пользователя
-  p2pPlus           Int?                   @default(0)
-  p2pMinus          Int?                   @default(0)
-  contact           Json? // поле для хранения контактных данных
-  loginHistory      Json? // поле для хранения истории входов
-  betsCreated       Bet[]                  @relation("BetsCreated")
-  betsCLOSEDCreated BetCLOSED[]            @relation("BetsCLOSEDCreated")
-  orderP2PUser1     OrderP2P[]             @relation("OrderP2PUser1") // Отношение для user1
-  orderP2PUser2     OrderP2P[]             @relation("OrderP2PUser2") // Отношение для user2
-  transferUser1     Transfer[]             @relation("TransferUser1") // Отношение для user1
-  transferUser2     Transfer[]             @relation("TransferUser2") // Отношение для user2
-  betsPlaced        BetParticipant[]
-  betsCLOSEDPlaced  BetParticipantCLOSED[]
-  userP2PMoney      Json?
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
+  id                    Int                     @id @default(autoincrement())
+  email                 String                  @unique
+  cardId                String                  @unique @default(uuid()) // Используем UUID для уникальности
+  fullName              String
+  provider              String?
+  providerId            String?
+  password              String
+  role                  UserRole                @default(USER)
+  img                   String?
+  points                Float                   @default(1000) // баллы пользователя
+  p2pPlus               Int?                    @default(0)
+  p2pMinus              Int?                    @default(0)
+  contact               Json? // поле для хранения контактных данных
+  loginHistory          Json? // поле для хранения истории входов
+  betsCreated           Bet[]                   @relation("BetsCreated")
+  betsCLOSEDCreated     BetCLOSED[]             @relation("BetsCLOSEDCreated")
+  orderP2PUser1         OrderP2P[]              @relation("OrderP2PUser1") // Отношение для user1
+  orderP2PUser2         OrderP2P[]              @relation("OrderP2PUser2") // Отношение для user2
+  transferUser1         Transfer[]              @relation("TransferUser1") // Отношение для user1
+  transferUser2         Transfer[]              @relation("TransferUser2") // Отношение для user2
+  betsPlaced            BetParticipant[]
+  betsCLOSEDPlaced      BetParticipantCLOSED[]
+  userP2PMoney          Json?
+  referralUserIpAddress ReferralUserIpAddress[]
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
 }
 
 model OrderP2P {
@@ -189,6 +190,15 @@ model GlobalData {
   updatedAt      DateTime @updatedAt
 }
 
+model ReferralUserIpAddress {
+  id                Int      @id @default(autoincrement())
+  userReferral      User     @relation(fields: [referralUserId], references: [id])
+  referralUserId    Int
+  referralIpAddress Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 model Player {
   id                Int         @id @default(autoincrement())
   name              String      @unique
@@ -209,8 +219,8 @@ model Category {
 model Product {
   id           Int           @id @default(autoincrement())
   name         String        @unique
-  categoryId   Int
   category     Category      @relation(fields: [categoryId], references: [id])
+  categoryId   Int
   productItems ProductItem[]
   bets         Bet[]
   betsCLOSED   BetCLOSED[]
