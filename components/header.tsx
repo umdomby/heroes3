@@ -7,18 +7,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {ProfileButton} from './profile-button';
 import {AuthModal} from './modals';
-import {ModeToggle} from "@/components/buttonTheme";
-import {Button} from "@/components/ui";
-
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {useSession} from "next-auth/react";
 import {Access_admin} from "@/components/access_admin";
 import {Access_user} from "@/components/access_user";
