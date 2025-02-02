@@ -24,7 +24,7 @@ export default async function ReferralPage({
         return redirect('/');
     }
 
-    // Получаем IP-адрес из заголовков запроса
+    // Получаем IP-адрес
     const ip = await getIpAddress();
     console.log('IP:', ip);
 
