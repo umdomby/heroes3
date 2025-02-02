@@ -6,7 +6,6 @@ import Loading from "@/app/(root)/loading";
 import { BET_ALL_CLOSED } from "@/components/BET_ALL_CLOSED";
 
 export default async function BetAllClosedPage() {
-
     // Получаем все закрытые ставки, в которых участвовал пользователь
     const closedBets = await prisma.betCLOSED.findMany({
         include: {
