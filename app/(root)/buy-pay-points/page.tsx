@@ -7,7 +7,7 @@ import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import {BUY_PAY_POINTS} from "@/components/BUY_PAY_POINTS";
 
-export default async function Home() {
+export default async function BuyPayPointsPage() {
     const session = await getUserSession();
 
     if (!session) {

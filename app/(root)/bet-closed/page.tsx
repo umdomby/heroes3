@@ -7,7 +7,7 @@ import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { HEROES_CLIENT_CLOSED } from "@/components/HEROES_CLIENT_CLOSED";
 
-export default async function Home() {
+export default async function BetClosedPage() {
     const session = await getUserSession();
 
     if (!session) {

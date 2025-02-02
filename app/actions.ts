@@ -658,3 +658,24 @@ export async function closeBet(betId: number, winnerId: number) {
         }
     }
 }
+
+// Функция для добавления и редактирование имен игроков, админом
+export async function addEditPlayer(playerId: number | null, playerName: string) {
+    try {
+        if (playerId) {
+            // Edit existing player
+            await prisma.player.update({
+                where: { id: playerId },
+                data: { name: playerName },
+            });
+        } else {
+            // Add new player
+            await prisma.player.create({
+                data: { name: playerName },
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        throw new Error('Failed to update');
+    }
+}

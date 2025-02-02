@@ -8,7 +8,7 @@ import { getUserSession } from "@/components/lib/get-user-session";
 import { BUY_PAY_POINTS } from "@/components/BUY_PAY_POINTS";
 import {CONTACTS} from "@/components/CONTACTS";
 
-export default async function Home() {
+export default async function ContactsPage() {
 
 
     return (
