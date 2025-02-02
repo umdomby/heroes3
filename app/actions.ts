@@ -662,23 +662,46 @@ export async function closeBet(betId: number, winnerId: number) {
 // Функция для добавления и редактирование имен игроков, админом
 export async function addEditPlayer(playerId: number | null, playerName: string) {
     if (!playerName) {
-        throw new Error('Player name is required');
+        throw new Error('Имя игрока обязательно');
     }
     try {
+        // Проверяем, существует ли игрок с таким именем
+        const existingPlayer = await prisma.player.findUnique({
+            where: { name: playerName },
+        });
+
+        if (existingPlayer) {
+            // Уведомляем клиента, что игрок с таким именем уже существует
+            return { success: false, message: 'Игрок с таким именем уже существует' };
+        }
+
         if (playerId) {
-            // Edit existing player
+            // Редактируем существующего игрока
             await prisma.player.update({
                 where: { id: playerId },
                 data: { name: playerName },
             });
         } else {
-            // Add new player
+            // Добавляем нового игрока
             await prisma.player.create({
                 data: { name: playerName },
             });
         }
+
+        return { success: true, message: 'Игрок успешно сохранен' };
     } catch (error) {
-        console.error('Error:', error);
-        throw new Error('Failed to update player');
+        console.error('Ошибка:', error);
+        throw new Error('Не удалось обновить игрока');
+    }
+}
+export async function deletePlayer(playerId: number) {
+    try {
+        await prisma.player.delete({
+            where: { id: playerId },
+        });
+        return { success: true, message: 'Игрок успешно удален' };
+    } catch (error) {
+        console.error('Ошибка при удалении игрока:', error);
+        throw new Error('Не удалось удалить игрока');
     }
 }

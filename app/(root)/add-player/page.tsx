@@ -6,7 +6,6 @@ import {AddEditPlayer} from "@/components/addEditPlayer";
 import Loading from "@/app/(root)/loading";
 import React, {Suspense} from "react";
 import {Container} from "@/components/container";
-import {BET_ALL_CLOSED} from "@/components/BET_ALL_CLOSED";
 
 
 export default async function AddPlayerPage() {
@@ -26,7 +25,7 @@ export default async function AddPlayerPage() {
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <AddEditPlayer user={user} players={players} />;
+                <AddEditPlayer user={user} players={players} />
             </Suspense>
         </Container>
     );
