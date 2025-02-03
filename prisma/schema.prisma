@@ -246,7 +246,7 @@ enum BetStatus {
 enum UserRole {
   USER
   ADMIN
-  BLOCK
+  BANED
 }
 enum IsCovered {
   OPEN // overlap = 0
