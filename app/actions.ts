@@ -847,7 +847,7 @@ export async function transferPoints(cardId: string, points: number) {
                 transferStatus: true,
             },
         });
-
+        revalidatePath('/transfer-points');
         return true;
     } catch (error) {
         console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
