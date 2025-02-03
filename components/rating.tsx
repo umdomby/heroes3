@@ -41,10 +41,11 @@ export const Rating: React.FC<Props> = ({ className, users }) => {
             <Table className="w-full">
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Points</TableHead>
-                        <TableHead>User</TableHead>
-                        <TableHead>Card ID</TableHead>
-                        <TableHead>Дата создания</TableHead>
+                        <TableHead className="text-center">Points</TableHead>
+                        <TableHead className="text-center">User</TableHead>
+                        <TableHead className="text-center">Email</TableHead>
+                        <TableHead className="text-center">Card ID</TableHead>
+                        <TableHead className="text-center">Дата создания</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -52,6 +53,7 @@ export const Rating: React.FC<Props> = ({ className, users }) => {
                         <TableRow key={index} className="hover:bg-gray-900">
                             <TableCell className="text-center">{user.points}</TableCell>
                             <TableCell className="text-center">{user.fullName}</TableCell>
+                            <TableCell className="text-center">{user.email.slice(0, 5)}...</TableCell>
                             <TableCell className="text-center">
                                 <div className="flex justify-center items-center">
                                     <span className="mr-2">{user.cardId}</span>

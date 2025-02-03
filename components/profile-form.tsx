@@ -80,7 +80,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                             <form onSubmit={form.handleSubmit(onSubmit)}>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-300">Email: {data.email}</label>
-                                    <label className="block text-sm font-medium text-gray-300">Card: ID{data.cardId}</label>
+                                    <label className="block text-sm font-medium text-gray-300">Card ID: {data.cardId}</label>
                                 </div>
                                 <FormInput name="fullName" label="Полное имя" required/>
                                 <FormInput type="password" name="password" label="Новый пароль" required/>

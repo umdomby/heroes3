@@ -56,12 +56,12 @@ export const LoginForm: React.FC<Props> = ({ onClose }) => {
           <img src="/assets/images/phone-icon.png" alt="phone-icon" width={60} height={60} />
         </div>
 
-        {/*<FormInput name="email" label="E-Mail" required />*/}
-        {/*<FormInput name="password" label="Пароль" type="password" required />*/}
+        <FormInput name="email" label="E-Mail" required />
+        <FormInput name="password" label="Пароль" type="password" required />
 
-        {/*<Button loading={form.formState.isSubmitting} className="h-12 text-base" type="submit">*/}
-        {/*  Войти*/}
-        {/*</Button>*/}
+        <Button loading={form.formState.isSubmitting} className="h-12 text-base" type="submit">
+          Войти
+        </Button>
       </form>
     </FormProvider>
   );
