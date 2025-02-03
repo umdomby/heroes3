@@ -820,7 +820,7 @@ export async function transferPoints(cardId: string, points: number) {
         });
 
         if (!recipient) {
-            return false;
+            throw new Error('Получатель не найден');
         }
 
         // Обновление баллов у обоих пользователей
@@ -830,14 +830,14 @@ export async function transferPoints(cardId: string, points: number) {
         });
 
         await prisma.user.update({
-            where: { id: currentUser.id },
+            where: { id: Number(currentUser.id) }, // Преобразование id в число
             data: { points: { decrement: points } },
         });
 
         // Логирование перевода
         await prisma.transfer.create({
             data: {
-                transferUser1Id: currentUser.id,
+                transferUser1Id: Number(currentUser.id), // Преобразование id в число
                 transferUser2Id: recipient.id,
                 transferPoints: points,
                 transferStatus: true,
@@ -846,8 +846,9 @@ export async function transferPoints(cardId: string, points: number) {
 
         return true;
     } catch (error) {
-        console.error('Ошибка при передаче баллов:', error);
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
         return false;
     }
 }
+
 
