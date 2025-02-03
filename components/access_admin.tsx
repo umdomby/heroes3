@@ -43,7 +43,7 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 </Link>
                                 <Link href="/bet-closed">
                                     <DropdownMenuRadioItem value="bet-closed">
-                                        MY BET CLOSED
+                                        BET CLOSED
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-all-closed">
