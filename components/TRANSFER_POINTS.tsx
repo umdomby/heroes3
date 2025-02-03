@@ -29,17 +29,11 @@ interface Props {
 }
 
 export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, className }) => {
-
-    const [transferHistorys, setTransferHistorys] = useState(transferHistory);
     const [cardId, setCardId] = useState('');
     const [points, setPoints] = useState(50);
     const [recipientEmail, setRecipientEmail] = useState('');
     const [showDialog, setShowDialog] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-
-    useEffect(() => {
-        setTransferHistorys(transferHistory);
-    }, [transferHistory])
 
     const handleTransfer = async () => {
         if (points < 50 || points > user.points) {
@@ -124,7 +118,7 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {transferHistorys.map((transfer, index) => (
+                    {transferHistory.map((transfer, index) => (
                         <TableRow key={index}>
                             <TableCell className="text-center">{new Date(transfer.createdAt).toLocaleDateString()}</TableCell>
                             <TableCell className="text-center">{transfer.transferUser1Id === user.id ? 'Исходящий' : 'Входящий'}</TableCell>
