@@ -1,8 +1,19 @@
-import React from 'react';
+"use client"; // Указываем, что компонент клиентский
+import React, { useState } from 'react';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableRow,
+    TableHeader,
+    TableHead,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 interface User {
     fullName: string;
     points: number;
+    cardId: string;
     createdAt: Date;
 }
 
@@ -11,28 +22,58 @@ interface Props {
     users: User[];
 }
 
-export const Rating: React.FC<Props> = ({className, users}) => {
+export const Rating: React.FC<Props> = ({ className, users }) => {
+    const [showCopyMessage, setShowCopyMessage] = useState(false);
+    const [copiedUserName, setCopiedUserName] = useState('');
+
+    const handleCopy = (cardId: string, fullName: string) => {
+        navigator.clipboard.writeText(cardId);
+        setCopiedUserName(fullName);
+        setShowCopyMessage(true);
+        setTimeout(() => setShowCopyMessage(false), 1000); // Убираем сообщение через 1 секунду
+    };
+
     return (
-        <div className={className}>
+        <div className={`p-4 ${className}`}>
             <h1 className="text-2xl font-bold text-center mb-6 p-2 bg-gray-400 rounded-lg">
                 Rating
             </h1>
-            {users.map((user, index) => (
-                <div key={index} className="flex justify-between items-center mb-4 border-b pb-2">
-                    <div className="flex-1 text-center px-2">
-                        {user.points}
-                    </div>
-                    <div className="flex-1 text-center px-2">
-                        {user.fullName}
-                    </div>
-                    <div className="flex-1 text-center px-2">
-                        {user.cardId}
-                    </div>
-                    <div className="flex-1 text-center px-2">
-                        {user.createdAt.toLocaleDateString()}
-                    </div>
+            <Table className="w-full">
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Points</TableHead>
+                        <TableHead>User</TableHead>
+                        <TableHead>Card ID</TableHead>
+                        <TableHead>Дата создания</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {users.map((user, index) => (
+                        <TableRow key={index} className="hover:bg-gray-900">
+                            <TableCell className="text-center">{user.points}</TableCell>
+                            <TableCell className="text-center">{user.fullName}</TableCell>
+                            <TableCell className="text-center">
+                                <div className="flex justify-center items-center">
+                                    <span className="mr-2">{user.cardId}</span>
+                                    <Button
+                                        onClick={() => handleCopy(user.cardId, user.fullName)}
+                                        className="bg-blue-500 text-white px-2 py-1 rounded"
+                                    >
+                                        Copy
+                                    </Button>
+                                </div>
+                            </TableCell>
+                            <TableCell className="text-center">{user.createdAt.toLocaleDateString()}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+
+            {showCopyMessage && (
+                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-2 rounded shadow-lg">
+                    Card ID {copiedUserName} скопирован!
                 </div>
-            ))}
+            )}
         </div>
     );
 };

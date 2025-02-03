@@ -100,20 +100,24 @@ export async function updateUserInfo(body: Prisma.UserUpdateInput) {
             },
         });
 
+        if (!findUser) {
+            throw new Error('Пользователь не найден в базе данных');
+        }
+
         await prisma.user.update({
             where: {
                 id: Number(currentUser.id),
             },
             data: {
                 fullName: body.fullName,
-                email: body.email,
-                password: body.password ? hashSync(body.password as string, 10) : findUser?.password,
+                password: body.password ? hashSync(body.password as string, 10) : findUser.password,
             },
         });
     } catch (err) {
         throw err;
     }
 }
+
 
 export async function clientCreateBet(formData: any) {
     const session = await getUserSession();

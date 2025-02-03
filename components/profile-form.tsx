@@ -22,7 +22,6 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         resolver: zodResolver(formRegisterSchema),
         defaultValues: {
             fullName: data.fullName,
-            email: data.email,
             password: '',
             confirmPassword: '',
         },
@@ -46,7 +45,6 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     const onSubmit = async (data: TFormRegisterValues) => {
         try {
             await updateUserInfo({
-                email: data.email,
                 fullName: data.fullName,
                 password: data.password,
             });
@@ -80,7 +78,10 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
                         <FormProvider {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
-                                <FormInput name="email" label="E-Mail" required/>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-300">Email: {data.email}</label>
+                                    <label className="block text-sm font-medium text-gray-300">Card: ID{data.cardId}</label>
+                                </div>
                                 <FormInput name="fullName" label="Полное имя" required/>
                                 <FormInput type="password" name="password" label="Новый пароль" required/>
                                 <FormInput type="password" name="confirmPassword" label="Повторите пароль" required/>

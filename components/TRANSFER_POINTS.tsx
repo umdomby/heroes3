@@ -13,17 +13,27 @@ import { Input } from "@/components/ui/input";
 import { User } from "@prisma/client";
 import { getEmailByCardId, transferPoints } from "@/app/actions";
 
+interface Transfer {
+    transferUser1Id: number;
+    transferUser2Id: number;
+    transferPoints: number;
+    createdAt: Date;
+    transferUser1: { cardId: string };
+    transferUser2: { cardId: string };
+}
+
 interface Props {
     user: User;
+    transferHistory: Transfer[];
     className?: string;
 }
 
-export const TRANSFER_POINTS: React.FC<Props> = ({ user, className }) => {
+export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, className }) => {
     const [cardId, setCardId] = useState('');
     const [points, setPoints] = useState(50);
-    const [transferHistory, setTransferHistory] = useState([]);
     const [recipientEmail, setRecipientEmail] = useState('');
     const [showDialog, setShowDialog] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     const handleTransfer = async () => {
         if (points < 50 || points > user.points) {
@@ -45,9 +55,9 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, className }) => {
         const result = await transferPoints(cardId, points);
 
         if (result) {
-            alert('Баллы успешно переданы');
-            setTransferHistory([...transferHistory, { cardId, points }]);
+            setSuccessMessage('Баллы успешно переданы');
             setShowDialog(false);
+            setTimeout(() => setSuccessMessage(''), 3000); // Убираем сообщение через 3 секунды
         } else {
             alert('Передача не удалась');
         }
@@ -89,9 +99,17 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, className }) => {
                 </div>
             )}
 
+            {successMessage && (
+                <div className="mt-4 p-2 bg-green-100 text-green-800 rounded">
+                    {successMessage}
+                </div>
+            )}
+
             <Table className="mt-6">
                 <TableHeader>
                     <TableRow>
+                        <TableHead>Дата</TableHead>
+                        <TableHead>Тип</TableHead>
                         <TableHead>ID карты</TableHead>
                         <TableHead>Баллы</TableHead>
                     </TableRow>
@@ -99,8 +117,10 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, className }) => {
                 <TableBody>
                     {transferHistory.map((transfer, index) => (
                         <TableRow key={index}>
-                            <TableCell>{transfer.cardId}</TableCell>
-                            <TableCell>{transfer.points}</TableCell>
+                            <TableCell>{new Date(transfer.createdAt).toLocaleDateString()}</TableCell>
+                            <TableCell>{transfer.transferUser1Id === user.id ? 'Исходящий' : 'Входящий'}</TableCell>
+                            <TableCell>{transfer.transferUser1Id === user.id ? transfer.transferUser2.cardId : transfer.transferUser1.cardId}</TableCell>
+                            <TableCell>{transfer.transferUser1Id === user.id ? `-${transfer.transferPoints}` : `+${transfer.transferPoints}`}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

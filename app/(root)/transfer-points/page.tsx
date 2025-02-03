@@ -20,10 +20,25 @@ export default async function TransferPointsPage() {
         return redirect('/not-auth');
     }
 
+    // Получение истории переводов с cardId для обоих пользователей
+    const transferHistory = await prisma.transfer.findMany({
+        where: {
+            OR: [
+                { transferUser1Id: user.id },
+                { transferUser2Id: user.id }
+            ]
+        },
+        include: {
+            transferUser1: { select: { cardId: true } },
+            transferUser2: { select: { cardId: true } }
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <TRANSFER_POINTS user={user} />
+                <TRANSFER_POINTS user={user} transferHistory={transferHistory} />
             </Suspense>
         </Container>
     );
