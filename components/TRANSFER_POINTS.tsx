@@ -34,8 +34,17 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
     const [recipientEmail, setRecipientEmail] = useState('');
     const [showDialog, setShowDialog] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState(''); // State for error message
 
     const handleTransfer = async () => {
+        // Check if the recipient's cardId is the same as the current user's cardId
+        if (cardId === user.cardId) {
+            setErrorMessage('Вы не можете передать баллы самому себе.'); // Set error message
+            return;
+        } else {
+            setErrorMessage(''); // Clear error message if valid
+        }
+
         if (points < 50 || points > user.points) {
             alert('Недопустимое количество баллов');
             return;
@@ -93,6 +102,10 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
                 />
                 <Button type="submit" className="w-full bg-blue-500 text-white">Передать баллы</Button>
             </form>
+
+            {errorMessage && (
+                <p className="text-red-500 mt-2">{errorMessage}</p> // Display error message in red
+            )}
 
             {showDialog && (
                 <div className="dialog mt-4 p-4 border rounded shadow-lg">
