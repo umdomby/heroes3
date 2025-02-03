@@ -15,11 +15,11 @@ import { getEmailByCardId, transferPoints } from "@/app/actions";
 
 interface Transfer {
     transferUser1Id: number;
-    transferUser2Id: number;
+    transferUser2Id: number | null; // Allow null
     transferPoints: number;
     createdAt: Date;
     transferUser1: { cardId: string };
-    transferUser2: { cardId: string };
+    transferUser2: { cardId: string } | null; // Allow null
 }
 
 interface Props {

@@ -26,7 +26,8 @@ export default async function TransferPointsPage() {
             OR: [
                 { transferUser1Id: user.id },
                 { transferUser2Id: user.id }
-            ]
+            ],
+            transferUser2Id: { not: null } // Exclude transfers with null transferUser2Id
         },
         include: {
             transferUser1: { select: { cardId: true } },

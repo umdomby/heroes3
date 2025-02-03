@@ -32,7 +32,8 @@ model User {
   transferUser2         Transfer[]              @relation("TransferUser2") // Отношение для user2
   betsPlaced            BetParticipant[]
   betsCLOSEDPlaced      BetParticipantCLOSED[]
-  userP2PMoney          Json?
+  buyPointReq           BuyPointReq[]
+  bankDetails           Json?
   referralUserIpAddress ReferralUserIpAddress[]
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
@@ -60,15 +61,20 @@ model Transfer {
   transferUser2   User?    @relation("TransferUser2", fields: [transferUser2Id], references: [id])
   transferUser2Id Int?
   transferPoints  Float
-  transfer        String   @default("")
   transferStatus  Boolean?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
-model ContactDataEnum {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+model BuyPointReq {
+  id                Int      @id @default(autoincrement())
+  buyPointReqUser1  User     @relation(fields: [buyPointReq1Id], references: [id])
+  buyPointReq1Id    Int
+  buyPointReqPoints Float
+  buyPointReqText   String   @default("")
+  buyPointReqStatus Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 // export async function clientCreateBet(formData: any) actions.ts

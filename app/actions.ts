@@ -856,3 +856,48 @@ export async function transferPoints(cardId: string, points: number) {
 }
 
 
+
+export async function buyPointsReq(cardId: string, points: number) {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        const recipient = await prisma.user.findUnique({
+            where: { cardId },
+        });
+
+        if (!recipient) {
+            throw new Error('Получатель не найден');
+        }
+
+        // Обновление баллов у обоих пользователей
+        await prisma.user.update({
+            where: { cardId },
+            data: { points: { increment: points } },
+        });
+
+        await prisma.user.update({
+            where: { id: Number(currentUser.id) }, // Преобразование id в число
+            data: { points: { decrement: points } },
+        });
+
+        // Логирование перевода
+        await prisma.transfer.create({
+            data: {
+                transferUser1Id: Number(currentUser.id), // Преобразование id в число
+                transferUser2Id: recipient.id,
+                transferPoints: points,
+                transferStatus: true,
+            },
+        });
+        revalidatePath('/buy-point-req');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
+
+
