@@ -26,6 +26,9 @@ export const Rating: React.FC<Props> = ({className, users}) => {
                         {user.fullName}
                     </div>
                     <div className="flex-1 text-center px-2">
+                        {user.cardId}
+                    </div>
+                    <div className="flex-1 text-center px-2">
                         {user.createdAt.toLocaleDateString()}
                     </div>
                 </div>

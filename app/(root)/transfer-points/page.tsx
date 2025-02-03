@@ -7,7 +7,7 @@ import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { TRANSFER_POINTS } from "@/components/TRANSFER_POINTS";
 
-export default async function Home() {
+export default async function TransferPointsPage() {
     const session = await getUserSession();
 
     if (!session) {

@@ -60,7 +60,7 @@ model Transfer {
   transferUser2   User?    @relation("TransferUser2", fields: [transferUser2Id], references: [id])
   transferUser2Id Int?
   transferPoints  Float
-  transfer        String   @default("") // Изменяем Text на String
+  transfer        String   @default("")
   transferStatus  Boolean?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

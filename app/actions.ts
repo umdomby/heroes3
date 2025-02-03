@@ -789,3 +789,65 @@ export async function referralGet() {
         throw new Error('Не удалось получить IP адреса');
     }
 }
+
+// Функция для получения email по cardId
+export async function getEmailByCardId(cardId: string) {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { cardId },
+        });
+
+        if (user) {
+            return { email: user.email };
+        } else {
+            return { error: 'Пользователь не найден' };
+        }
+    } catch (error) {
+        console.error('Ошибка при получении email:', error);
+        return { error: 'Ошибка сервера' };
+    }
+}
+// Функция для передачи баллов
+export async function transferPoints(cardId: string, points: number) {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        const recipient = await prisma.user.findUnique({
+            where: { cardId },
+        });
+
+        if (!recipient) {
+            return false;
+        }
+
+        // Обновление баллов у обоих пользователей
+        await prisma.user.update({
+            where: { cardId },
+            data: { points: { increment: points } },
+        });
+
+        await prisma.user.update({
+            where: { id: currentUser.id },
+            data: { points: { decrement: points } },
+        });
+
+        // Логирование перевода
+        await prisma.transfer.create({
+            data: {
+                transferUser1Id: currentUser.id,
+                transferUser2Id: recipient.id,
+                transferPoints: points,
+                transferStatus: true,
+            },
+        });
+
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error);
+        return false;
+    }
+}
+
