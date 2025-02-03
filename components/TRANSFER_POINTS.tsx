@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useState} from 'react';
+import React, { useState } from 'react';
 import {
     Table,
     TableBody,
@@ -86,7 +86,7 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
                     value={points}
                     onChange={(e) => {
                         const value = e.target.value;
-                        setPoints(value === '' ? '' : Number(value));
+                        setPoints(value === '' ? 0 : Number(value)); // Set to 0 if empty
                     }}
                     required
                     className="w-full"
@@ -120,9 +120,13 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
                 <TableBody>
                     {transferHistory.map((transfer, index) => (
                         <TableRow key={index}>
-                            <TableCell className="text-center">{new Date(transfer.createdAt).toLocaleDateString()}</TableCell>
+                            <TableCell className="text-center">{new Date(transfer.createdAt).toLocaleString()}</TableCell>
                             <TableCell className="text-center">{transfer.transferUser1Id === user.id ? 'Исходящий' : 'Входящий'}</TableCell>
-                            <TableCell className="text-center">{transfer.transferUser1Id === user.id ? transfer.transferUser2.cardId : transfer.transferUser1.cardId}</TableCell>
+                            <TableCell className="text-center">
+                                {transfer.transferUser1Id === user.id
+                                    ? (transfer.transferUser2 ? transfer.transferUser2.cardId : 'N/A')
+                                    : transfer.transferUser1.cardId}
+                            </TableCell>
                             <TableCell className="text-center">{transfer.transferUser1Id === user.id ? `-${transfer.transferPoints}` : `+${transfer.transferPoints}`}</TableCell>
                         </TableRow>
                     ))}

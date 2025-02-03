@@ -827,15 +827,18 @@ export async function transferPoints(cardId: string, points: number) {
             throw new Error('Получатель не найден');
         }
 
+        // Округляем points до двух знаков после запятой
+        const roundedPoints = Math.floor(points * 100) / 100;
+
         // Обновление баллов у обоих пользователей
         await prisma.user.update({
             where: { cardId },
-            data: { points: { increment: points } },
+            data: { points: { increment: roundedPoints } },
         });
 
         await prisma.user.update({
             where: { id: Number(currentUser.id) }, // Преобразование id в число
-            data: { points: { decrement: points } },
+            data: { points: { decrement: roundedPoints } },
         });
 
         // Логирование перевода
@@ -843,10 +846,11 @@ export async function transferPoints(cardId: string, points: number) {
             data: {
                 transferUser1Id: Number(currentUser.id), // Преобразование id в число
                 transferUser2Id: recipient.id,
-                transferPoints: points,
+                transferPoints: roundedPoints, // Используем округленные баллы
                 transferStatus: true,
             },
         });
+
         revalidatePath('/transfer-points');
         return true;
     } catch (error) {

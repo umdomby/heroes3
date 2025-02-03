@@ -22,6 +22,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         resolver: zodResolver(formRegisterSchema),
         defaultValues: {
             fullName: data.fullName,
+            email: data.email,
             password: '',
             confirmPassword: '',
         },
@@ -76,12 +77,13 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                     <div className="w-full md:w-1/2 p-4 rounded-lg">
                         <Title text={`Личные данные | #${data.id}`} size="md" className="font-bold"/>
 
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-300">Email: {data.email}</label>
+                            <label className="block text-sm font-medium text-gray-300">Card ID: {data.cardId}</label>
+                        </div>
+
                         <FormProvider {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-300">Email: {data.email}</label>
-                                    <label className="block text-sm font-medium text-gray-300">Card ID: {data.cardId}</label>
-                                </div>
                                 <FormInput name="fullName" label="Полное имя" required/>
                                 <FormInput type="password" name="password" label="Новый пароль" required/>
                                 <FormInput type="password" name="confirmPassword" label="Повторите пароль" required/>
@@ -109,7 +111,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                         <Title text="История входов" size="md" className="font-bold mb-4"/>
                         {loginHistory.length > 0 ? (
                             <div className="space-y-1">
-                                {loginHistory.map((entry: any, index: number) => (
+                            {loginHistory.map((entry: any, index: number) => (
                                     <div key={index} className="p-1 border border-gray-300 rounded-lg">
                                         <p>
                                             <strong>IP:</strong> {entry.ip}, {new Date(entry.lastLogin).toLocaleString()}, <strong>VPN:</strong> {entry.vpn ? 'Да' : 'Нет'}, {entry.loginCount}

@@ -14,6 +14,7 @@ interface User {
     fullName: string;
     points: number;
     cardId: string;
+    email: string;
     createdAt: Date;
 }
 
@@ -51,7 +52,7 @@ export const Rating: React.FC<Props> = ({ className, users }) => {
                 <TableBody>
                     {users.map((user, index) => (
                         <TableRow key={index} className="hover:bg-gray-900">
-                            <TableCell className="text-center">{user.points}</TableCell>
+                            <TableCell className="text-center">{Math.floor(user.points * 100) / 100}</TableCell>
                             <TableCell className="text-center">{user.fullName}</TableCell>
                             <TableCell className="text-center">{user.email.slice(0, 5)}...</TableCell>
                             <TableCell className="text-center">
