@@ -5,6 +5,7 @@ import { PlayerChoice, Prisma, IsCovered, BetParticipant, Bet } from '@prisma/cl
 import { hashSync } from 'bcrypt';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import axios from "axios";
+import { JsonArray } from 'type-fest'; // Импортируйте тип JsonArray для использования
 
 const MARGIN = parseFloat(process.env.MARGIN || '0.05');
 
@@ -874,26 +875,24 @@ export async function addBankDetails(newDetail: { name: string; details: string;
             throw new Error('Пользователь не найден в базе данных');
         }
 
-        const updatedBankDetails = [...(user.bankDetails || []), newDetail];
+        // Преобразуем bankDetails в массив, если это необходимо
+        const bankDetails = Array.isArray(user.bankDetails) ? user.bankDetails : [];
+
+        const updatedBankDetails = [...bankDetails, newDetail];
 
         await prisma.user.update({
             where: { id: Number(currentUser.id) },
             data: {
-                bankDetails: updatedBankDetails,
+                bankDetails: updatedBankDetails as JsonArray, // Указываем тип JsonArray
             },
         });
 
         return updatedBankDetails;
     } catch (error) {
-        if (error instanceof Error) {
-            console.error('Ошибка при добавлении банковского реквизита:', error.message);
-        } else {
-            console.error('Неизвестная ошибка при добавлении банковского реквизита:', error);
-        }
+        console.error('Ошибка при добавлении банковского реквизита:', error);
         throw new Error('Не удалось добавить банковский реквизит');
     }
 }
-
 export async function deleteBankDetail(index: number) {
     try {
         const currentUser = await getUserSession();
@@ -909,12 +908,15 @@ export async function deleteBankDetail(index: number) {
             throw new Error('Пользователь не найден в базе данных');
         }
 
-        const updatedBankDetails = (user.bankDetails || []).filter((_, i) => i !== index);
+        // Преобразуем bankDetails в массив, если это необходимо
+        const bankDetails = Array.isArray(user.bankDetails) ? user.bankDetails : [];
+
+        const updatedBankDetails = bankDetails.filter((_, i) => i !== index);
 
         await prisma.user.update({
             where: { id: Number(currentUser.id) },
             data: {
-                bankDetails: updatedBankDetails,
+                bankDetails: updatedBankDetails as JsonArray, // Указываем тип JsonArray
             },
         });
 

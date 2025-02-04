@@ -34,7 +34,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     });
 
     const [referrals, setReferrals] = useState<any[]>([]);
-    const [bankDetails, setBankDetails] = useState<any[]>(data.bankDetails || []);
+    const [bankDetails, setBankDetails] = useState<any[]>(Array.isArray(data.bankDetails) ? data.bankDetails : []);
     const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '' });
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '' });
@@ -199,7 +199,6 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                             <AccordionItem value="bankDetails">
                                 <AccordionTrigger>Реквизиты банков</AccordionTrigger>
                                 <AccordionContent>
-
                                     <div className="mb-4">
                                         <FormProvider {...form}>
                                         <FormInput
@@ -220,7 +219,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                             value={newBankDetail.description}
                                             onChange={(e) => setNewBankDetail({ ...newBankDetail, description: e.target.value })}
                                         />
-                                        </FormProvider>
+                                            </FormProvider>
                                         <Button onClick={handleAddBankDetail} className="mt-2">Добавить</Button>
                                     </div>
 
