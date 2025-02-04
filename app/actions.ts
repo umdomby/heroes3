@@ -948,20 +948,97 @@ export async function updateBankDetails(updatedDetails: { name: string; details:
 }
 
 
-export async function buyPayPointsOpen() {
+// Функция для создания заявки на покупку points
+export async function createBuyOrder(points: number, bankDetails: any[], price: number, allowPartial: boolean) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
 
-        revalidatePath('/buy-pay-point');
-        return true;
+        // Проверка минимального и максимального количества points
+        if (points < 50 || points > 100000) {
+            throw new Error('Количество points должно быть от 50 до 100000');
+        }
+
+        // Создание заявки на покупку
+        const newOrder = await prisma.orderP2P.create({
+            data: {
+                orderP2PUser1Id: currentUser.id,
+                orderP2PBuySell: 'BUY',
+                orderP2PPoints: points,
+                orderP2PPrice: price,
+                orderP2PPart: allowPartial,
+                orderBankDetails: bankDetails,
+                orderP2PStatus: 'OPEN',
+            },
+        });
+
+        revalidatePath('/order-p2p');
+        return newOrder;
     } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
-        return false;
+        console.error('Ошибка при создании заявки на покупку:', error);
+        throw new Error('Не удалось создать заявку на покупку');
     }
 }
+
+// Функция для создания заявки на продажу points
+export async function createSellOrder(points: number, bankDetails: any[], price: number, allowPartial: boolean) {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        // Проверка минимального и максимального количества points
+        if (points < 50 || points > 100000) {
+            throw new Error('Количество points должно быть от 50 до 100000');
+        }
+
+        // Проверка, что у пользователя достаточно points для продажи
+        const user = await prisma.user.findUnique({
+            where: { id: currentUser.id },
+        });
+
+        if (!user || user.points < points) {
+            throw new Error('Недостаточно points для продажи');
+        }
+
+        // Создание заявки на продажу
+        const newOrder = await prisma.orderP2P.create({
+            data: {
+                orderP2PUser1Id: currentUser.id,
+                orderP2PBuySell: 'SELL',
+                orderP2PPoints: points,
+                orderP2PPrice: price,
+                orderP2PPart: allowPartial,
+                orderBankDetails: bankDetails,
+                orderP2PStatus: 'OPEN',
+            },
+        });
+
+        // Обновление баланса пользователя
+        await prisma.user.update({
+            where: { id: currentUser.id },
+            data: {
+                points: {
+                    decrement: points,
+                },
+            },
+        });
+
+        revalidatePath('/order-p2p');
+        return newOrder;
+    } catch (error) {
+        console.error('Ошибка при создании заявки на продажу:', error);
+        throw new Error('Не удалось создать заявку на продажу');
+    }
+}
+
+
+const handleCreateSellOrder = async () => {
+    // Логика создания заявки на продажу
+};
 export async function buyPayPointsClose() {
     try {
         const currentUser = await getUserSession();

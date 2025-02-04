@@ -47,7 +47,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                         TRANSFER POINTS
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <Link href="/buy-pay-points">
+                                <Link href="/order-p2p">
                                     <DropdownMenuRadioItem value="bet-closed">
                                         BUY/PAY POINTS
                                     </DropdownMenuRadioItem>
