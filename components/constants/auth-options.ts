@@ -129,15 +129,16 @@ export const authOptions: AuthOptions = {
         }
 
         // Получаем IP-адрес пользователя
-        // let ip = '';
-        // try {
-        //   const response = await axios.get('https://api.ipify.org?format=json');
-        //   ip = response.data.ip;
-        //   console.error('IP-адрес:', ip);
-        // } catch (error) {
-        //   console.error('Ошибка при получении IP-адреса:', error);
-        //   ip = 'unknown';
-        // }
+        let ip = '';
+        try {
+          const response = await axios.get('https://api.ipify.org?format=json');
+          ip = response.data.ip;
+          console.error('IP-адрес:', ip);
+        } catch (error) {
+          console.error('Ошибка при получении IP-адреса:', error);
+          ip = 'unknown';
+        }
+        const isVPN = await checkVPN(ip); // Проверяем VPN
         //
         // // Проверяем, существует ли IP-адрес в модели ReferralUserIpAddress
         // const referralEntry = await prisma.referralUserIpAddress.findFirst({
@@ -166,6 +167,11 @@ export const authOptions: AuthOptions = {
         //     },
         //   });
         // }
+
+        if (findUser) {
+          // Обновляем историю входов
+          await updateLoginHistory(findUser.id, ip, isVPN);
+        }
 
         return {
           id: findUser.id,

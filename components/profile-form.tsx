@@ -36,6 +36,8 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     const [referrals, setReferrals] = useState<any[]>([]);
     const [bankDetails, setBankDetails] = useState<any[]>(data.bankDetails || []);
     const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '' });
+    const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '' });
 
     useEffect(() => {
         const fetchReferrals = async () => {
@@ -74,12 +76,10 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     };
 
     const handleAddBankDetail = async () => {
-
         try {
             if (!newBankDetail.name || !newBankDetail.details || !newBankDetail.description) {
                 throw new Error('Все поля должны быть заполнены');
             }
-            console.log('Добавление банковского реквизита:', newBankDetail);
             const updatedBankDetails = await addBankDetails(newBankDetail);
             setBankDetails(updatedBankDetails);
             setNewBankDetail({ name: '', details: '', description: '' });
@@ -99,12 +99,23 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         }
     };
 
-    const handleUpdateBankDetails = async () => {
-        try {
-            await updateBankDetails(bankDetails);
-            toast.success('Банковские реквизиты обновлены');
-        } catch (error) {
-            toast.error('Ошибка при обновлении банковских реквизитов');
+    const handleEditBankDetail = (index: number) => {
+        setEditIndex(index);
+        setEditedDetail(bankDetails[index]);
+    };
+
+    const handleSaveBankDetail = async () => {
+        if (editIndex !== null) {
+            const updatedDetails = [...bankDetails];
+            updatedDetails[editIndex] = editedDetail;
+            try {
+                await updateBankDetails(updatedDetails);
+                setBankDetails(updatedDetails);
+                setEditIndex(null);
+                toast.success('Банковские реквизиты обновлены');
+            } catch (error) {
+                toast.error('Ошибка при обновлении банковских реквизитов');
+            }
         }
     };
 
@@ -188,6 +199,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                             <AccordionItem value="bankDetails">
                                 <AccordionTrigger>Реквизиты банков</AccordionTrigger>
                                 <AccordionContent>
+
                                     <div className="mb-4">
                                         <FormProvider {...form}>
                                         <FormInput
@@ -208,23 +220,49 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                             value={newBankDetail.description}
                                             onChange={(e) => setNewBankDetail({ ...newBankDetail, description: e.target.value })}
                                         />
-                                            </FormProvider>
+                                        </FormProvider>
                                         <Button onClick={handleAddBankDetail} className="mt-2">Добавить</Button>
                                     </div>
 
                                     <div className="space-y-1">
                                         {bankDetails.map((detail, index) => (
                                             <div key={index} className="p-1 border border-gray-300 rounded-lg flex justify-between items-center">
-                                                <div>
-                                                    <p><strong>Название:</strong> {detail.name}</p>
-                                                    <p><strong>Реквизиты:</strong> {detail.details}</p>
-                                                    <p><strong>Описание:</strong> {detail.description}</p>
+                                                {editIndex === index ? (
+                                                    <div>
+                                                        <input
+                                                            type="text"
+                                                            value={editedDetail.name}
+                                                            onChange={(e) => setEditedDetail({ ...editedDetail, name: e.target.value })}
+                                                            className="block w-full mb-1"
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            value={editedDetail.details}
+                                                            onChange={(e) => setEditedDetail({ ...editedDetail, details: e.target.value })}
+                                                            className="block w-full mb-1"
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            value={editedDetail.description}
+                                                            onChange={(e) => setEditedDetail({ ...editedDetail, description: e.target.value })}
+                                                            className="block w-full mb-1"
+                                                        />
+                                                        <Button onClick={handleSaveBankDetail} className="mt-2">Сохранить</Button>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <p><strong>Название:</strong> {detail.name}</p>
+                                                        <p><strong>Реквизиты:</strong> {detail.details}</p>
+                                                        <p><strong>Описание:</strong> {detail.description}</p>
+                                                    </div>
+                                                )}
+                                                <div className="flex space-x-2">
+                                                    <Button onClick={() => handleEditBankDetail(index)} variant="secondary">Изменить</Button>
+                                                    <Button onClick={() => handleDeleteBankDetail(index)} variant="secondary">Удалить</Button>
                                                 </div>
-                                                <Button onClick={() => handleDeleteBankDetail(index)} variant="secondary">Удалить</Button>
                                             </div>
                                         ))}
                                     </div>
-                                    <Button onClick={handleUpdateBankDetails} className="mt-4">Сохранить изменения</Button>
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
