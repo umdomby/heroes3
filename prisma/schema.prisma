@@ -32,7 +32,6 @@ model User {
   transferUser2         Transfer[]              @relation("TransferUser2") // Отношение для user2
   betsPlaced            BetParticipant[]
   betsCLOSEDPlaced      BetParticipantCLOSED[]
-  buyPointReq           BuyPointReq[]
   bankDetails           Json?
   referralUserIpAddress ReferralUserIpAddress[]
   createdAt             DateTime                @default(now())
@@ -247,7 +246,6 @@ enum IsCovered {
   OPEN // overlap = 0
   CLOSED // overlap = profit
   PENDING // overlap < profit
-  CP
 }
 enum BuySell {
   BUY

@@ -859,6 +859,91 @@ export async function transferPoints(cardId: string, points: number) {
     }
 }
 
+export async function addBankDetails(newDetail: { name: string; details: string; description: string }) {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: Number(currentUser.id) },
+        });
+
+        if (!user) {
+            throw new Error('Пользователь не найден в базе данных');
+        }
+
+        const updatedBankDetails = [...(user.bankDetails || []), newDetail];
+
+        await prisma.user.update({
+            where: { id: Number(currentUser.id) },
+            data: {
+                bankDetails: updatedBankDetails,
+            },
+        });
+
+        return updatedBankDetails;
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error('Ошибка при добавлении банковского реквизита:', error.message);
+        } else {
+            console.error('Неизвестная ошибка при добавлении банковского реквизита:', error);
+        }
+        throw new Error('Не удалось добавить банковский реквизит');
+    }
+}
+
+export async function deleteBankDetail(index: number) {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: Number(currentUser.id) },
+        });
+
+        if (!user) {
+            throw new Error('Пользователь не найден в базе данных');
+        }
+
+        const updatedBankDetails = (user.bankDetails || []).filter((_, i) => i !== index);
+
+        await prisma.user.update({
+            where: { id: Number(currentUser.id) },
+            data: {
+                bankDetails: updatedBankDetails,
+            },
+        });
+
+        return updatedBankDetails;
+    } catch (error) {
+        console.error('Ошибка при удалении банковского реквизита:', error);
+        throw new Error('Не удалось удалить банковский реквизит');
+    }
+}
+export async function updateBankDetails(updatedDetails: { name: string; details: string; description: string }[]) {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        await prisma.user.update({
+            where: { id: Number(currentUser.id) },
+            data: {
+                bankDetails: updatedDetails,
+            },
+        });
+
+        return updatedDetails;
+    } catch (error) {
+        console.error('Ошибка при обновлении банковских реквизитов:', error);
+        throw new Error('Не удалось обновить банковские реквизиты');
+    }
+}
 
 
 export async function buyPayPointsOpen() {
@@ -875,7 +960,6 @@ export async function buyPayPointsOpen() {
         return false;
     }
 }
-
 export async function buyPayPointsClose() {
     try {
         const currentUser = await getUserSession();
