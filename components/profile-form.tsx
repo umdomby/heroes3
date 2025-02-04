@@ -12,6 +12,12 @@ import { Title } from './title';
 import { FormInput } from './form';
 import { Button } from '@/components/ui';
 import { referralGet, updateUserInfo } from '@/app/actions';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface Props {
     data: User;
@@ -73,8 +79,8 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         <Container className="w-[98%]">
             <div className="flex flex-col gap-3 w-full mt-10">
                 <div className="flex flex-col md:flex-row gap-3 w-full">
-                    {/* Левая колонка: Форма */}
-                    <div className="w-full md:w-1/2 p-4 rounded-lg">
+                    {/* Левая колонка: Форма (30% ширины) */}
+                    <div className="w-full md:w-1/3 p-4 rounded-lg"> {/* Changed to 1/3 for 30% width */}
                         <Title text={`Личные данные | #${data.id}`} size="md" className="font-bold"/>
 
                         <div className="mb-4">
@@ -106,40 +112,56 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                         </FormProvider>
                     </div>
 
-                    {/* Правая колонка: История входов */}
-                    <div className="w-full md:w-1/2 p-4 rounded-lg">
-                        <Title text="История входов" size="md" className="font-bold mb-4"/>
-                        {loginHistory.length > 0 ? (
-                            <div className="space-y-1">
-                            {loginHistory.map((entry: any, index: number) => (
-                                    <div key={index} className="p-1 border border-gray-300 rounded-lg">
-                                        <p>
-                                            <strong>IP:</strong> {entry.ip}, {new Date(entry.lastLogin).toLocaleString()}, <strong>VPN:</strong> {entry.vpn ? 'Да' : 'Нет'}, {entry.loginCount}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p>История входов отсутствует.</p>
-                        )}
-                    </div>
+                    {/* Правая колонка: Аккордеон для истории входов и IP адресов рефералов (70% ширины) */}
+                    <div className="w-full md:w-2/3 p-4 rounded-lg"> {/* Changed to 2/3 for 70% width */}
+                        <Accordion type="single" collapsible>
+                            <AccordionItem value="loginHistory">
+                                <AccordionTrigger>История входов</AccordionTrigger>
+                                <AccordionContent>
+                                    {loginHistory.length > 0 ? (
+                                        <div className="space-y-1">
+                                            {loginHistory.map((entry: any, index: number) => (
+                                                <div key={index} className="p-1 border border-gray-300 rounded-lg">
+                                                    <p>
+                                                        <strong>IP:</strong> {entry.ip}, {new Date(entry.lastLogin).toLocaleString()}, <strong>VPN:</strong> {entry.vpn ? 'Да' : 'Нет'}, {entry.loginCount}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p>История входов отсутствует.</p>
+                                    )}
+                                </AccordionContent>
+                            </AccordionItem>
 
-                    {/* IP address */}
-                    <div className="w-full md:w-1/2 p-4 rounded-lg">
-                        <Title text="IP адреса рефералов" size="md" className="font-bold mb-4"/>
-                        {referrals.length > 0 ? (
-                            <div className="space-y-1">
-                                {referrals.map((referral, index) => (
-                                    <div key={index} className="p-1 border border-gray-300 rounded-lg">
-                                        <p className={referral.referralStatus ? 'text-green-600' : 'text-gray-400'}>
-                                            <strong>IP:</strong> {referral.referralIpAddress}, <strong>Дата:</strong> {new Date(referral.createdAt).toLocaleString()}, +{referral.referralPoints}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p>Нет данных о рефералах.</p>
-                        )}
+                            <AccordionItem value="referralIPs">
+                                <AccordionTrigger>IP адреса рефералов</AccordionTrigger>
+                                <AccordionContent>
+                                    {referrals.length > 0 ? (
+                                        <div className="space-y-1">
+                                            {referrals.map((referral, index) => (
+                                                <div key={index} className="p-1 border border-gray-300 rounded-lg">
+                                                    <p className={referral.referralStatus ? 'text-green-600' : 'text-gray-400'}>
+                                                        <strong>IP:</strong> {referral.referralIpAddress}, <strong>Дата:</strong> {new Date(referral.createdAt).toLocaleString()}, +{referral.referralPoints}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p>Нет данных о рефералах.</p>
+                                    )}
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            {/* Новый блок для информации о банковских реквизитах */}
+                            <AccordionItem value="bankDetails">
+                                <AccordionTrigger>Реквизиты банков</AccordionTrigger>
+                                <AccordionContent>
+                                    <p>Здесь вы можете добавить информацию о банковских реквизитах.</p>
+                                    {/* Добавьте форму или информацию о банковских реквизитах здесь */}
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
                     </div>
                 </div>
             </div>
