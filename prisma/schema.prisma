@@ -66,17 +66,6 @@ model Transfer {
   updatedAt       DateTime @updatedAt
 }
 
-model BuyPointReq {
-  id                Int      @id @default(autoincrement())
-  buyPointReqUser1  User     @relation(fields: [buyPointReq1Id], references: [id])
-  buyPointReq1Id    Int
-  buyPointReqPoints Float
-  buyPointReqText   String   @default("")
-  buyPointReqStatus Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-}
-
 // export async function clientCreateBet(formData: any) actions.ts
 model Bet {
   id              Int              @id @default(autoincrement())

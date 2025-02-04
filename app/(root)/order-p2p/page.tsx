@@ -5,9 +5,9 @@ import { redirect } from 'next/navigation';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
-import {BUY_PAY_POINTS} from "@/components/BUY_PAY_POINTS";
+import {OrderP2P} from "@/components/OrderP2P";
 
-export default async function BuyPayPointsPage() {
+export default async function OrderP2PPage() {
     const session = await getUserSession();
 
     if (!session) {
@@ -23,7 +23,7 @@ export default async function BuyPayPointsPage() {
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <BUY_PAY_POINTS user={user} />
+                <OrderP2P user={user} />
             </Suspense>
         </Container>
     );

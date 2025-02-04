@@ -13,7 +13,7 @@ interface Props {
     user: User;
 }
 
-export const BUY_PAY_POINTS: React.FC<Props> = ({ user }) => {
+export const OrderP2P: React.FC<Props> = ({ user }) => {
     return (
         <div>
             <div className="flex justify-between items-center">
