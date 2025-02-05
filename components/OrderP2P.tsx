@@ -81,25 +81,19 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
 
     // Обработчик изменения цены для покупки
     const handlePriceChangeForBuy = (index: number, value: string) => {
-        // Заменяем запятую на точку для корректного преобразования в число
-        console.log(value)
-        const normalizedValue = value.replace(',', '.'); // Заменяем запятую на точку
-        const price = parseFloat(normalizedValue); // Преобразуем строку в число
-
         setSelectedBankDetailsForBuy((prevDetails) => {
             const newDetails = [...prevDetails];
-            newDetails[index].price = isNaN(price) ? 0 : price; // Устанавливаем цену или 0, если значение некорректно
-            console.log(newDetails)
+            newDetails[index].price = value; // Set price or 0 if invalid
+            console.log(newDetails); // Log new state
             return newDetails;
         });
     };
 
     // Обработчик изменения цены для продажи
     const handlePriceChangeForSell = (index: number, value: string) => {
-        const price = parseFloat(value);
         setSelectedBankDetailsForSell((prevDetails) => {
             const newDetails = [...prevDetails];
-            newDetails[index].price = isNaN(price) ? 0 : price;
+            newDetails[index].price = value;
             return newDetails;
         });
     };
@@ -230,15 +224,15 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                 <span className="flex-shrink-0">1 Point =</span> {/* Предотвращаем сжатие span */}
                                 <Input
                                     type="text"
-                                    value={detail.price.toString().replace('.', ',')} // Заменяем точку на запятую для отображения
+                                    value={detail.price.toString().replace('.', ',')} // Display with comma
                                     onChange={(e) => {
                                         let value = e.target.value;
-                                        // Заменяем точку на запятую для отображения
+                                        // Replace period with comma for display
                                         value = value.replace('.', ',');
-                                        // Проверяем, чтобы вводилось только допустимое значение (цифры и одна запятая)
+                                        // Allow only digits and one comma
                                         const regex = /^\d*[,]?\d*$/;
                                         if (regex.test(value)) {
-                                            handlePriceChangeForBuy(index, value); // Вызываем обработчик
+                                            handlePriceChangeForBuy(index, value); // Call handler
                                         }
                                     }}
                                     className="h-7 ml-2"
@@ -299,10 +293,18 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                             <div className="flex items-center mt-1 w-full"> {/* Первая строка с Input */}
                                 <span className="flex-shrink-0">1 Point =</span> {/* Предотвращаем сжатие span */}
                                 <Input
-                                    type="number"
-                                    step="0.0000001"
-                                    value={detail.price.toString()}
-                                    onChange={(e) => handlePriceChangeForSell(index, e.target.value)}
+                                    type="text"
+                                    value={detail.price.toString().replace('.', ',')} // Display with comma
+                                    onChange={(e) => {
+                                        let value = e.target.value;
+                                        // Replace period with comma for display
+                                        value = value.replace('.', ',');
+                                        // Allow only digits and one comma
+                                        const regex = /^\d*[,]?\d*$/;
+                                        if (regex.test(value)) {
+                                            handlePriceChangeForSell(index, value); // Call handler
+                                        }
+                                    }}
                                     className="h-7 ml-2"
                                 />
                             </div>
