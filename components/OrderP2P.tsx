@@ -13,13 +13,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+// Интерфейс для свойств компонента
 interface Props {
     user: User;
     openOrders: OrderP2PType[];
     className?: string;
 }
 
+// Компонент для работы с P2P заказами
 export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
+    // Состояния для управления данными
     const [buyPoints, setBuyPoints] = useState<number>(0);
     const [sellPoints, setSellPoints] = useState<number>(0);
     const [selectedBankDetailsForBuy, setSelectedBankDetailsForBuy] = useState<any[]>([]);
@@ -30,6 +33,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const [isBuySelectOpen, setIsBuySelectOpen] = useState<boolean>(false);
     const [isSellSelectOpen, setIsSellSelectOpen] = useState<boolean>(false);
 
+    // Обработчик выбора банковских реквизитов для покупки
     const handleSelectBankDetailForBuy = (detail: any) => {
         setSelectedBankDetailsForBuy((prevDetails) => {
             if (prevDetails.includes(detail)) {
@@ -40,6 +44,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
+    // Обработчик выбора банковских реквизитов для продажи
     const handleSelectBankDetailForSell = (detail: any) => {
         setSelectedBankDetailsForSell((prevDetails) => {
             if (prevDetails.includes(detail)) {
@@ -50,26 +55,31 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
+    // Обработчик выбора всех банковских реквизитов для покупки
     const handleSelectAllBankDetailsForBuy = () => {
         setSelectedBankDetailsForBuy(user.bankDetails.map((detail: any) => ({ ...detail, price: 0 })));
         setIsBuySelectOpen(false); // Закрыть Select
     };
 
+    // Обработчик выбора всех банковских реквизитов для продажи
     const handleSelectAllBankDetailsForSell = () => {
         setSelectedBankDetailsForSell(user.bankDetails.map((detail: any) => ({ ...detail, price: 0 })));
         setIsSellSelectOpen(false); // Закрыть Select
     };
 
+    // Обработчик очистки выбранных банковских реквизитов для покупки
     const handleClearBankDetailsForBuy = () => {
         setSelectedBankDetailsForBuy([]);
         setIsBuySelectOpen(false); // Закрыть Select
     };
 
+    // Обработчик очистки выбранных банковских реквизитов для продажи
     const handleClearBankDetailsForSell = () => {
         setSelectedBankDetailsForSell([]);
         setIsSellSelectOpen(false); // Закрыть Select
     };
 
+    // Обработчик изменения цены для покупки
     const handlePriceChangeForBuy = (index: number, value: string) => {
         const price = parseFloat(value);
         setSelectedBankDetailsForBuy((prevDetails) => {
@@ -79,6 +89,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
+    // Обработчик изменения цены для продажи
     const handlePriceChangeForSell = (index: number, value: string) => {
         const price = parseFloat(value);
         setSelectedBankDetailsForSell((prevDetails) => {
@@ -88,6 +99,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
+    // Обработчик создания заявки на покупку
     const handleCreateBuyOrder = async () => {
         try {
             await createBuyOrder(buyPoints, selectedBankDetailsForBuy, allowPartialBuy);
@@ -98,6 +110,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         }
     };
 
+    // Обработчик создания заявки на продажу
     const handleCreateSellOrder = async () => {
         try {
             await createSellOrder(sellPoints, selectedBankDetailsForSell, allowPartialSell);
@@ -108,10 +121,12 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         }
     };
 
+    // Обработчик выбора банковских реквизитов для взаимодействия
     const handleSelectBankDetailForInteraction = (detail: any) => {
         setSelectedBankDetailsForInteraction([detail]);
     };
 
+    // Обработчик заключения сделки
     const handleConcludeDeal = async (order: OrderP2PType) => {
         if (order.orderP2PUser1Id === user.id) {
             alert('Вы не можете заключать сделку с самим собой');
@@ -127,6 +142,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         }
     };
 
+    // Проверка, можно ли создать заявку
     const isCreateOrderDisabled = (points: number, selectedDetails: any[]) => {
         return points <= 0 || selectedDetails.length === 0 || selectedDetails.some(detail => detail.price <= 0);
     };
