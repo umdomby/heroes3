@@ -22,15 +22,15 @@ interface Props {
 
 // Компонент для работы с P2P заказами
 export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
-    const [buyPoints, setBuyPoints] = useState<number>(0);
-    const [sellPoints, setSellPoints] = useState<number>(0);
-    const [selectedBankDetailsForBuy, setSelectedBankDetailsForBuy] = useState<any[]>([]);
-    const [selectedBankDetailsForSell, setSelectedBankDetailsForSell] = useState<any[]>([]);
-    const [selectedBankDetailsForInteraction, setSelectedBankDetailsForInteraction] = useState<any[]>([]);
-    const [allowPartialBuy, setAllowPartialBuy] = useState<boolean>(false);
-    const [allowPartialSell, setAllowPartialSell] = useState<boolean>(false);
-    const [isBuySelectOpen, setIsBuySelectOpen] = useState<boolean>(false);
-    const [isSellSelectOpen, setIsSellSelectOpen] = useState<boolean>(false);
+    const [buyPoints, setBuyPoints] = useState<number>(0); // Количество очков для покупки
+    const [sellPoints, setSellPoints] = useState<number>(0); // Количество очков для продажи
+    const [selectedBankDetailsForBuy, setSelectedBankDetailsForBuy] = useState<any[]>([]); // Выбранные банковские реквизиты для покупки
+    const [selectedBankDetailsForSell, setSelectedBankDetailsForSell] = useState<any[]>([]); // Выбранные банковские реквизиты для продажи
+    const [allowPartialBuy, setAllowPartialBuy] = useState<boolean>(false); // Разрешить частичную покупку
+    const [allowPartialSell, setAllowPartialSell] = useState<boolean>(false); // Разрешить частичную продажу
+    const [isBuySelectOpen, setIsBuySelectOpen] = useState<boolean>(false); // Открыт ли Select для покупки
+    const [isSellSelectOpen, setIsSellSelectOpen] = useState<boolean>(false); // Открыт ли Select для продажи
+    const [selectedBankDetailsForInteraction, setSelectedBankDetailsForInteraction] = useState<any[]>([]); // Выбранные банковские реквизиты для взаимодействия
 
     // Обработчик выбора банковских реквизитов для покупки
     const handleSelectBankDetailForBuy = (detail: any) => {
