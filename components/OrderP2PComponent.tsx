@@ -7,7 +7,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import {$Enums, OrderP2P, User} from "@prisma/client";
+import {OrderP2P, User} from "@prisma/client";
 import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,15 +19,16 @@ interface BankDetail {
     description: string;
 }
 
+
 // Интерфейс для свойств компонента
 interface Props {
     user: User;
-    openOrders: OrderP2P;
+    openOrders: OrderP2P[]; // Ensure this is an array
     className?: string;
 }
 
 // Компонент для работы с P2P заказами
-export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
+export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className }) => {
     const [buyPoints, setBuyPoints] = useState<number>(0); // Количество очков для покупки
     const [sellPoints, setSellPoints] = useState<number>(0); // Количество очков для продажи
     const [selectedBankDetailsForBuy, setSelectedBankDetailsForBuy] = useState<any[]>([]); // Выбранные банковские реквизиты для покупки
@@ -37,6 +38,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const [selectedBankDetailsForInteraction, setSelectedBankDetailsForInteraction] = useState<any[]>([]); // Выбранные банковские реквизиты для взаимодействия
     const [selectedBuyOption, setSelectedBuyOption] = useState<string>(''); // Текущее выбранное значение для покупки
     const [selectedSellOption, setSelectedSellOption] = useState<string>(''); // Текущее выбранное значение для продажи
+
 
 // Обработчик выбора банковских реквизитов для покупки
     const handleSelectBankDetailForBuy = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -204,7 +206,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     };
 
     // Обработчик заключения сделки
-    const handleConcludeDeal = async (order: OrderP2PType) => {
+    const handleConcludeDeal = async (order: OrderP2P) => {
         if (order.orderP2PUser1Id === user.id) {
             alert('Вы не можете заключать сделку с самим собой');
             return;
@@ -485,7 +487,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                     <TableRow>
                                         <TableCell>{order.orderP2PPoints}</TableCell>
                                         <TableCell>
-                                            {/* Displaying the bank details in a readable format */}
+                                            {/* Отображение банковских реквизитов */}
                                             {order.orderBankDetails && order.orderBankDetails.length > 0 ? (
                                                 <ul>
                                                     {order.orderBankDetails.map((detail, index) => (

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
-import { OrderP2P } from "@/components/OrderP2P"; // Ensure this import matches your OrderP2P component
+import { OrderP2PComponent } from "@/components/OrderP2PComponent"; // Ensure this import matches your OrderP2P component
 
 export default async function OrderP2PPage() {
     const session = await getUserSession();
@@ -21,12 +21,24 @@ export default async function OrderP2PPage() {
         return redirect('/not-auth');
     }
 
-    // Fetch open orders directly
+    // Запрос к базе данных
     const openOrders = await prisma.orderP2P.findMany({
         where: { orderP2PStatus: 'OPEN' },
         include: {
-            orderP2PUser1: true,
-            orderP2PUser2: true,
+            orderP2PUser1: {
+                select: {
+                    id: true,
+                    cardId: true,
+                    // Добавьте другие необходимые поля
+                }
+            },
+            orderP2PUser2: {
+                select: {
+                    id: true,
+                    cardId: true,
+                    // Добавьте другие необходимые поля
+                }
+            }
         }
     });
 
@@ -34,7 +46,7 @@ export default async function OrderP2PPage() {
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <OrderP2P user={user} openOrders={openOrders} />
+                <OrderP2PComponent user={user} openOrders={openOrders} />
             </Suspense>
         </Container>
     );
