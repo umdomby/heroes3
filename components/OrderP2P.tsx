@@ -11,7 +11,6 @@ import { User, OrderP2P as OrderP2PType } from "@prisma/client";
 import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Интерфейс для свойств компонента
 interface Props {
@@ -28,54 +27,42 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const [selectedBankDetailsForSell, setSelectedBankDetailsForSell] = useState<any[]>([]); // Выбранные банковские реквизиты для продажи
     const [allowPartialBuy, setAllowPartialBuy] = useState<boolean>(false); // Разрешить частичную покупку
     const [allowPartialSell, setAllowPartialSell] = useState<boolean>(false); // Разрешить частичную продажу
-    const [isBuySelectOpen, setIsBuySelectOpen] = useState<boolean>(false); // Открыт ли Select для покупки
-    const [isSellSelectOpen, setIsSellSelectOpen] = useState<boolean>(false); // Открыт ли Select для продажи
     const [selectedBankDetailsForInteraction, setSelectedBankDetailsForInteraction] = useState<any[]>([]); // Выбранные банковские реквизиты для взаимодействия
+    const [selectedBuyOption, setSelectedBuyOption] = useState<string>(''); // Текущее выбранное значение для покупки
+    const [selectedSellOption, setSelectedSellOption] = useState<string>(''); // Текущее выбранное значение для продажи
 
     // Обработчик выбора банковских реквизитов для покупки
-    const handleSelectBankDetailForBuy = (detail: any) => {
-        setSelectedBankDetailsForBuy((prevDetails) => {
-            if (prevDetails.includes(detail)) {
-                return prevDetails.filter((d) => d !== detail);
-            } else {
-                return [...prevDetails, { ...detail, price: 0 }];
-            }
-        });
+    const handleSelectBankDetailForBuy = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedValue = event.target.value;
+        setSelectedBuyOption(selectedValue); // Устанавливаем выбранное значение
+        const detail = user.bankDetails.find((d: any) => d.name === selectedValue);
+        if (detail) {
+            setSelectedBankDetailsForBuy((prevDetails) => {
+                if (prevDetails.includes(detail)) {
+                    return prevDetails.filter((d) => d !== detail);
+                } else {
+                    return [...prevDetails, { ...detail, price: 0 }];
+                }
+            });
+        }
+        setSelectedBuyOption(''); // Сбрасываем выбор
     };
 
     // Обработчик выбора банковских реквизитов для продажи
-    const handleSelectBankDetailForSell = (detail: any) => {
-        setSelectedBankDetailsForSell((prevDetails) => {
-            if (prevDetails.includes(detail)) {
-                return prevDetails.filter((d) => d !== detail);
-            } else {
-                return [...prevDetails, { ...detail, price: 0 }];
-            }
-        });
-    };
-
-    // Обработчик выбора всех банковских реквизитов для покупки
-    const handleSelectAllBankDetailsForBuy = () => {
-        setSelectedBankDetailsForBuy(user.bankDetails.map((detail: any) => ({ ...detail, price: 0 })));
-        setIsBuySelectOpen(false); // Закрыть Select
-    };
-
-    // Обработчик выбора всех банковских реквизитов для продажи
-    const handleSelectAllBankDetailsForSell = () => {
-        setSelectedBankDetailsForSell(user.bankDetails.map((detail: any) => ({ ...detail, price: 0 })));
-        setIsSellSelectOpen(false); // Закрыть Select
-    };
-
-    // Обработчик очистки выбранных банковских реквизитов для покупки
-    const handleClearBankDetailsForBuy = () => {
-        setSelectedBankDetailsForBuy([]);
-        setIsBuySelectOpen(false); // Закрыть Select
-    };
-
-    // Обработчик очистки выбранных банковских реквизитов для продажи
-    const handleClearBankDetailsForSell = () => {
-        setSelectedBankDetailsForSell([]);
-        setIsSellSelectOpen(false); // Закрыть Select
+    const handleSelectBankDetailForSell = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedValue = event.target.value;
+        setSelectedSellOption(selectedValue); // Устанавливаем выбранное значение
+        const detail = user.bankDetails.find((d: any) => d.name === selectedValue);
+        if (detail) {
+            setSelectedBankDetailsForSell((prevDetails) => {
+                if (prevDetails.includes(detail)) {
+                    return prevDetails.filter((d) => d !== detail);
+                } else {
+                    return [...prevDetails, { ...detail, price: 0 }];
+                }
+            });
+        }
+        setSelectedSellOption(''); // Сбрасываем выбор
     };
 
     // Обработчик изменения цены для покупки
@@ -281,32 +268,20 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                 <div className="w-1/2">
                     <h2 className="text-xl font-bold mb-2">Купить Points</h2>
                     <Input
-                        type="text" // Изменено на "text" для более гибкой обработки ввода
+                        type="text"
                         value={buyPoints}
                         onChange={handleBuyPointsChange}
                         placeholder="Сколько хотите купить"
                         className="mb-2"
                     />
-                    <Select
-                        open={isBuySelectOpen}
-                        onOpenChange={setIsBuySelectOpen}
-                        onValueChange={handleSelectBankDetailForBuy}
-                        placeholder="Выберите реквизиты банка"
-                        className="mb-2"
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Выберите реквизиты банка" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <Button onClick={handleSelectAllBankDetailsForBuy} className="mb-2">Выбрать все</Button>
-                            <Button onClick={handleClearBankDetailsForBuy} className="mb-2">Закрыть все</Button>
-                            {user.bankDetails && user.bankDetails.map((detail, index) => (
-                                <SelectItem key={index} value={detail}>
-                                    {detail.name} - {detail.details}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <select value={selectedBuyOption} onChange={handleSelectBankDetailForBuy} className="mb-2">
+                        <option value="">Выберите реквизиты банка</option>
+                        {user.bankDetails && user.bankDetails.map((detail, index) => (
+                            <option key={index} value={detail.name}>
+                                {detail.name} - {detail.details}
+                            </option>
+                        ))}
+                    </select>
                     {/*Создание реквизитов банка с price для покупки*/}
                     {selectedBankDetailsForBuy.map((detail, index) => (
                         <div key={index} className="mt-1 border border-gray-300 rounded p-2">
@@ -317,9 +292,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                     value={detail.price.toString().replace('.', ',')}
                                     onChange={(e) => {
                                         let value = e.target.value;
-                                        // Заменяем точку на запятую для отображения
                                         value = value.replace('.', ',');
-                                        // Разрешаем только цифры и одну запятую
                                         const regex = /^\d*[,]?\d*$/;
                                         if (regex.test(value)) {
                                             handlePriceChangeForBuy(index, value);
@@ -355,32 +328,20 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                 <div className="w-1/2">
                     <h2 className="text-xl font-bold mb-2">Продать Points</h2>
                     <Input
-                        type="text" // Изменено на "text" для более гибкой обработки ввода
+                        type="text"
                         value={sellPoints}
                         onChange={handleSellPointsChange}
                         placeholder="Сколько хотите продать"
                         className="mb-2"
                     />
-                    <Select
-                        open={isSellSelectOpen}
-                        onOpenChange={setIsSellSelectOpen}
-                        onValueChange={handleSelectBankDetailForSell}
-                        placeholder="Выберите реквизиты банка"
-                        className="mb-2"
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Выберите реквизиты банка" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <Button onClick={handleSelectAllBankDetailsForSell} className="mb-2">Выбрать все</Button>
-                            <Button onClick={handleClearBankDetailsForSell} className="mb-2">Закрыть все</Button>
-                            {user.bankDetails && user.bankDetails.map((detail, index) => (
-                                <SelectItem key={index} value={detail}>
-                                    {detail.name} - {detail.details}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <select value={selectedSellOption} onChange={handleSelectBankDetailForSell} className="mb-2">
+                        <option value="">Выберите реквизиты банка</option>
+                        {user.bankDetails && user.bankDetails.map((detail, index) => (
+                            <option key={index} value={detail.name}>
+                                {detail.name} - {detail.details}
+                            </option>
+                        ))}
+                    </select>
                     {/*Создание реквизитов банка с price для продажи*/}
                     {selectedBankDetailsForSell.map((detail, index) => (
                         <div key={index} className="mt-1 border border-gray-300 rounded p-2">
@@ -391,9 +352,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                     value={detail.price.toString().replace('.', ',')}
                                     onChange={(e) => {
                                         let value = e.target.value;
-                                        // Заменяем точку на запятую для отображения
                                         value = value.replace('.', ',');
-                                        // Разрешаем только цифры и одну запятую
                                         const regex = /^\d*[,]?\d*$/;
                                         if (regex.test(value)) {
                                             handlePriceChangeForSell(index, value);
@@ -443,22 +402,14 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                     </TableRow>
                                 </TableBody>
                             </Table>
-                            <Select
-                                onValueChange={handleSelectBankDetailForInteraction}
-                                placeholder="Выберите реквизиты банка для сделки"
-                                className="mb-2"
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Выберите реквизиты банка" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {order.orderBankDetails && order.orderBankDetails.map((detail, index) => (
-                                        <SelectItem key={index} value={detail}>
-                                            {detail.name} - {detail.details}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <select onChange={(e) => handleSelectBankDetailForInteraction(e.target.value)} className="mb-2">
+                                <option value="">Выберите реквизиты банка для сделки</option>
+                                {order.orderBankDetails && order.orderBankDetails.map((detail, index) => (
+                                    <option key={index} value={detail.name}>
+                                        {detail.name} - {detail.details}
+                                    </option>
+                                ))}
+                            </select>
                             <Button onClick={() => handleConcludeDeal(order)} disabled={order.orderP2PUser1Id === user.id}>
                                 Заключить сделку
                             </Button>
