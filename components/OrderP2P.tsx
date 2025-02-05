@@ -8,26 +8,28 @@ import {
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { User, OrderP2P as OrderP2PType } from "@prisma/client";
-import { createBuyOrder, createSellOrder } from '@/app/actions.ts';
-import { Button } from "@/components/ui/button"; // Импортируем кнопку из Shadcn
-import { Input } from "@/components/ui/input"; // Импортируем инпут из Shadcn
+import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions.ts';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {Select, SelectItem, SelectContent, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 interface Props {
     user: User;
     openOrders: OrderP2PType[];
-    className?: string; // Добавляем класс для стилизации
+    className?: string;
 }
 
 export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const [buyPoints, setBuyPoints] = useState<number>(0);
     const [sellPoints, setSellPoints] = useState<number>(0);
-    const [selectedBankDetails, setSelectedBankDetails] = useState<any[]>([]); // Для хранения выбранных реквизитов банка
-    const [price, setPrice] = useState<number>(0); // Для хранения цены
-    const [allowPartial, setAllowPartial] = useState<boolean>(false); // Для хранения состояния чекбокса
+    const [selectedBankDetailsForCreation, setSelectedBankDetailsForCreation] = useState<any[]>([]);
+    const [selectedBankDetailsForInteraction, setSelectedBankDetailsForInteraction] = useState<any[]>([]);
+    const [price, setPrice] = useState<number>(0);
+    const [allowPartial, setAllowPartial] = useState<boolean>(false);
 
     const handleCreateBuyOrder = async () => {
         try {
-            await createBuyOrder(buyPoints, selectedBankDetails, price, allowPartial);
+            await createBuyOrder(buyPoints, selectedBankDetailsForCreation, price, allowPartial);
             alert('Заявка на покупку успешно создана');
         } catch (error) {
             console.error('Ошибка при создании заявки на покупку:', error);
@@ -37,11 +39,34 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
 
     const handleCreateSellOrder = async () => {
         try {
-            await createSellOrder(sellPoints, selectedBankDetails, price, allowPartial);
+            await createSellOrder(sellPoints, selectedBankDetailsForCreation, price, allowPartial);
             alert('Заявка на продажу успешно создана');
         } catch (error) {
             console.error('Ошибка при создании заявки на продажу:', error);
             alert('Не удалось создать заявку на продажу');
+        }
+    };
+
+    const handleSelectBankDetailForCreation = (detail: any) => {
+        setSelectedBankDetailsForCreation((prevDetails) => [...prevDetails, detail]);
+    };
+
+    const handleSelectBankDetailForInteraction = (detail: any) => {
+        setSelectedBankDetailsForInteraction([detail]);
+    };
+
+    const handleConcludeDeal = async (order: OrderP2PType) => {
+        if (order.orderP2PUser1Id === user.id) {
+            alert('Вы не можете заключать сделку с самим собой');
+            return;
+        }
+
+        try {
+            await buyPayPointsOpen();
+            alert('Сделка успешно заключена');
+        } catch (error) {
+            console.error('Ошибка при заключении сделки:', error);
+            alert('Не удалось заключить сделку');
         }
     };
 
@@ -62,7 +87,22 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         placeholder="Сколько хотите купить"
                         className="mb-2"
                     />
-                    {/* Выбор реквизитов банка и цены */}
+                    <Select
+                        onValueChange={handleSelectBankDetailForCreation}
+                        placeholder="Выберите реквизиты банка"
+                        className="mb-2"
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Выберите реквизиты банка" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {user.bankDetails && user.bankDetails.map((detail, index) => (
+                                <SelectItem key={index} value={detail}>
+                                    {detail.name} - {detail.details}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <Input
                         type="number"
                         value={price}
@@ -90,7 +130,22 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         placeholder="Сколько хотите продать"
                         className="mb-2"
                     />
-                    {/* Выбор реквизитов банка и цены */}
+                    <Select
+                        onValueChange={handleSelectBankDetailForCreation}
+                        placeholder="Выберите реквизиты банка"
+                        className="mb-2"
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Выберите реквизиты банка" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {user.bankDetails && user.bankDetails.map((detail, index) => (
+                                <SelectItem key={index} value={detail}>
+                                    {detail.name} - {detail.details}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <Input
                         type="number"
                         value={price}
@@ -112,8 +167,8 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
             </div>
             <Accordion className="mt-4">
                 {openOrders.map((order) => (
-                    <AccordionItem key={order.id}>
-                        <AccordionTrigger>
+                    <AccordionItem key={order.id} className={order.orderP2PUser1Id === user.id ? 'bg-gray-200' : ''}>
+                        <AccordionTrigger disabled={order.orderP2PUser1Id === user.id}>
                             {order.orderP2PUser1.cardId} хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
                         </AccordionTrigger>
                         <AccordionContent>
@@ -121,13 +176,28 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                 <TableBody>
                                     <TableRow>
                                         <TableCell>{order.orderP2PPoints}</TableCell>
-                                        <TableCell>{order.orderBankDetails}</TableCell>
+                                        <TableCell>{JSON.stringify(order.orderBankDetails)}</TableCell>
                                         <TableCell>{order.orderP2PPrice}</TableCell>
                                         <TableCell>{order.orderP2PPart ? 'Частями' : 'Целиком'}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
-                            {/* Логика для заключения сделки */}
+                            <Select
+                                onValueChange={handleSelectBankDetailForInteraction}
+                                placeholder="Выберите реквизиты банка для сделки"
+                                className="mb-2"
+                            >
+                                <SelectContent>
+                                    {order.orderBankDetails && order.orderBankDetails.map((detail: { id: number, name: string, details: string }) => (
+                                        <SelectItem key={detail.id} value={detail}>
+                                            {detail.name} - {detail.details}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Button onClick={() => handleConcludeDeal(order)} disabled={order.orderP2PUser1Id === user.id}>
+                                Заключить сделку
+                            </Button>
                         </AccordionContent>
                     </AccordionItem>
                 ))}

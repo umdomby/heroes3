@@ -956,12 +956,10 @@ export async function createBuyOrder(points: number, bankDetails: any[], price: 
             throw new Error('Пользователь не найден');
         }
 
-        // Проверка минимального и максимального количества points
         if (points < 50 || points > 100000) {
             throw new Error('Количество points должно быть от 50 до 100000');
         }
 
-        // Создание заявки на покупку
         const newOrder = await prisma.orderP2P.create({
             data: {
                 orderP2PUser1Id: currentUser.id,
@@ -990,12 +988,10 @@ export async function createSellOrder(points: number, bankDetails: any[], price:
             throw new Error('Пользователь не найден');
         }
 
-        // Проверка минимального и максимального количества points
         if (points < 50 || points > 100000) {
             throw new Error('Количество points должно быть от 50 до 100000');
         }
 
-        // Проверка, что у пользователя достаточно points для продажи
         const user = await prisma.user.findUnique({
             where: { id: currentUser.id },
         });
@@ -1004,7 +1000,6 @@ export async function createSellOrder(points: number, bankDetails: any[], price:
             throw new Error('Недостаточно points для продажи');
         }
 
-        // Создание заявки на продажу
         const newOrder = await prisma.orderP2P.create({
             data: {
                 orderP2PUser1Id: currentUser.id,
@@ -1017,7 +1012,6 @@ export async function createSellOrder(points: number, bankDetails: any[], price:
             },
         });
 
-        // Обновление баланса пользователя
         await prisma.user.update({
             where: { id: currentUser.id },
             data: {
@@ -1035,10 +1029,23 @@ export async function createSellOrder(points: number, bankDetails: any[], price:
     }
 }
 
+// Функция для открытия сделки
+export async function buyPayPointsOpen() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
 
-const handleCreateSellOrder = async () => {
-    // Логика создания заявки на продажу
-};
+        revalidatePath('/buy-pay-point');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
+
+
 export async function buyPayPointsClose() {
     try {
         const currentUser = await getUserSession();
