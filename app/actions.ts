@@ -962,7 +962,7 @@ export async function createBuyOrder(points: number, bankDetails: any[], allowPa
 
         const newOrder = await prisma.orderP2P.create({
             data: {
-                orderP2PUser1Id: currentUser.id,
+                orderP2PUser1Id: Number(currentUser.id),
                 orderP2PBuySell: 'BUY',
                 orderP2PPoints: points,
                 orderP2PPart: allowPartial,
@@ -992,7 +992,7 @@ export async function createSellOrder(points: number, bankDetails: any[],  allow
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: currentUser.id },
+            where: { id: Number(currentUser.id) },
         });
 
         if (!user || user.points < points) {
@@ -1001,7 +1001,7 @@ export async function createSellOrder(points: number, bankDetails: any[],  allow
 
         const newOrder = await prisma.orderP2P.create({
             data: {
-                orderP2PUser1Id: currentUser.id,
+                orderP2PUser1Id: Number(currentUser.id),
                 orderP2PBuySell: 'SELL',
                 orderP2PPoints: points,
                 orderP2PPart: allowPartial,
@@ -1011,7 +1011,7 @@ export async function createSellOrder(points: number, bankDetails: any[],  allow
         });
 
         await prisma.user.update({
-            where: { id: currentUser.id },
+            where: { id: Number(currentUser.id)},
             data: {
                 points: {
                     decrement: points,

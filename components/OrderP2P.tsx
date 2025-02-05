@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { User, OrderP2P as OrderP2PType } from "@prisma/client";
-import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions.ts';
+import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,8 +30,8 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const [isBuySelectOpen, setIsBuySelectOpen] = useState<boolean>(false);
     const [isSellSelectOpen, setIsSellSelectOpen] = useState<boolean>(false);
 
-    const handleSelectBankDetail = (detail: any, setSelectedDetails: React.Dispatch<React.SetStateAction<any[]>>) => {
-        setSelectedDetails((prevDetails) => {
+    const handleSelectBankDetailForBuy = (detail: any) => {
+        setSelectedBankDetailsForBuy((prevDetails) => {
             if (prevDetails.includes(detail)) {
                 return prevDetails.filter((d) => d !== detail);
             } else {
@@ -40,33 +40,76 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
-    const handleSelectAllBankDetails = (setSelectedDetails: React.Dispatch<React.SetStateAction<any[]>>, closeSelect: React.Dispatch<React.SetStateAction<boolean>>) => {
-        setSelectedDetails(user.bankDetails.map((detail: any) => ({ ...detail, price: 0 })));
-        closeSelect(false);
+    const handleSelectBankDetailForSell = (detail: any) => {
+        setSelectedBankDetailsForSell((prevDetails) => {
+            if (prevDetails.includes(detail)) {
+                return prevDetails.filter((d) => d !== detail);
+            } else {
+                return [...prevDetails, { ...detail, price: 0 }];
+            }
+        });
     };
 
-    const handleClearBankDetails = (setSelectedDetails: React.Dispatch<React.SetStateAction<any[]>>, closeSelect: React.Dispatch<React.SetStateAction<boolean>>) => {
-        setSelectedDetails([]);
-        closeSelect(false);
+    const handleSelectAllBankDetailsForBuy = () => {
+        setSelectedBankDetailsForBuy(user.bankDetails.map((detail: any) => ({ ...detail, price: 0 })));
+        setIsBuySelectOpen(false); // Закрыть Select
     };
 
-    const handlePriceChange = (index: number, value: string, setSelectedDetails: React.Dispatch<React.SetStateAction<any[]>>) => {
-        const price = parseInt(value, 10);
-        setSelectedDetails((prevDetails) => {
+    const handleSelectAllBankDetailsForSell = () => {
+        setSelectedBankDetailsForSell(user.bankDetails.map((detail: any) => ({ ...detail, price: 0 })));
+        setIsSellSelectOpen(false); // Закрыть Select
+    };
+
+    const handleClearBankDetailsForBuy = () => {
+        setSelectedBankDetailsForBuy([]);
+        setIsBuySelectOpen(false); // Закрыть Select
+    };
+
+    const handleClearBankDetailsForSell = () => {
+        setSelectedBankDetailsForSell([]);
+        setIsSellSelectOpen(false); // Закрыть Select
+    };
+
+    const handlePriceChangeForBuy = (index: number, value: string) => {
+        const price = parseFloat(value);
+        setSelectedBankDetailsForBuy((prevDetails) => {
             const newDetails = [...prevDetails];
             newDetails[index].price = isNaN(price) ? 0 : price;
             return newDetails;
         });
     };
 
-    const handleCreateOrder = async (points: number, selectedDetails: any[], allowPartial: boolean, createOrderFunc: Function, successMessage: string, errorMessage: string) => {
+    const handlePriceChangeForSell = (index: number, value: string) => {
+        const price = parseFloat(value);
+        setSelectedBankDetailsForSell((prevDetails) => {
+            const newDetails = [...prevDetails];
+            newDetails[index].price = isNaN(price) ? 0 : price;
+            return newDetails;
+        });
+    };
+
+    const handleCreateBuyOrder = async () => {
         try {
-            await createOrderFunc(points, selectedDetails, allowPartial);
-            alert(successMessage);
+            await createBuyOrder(buyPoints, selectedBankDetailsForBuy, allowPartialBuy);
+            alert('Заявка на покупку успешно создана');
         } catch (error) {
-            console.error(errorMessage, error);
-            alert(errorMessage);
+            console.error('Ошибка при создании заявки на покупку:', error);
+            alert('Не удалось создать заявку на покупку');
         }
+    };
+
+    const handleCreateSellOrder = async () => {
+        try {
+            await createSellOrder(sellPoints, selectedBankDetailsForSell, allowPartialSell);
+            alert('Заявка на продажу успешно создана');
+        } catch (error) {
+            console.error('Ошибка при создании заявки на продажу:', error);
+            alert('Не удалось создать заявку на продажу');
+        }
+    };
+
+    const handleSelectBankDetailForInteraction = (detail: any) => {
+        setSelectedBankDetailsForInteraction([detail]);
     };
 
     const handleConcludeDeal = async (order: OrderP2PType) => {
@@ -100,7 +143,6 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                     <h2 className="text-xl font-bold mb-2">Купить Points</h2>
                     <Input
                         type="number"
-                        step="1"
                         value={buyPoints}
                         onChange={(e) => setBuyPoints(Number(e.target.value))}
                         placeholder="Сколько хотите купить"
@@ -109,7 +151,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                     <Select
                         open={isBuySelectOpen}
                         onOpenChange={setIsBuySelectOpen}
-                        onValueChange={(detail) => handleSelectBankDetail(detail, setSelectedBankDetailsForBuy)}
+                        onValueChange={handleSelectBankDetailForBuy}
                         placeholder="Выберите реквизиты банка"
                         className="mb-2"
                     >
@@ -117,8 +159,8 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                             <SelectValue placeholder="Выберите реквизиты банка" />
                         </SelectTrigger>
                         <SelectContent>
-                            <Button onClick={() => handleSelectAllBankDetails(setSelectedBankDetailsForBuy, setIsBuySelectOpen)} className="mb-2">Выбрать все</Button>
-                            <Button onClick={() => handleClearBankDetails(setSelectedBankDetailsForBuy, setIsBuySelectOpen)} className="mb-2">Закрыть все</Button>
+                            <Button onClick={handleSelectAllBankDetailsForBuy} className="mb-2">Выбрать все</Button>
+                            <Button onClick={handleClearBankDetailsForBuy} className="mb-2">Закрыть все</Button>
                             {user.bankDetails && user.bankDetails.map((detail, index) => (
                                 <SelectItem key={index} value={detail}>
                                     {detail.name} - {detail.details}
@@ -131,9 +173,9 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                             <span>{detail.name} - {detail.details}</span>
                             <Input
                                 type="number"
-                                step="1"
+                                step="0.1"
                                 value={detail.price.toString()}
-                                onChange={(e) => handlePriceChange(index, e.target.value, setSelectedBankDetailsForBuy)}
+                                onChange={(e) => handlePriceChangeForBuy(index, e.target.value)}
                                 placeholder="Цена"
                                 className="ml-2"
                             />
@@ -148,13 +190,12 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         />
                         Покупать частями
                     </label>
-                    <Button onClick={() => handleCreateOrder(buyPoints, selectedBankDetailsForBuy, allowPartialBuy, createBuyOrder, 'Заявка на покупку успешно создана', 'Не удалось создать заявку на покупку')} className="w-full" disabled={isCreateOrderDisabled(buyPoints, selectedBankDetailsForBuy)}>Создать заявку</Button>
+                    <Button onClick={handleCreateBuyOrder} className="w-full" disabled={isCreateOrderDisabled(buyPoints, selectedBankDetailsForBuy)}>Создать заявку</Button>
                 </div>
                 <div className="w-1/2">
                     <h2 className="text-xl font-bold mb-2">Продать Points</h2>
                     <Input
                         type="number"
-                        step="1"
                         value={sellPoints}
                         onChange={(e) => setSellPoints(Number(e.target.value))}
                         placeholder="Сколько хотите продать"
@@ -163,7 +204,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                     <Select
                         open={isSellSelectOpen}
                         onOpenChange={setIsSellSelectOpen}
-                        onValueChange={(detail) => handleSelectBankDetail(detail, setSelectedBankDetailsForSell)}
+                        onValueChange={handleSelectBankDetailForSell}
                         placeholder="Выберите реквизиты банка"
                         className="mb-2"
                     >
@@ -171,8 +212,8 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                             <SelectValue placeholder="Выберите реквизиты банка" />
                         </SelectTrigger>
                         <SelectContent>
-                            <Button onClick={() => handleSelectAllBankDetails(setSelectedBankDetailsForSell, setIsSellSelectOpen)} className="mb-2">Выбрать все</Button>
-                            <Button onClick={() => handleClearBankDetails(setSelectedBankDetailsForSell, setIsSellSelectOpen)} className="mb-2">Закрыть все</Button>
+                            <Button onClick={handleSelectAllBankDetailsForSell} className="mb-2">Выбрать все</Button>
+                            <Button onClick={handleClearBankDetailsForSell} className="mb-2">Закрыть все</Button>
                             {user.bankDetails && user.bankDetails.map((detail, index) => (
                                 <SelectItem key={index} value={detail}>
                                     {detail.name} - {detail.details}
@@ -185,9 +226,9 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                             <span>{detail.name} - {detail.details}</span>
                             <Input
                                 type="number"
-                                step="1"
+                                step="0.1"
                                 value={detail.price.toString()}
-                                onChange={(e) => handlePriceChange(index, e.target.value, setSelectedBankDetailsForSell)}
+                                onChange={(e) => handlePriceChangeForSell(index, e.target.value)}
                                 placeholder="Цена"
                                 className="ml-2"
                             />
@@ -202,7 +243,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         />
                         Продавать частями
                     </label>
-                    <Button onClick={() => handleCreateOrder(sellPoints, selectedBankDetailsForSell, allowPartialSell, createSellOrder, 'Заявка на продажу успешно создана', 'Не удалось создать заявку на продажу')} className="w-full" disabled={isCreateOrderDisabled(sellPoints, selectedBankDetailsForSell)}>Создать заявку</Button>
+                    <Button onClick={handleCreateSellOrder} className="w-full" disabled={isCreateOrderDisabled(sellPoints, selectedBankDetailsForSell)}>Создать заявку</Button>
                 </div>
             </div>
             <Accordion className="mt-4">
