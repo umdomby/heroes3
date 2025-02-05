@@ -7,11 +7,25 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { User, OrderP2P as OrderP2PType } from "@prisma/client";
+import {$Enums, OrderP2P, User} from "@prisma/client";
 import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import BuySell = $Enums.BuySell;
 
+
+// interface OrderP2P {
+//     id: number;
+//     createdAt: Date;
+//     updatedAt: Date;
+//     orderP2PUser1Id: number;
+//     orderP2PUser1?: User; // This should be optional if the user might not exist
+//     orderP2PUser2Id?: number | null;
+//     orderP2PUser2?: User; // This should also be optional
+//     orderP2PBuySell: BuySell;
+//     orderP2PPoints?: number | null;
+//     orderP2PStatus: OrderP2PStatus;
+// }
 
 
 interface BankDetail {
@@ -20,10 +34,17 @@ interface BankDetail {
     description: string;
 }
 
+// interface User {
+//     id: number;
+//     cardId: string; // Ensure this matches your User model
+//     bankDetails : BankDetail;
+//     // other user fields...
+// }
+
 // Интерфейс для свойств компонента
 interface Props {
     user: User;
-    openOrders: OrderP2PType[];
+    openOrders: OrderP2P;
     className?: string;
 }
 
@@ -39,7 +60,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const [selectedBuyOption, setSelectedBuyOption] = useState<string>(''); // Текущее выбранное значение для покупки
     const [selectedSellOption, setSelectedSellOption] = useState<string>(''); // Текущее выбранное значение для продажи
 
-    // Обработчик выбора банковских реквизитов для покупки
+// Обработчик выбора банковских реквизитов для покупки
     const handleSelectBankDetailForBuy = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedValue = event.target.value;
         setSelectedBuyOption(selectedValue); // Устанавливаем выбранное значение
@@ -56,17 +77,14 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                 });
             }
         }
-
         setSelectedBuyOption(''); // Сбрасываем выбор
     };
 
-    // Обработчик выбора банковских реквизитов для продажи
 // Обработчик выбора банковских реквизитов для продажи
     const handleSelectBankDetailForSell = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedValue = event.target.value;
         setSelectedSellOption(selectedValue); // Устанавливаем выбранное значение
 
-        // Проверяем, что bankDetails не null и является массивом
         if (Array.isArray(user.bankDetails)) {
             const detail = user.bankDetails.find((d: any) => d.name === selectedValue);
             if (detail && typeof detail === 'object') { // Проверяем, что detail является объектом
@@ -79,7 +97,6 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                 });
             }
         }
-
         setSelectedSellOption(''); // Сбрасываем выбор
     };
 
@@ -275,10 +292,15 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
-    // Добавление всех банковских реквизитов для покупки
+// Добавление всех банковских реквизитов для покупки
     const handleAddAllBankDetailsForBuy = () => {
-        const allDetails = user.bankDetails.map((detail: any) => ({ ...detail, price: 0 }));
-        setSelectedBankDetailsForBuy(allDetails);
+        if (Array.isArray(user.bankDetails)) { // Check if bankDetails is an array
+            // Use type assertion to convert JsonValue to BankDetail[]
+            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: 0 }));
+            setSelectedBankDetailsForBuy(allDetails);
+        } else {
+            alert('Нет доступных банковских реквизитов для добавления.'); // Optional: Alert the user if there are no bank details
+        }
     };
 
     // Удаление всех банковских реквизитов для покупки
@@ -286,15 +308,24 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         setSelectedBankDetailsForBuy([]);
     };
 
-    // Добавление всех банковских реквизитов для продажи
+// Добавление всех банковских реквизитов для продажи
     const handleAddAllBankDetailsForSell = () => {
-        const allDetails = user.bankDetails.map((detail: any) => ({ ...detail, price: 0 }));
-        setSelectedBankDetailsForSell(allDetails);
+        if (user.bankDetails) { // Check if bankDetails is not null
+            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: 0 }));
+            setSelectedBankDetailsForSell(allDetails);
+        } else {
+            alert('Нет доступных банковских реквизитов для добавления.'); // Optional: Alert the user if there are no bank details
+        }
     };
 
     // Удаление всех банковских реквизитов для продажи
     const handleRemoveAllBankDetailsForSell = () => {
         setSelectedBankDetailsForSell([]);
+    };
+
+    // Защита типов для проверки, является ли объект BankDetail
+    const isBankDetail = (detail: any): detail is BankDetail => {
+        return detail && typeof detail.name === 'string' && typeof detail.details === 'string';
     };
 
     return (
@@ -321,11 +352,16 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                             className="flex-grow w-[50%] p-2 border rounded"
                         >
                             <option value="">Выберите реквизиты банка</option>
-                            {user.bankDetails && user.bankDetails.map((detail, index) => (
-                                <option key={index} value={detail.name}>
-                                    {detail.name} - {detail.details}
-                                </option>
-                            ))}
+                            {Array.isArray(user.bankDetails) && user.bankDetails.map((detail, index) => {
+                                if (isBankDetail(detail)) { // Используем защиту типов
+                                    return (
+                                        <option key={index} value={detail.name}>
+                                            {detail.name} - {detail.details}
+                                        </option>
+                                    );
+                                }
+                                return null; // Возвращаем null, если detail не является BankDetail
+                            })}
                         </select>
                         <Button onClick={handleAddAllBankDetailsForBuy} className="whitespace-nowrap">
                             Добавить все
@@ -388,16 +424,21 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                     />
                     <div className="flex items-center space-x-2 mb-2">
                         <select
-                            value={selectedSellOption}
-                            onChange={handleSelectBankDetailForSell}
+                            value={selectedBuyOption}
+                            onChange={handleSelectBankDetailForBuy}
                             className="flex-grow w-[50%] p-2 border rounded"
                         >
                             <option value="">Выберите реквизиты банка</option>
-                            {user.bankDetails && user.bankDetails.map((detail, index) => (
-                                <option key={index} value={detail.name}>
-                                    {detail.name} - {detail.details}
-                                </option>
-                            ))}
+                            {Array.isArray(user.bankDetails) && user.bankDetails.map((detail, index) => {
+                                if (isBankDetail(detail)) { // Используем защиту типов
+                                    return (
+                                        <option key={index} value={detail.name}>
+                                            {detail.name} - {detail.details}
+                                        </option>
+                                    );
+                                }
+                                return null; // Возвращаем null, если detail не является BankDetail
+                            })}
                         </select>
                         <Button onClick={handleAddAllBankDetailsForSell} className="whitespace-nowrap">
                             Добавить все
@@ -450,11 +491,15 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         заявку</Button>
                 </div>
             </div>
-            <Accordion className="mt-4">
+            <Accordion className="mt-4" type="multiple">
                 {openOrders.map((order) => (
-                    <AccordionItem key={order.id} className={order.orderP2PUser1Id === user.id ? 'bg-gray-200' : ''}>
+                    <AccordionItem
+                        key={order.id}
+                        value={order.id.toString()}
+                        className={order.orderP2PUser1Id === user.id ? 'bg-gray-200' : ''}
+                    >
                         <AccordionTrigger disabled={order.orderP2PUser1Id === user.id}>
-                            {order.orderP2PUser1.cardId} хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
+                            {order.orderP2PUser1?.cardId} хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
                         </AccordionTrigger>
                         <AccordionContent>
                             <Table>

@@ -25,7 +25,10 @@ export default async function OrderP2PPage() {
 
     const openOrders = await prisma.orderP2P.findMany({
         where: { orderP2PStatus: 'OPEN' },
-        include: { orderP2PUser1: true, orderP2PUser2: true }
+        include: {
+            orderP2PUser1: true, // Include the user data for orderP2PUser1
+            orderP2PUser2: true, // Include the user data for orderP2PUser2 if needed
+        }
     });
 
     return (
