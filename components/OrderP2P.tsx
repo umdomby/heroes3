@@ -11,7 +11,7 @@ import { User, OrderP2P as OrderP2PType } from "@prisma/client";
 import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions.ts';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {Select, SelectItem, SelectContent, SelectTrigger, SelectValue} from "@/components/ui/select";
+import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Props {
     user: User;
@@ -25,11 +25,12 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const [selectedBankDetailsForCreation, setSelectedBankDetailsForCreation] = useState<any[]>([]);
     const [selectedBankDetailsForInteraction, setSelectedBankDetailsForInteraction] = useState<any[]>([]);
     const [price, setPrice] = useState<number>(0);
-    const [allowPartial, setAllowPartial] = useState<boolean>(false);
+    const [allowPartialBuy, setAllowPartialBuy] = useState<boolean>(false); // Для покупки частями
+    const [allowPartialSell, setAllowPartialSell] = useState<boolean>(false); // Для продажи частями
 
     const handleCreateBuyOrder = async () => {
         try {
-            await createBuyOrder(buyPoints, selectedBankDetailsForCreation, price, allowPartial);
+            await createBuyOrder(buyPoints, selectedBankDetailsForCreation, price, allowPartialBuy);
             alert('Заявка на покупку успешно создана');
         } catch (error) {
             console.error('Ошибка при создании заявки на покупку:', error);
@@ -39,7 +40,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
 
     const handleCreateSellOrder = async () => {
         try {
-            await createSellOrder(sellPoints, selectedBankDetailsForCreation, price, allowPartial);
+            await createSellOrder(sellPoints, selectedBankDetailsForCreation, price, allowPartialSell);
             alert('Заявка на продажу успешно создана');
         } catch (error) {
             console.error('Ошибка при создании заявки на продажу:', error);
@@ -113,11 +114,11 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                     <label className="flex items-center mb-2">
                         <input
                             type="checkbox"
-                            checked={allowPartial}
-                            onChange={() => setAllowPartial(!allowPartial)}
+                            checked={allowPartialBuy}
+                            onChange={() => setAllowPartialBuy(!allowPartialBuy)}
                             className="mr-2"
                         />
-                        Продавать частями
+                        Покупать частями
                     </label>
                     <Button onClick={handleCreateBuyOrder} className="w-full">Создать заявку</Button>
                 </div>
@@ -156,8 +157,8 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                     <label className="flex items-center mb-2">
                         <input
                             type="checkbox"
-                            checked={allowPartial}
-                            onChange={() => setAllowPartial(!allowPartial)}
+                            checked={allowPartialSell}
+                            onChange={() => setAllowPartialSell(!allowPartialSell)}
                             className="mr-2"
                         />
                         Продавать частями
@@ -187,9 +188,12 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                 placeholder="Выберите реквизиты банка для сделки"
                                 className="mb-2"
                             >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Выберите реквизиты банка" />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    {order.orderBankDetails && order.orderBankDetails.map((detail: { id: number, name: string, details: string }) => (
-                                        <SelectItem key={detail.id} value={detail}>
+                                    {order.orderBankDetails && order.orderBankDetails.map((detail, index) => (
+                                        <SelectItem key={index} value={detail}>
                                             {detail.name} - {detail.details}
                                         </SelectItem>
                                     ))}
