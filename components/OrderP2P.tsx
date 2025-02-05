@@ -79,10 +79,16 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         setIsSellSelectOpen(false); // Закрыть Select
     };
 
-    // Обработчик изменения цены для покупки
+// Обработчик изменения цены для покупки
     const handlePriceChangeForBuy = (index: number, value: string) => {
         setSelectedBankDetailsForBuy((prevDetails) => {
             const newDetails = [...prevDetails];
+
+            // Если значение пустое, сбрасываем цену
+            if (value === '') {
+                newDetails[index].price = '';
+                return newDetails;
+            }
 
             // Если первый символ запятая или точка, добавляем '0,' в начало
             if (value.startsWith(',') || value.startsWith('.')) {
@@ -118,10 +124,16 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
-    // Обработчик изменения цены для продажи
+// Обработчик изменения цены для продажи
     const handlePriceChangeForSell = (index: number, value: string) => {
         setSelectedBankDetailsForSell((prevDetails) => {
             const newDetails = [...prevDetails];
+
+            // Если значение пустое, сбрасываем цену
+            if (value === '') {
+                newDetails[index].price = '';
+                return newDetails;
+            }
 
             // Если первый символ запятая или точка, добавляем '0,' в начало
             if (value.startsWith(',') || value.startsWith('.')) {
