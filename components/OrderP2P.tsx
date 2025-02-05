@@ -81,10 +81,15 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
 
     // Обработчик изменения цены для покупки
     const handlePriceChangeForBuy = (index: number, value: string) => {
-        const price = parseFloat(value);
+        // Заменяем запятую на точку для корректного преобразования в число
+        console.log(value)
+        const normalizedValue = value.replace(',', '.'); // Заменяем запятую на точку
+        const price = parseFloat(normalizedValue); // Преобразуем строку в число
+
         setSelectedBankDetailsForBuy((prevDetails) => {
             const newDetails = [...prevDetails];
-            newDetails[index].price = isNaN(price) ? 0 : price;
+            newDetails[index].price = isNaN(price) ? 0 : price; // Устанавливаем цену или 0, если значение некорректно
+            console.log(newDetails)
             return newDetails;
         });
     };
@@ -222,12 +227,20 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         <div key={index}
                              className="mt-1 border border-gray-300 rounded p-2"> {/* Добавляем рамку, закругленные углы и отступы */}
                             <div className="flex items-center mt-1 w-full"> {/* Первая строка с Input */}
-                                <span className="flex-shrink-0">1 point =</span> {/* Предотвращаем сжатие span */}
+                                <span className="flex-shrink-0">1 Point =</span> {/* Предотвращаем сжатие span */}
                                 <Input
-                                    type="number"
-                                    step="0.0000001"
-                                    value={detail.price.toString()}
-                                    onChange={(e) => handlePriceChangeForBuy(index, e.target.value)}
+                                    type="text"
+                                    value={detail.price.toString().replace('.', ',')} // Заменяем точку на запятую для отображения
+                                    onChange={(e) => {
+                                        let value = e.target.value;
+                                        // Заменяем точку на запятую для отображения
+                                        value = value.replace('.', ',');
+                                        // Проверяем, чтобы вводилось только допустимое значение (цифры и одна запятая)
+                                        const regex = /^\d*[,]?\d*$/;
+                                        if (regex.test(value)) {
+                                            handlePriceChangeForBuy(index, value); // Вызываем обработчик
+                                        }
+                                    }}
                                     className="h-7 ml-2"
                                 />
                             </div>
@@ -284,7 +297,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         <div key={index}
                              className="mt-1 border border-gray-300 rounded p-2"> {/* Добавляем рамку, закругленные углы и отступы */}
                             <div className="flex items-center mt-1 w-full"> {/* Первая строка с Input */}
-                                <span className="flex-shrink-0">1 point =</span> {/* Предотвращаем сжатие span */}
+                                <span className="flex-shrink-0">1 Point =</span> {/* Предотвращаем сжатие span */}
                                 <Input
                                     type="number"
                                     step="0.0000001"
