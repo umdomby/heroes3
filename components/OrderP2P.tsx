@@ -217,17 +217,24 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                             ))}
                         </SelectContent>
                     </Select>
+                    {/*Создание реквизитов банка с price для покупки*/}
                     {selectedBankDetailsForBuy.map((detail, index) => (
-                        <div key={index} className="flex items-center mb-2">
-                            <span>{detail.name} - {detail.details}</span>
-                            <Input
-                                type="number"
-                                step="0.1"
-                                value={detail.price.toString()}
-                                onChange={(e) => handlePriceChangeForBuy(index, e.target.value)}
-                                placeholder="Цена"
-                                className="ml-2"
-                            />
+                        <div key={index}
+                             className="mt-1 border border-gray-300 rounded p-2"> {/* Добавляем рамку, закругленные углы и отступы */}
+                            <div className="flex items-center mt-1 w-full"> {/* Первая строка с Input */}
+                                <span className="flex-shrink-0">1 point =</span> {/* Предотвращаем сжатие span */}
+                                <Input
+                                    type="number"
+                                    step="0.0000001"
+                                    value={detail.price.toString()}
+                                    onChange={(e) => handlePriceChangeForBuy(index, e.target.value)}
+                                    className="h-7 ml-2"
+                                />
+                            </div>
+                            <div className="flex items-center w-full"> {/* Вторая строка с span */}
+                                <span
+                                    className="flex-grow mt-1">{detail.name} - {detail.details}</span> {/* Разрешаем span занимать оставшееся пространство */}
+                            </div>
                         </div>
                     ))}
                     <label className="flex items-center mb-2">
@@ -239,7 +246,9 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         />
                         Покупать частями
                     </label>
-                    <Button onClick={handleCreateBuyOrder} className="w-full" disabled={isCreateOrderDisabled(buyPoints, selectedBankDetailsForBuy)}>Создать заявку</Button>
+                    <Button onClick={handleCreateBuyOrder} className="w-full"
+                            disabled={isCreateOrderDisabled(buyPoints, selectedBankDetailsForBuy)}>Создать
+                        заявку</Button>
                 </div>
                 <div className="w-1/2">
                     <h2 className="text-xl font-bold mb-2">Продать Points</h2>
@@ -270,17 +279,24 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                             ))}
                         </SelectContent>
                     </Select>
+                    {/*Создание реквизитов банка с price для продажи*/}
                     {selectedBankDetailsForSell.map((detail, index) => (
-                        <div key={index} className="flex items-center mb-2">
-                            <span>{detail.name} - {detail.details}</span>
-                            <Input
-                                type="number"
-                                step="0.1"
-                                value={detail.price.toString()}
-                                onChange={(e) => handlePriceChangeForSell(index, e.target.value)}
-                                placeholder="Цена"
-                                className="ml-2"
-                            />
+                        <div key={index}
+                             className="mt-1 border border-gray-300 rounded p-2"> {/* Добавляем рамку, закругленные углы и отступы */}
+                            <div className="flex items-center mt-1 w-full"> {/* Первая строка с Input */}
+                                <span className="flex-shrink-0">1 point =</span> {/* Предотвращаем сжатие span */}
+                                <Input
+                                    type="number"
+                                    step="0.0000001"
+                                    value={detail.price.toString()}
+                                    onChange={(e) => handlePriceChangeForSell(index, e.target.value)}
+                                    className="h-7 ml-2"
+                                />
+                            </div>
+                            <div className="flex items-center w-full"> {/* Вторая строка с span */}
+                                <span
+                                    className="flex-grow mt-1">{detail.name} - {detail.details}</span> {/* Разрешаем span занимать оставшееся пространство */}
+                            </div>
                         </div>
                     ))}
                     <label className="flex items-center mb-2">
@@ -292,7 +308,9 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         />
                         Продавать частями
                     </label>
-                    <Button onClick={handleCreateSellOrder} className="w-full" disabled={isCreateOrderDisabled(sellPoints, selectedBankDetailsForSell)}>Создать заявку</Button>
+                    <Button onClick={handleCreateSellOrder} className="w-full"
+                            disabled={isCreateOrderDisabled(sellPoints, selectedBankDetailsForSell)}>Создать
+                        заявку</Button>
                 </div>
             </div>
             <Accordion className="mt-4">

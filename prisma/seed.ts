@@ -23,7 +23,7 @@ async function up() {
         points: 1000,
         cardId: generateCardId(),
         bankDetails: [
-            {"name": "USTD", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)"},
+            {"name": "USTD - BSC (BEP20)", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)"},
             {"name": "BTC", "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow", "description": "Биткойн"},
             {"name": "Технобанк VISA", "details": "4704693052762369 10/27", "description": "IBAN BY95TECN3014000000GRN0029573"},
             {"name": "Технобанк ЕРИП", "details": "(№ Договора - GRN29573)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)"},
