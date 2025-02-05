@@ -178,6 +178,24 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         }
     };
 
+    // Remove a bank detail from the buy list
+    const handleRemoveBankDetailForBuy = (index: number) => {
+        setSelectedBankDetailsForBuy((prevDetails) => {
+            const newDetails = [...prevDetails];
+            newDetails.splice(index, 1);
+            return newDetails;
+        });
+    };
+
+// Remove a bank detail from the sell list
+    const handleRemoveBankDetailForSell = (index: number) => {
+        setSelectedBankDetailsForSell((prevDetails) => {
+            const newDetails = [...prevDetails];
+            newDetails.splice(index, 1);
+            return newDetails;
+        });
+    };
+
 
     return (
         <div className={className}>
@@ -218,29 +236,31 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                     </Select>
                     {/*Создание реквизитов банка с price для покупки*/}
                     {selectedBankDetailsForBuy.map((detail, index) => (
-                        <div key={index}
-                             className="mt-1 border border-gray-300 rounded p-2"> {/* Добавляем рамку, закругленные углы и отступы */}
-                            <div className="flex items-center mt-1 w-full"> {/* Первая строка с Input */}
-                                <span className="flex-shrink-0">1 Point =</span> {/* Предотвращаем сжатие span */}
+                        <div key={index} className="mt-1 border border-gray-300 rounded p-2">
+                            <div className="flex items-center mt-1 w-full">
+                                <span className="flex-shrink-0">1 Point =</span>
                                 <Input
                                     type="text"
-                                    value={detail.price.toString().replace('.', ',')} // Display with comma
+                                    value={detail.price.toString().replace('.', ',')}
                                     onChange={(e) => {
                                         let value = e.target.value;
-                                        // Replace period with comma for display
                                         value = value.replace('.', ',');
-                                        // Allow only digits and one comma
                                         const regex = /^\d*[,]?\d*$/;
                                         if (regex.test(value)) {
-                                            handlePriceChangeForBuy(index, value); // Call handler
+                                            handlePriceChangeForBuy(index, value);
                                         }
                                     }}
                                     className="h-7 ml-2"
                                 />
+                                <Button
+                                    onClick={() => handleRemoveBankDetailForBuy(index)}
+                                    className="ml-2"
+                                >
+                                    Удалить
+                                </Button>
                             </div>
-                            <div className="flex items-center w-full"> {/* Вторая строка с span */}
-                                <span
-                                    className="flex-grow mt-1">{detail.name} - {detail.details}</span> {/* Разрешаем span занимать оставшееся пространство */}
+                            <div className="flex items-center w-full">
+                                <span className="flex-grow mt-1">{detail.name} - {detail.details}</span>
                             </div>
                         </div>
                     ))}
@@ -288,29 +308,31 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                     </Select>
                     {/*Создание реквизитов банка с price для продажи*/}
                     {selectedBankDetailsForSell.map((detail, index) => (
-                        <div key={index}
-                             className="mt-1 border border-gray-300 rounded p-2"> {/* Добавляем рамку, закругленные углы и отступы */}
-                            <div className="flex items-center mt-1 w-full"> {/* Первая строка с Input */}
-                                <span className="flex-shrink-0">1 Point =</span> {/* Предотвращаем сжатие span */}
+                        <div key={index} className="mt-1 border border-gray-300 rounded p-2">
+                            <div className="flex items-center mt-1 w-full">
+                                <span className="flex-shrink-0">1 Point =</span>
                                 <Input
                                     type="text"
-                                    value={detail.price.toString().replace('.', ',')} // Display with comma
+                                    value={detail.price.toString().replace('.', ',')}
                                     onChange={(e) => {
                                         let value = e.target.value;
-                                        // Replace period with comma for display
                                         value = value.replace('.', ',');
-                                        // Allow only digits and one comma
                                         const regex = /^\d*[,]?\d*$/;
                                         if (regex.test(value)) {
-                                            handlePriceChangeForSell(index, value); // Call handler
+                                            handlePriceChangeForSell(index, value);
                                         }
                                     }}
                                     className="h-7 ml-2"
                                 />
+                                <Button
+                                    onClick={() => handleRemoveBankDetailForSell(index)}
+                                    className="ml-2"
+                                >
+                                    Удалить
+                                </Button>
                             </div>
-                            <div className="flex items-center w-full"> {/* Вторая строка с span */}
-                                <span
-                                    className="flex-grow mt-1">{detail.name} - {detail.details}</span> {/* Разрешаем span занимать оставшееся пространство */}
+                            <div className="flex items-center w-full">
+                                <span className="flex-grow mt-1">{detail.name} - {detail.details}</span>
                             </div>
                         </div>
                     ))}
