@@ -11,21 +11,6 @@ import {$Enums, OrderP2P, User} from "@prisma/client";
 import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import BuySell = $Enums.BuySell;
-
-
-// interface OrderP2P {
-//     id: number;
-//     createdAt: Date;
-//     updatedAt: Date;
-//     orderP2PUser1Id: number;
-//     orderP2PUser1?: User; // This should be optional if the user might not exist
-//     orderP2PUser2Id?: number | null;
-//     orderP2PUser2?: User; // This should also be optional
-//     orderP2PBuySell: BuySell;
-//     orderP2PPoints?: number | null;
-//     orderP2PStatus: OrderP2PStatus;
-// }
 
 
 interface BankDetail {
@@ -33,13 +18,6 @@ interface BankDetail {
     details: string;
     description: string;
 }
-
-// interface User {
-//     id: number;
-//     cardId: string; // Ensure this matches your User model
-//     bankDetails : BankDetail;
-//     // other user fields...
-// }
 
 // Интерфейс для свойств компонента
 interface Props {
@@ -424,8 +402,8 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                     />
                     <div className="flex items-center space-x-2 mb-2">
                         <select
-                            value={selectedBuyOption}
-                            onChange={handleSelectBankDetailForBuy}
+                            value={selectedSellOption}
+                            onChange={handleSelectBankDetailForSell}
                             className="flex-grow w-[50%] p-2 border rounded"
                         >
                             <option value="">Выберите реквизиты банка</option>
@@ -506,7 +484,20 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                 <TableBody>
                                     <TableRow>
                                         <TableCell>{order.orderP2PPoints}</TableCell>
-                                        <TableCell>{JSON.stringify(order.orderBankDetails)}</TableCell>
+                                        <TableCell>
+                                            {/* Displaying the bank details in a readable format */}
+                                            {order.orderBankDetails && order.orderBankDetails.length > 0 ? (
+                                                <ul>
+                                                    {order.orderBankDetails.map((detail, index) => (
+                                                        <li key={index}>
+                                                            <strong>{detail.name}</strong> - Price: {detail.price}, Details: {detail.details}, Description: {detail.description}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <span>Нет доступных банковских реквизитов</span>
+                                            )}
+                                        </TableCell>
                                         <TableCell>{order.orderP2PPart ? 'Частями' : 'Целиком'}</TableCell>
                                     </TableRow>
                                 </TableBody>

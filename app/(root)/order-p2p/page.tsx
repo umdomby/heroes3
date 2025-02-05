@@ -1,12 +1,10 @@
-// heroes\app\(root)\order-p2p\page.tsx
-"use server";
 import { Container } from '@/components/container';
 import { prisma } from '@/prisma/prisma-client';
 import { redirect } from 'next/navigation';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
-import { OrderP2P } from "@/components/OrderP2P";
+import { OrderP2P } from "@/components/OrderP2P"; // Ensure this import matches your OrderP2P component
 
 export default async function OrderP2PPage() {
     const session = await getUserSession();
@@ -23,13 +21,15 @@ export default async function OrderP2PPage() {
         return redirect('/not-auth');
     }
 
+    // Fetch open orders directly
     const openOrders = await prisma.orderP2P.findMany({
         where: { orderP2PStatus: 'OPEN' },
         include: {
-            orderP2PUser1: true, // Include the user data for orderP2PUser1
-            orderP2PUser2: true, // Include the user data for orderP2PUser2 if needed
+            orderP2PUser1: true,
+            orderP2PUser2: true,
         }
     });
+
 
     return (
         <Container className="w-[100%]">
