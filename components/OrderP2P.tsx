@@ -12,6 +12,14 @@ import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+
+
+interface BankDetail {
+    name: string;
+    details: string;
+    description: string;
+}
+
 // Интерфейс для свойств компонента
 interface Props {
     user: User;
@@ -35,33 +43,43 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const handleSelectBankDetailForBuy = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedValue = event.target.value;
         setSelectedBuyOption(selectedValue); // Устанавливаем выбранное значение
-        const detail = user.bankDetails.find((d: any) => d.name === selectedValue);
-        if (detail) {
-            setSelectedBankDetailsForBuy((prevDetails) => {
-                if (prevDetails.includes(detail)) {
-                    return prevDetails.filter((d) => d !== detail);
-                } else {
-                    return [...prevDetails, { ...detail, price: 0 }];
-                }
-            });
+
+        if (Array.isArray(user.bankDetails)) {
+            const detail = user.bankDetails.find((d: any) => d.name === selectedValue);
+            if (detail && typeof detail === 'object') { // Проверяем, что detail является объектом
+                setSelectedBankDetailsForBuy((prevDetails) => {
+                    if (prevDetails.includes(detail)) {
+                        return prevDetails.filter((d) => d !== detail);
+                    } else {
+                        return [...prevDetails, { ...detail, price: 0 }];
+                    }
+                });
+            }
         }
+
         setSelectedBuyOption(''); // Сбрасываем выбор
     };
 
     // Обработчик выбора банковских реквизитов для продажи
+// Обработчик выбора банковских реквизитов для продажи
     const handleSelectBankDetailForSell = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedValue = event.target.value;
         setSelectedSellOption(selectedValue); // Устанавливаем выбранное значение
-        const detail = user.bankDetails.find((d: any) => d.name === selectedValue);
-        if (detail) {
-            setSelectedBankDetailsForSell((prevDetails) => {
-                if (prevDetails.includes(detail)) {
-                    return prevDetails.filter((d) => d !== detail);
-                } else {
-                    return [...prevDetails, { ...detail, price: 0 }];
-                }
-            });
+
+        // Проверяем, что bankDetails не null и является массивом
+        if (Array.isArray(user.bankDetails)) {
+            const detail = user.bankDetails.find((d: any) => d.name === selectedValue);
+            if (detail && typeof detail === 'object') { // Проверяем, что detail является объектом
+                setSelectedBankDetailsForSell((prevDetails) => {
+                    if (prevDetails.includes(detail)) {
+                        return prevDetails.filter((d) => d !== detail);
+                    } else {
+                        return [...prevDetails, { ...detail, price: 0 }];
+                    }
+                });
+            }
         }
+
         setSelectedSellOption(''); // Сбрасываем выбор
     };
 

@@ -15,7 +15,9 @@ export default async function OrderP2PPage() {
         return redirect('/not-auth');
     }
 
-    const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
+    const user = await prisma.user.findFirst({
+        where: { id: Number(session?.id) },
+    });
 
     if (!user) {
         return redirect('/not-auth');
