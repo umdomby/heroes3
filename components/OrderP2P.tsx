@@ -79,7 +79,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         setIsSellSelectOpen(false); // Закрыть Select
     };
 
-// Обработчик изменения цены для покупки
+    // Обработчик изменения цены для покупки
     const handlePriceChangeForBuy = (index: number, value: string) => {
         setSelectedBankDetailsForBuy((prevDetails) => {
             const newDetails = [...prevDetails];
@@ -118,7 +118,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
-// Обработчик изменения цены для продажи
+    // Обработчик изменения цены для продажи
     const handlePriceChangeForSell = (index: number, value: string) => {
         setSelectedBankDetailsForSell((prevDetails) => {
             const newDetails = [...prevDetails];
@@ -217,28 +217,32 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     // Обработчик изменения значения для покупки
     const handleBuyPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        // Удаляем ведущие нули и оставляем только положительные целые числа
-        const sanitizedValue = value.replace(/^0+/, '').replace(/[^0-9]/g, '');
+        // Удаляем все символы, кроме цифр
+        const sanitizedValue = value.replace(/[^0-9]/g, '');
         const points = sanitizedValue ? Number(sanitizedValue) : 0;
         // Ограничиваем покупку до 100,000 points
         if (points <= 100000) {
             setBuyPoints(points);
+        } else {
+            setBuyPoints(100000); // Устанавливаем максимум, если превышает
         }
     };
 
     // Обработчик изменения значения для продажи
     const handleSellPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        // Удаляем ведущие нули и оставляем только положительные целые числа
-        const sanitizedValue = value.replace(/^0+/, '').replace(/[^0-9]/g, '');
+        // Удаляем все символы, кроме цифр
+        const sanitizedValue = value.replace(/[^0-9]/g, '');
         const points = sanitizedValue ? Number(sanitizedValue) : 0;
         // Ограничиваем продажу до количества points у пользователя
         if (points <= user.points) {
             setSellPoints(points);
+        } else {
+            setSellPoints(user.points); // Устанавливаем максимум, если превышает
         }
     };
 
-    // Remove a bank detail from the buy list
+    // Удаление банковских реквизитов из списка для покупки
     const handleRemoveBankDetailForBuy = (index: number) => {
         setSelectedBankDetailsForBuy((prevDetails) => {
             const newDetails = [...prevDetails];
@@ -247,7 +251,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
-// Remove a bank detail from the sell list
+    // Удаление банковских реквизитов из списка для продажи
     const handleRemoveBankDetailForSell = (index: number) => {
         setSelectedBankDetailsForSell((prevDetails) => {
             const newDetails = [...prevDetails];
@@ -255,7 +259,6 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
             return newDetails;
         });
     };
-
 
     return (
         <div className={className}>
