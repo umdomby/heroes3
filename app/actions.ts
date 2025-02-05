@@ -949,7 +949,7 @@ export async function updateBankDetails(updatedDetails: { name: string; details:
 
 
 // Функция для создания заявки на покупку points
-export async function createBuyOrder(points: number, bankDetails: any[], price: number, allowPartial: boolean) {
+export async function createBuyOrder(points: number, bankDetails: any[], allowPartial: boolean) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
@@ -965,7 +965,6 @@ export async function createBuyOrder(points: number, bankDetails: any[], price: 
                 orderP2PUser1Id: currentUser.id,
                 orderP2PBuySell: 'BUY',
                 orderP2PPoints: points,
-                orderP2PPrice: price,
                 orderP2PPart: allowPartial,
                 orderBankDetails: bankDetails,
                 orderP2PStatus: 'OPEN',
@@ -981,7 +980,7 @@ export async function createBuyOrder(points: number, bankDetails: any[], price: 
 }
 
 // Функция для создания заявки на продажу points
-export async function createSellOrder(points: number, bankDetails: any[], price: number, allowPartial: boolean) {
+export async function createSellOrder(points: number, bankDetails: any[],  allowPartial: boolean) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
@@ -1005,7 +1004,6 @@ export async function createSellOrder(points: number, bankDetails: any[], price:
                 orderP2PUser1Id: currentUser.id,
                 orderP2PBuySell: 'SELL',
                 orderP2PPoints: points,
-                orderP2PPrice: price,
                 orderP2PPart: allowPartial,
                 orderBankDetails: bankDetails,
                 orderP2PStatus: 'OPEN',
