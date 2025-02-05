@@ -18,6 +18,12 @@ interface BankDetail {
     details: string;
     description: string;
 }
+interface orderBankDetail {
+    name: string;
+    price: number; // или string, в зависимости от вашего использования
+    details: string;
+    description: string;
+}
 
 
 // Интерфейс для свойств компонента
@@ -476,10 +482,11 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                     <AccordionItem
                         key={order.id}
                         value={order.id.toString()}
-                        className={order.orderP2PUser1Id === user.id ? 'bg-gray-200' : ''}
+                        className={order.orderP2PUser1Id === user.id ? 'bg-gray-700' : ''}
                     >
                         <AccordionTrigger disabled={order.orderP2PUser1Id === user.id}>
-                            {order.orderP2PUser1?.cardId} хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
+                            {/*{order.orderP2PUser1?.cardId} */}
+                            хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
                         </AccordionTrigger>
                         <AccordionContent>
                             <Table>
@@ -488,13 +495,29 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                         <TableCell>{order.orderP2PPoints}</TableCell>
                                         <TableCell>
                                             {/* Отображение банковских реквизитов */}
-                                            {order.orderBankDetails && order.orderBankDetails.length > 0 ? (
+                                            {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
                                                 <ul>
-                                                    {order.orderBankDetails.map((detail, index) => (
-                                                        <li key={index}>
-                                                            <strong>{detail.name}</strong> - Price: {detail.price}, Details: {detail.details}, Description: {detail.description}
-                                                        </li>
-                                                    ))}
+                                                    {order.orderBankDetails.map((detail, index) => {
+                                                        // Проверяем, является ли detail объектом и содержит ли необходимые свойства
+                                                        if (detail && typeof detail === 'object' && 'name' in detail && 'price' in detail && 'details' in detail && 'description' in detail) {
+                                                            // Проверяем типы свойств перед присвоением
+                                                            const bankDetail: orderBankDetail = {
+                                                                name: typeof detail.name === 'string' ? detail.name : '',
+                                                                price: typeof detail.price === 'number' ? detail.price : 0, // или другое значение по умолчанию
+                                                                details: typeof detail.details === 'string' ? detail.details : '',
+                                                                description: typeof detail.description === 'string' ? detail.description : '',
+                                                            };
+                                                            return (
+                                                                <li key={index}>
+                                                                    <strong>{bankDetail.name}</strong> -
+                                                                    Price: {bankDetail.price},
+                                                                    Details: {bankDetail.details},
+                                                                    Description: {bankDetail.description}
+                                                                </li>
+                                                            );
+                                                        }
+                                                        return null; // Если detail не является объектом BankDetail, возвращаем null
+                                                    })}
                                                 </ul>
                                             ) : (
                                                 <span>Нет доступных банковских реквизитов</span>
@@ -504,15 +527,30 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                     </TableRow>
                                 </TableBody>
                             </Table>
-                            <select onChange={(e) => handleSelectBankDetailForInteraction(e.target.value)} className="mb-2">
+                            <select onChange={(e) => handleSelectBankDetailForInteraction(e.target.value)}
+                                    className="mb-2">
                                 <option value="">Выберите реквизиты банка для сделки</option>
-                                {order.orderBankDetails && order.orderBankDetails.map((detail, index) => (
-                                    <option key={index} value={detail.name}>
-                                        {detail.name} - {detail.details}
-                                    </option>
-                                ))}
+                                {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
+                                    order.orderBankDetails.map((detail, index) => {
+                                        // Проверяем, является ли detail объектом и содержит ли необходимые свойства
+                                        if (detail && typeof detail === 'object' && 'name' in detail && 'details' in detail) {
+                                            const name = typeof detail.name === 'string' ? detail.name : ''; // Проверка типа для name
+                                            const details = typeof detail.details === 'string' ? detail.details : ''; // Проверка типа для details
+
+                                            return (
+                                                <option key={index} value={name}>
+                                                    {name} - {details}
+                                                </option>
+                                            );
+                                        }
+                                        return null; // Если detail не является объектом или не содержит нужных свойств, возвращаем null
+                                    })
+                                ) : (
+                                    <option disabled>Нет доступных банковских реквизитов</option>
+                                )}
                             </select>
-                            <Button onClick={() => handleConcludeDeal(order)} disabled={order.orderP2PUser1Id === user.id}>
+                            <Button onClick={() => handleConcludeDeal(order)}
+                                    disabled={order.orderP2PUser1Id === user.id}>
                                 Заключить сделку
                             </Button>
                         </AccordionContent>
