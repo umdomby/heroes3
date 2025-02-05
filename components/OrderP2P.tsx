@@ -83,8 +83,11 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const handlePriceChangeForBuy = (index: number, value: string) => {
         setSelectedBankDetailsForBuy((prevDetails) => {
             const newDetails = [...prevDetails];
-            newDetails[index].price = value; // Set price or 0 if invalid
-            console.log(newDetails); // Log new state
+            // Если ввод начинается с 0 и вводится следующая цифра, добавляем запятую
+            if (value.startsWith('0') && value.length > 1 && value[1] !== ',') {
+                value = '0,' + value.slice(1);
+            }
+            newDetails[index].price = value;
             return newDetails;
         });
     };
@@ -93,6 +96,10 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const handlePriceChangeForSell = (index: number, value: string) => {
         setSelectedBankDetailsForSell((prevDetails) => {
             const newDetails = [...prevDetails];
+            // Если ввод начинается с 0 и вводится следующая цифра, добавляем запятую
+            if (value.startsWith('0') && value.length > 1 && value[1] !== ',') {
+                value = '0,' + value.slice(1);
+            }
             newDetails[index].price = value;
             return newDetails;
         });
@@ -244,7 +251,9 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                     value={detail.price.toString().replace('.', ',')}
                                     onChange={(e) => {
                                         let value = e.target.value;
+                                        // Заменяем точку на запятую для отображения
                                         value = value.replace('.', ',');
+                                        // Разрешаем только цифры и одну запятую
                                         const regex = /^\d*[,]?\d*$/;
                                         if (regex.test(value)) {
                                             handlePriceChangeForBuy(index, value);
@@ -316,7 +325,9 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                                     value={detail.price.toString().replace('.', ',')}
                                     onChange={(e) => {
                                         let value = e.target.value;
+                                        // Заменяем точку на запятую для отображения
                                         value = value.replace('.', ',');
+                                        // Разрешаем только цифры и одну запятую
                                         const regex = /^\d*[,]?\d*$/;
                                         if (regex.test(value)) {
                                             handlePriceChangeForSell(index, value);
