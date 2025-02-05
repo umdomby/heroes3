@@ -257,6 +257,28 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
+    // Добавление всех банковских реквизитов для покупки
+    const handleAddAllBankDetailsForBuy = () => {
+        const allDetails = user.bankDetails.map((detail: any) => ({ ...detail, price: 0 }));
+        setSelectedBankDetailsForBuy(allDetails);
+    };
+
+    // Удаление всех банковских реквизитов для покупки
+    const handleRemoveAllBankDetailsForBuy = () => {
+        setSelectedBankDetailsForBuy([]);
+    };
+
+    // Добавление всех банковских реквизитов для продажи
+    const handleAddAllBankDetailsForSell = () => {
+        const allDetails = user.bankDetails.map((detail: any) => ({ ...detail, price: 0 }));
+        setSelectedBankDetailsForSell(allDetails);
+    };
+
+    // Удаление всех банковских реквизитов для продажи
+    const handleRemoveAllBankDetailsForSell = () => {
+        setSelectedBankDetailsForSell([]);
+    };
+
     return (
         <div className={className}>
             <div className="flex justify-between items-center mb-4">
@@ -274,14 +296,26 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         placeholder="Сколько хотите купить"
                         className="mb-2"
                     />
-                    <select value={selectedBuyOption} onChange={handleSelectBankDetailForBuy} className="mb-2">
-                        <option value="">Выберите реквизиты банка</option>
-                        {user.bankDetails && user.bankDetails.map((detail, index) => (
-                            <option key={index} value={detail.name}>
-                                {detail.name} - {detail.details}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="flex items-center space-x-2 mb-2">
+                        <select
+                            value={selectedBuyOption}
+                            onChange={handleSelectBankDetailForBuy}
+                            className="flex-grow w-[50%] p-2 border rounded"
+                        >
+                            <option value="">Выберите реквизиты банка</option>
+                            {user.bankDetails && user.bankDetails.map((detail, index) => (
+                                <option key={index} value={detail.name}>
+                                    {detail.name} - {detail.details}
+                                </option>
+                            ))}
+                        </select>
+                        <Button onClick={handleAddAllBankDetailsForBuy} className="whitespace-nowrap">
+                            Добавить все
+                        </Button>
+                        <Button onClick={handleRemoveAllBankDetailsForBuy} className="whitespace-nowrap">
+                            Удалить все
+                        </Button>
+                    </div>
                     {/*Создание реквизитов банка с price для покупки*/}
                     {selectedBankDetailsForBuy.map((detail, index) => (
                         <div key={index} className="mt-1 border border-gray-300 rounded p-2">
@@ -334,14 +368,26 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         placeholder="Сколько хотите продать"
                         className="mb-2"
                     />
-                    <select value={selectedSellOption} onChange={handleSelectBankDetailForSell} className="mb-2">
-                        <option value="">Выберите реквизиты банка</option>
-                        {user.bankDetails && user.bankDetails.map((detail, index) => (
-                            <option key={index} value={detail.name}>
-                                {detail.name} - {detail.details}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="flex items-center space-x-2 mb-2">
+                        <select
+                            value={selectedSellOption}
+                            onChange={handleSelectBankDetailForSell}
+                            className="flex-grow w-[50%] p-2 border rounded"
+                        >
+                            <option value="">Выберите реквизиты банка</option>
+                            {user.bankDetails && user.bankDetails.map((detail, index) => (
+                                <option key={index} value={detail.name}>
+                                    {detail.name} - {detail.details}
+                                </option>
+                            ))}
+                        </select>
+                        <Button onClick={handleAddAllBankDetailsForSell} className="whitespace-nowrap">
+                            Добавить все
+                        </Button>
+                        <Button onClick={handleRemoveAllBankDetailsForSell} className="whitespace-nowrap">
+                            Удалить все
+                        </Button>
+                    </div>
                     {/*Создание реквизитов банка с price для продажи*/}
                     {selectedBankDetailsForSell.map((detail, index) => (
                         <div key={index} className="mt-1 border border-gray-300 rounded p-2">
