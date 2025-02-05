@@ -27,6 +27,8 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
     const [selectedBankDetailsForInteraction, setSelectedBankDetailsForInteraction] = useState<any[]>([]);
     const [allowPartialBuy, setAllowPartialBuy] = useState<boolean>(false);
     const [allowPartialSell, setAllowPartialSell] = useState<boolean>(false);
+    const [isBuySelectOpen, setIsBuySelectOpen] = useState<boolean>(false);
+    const [isSellSelectOpen, setIsSellSelectOpen] = useState<boolean>(false);
 
     const handleSelectBankDetailForBuy = (detail: any) => {
         setSelectedBankDetailsForBuy((prevDetails) => {
@@ -50,18 +52,22 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
 
     const handleSelectAllBankDetailsForBuy = () => {
         setSelectedBankDetailsForBuy(user.bankDetails.map((detail: any) => ({ ...detail, price: 0 })));
+        setIsBuySelectOpen(false); // Закрыть Select
     };
 
     const handleSelectAllBankDetailsForSell = () => {
         setSelectedBankDetailsForSell(user.bankDetails.map((detail: any) => ({ ...detail, price: 0 })));
+        setIsSellSelectOpen(false); // Закрыть Select
     };
 
     const handleClearBankDetailsForBuy = () => {
         setSelectedBankDetailsForBuy([]);
+        setIsBuySelectOpen(false); // Закрыть Select
     };
 
     const handleClearBankDetailsForSell = () => {
         setSelectedBankDetailsForSell([]);
+        setIsSellSelectOpen(false); // Закрыть Select
     };
 
     const handlePriceChangeForBuy = (index: number, value: string) => {
@@ -143,6 +149,8 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         className="mb-2"
                     />
                     <Select
+                        open={isBuySelectOpen}
+                        onOpenChange={setIsBuySelectOpen}
                         onValueChange={handleSelectBankDetailForBuy}
                         placeholder="Выберите реквизиты банка"
                         className="mb-2"
@@ -194,6 +202,8 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                         className="mb-2"
                     />
                     <Select
+                        open={isSellSelectOpen}
+                        onOpenChange={setIsSellSelectOpen}
                         onValueChange={handleSelectBankDetailForSell}
                         placeholder="Выберите реквизиты банка"
                         className="mb-2"
