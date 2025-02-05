@@ -99,8 +99,12 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
-    // Обработчик создания заявки на покупку
+// Обработчик создания заявки на покупку
     const handleCreateBuyOrder = async () => {
+        if (buyPoints > 100000) {
+            alert('Вы не можете купить более 100,000 points');
+            return;
+        }
         try {
             await createBuyOrder(buyPoints, selectedBankDetailsForBuy, allowPartialBuy);
             alert('Заявка на покупку успешно создана');
@@ -110,8 +114,12 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         }
     };
 
-    // Обработчик создания заявки на продажу
+// Обработчик создания заявки на продажу
     const handleCreateSellOrder = async () => {
+        if (sellPoints > user.points) {
+            alert('Вы не можете продать больше, чем у вас есть points');
+            return;
+        }
         try {
             await createSellOrder(sellPoints, selectedBankDetailsForSell, allowPartialSell);
             alert('Заявка на продажу успешно создана');
@@ -147,6 +155,31 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         return points <= 0 || selectedDetails.length === 0 || selectedDetails.some(detail => detail.price <= 0);
     };
 
+    // Обработчик изменения значения для покупки
+    const handleBuyPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        // Удаляем ведущие нули и оставляем только положительные целые числа
+        const sanitizedValue = value.replace(/^0+/, '').replace(/[^0-9]/g, '');
+        const points = sanitizedValue ? Number(sanitizedValue) : 0;
+        // Ограничиваем покупку до 100,000 points
+        if (points <= 100000) {
+            setBuyPoints(points);
+        }
+    };
+
+    // Обработчик изменения значения для продажи
+    const handleSellPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        // Удаляем ведущие нули и оставляем только положительные целые числа
+        const sanitizedValue = value.replace(/^0+/, '').replace(/[^0-9]/g, '');
+        const points = sanitizedValue ? Number(sanitizedValue) : 0;
+        // Ограничиваем продажу до количества points у пользователя
+        if (points <= user.points) {
+            setSellPoints(points);
+        }
+    };
+
+
     return (
         <div className={className}>
             <div className="flex justify-between items-center mb-4">
@@ -158,9 +191,9 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                 <div className="w-1/2">
                     <h2 className="text-xl font-bold mb-2">Купить Points</h2>
                     <Input
-                        type="number"
+                        type="text" // Изменено на "text" для более гибкой обработки ввода
                         value={buyPoints}
-                        onChange={(e) => setBuyPoints(Number(e.target.value))}
+                        onChange={handleBuyPointsChange}
                         placeholder="Сколько хотите купить"
                         className="mb-2"
                     />
@@ -211,9 +244,9 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
                 <div className="w-1/2">
                     <h2 className="text-xl font-bold mb-2">Продать Points</h2>
                     <Input
-                        type="number"
+                        type="text" // Изменено на "text" для более гибкой обработки ввода
                         value={sellPoints}
-                        onChange={(e) => setSellPoints(Number(e.target.value))}
+                        onChange={handleSellPointsChange}
                         placeholder="Сколько хотите продать"
                         className="mb-2"
                     />
