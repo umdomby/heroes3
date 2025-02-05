@@ -22,7 +22,6 @@ interface Props {
 
 // Компонент для работы с P2P заказами
 export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
-    // Состояния для управления данными
     const [buyPoints, setBuyPoints] = useState<number>(0);
     const [sellPoints, setSellPoints] = useState<number>(0);
     const [selectedBankDetailsForBuy, setSelectedBankDetailsForBuy] = useState<any[]>([]);
@@ -79,7 +78,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         setIsSellSelectOpen(false); // Закрыть Select
     };
 
-// Обработчик изменения цены для покупки
+    // Обработчик изменения цены для покупки
     const handlePriceChangeForBuy = (index: number, value: string) => {
         setSelectedBankDetailsForBuy((prevDetails) => {
             const newDetails = [...prevDetails];
@@ -124,7 +123,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         });
     };
 
-// Обработчик изменения цены для продажи
+    // Обработчик изменения цены для продажи
     const handlePriceChangeForSell = (index: number, value: string) => {
         setSelectedBankDetailsForSell((prevDetails) => {
             const newDetails = [...prevDetails];
@@ -168,7 +167,6 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
             return newDetails;
         });
     };
-
 
     // Обработчик создания заявки на покупку
     const handleCreateBuyOrder = async () => {
