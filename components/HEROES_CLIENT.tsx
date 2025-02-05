@@ -486,7 +486,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                         <div className="m-4">
                                             <p>
                                                 Общая сумма ставок на это событие:
-                                                <span className="text-green-400"> {bet.totalBetAmount}</span>
+                                                <span className="text-green-400"> {Math.floor(bet.totalBetAmount * 100) / 100}</span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
