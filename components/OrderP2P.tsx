@@ -79,33 +79,86 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         setIsSellSelectOpen(false); // Закрыть Select
     };
 
-    // Обработчик изменения цены для покупки
+// Обработчик изменения цены для покупки
     const handlePriceChangeForBuy = (index: number, value: string) => {
         setSelectedBankDetailsForBuy((prevDetails) => {
             const newDetails = [...prevDetails];
+
+            // Если первый символ запятая или точка, добавляем '0,' в начало
+            if (value.startsWith(',') || value.startsWith('.')) {
+                value = '0,' + value.slice(1);
+            }
+
             // Если ввод начинается с 0 и вводится следующая цифра, добавляем запятую
             if (value.startsWith('0') && value.length > 1 && value[1] !== ',') {
                 value = '0,' + value.slice(1);
             }
-            newDetails[index].price = value;
+
+            // Разделяем на целую и дробную части
+            const parts = value.split(',');
+            // Ограничиваем целую часть до 100000
+            if (parts[0].length > 6 || parseInt(parts[0]) > 100000) {
+                parts[0] = parts[0].slice(0, 6);
+                if (parseInt(parts[0]) > 100000) {
+                    parts[0] = '100000';
+                }
+            }
+            // Ограничиваем количество знаков после запятой до десяти
+            if (parts[1] && parts[1].length > 10) {
+                parts[1] = parts[1].slice(0, 10);
+            }
+            value = parts.join(',');
+
+            // Проверяем, можно ли преобразовать в Float
+            const floatValue = parseFloat(value.replace(',', '.'));
+            if (!isNaN(floatValue)) {
+                newDetails[index].price = value;
+            }
             return newDetails;
         });
     };
 
-    // Обработчик изменения цены для продажи
+// Обработчик изменения цены для продажи
     const handlePriceChangeForSell = (index: number, value: string) => {
         setSelectedBankDetailsForSell((prevDetails) => {
             const newDetails = [...prevDetails];
+
+            // Если первый символ запятая или точка, добавляем '0,' в начало
+            if (value.startsWith(',') || value.startsWith('.')) {
+                value = '0,' + value.slice(1);
+            }
+
             // Если ввод начинается с 0 и вводится следующая цифра, добавляем запятую
             if (value.startsWith('0') && value.length > 1 && value[1] !== ',') {
                 value = '0,' + value.slice(1);
             }
-            newDetails[index].price = value;
+
+            // Разделяем на целую и дробную части
+            const parts = value.split(',');
+            // Ограничиваем целую часть до 100000
+            if (parts[0].length > 6 || parseInt(parts[0]) > 100000) {
+                parts[0] = parts[0].slice(0, 6);
+                if (parseInt(parts[0]) > 100000) {
+                    parts[0] = '100000';
+                }
+            }
+            // Ограничиваем количество знаков после запятой до десяти
+            if (parts[1] && parts[1].length > 10) {
+                parts[1] = parts[1].slice(0, 10);
+            }
+            value = parts.join(',');
+
+            // Проверяем, можно ли преобразовать в Float
+            const floatValue = parseFloat(value.replace(',', '.'));
+            if (!isNaN(floatValue)) {
+                newDetails[index].price = value;
+            }
             return newDetails;
         });
     };
 
-// Обработчик создания заявки на покупку
+
+    // Обработчик создания заявки на покупку
     const handleCreateBuyOrder = async () => {
         if (buyPoints > 100000) {
             alert('Вы не можете купить более 100,000 points');
@@ -120,7 +173,7 @@ export const OrderP2P: React.FC<Props> = ({ user, openOrders, className }) => {
         }
     };
 
-// Обработчик создания заявки на продажу
+    // Обработчик создания заявки на продажу
     const handleCreateSellOrder = async () => {
         if (sellPoints > user.points) {
             alert('Вы не можете продать больше, чем у вас есть points');
