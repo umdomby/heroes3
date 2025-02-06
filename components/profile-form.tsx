@@ -227,31 +227,53 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                 value={newBankDetail.price || ''} // Ensure the value is always a string
                                                 onChange={(e) => {
                                                     let value = e.target.value;
-                                                    if (value === '') {
-                                                        setNewBankDetail({ ...newBankDetail, price: '' });
-                                                        return;
-                                                    }
-                                                    if (value.startsWith(',') || value.startsWith('.')) {
-                                                        value = '0,' + value.slice(1);
-                                                    }
-                                                    if (value.startsWith('0') && value.length > 1 && value[1] !== ',') {
-                                                        value = '0,' + value.slice(1);
-                                                    }
-                                                    const parts = value.split(',');
-                                                    if (parts[0].length > 6 || parseInt(parts[0]) > 100000) {
-                                                        parts[0] = parts[0].slice(0, 6);
-                                                        if (parseInt(parts[0]) > 100000) {
-                                                            parts[0] = '100000';
+                                                    // Заменяем точку на запятую
+                                                    value = value.replace('.', ',');
+                                                    // Проверяем, соответствует ли значение регулярному выражению
+                                                    const regex = /^\d*[,]?\d*$/;
+                                                    if (regex.test(value)) {
+                                                        // Если значение пустое, сбрасываем цену
+                                                        if (value === '') {
+                                                            setEditedDetail({...editedDetail, price: ''});
+                                                            return;
                                                         }
-                                                    }
-                                                    if (parts[1] && parts[1].length > 10) {
-                                                        parts[1] = parts[1].slice(0, 10);
-                                                    }
-                                                    value = parts.join(',');
+                                                        // Если значение начинается с запятой или точки, добавляем "0," в начало
+                                                        if (value.startsWith(',') || value.startsWith('.')) {
+                                                            value = '0,' + value.slice(1);
+                                                        }
+                                                        // Если значение начинается с "0" и за ним не следует запятая, добавляем запятую
+                                                        if (value.startsWith('0') && value.length > 1 && value[1] !== ',') {
+                                                            value = '0,' + value.slice(1);
+                                                        }
+                                                        // Предотвращаем добавление второй запятой после "0,0"
+                                                        if (value.startsWith('0,') && value[3] === ',') {
+                                                            value = '0,' + value.slice(4);
+                                                        }
+                                                        // Предотвращаем добавление второй запятой после "0,0"
+                                                        if (value.startsWith('0,') && value[4] === ',') {
+                                                            value = '0,' + value.slice(5);
+                                                        }
+                                                        // Разделяем значение на части до и после запятой
+                                                        const parts = value.split(',');
+                                                        // Ограничиваем длину части до запятой и проверяем, не превышает ли она 100000
+                                                        if (parts[0].length > 6 || parseInt(parts[0]) > 100000) {
+                                                            parts[0] = parts[0].slice(0, 6);
+                                                            if (parseInt(parts[0]) > 100000) {
+                                                                parts[0] = '100000';
+                                                            }
+                                                        }
+                                                        // Ограничиваем длину части после запятой
+                                                        if (parts[1] && parts[1].length > 10) {
+                                                            parts[1] = parts[1].slice(0, 10);
+                                                        }
+                                                        // Объединяем части обратно в строку
+                                                        value = parts.join(',');
 
-                                                    const floatValue = parseFloat(value.replace(',', '.'));
-                                                    if (!isNaN(floatValue)) {
-                                                        setNewBankDetail({ ...newBankDetail, price: value });
+                                                        // Преобразуем строку в число с плавающей точкой и проверяем, является ли оно числом
+                                                        const floatValue = parseFloat(value.replace(',', '.'));
+                                                        if (!isNaN(floatValue)) {
+                                                            setNewBankDetail({ ...newBankDetail, price: value });
+                                                        }
                                                     }
                                                 }}
                                             />
@@ -267,28 +289,91 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                         <input
                                                             type="text"
                                                             value={editedDetail.name || ''} // Убедитесь, что значение всегда строка
-                                                            onChange={(e) => setEditedDetail({ ...editedDetail, name: e.target.value })}
+                                                            onChange={(e) => setEditedDetail({
+                                                                ...editedDetail,
+                                                                name: e.target.value
+                                                            })}
                                                             className="block w-full mb-1"
                                                         />
                                                         <input
                                                             type="text"
                                                             value={editedDetail.details || ''} // Убедитесь, что значение всегда строка
-                                                            onChange={(e) => setEditedDetail({ ...editedDetail, details: e.target.value })}
+                                                            onChange={(e) => setEditedDetail({
+                                                                ...editedDetail,
+                                                                details: e.target.value
+                                                            })}
                                                             className="block w-full mb-1"
                                                         />
                                                         <input
                                                             type="text"
                                                             value={editedDetail.description || ''} // Убедитесь, что значение всегда строка
-                                                            onChange={(e) => setEditedDetail({ ...editedDetail, description: e.target.value })}
+                                                            onChange={(e) => setEditedDetail({
+                                                                ...editedDetail,
+                                                                description: e.target.value
+                                                            })}
                                                             className="block w-full mb-1"
                                                         />
                                                         <input
                                                             type="text"
-                                                            value={editedDetail.price || ''} // Убедитесь, что значение всегда строка
-                                                            onChange={(e) => setEditedDetail({ ...editedDetail, price: e.target.value })}
+                                                            value={editedDetail.price || ''}
+                                                            onChange={(e) => {
+                                                                let value = e.target.value;
+                                                                // Заменяем точку на запятую
+                                                                value = value.replace('.', ',');
+                                                                // Проверяем, соответствует ли значение регулярному выражению
+                                                                const regex = /^\d*[,]?\d*$/;
+                                                                if (regex.test(value)) {
+                                                                    // Если значение пустое, сбрасываем цену
+                                                                    if (value === '') {
+                                                                        setEditedDetail({...editedDetail, price: ''});
+                                                                        return;
+                                                                    }
+                                                                    // Если значение начинается с запятой или точки, добавляем "0," в начало
+                                                                    if (value.startsWith(',') || value.startsWith('.')) {
+                                                                        value = '0,' + value.slice(1);
+                                                                    }
+                                                                    // Если значение начинается с "0" и за ним не следует запятая, добавляем запятую
+                                                                    if (value.startsWith('0') && value.length > 1 && value[1] !== ',') {
+                                                                        value = '0,' + value.slice(1);
+                                                                    }
+                                                                    // Предотвращаем добавление второй запятой после "0,0"
+                                                                    if (value.startsWith('0,') && value[3] === ',') {
+                                                                        value = '0,' + value.slice(4);
+                                                                    }
+                                                                    // Предотвращаем добавление второй запятой после "0,0"
+                                                                    if (value.startsWith('0,') && value[4] === ',') {
+                                                                        value = '0,' + value.slice(5);
+                                                                    }
+                                                                    // Разделяем значение на части до и после запятой
+                                                                    const parts = value.split(',');
+                                                                    // Ограничиваем длину части до запятой и проверяем, не превышает ли она 100000
+                                                                    if (parts[0].length > 6 || parseInt(parts[0]) > 100000) {
+                                                                        parts[0] = parts[0].slice(0, 6);
+                                                                        if (parseInt(parts[0]) > 100000) {
+                                                                            parts[0] = '100000';
+                                                                        }
+                                                                    }
+                                                                    // Ограничиваем длину части после запятой
+                                                                    if (parts[1] && parts[1].length > 10) {
+                                                                        parts[1] = parts[1].slice(0, 10);
+                                                                    }
+                                                                    // Объединяем части обратно в строку
+                                                                    value = parts.join(',');
+
+                                                                    // Преобразуем строку в число с плавающей точкой и проверяем, является ли оно числом
+                                                                    const floatValue = parseFloat(value.replace(',', '.'));
+                                                                    if (!isNaN(floatValue)) {
+                                                                        setEditedDetail({
+                                                                            ...editedDetail,
+                                                                            price: value
+                                                                        });
+                                                                    }
+                                                                }
+                                                            }}
                                                             className="block w-full mb-1"
                                                         />
-                                                        <Button onClick={handleSaveBankDetail} className="mt-2">Сохранить</Button>
+                                                        <Button onClick={handleSaveBankDetail}
+                                                                className="mt-2">Сохранить</Button>
                                                     </div>
                                                 ) : (
                                                     <div>
@@ -299,8 +384,10 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                     </div>
                                                 )}
                                                 <div className="flex space-x-2">
-                                                    <Button onClick={() => handleEditBankDetail(index)} variant="secondary">Изменить</Button>
-                                                    <Button onClick={() => handleDeleteBankDetail(index)} variant="secondary">Удалить</Button>
+                                                    <Button onClick={() => handleEditBankDetail(index)}
+                                                            variant="secondary">Изменить</Button>
+                                                    <Button onClick={() => handleDeleteBankDetail(index)}
+                                                            variant="secondary">Удалить</Button>
                                                 </div>
                                             </div>
                                         ))}
