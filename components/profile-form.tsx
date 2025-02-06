@@ -224,16 +224,36 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                             <FormInput
                                                 name="price"
                                                 label="Цена за 1 Point"
-                                                value={newBankDetail.price || ''} // Убедитесь, что значение всегда строка
-
+                                                value={newBankDetail.price || ''} // Ensure the value is always a string
                                                 onChange={(e) => {
                                                     let value = e.target.value;
-                                                    value = value.replace('.', ',');
-                                                    const regex = /^\d*[,]?\d*$/;
-                                                    if (regex.test(value)) {
-                                                        setNewBankDetail({...newBankDetail, value})}
+                                                    if (value === '') {
+                                                        setNewBankDetail({ ...newBankDetail, price: '' });
+                                                        return;
                                                     }
-                                                }
+                                                    if (value.startsWith(',') || value.startsWith('.')) {
+                                                        value = '0,' + value.slice(1);
+                                                    }
+                                                    if (value.startsWith('0') && value.length > 1 && value[1] !== ',') {
+                                                        value = '0,' + value.slice(1);
+                                                    }
+                                                    const parts = value.split(',');
+                                                    if (parts[0].length > 6 || parseInt(parts[0]) > 100000) {
+                                                        parts[0] = parts[0].slice(0, 6);
+                                                        if (parseInt(parts[0]) > 100000) {
+                                                            parts[0] = '100000';
+                                                        }
+                                                    }
+                                                    if (parts[1] && parts[1].length > 10) {
+                                                        parts[1] = parts[1].slice(0, 10);
+                                                    }
+                                                    value = parts.join(',');
+
+                                                    const floatValue = parseFloat(value.replace(',', '.'));
+                                                    if (!isNaN(floatValue)) {
+                                                        setNewBankDetail({ ...newBankDetail, price: value });
+                                                    }
+                                                }}
                                             />
                                             </FormProvider>
                                         <Button onClick={handleAddBankDetail} className="mt-2">Добавить</Button>
