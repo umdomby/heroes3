@@ -278,7 +278,11 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                 }}
                                             />
                                             </FormProvider>
-                                        <Button onClick={handleAddBankDetail} className="mt-2">Добавить</Button>
+                                        <Button
+                                            onClick={handleAddBankDetail}
+                                            disabled={!newBankDetail.name || !newBankDetail.details || !newBankDetail.description || !newBankDetail.price}
+                                            className="mt-2"
+                                        >Добавить</Button>
                                     </div>
 
                                     <div className="space-y-1">
@@ -340,10 +344,6 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                                     if (value.startsWith('0,') && value[3] === ',') {
                                                                         value = '0,' + value.slice(4);
                                                                     }
-                                                                    // Предотвращаем добавление второй запятой после "0,0"
-                                                                    if (value.startsWith('0,') && value[4] === ',') {
-                                                                        value = '0,' + value.slice(5);
-                                                                    }
                                                                     // Разделяем значение на части до и после запятой
                                                                     const parts = value.split(',');
                                                                     // Ограничиваем длину части до запятой и проверяем, не превышает ли она 100000
@@ -372,8 +372,13 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                             }}
                                                             className="block w-full mb-1"
                                                         />
-                                                        <Button onClick={handleSaveBankDetail}
-                                                                className="mt-2">Сохранить</Button>
+                                                        <Button
+                                                            onClick={handleSaveBankDetail}
+                                                            className="mt-2"
+                                                            disabled={!editedDetail.name || !editedDetail.details || !editedDetail.description || !editedDetail.price} // Disable if any field is empty
+                                                        >
+                                                            Сохранить
+                                                        </Button>
                                                     </div>
                                                 ) : (
                                                     <div>
