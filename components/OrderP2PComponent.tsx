@@ -240,7 +240,6 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
             alert('Вы не можете заключать сделку с самим собой');
             return;
         }
-
         try {
             await openBuyOrder();
             alert('Сделка успешно заключена');
@@ -661,17 +660,18 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                     Закрыть сделку продажи
                                 </Button>
                             )}
-
-                            <Button className="ml-3 h-6" onClick={() => handleConcludeDealSell(order)}
-                                    disabled={order.orderP2PUser1Id === user.id}>
-                                Заключить сделку продажи
-                            </Button>
-                            <Button className="ml-3 h-6" onClick={() => handleConcludeDealBuy(order)}
-                                    disabled={order.orderP2PUser1Id === user.id}>
-                                Заключить сделку покупки
-                            </Button>
-
-
+                            {order.orderP2PBuySell === 'BUY' && (
+                                <Button className="ml-3 h-6" onClick={() => handleConcludeDealSell(order)}
+                                        disabled={order.orderP2PUser1Id === user.id}>
+                                    Заключить сделку продажи
+                                </Button>
+                            )}
+                            {order.orderP2PBuySell === 'SELL' && (
+                                <Button className="ml-3 h-6" onClick={() => handleConcludeDealBuy(order)}
+                                        disabled={order.orderP2PUser1Id === user.id}>
+                                    Заключить сделку покупки
+                                </Button>
+                            )}
                         </AccordionContent>
                     </AccordionItem>
                 ))}

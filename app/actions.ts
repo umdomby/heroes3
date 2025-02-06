@@ -5,11 +5,9 @@ import { PlayerChoice, Prisma, IsCovered, BetParticipant, Bet } from '@prisma/cl
 import { hashSync } from 'bcrypt';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import axios from "axios";
-import { JsonArray } from 'type-fest'; // Импортируйте тип JsonArray для использования
-
+import { JsonArray } from 'type-fest';
 const MARGIN = parseFloat(process.env.MARGIN || '0.05');
 
-// Функция для обновления глобальных данных
 export async function updateGlobalData() {
     try {
         // 1. Количество пользователей, участвующих в открытых ставках
@@ -84,9 +82,7 @@ export async function updateGlobalData() {
         console.error('Error updating GlobalData:', error);
         throw new Error('Failed to update GlobalData');
     }
-}
-
-// Функция для обновления информации о пользователе
+} // Функция для обновления глобальных данных
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
     try {
         const currentUser = await getUserSession();
@@ -117,9 +113,7 @@ export async function updateUserInfo(body: Prisma.UserUpdateInput) {
     } catch (err) {
         throw err;
     }
-}
-
-
+} // Функция для обновления информации о пользователе
 export async function clientCreateBet(formData: any) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {throw new Error('У вас нет прав для выполнения этой операции');}
@@ -181,8 +175,6 @@ export async function clientCreateBet(formData: any) {
         throw new Error('Failed to create bet. Please try again.');
     }
 }
-
-// Функция для расчета коэффициентов
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2;
 
@@ -195,9 +187,7 @@ function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: numbe
         oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
         oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
     };
-}
-
-// Функция для расчета максимальных ставок
+} // Функция для расчета коэффициентов
 function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): {
     maxBetPlayer1: number,
     maxBetPlayer2: number
@@ -206,12 +196,10 @@ function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): {
     const maxBetPlayer1 = Math.floor((initBetPlayer2 * 1.00) * 100) / 100; // 100% от суммы ставок на Player2
     const maxBetPlayer2 = Math.floor((initBetPlayer1 * 1.00) * 100) / 100; // 100% от суммы ставок на Player1
     return { maxBetPlayer1, maxBetPlayer2 };
-}
-
+} // Функция для расчета максимальных ставок
 function areNumbersEqual(num1: number, num2: number): boolean {
     return Math.abs(num1 - num2) < Number.EPSILON;
 }
-
 export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
     try {
         console.log('Запуск функции placeBet с formData:', formData);
@@ -365,8 +353,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }
-
-// Функция для балансировки перекрытий
 async function balanceOverlaps(betId: number) {
     console.log(`Начало balanceOverlaps для betId: ${betId}`);
 
@@ -471,9 +457,7 @@ async function balanceOverlaps(betId: number) {
     await transferOverlap(participantsPlayer2, 'overlapPlayer1', bet);
 
     console.log(`Завершение balanceOverlaps для betId: ${betId}`);
-}
-
-// Функция для закрытия ставки
+} // Функция для балансировки перекрытий
 export async function closeBet(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {throw new Error('У вас нет прав для выполнения этой операции');}
@@ -662,10 +646,7 @@ export async function closeBet(betId: number, winnerId: number) {
             throw new Error("Не удалось закрыть ставку.");
         }
     }
-}
-
-// Функция для добавления и редактирование имен игроков, админом
-
+} // Функция для закрытия ставки
 export async function addEditPlayer(playerId: number | null, playerName: string) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {throw new Error('У вас нет прав для выполнения этой операции');}
@@ -696,7 +677,7 @@ export async function addEditPlayer(playerId: number | null, playerName: string)
         console.error('Ошибка:', error);
         throw new Error('Не удалось обновить игрока');
     }
-}
+} // Функция для добавления и редактирование имен игроков, админом
 export async function deletePlayer(playerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {throw new Error('У вас нет прав для выполнения этой операции');}
@@ -712,8 +693,6 @@ export async function deletePlayer(playerId: number) {
         throw new Error('Не удалось удалить игрока');
     }
 }
-
-// Функция для получения IP-адреса из заголовков запроса
 export async function getIpAddress() {
     let ip = 'unknown';
     try {
@@ -725,9 +704,7 @@ export async function getIpAddress() {
         ip = 'unknown';
     }
     return ip;
-}
-
-// Функция для сохранения IP-адреса пользователя
+} // Функция для получения IP-адреса из заголовков запроса
 export async function referralUserIpAddress(userId: number, ipAddress: string) {
     try {
         // Проверяем, существует ли уже запись с таким IP-адресом для данного пользователя
@@ -759,9 +736,7 @@ export async function referralUserIpAddress(userId: number, ipAddress: string) {
         console.error('Ошибка при сохранении IP адреса:', error);
         throw new Error('Не удалось сохранить IP адрес');
     }
-}
-
-
+} // Функция для сохранения IP-адреса пользователя
 export async function referralGet() {
     try {
         const currentUser = await getUserSession();
@@ -794,8 +769,6 @@ export async function referralGet() {
         throw new Error('Не удалось получить IP адреса');
     }
 }
-
-// Функция для получения email по cardId
 export async function getEmailByCardId(cardId: string) {
     try {
         const user = await prisma.user.findUnique({
@@ -811,8 +784,7 @@ export async function getEmailByCardId(cardId: string) {
         console.error('Ошибка при получении email:', error);
         return { error: 'Ошибка сервера' };
     }
-}
-// Функция для передачи баллов
+} // Функция для получения email по cardId
 export async function transferPoints(cardId: string, points: number) {
     try {
         const currentUser = await getUserSession();
@@ -858,8 +830,7 @@ export async function transferPoints(cardId: string, points: number) {
         console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
         return false;
     }
-}
-
+} // Функция для передачи баллов
 export async function addBankDetails(newDetail: { name: string; details: string; description: string }) {
     try {
         const currentUser = await getUserSession();
@@ -946,9 +917,6 @@ export async function updateBankDetails(updatedDetails: { name: string; details:
         throw new Error('Не удалось обновить банковские реквизиты');
     }
 }
-
-
-// Функция для создания заявки на покупку points
 export async function createBuyOrder(points: number, bankDetails: any[], allowPartial: boolean) {
     try {
         const currentUser = await getUserSession();
@@ -977,9 +945,7 @@ export async function createBuyOrder(points: number, bankDetails: any[], allowPa
         console.error('Ошибка при создании заявки на покупку:', error);
         throw new Error('Не удалось создать заявку на покупку');
     }
-}
-
-// Функция для создания заявки на продажу points
+} // Функция для создания заявки на покупку points
 export async function createSellOrder(points: number, bankDetails: any[],  allowPartial: boolean) {
     try {
         const currentUser = await getUserSession();
@@ -1025,103 +991,7 @@ export async function createSellOrder(points: number, bankDetails: any[],  allow
         console.error('Ошибка при создании заявки на продажу:', error);
         throw new Error('Не удалось создать заявку на продажу');
     }
-}
-
-// Функция для открытия сделки
-export async function openSellOrder() {
-    try {
-        const currentUser = await getUserSession();
-        if (!currentUser) {
-            throw new Error('Пользователь не найден');
-        }
-
-        revalidatePath('/order-p2p');
-        return true;
-    } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
-        return false;
-    }
-}
-
-// Функция для открытия сделки
-export async function openBuyOrder() {
-    try {
-        const currentUser = await getUserSession();
-        if (!currentUser) {
-            throw new Error('Пользователь не найден');
-        }
-
-        revalidatePath('/order-p2p');
-        return true;
-    } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
-        return false;
-    }
-}
-
-
-export async function confirmSellOrderUser2() {
-    try {
-        const currentUser = await getUserSession();
-        if (!currentUser) {
-            throw new Error('Пользователь не найден');
-        }
-
-        revalidatePath('/order-p2p');
-        return true;
-    } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
-        return false;
-    }
-}
-
-export async function confirmSellOrderCreator() {
-    try {
-        const currentUser = await getUserSession();
-        if (!currentUser) {
-            throw new Error('Пользователь не найден');
-        }
-
-        revalidatePath('/order-p2p');
-        return true;
-    } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
-        return false;
-    }
-}
-
-export async function confirmBuyOrderUser2() {
-    try {
-        const currentUser = await getUserSession();
-        if (!currentUser) {
-            throw new Error('Пользователь не найден');
-        }
-
-        revalidatePath('/order-p2p');
-        return true;
-    } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
-        return false;
-    }
-}
-
-export async function confirmBuyOrderCreator() {
-    try {
-        const currentUser = await getUserSession();
-        if (!currentUser) {
-            throw new Error('Пользователь не найден');
-        }
-
-        revalidatePath('/order-p2p');
-        return true;
-    } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
-        return false;
-    }
-}
-
-
-// Функция закрытия открытой сделки покупки
+} // Функция для создания заявки на продажу points
 export async function closeBuyOrderOpen(orderId: number) {
     try {
         const currentUser = await getUserSession();
@@ -1142,9 +1012,7 @@ export async function closeBuyOrderOpen(orderId: number) {
         console.error('Ошибка при закрытии сделки покупки:', error instanceof Error ? error.message : error);
         return false;
     }
-}
-
-// Функция закрытия открытой сделки продажи
+} // Функция закрытия открытой сделки покупки
 export async function closeSellOrderOpen(orderId: number) {
     try {
         const currentUser = await getUserSession();
@@ -1178,7 +1046,94 @@ export async function closeSellOrderOpen(orderId: number) {
         console.error('Ошибка при закрытии сделки продажи:', error instanceof Error ? error.message : error);
         return false;
     }
-}
+} // Функция закрытия открытой сделки продажи
 
 
+// ################################################
+export async function confirmBuyOrderUser2() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/order-p2p');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+} // подтверждение оплаты для покупки
+export async function confirmBuyOrderCreator() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/order-p2p');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+} // завершение сделки-покупки, подтверждением создателем
+export async function confirmSellOrderUser2() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/order-p2p');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+} // подтверждение оплаты для продажи
+export async function confirmSellOrderCreator() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/order-p2p');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+} // завершение сделки-продажи, подтверждением создателем
+
+
+export async function openSellOrder() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/order-p2p');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+} // Функция для открытия сделки
+export async function openBuyOrder() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/order-p2p');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+} // Функция для открытия сделки
 
