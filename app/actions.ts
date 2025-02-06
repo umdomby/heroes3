@@ -1048,7 +1048,35 @@ export async function closeSellOrderOpen(orderId: number) {
         return false;
     }
 } // Функция закрытия открытой сделки продажи
-
+export async function getOpenOrders(): Promise<OrderP2P[]> {
+    try {
+        return await prisma.orderP2P.findMany({
+            where: {orderP2PStatus: 'OPEN'},
+            orderBy: {
+                createdAt: 'desc',
+            },
+            include: {
+                orderP2PUser1: {
+                    select: {
+                        id: true,
+                        cardId: true,
+                        // Добавьте другие необходимые поля
+                    }
+                },
+                orderP2PUser2: {
+                    select: {
+                        id: true,
+                        cardId: true,
+                        // Добавьте другие необходимые поля
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Ошибка при получении открытых заказов:', error);
+        throw new Error('Не удалось получить открытые заказы'); // Выбрасывание ошибки для лучшей обработки
+    }
+} // 5 секунд обновление открытых сделок для OrderP2PComponent
 
 // ################################################
 export async function confirmBuyOrderUser2() {
@@ -1138,34 +1166,4 @@ export async function openBuyOrder() {
     }
 } // Функция для открытия сделки
 
-
-export async function getOpenOrders(): Promise<OrderP2P[]> {
-    try {
-        return await prisma.orderP2P.findMany({
-            where: {orderP2PStatus: 'OPEN'},
-            orderBy: {
-                createdAt: 'desc',
-            },
-            include: {
-                orderP2PUser1: {
-                    select: {
-                        id: true,
-                        cardId: true,
-                        // Добавьте другие необходимые поля
-                    }
-                },
-                orderP2PUser2: {
-                    select: {
-                        id: true,
-                        cardId: true,
-                        // Добавьте другие необходимые поля
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Ошибка при получении открытых заказов:', error);
-        throw new Error('Не удалось получить открытые заказы'); // Выбрасывание ошибки для лучшей обработки
-    }
-}
 
