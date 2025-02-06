@@ -66,7 +66,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
     const [selectedBankDetailsForInteraction, setSelectedBankDetailsForInteraction] = useState<any[]>([]); // Выбранные банковские реквизиты для взаимодействия
     const [selectedBuyOption, setSelectedBuyOption] = useState<string>(''); // Текущее выбранное значение для покупки
     const [selectedSellOption, setSelectedSellOption] = useState<string>(''); // Текущее выбранное значение для продажи
-    const [successMessage, setSuccessMessage] = useState<string | null>(null); // Состояние для управления сообщением об успешном закрытии сделки:
+    const [successMessage, setSuccessMessage] = useState<string | null>(null); // Состояние для управления сообщением об успешном закрытии сделки
+    const [calculatedValues, setCalculatedValues] = useState<{ [key: number]: number | null }>({}); // Состояние для хранения результата умножения
 
     // Обработчик выбора банковских реквизитов для покупки
     const handleSelectBankDetailForBuy = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -228,11 +229,6 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
             console.error('Ошибка при создании заявки на продажу:', error);
             alert('Не удалось создать заявку на продажу');
         }
-    };
-
-    // Обработчик выбора банковских реквизитов для взаимодействия
-    const handleSelectBankDetailForInteraction = (detail: any) => {
-        setSelectedBankDetailsForInteraction([detail]);
     };
 
     // Обработчик заключения сделки покупки
@@ -402,6 +398,25 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         }
     };
 
+    // Обработчик выбора банковских реквизитов для взаимодействия
+    const handleSelectBankDetailForInteraction = (selectedValue: string, order: OrderP2P) => {
+        if (!selectedValue) {
+            setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
+            return;
+        }
+
+        const detail = JSON.parse(selectedValue);
+        if (detail && typeof detail.price === 'string') {
+            const price = parseFloat(detail.price.replace(',', '.'));
+            if (!isNaN(price)) {
+                setCalculatedValues((prev) => ({ ...prev, [order.id]: order.orderP2PPoints * price }));
+            } else {
+                setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
+            }
+        } else {
+            setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
+        }
+    };
 
     return (
         <div className={className}>
@@ -484,15 +499,15 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                             </div>
                         </div>
                     ))}
-                    <label className="flex items-center mb-2">
-                        <input
-                            type="checkbox"
-                            checked={allowPartialBuy}
-                            onChange={() => setAllowPartialBuy(!allowPartialBuy)}
-                            className="mr-2"
-                        />
-                        Покупать частями
-                    </label>
+                    {/*<label className="flex items-center mb-2">*/}
+                    {/*    <input*/}
+                    {/*        type="checkbox"*/}
+                    {/*        checked={allowPartialBuy}*/}
+                    {/*        onChange={() => setAllowPartialBuy(!allowPartialBuy)}*/}
+                    {/*        className="mr-2"*/}
+                    {/*    />*/}
+                    {/*    Покупать частями*/}
+                    {/*</label>*/}
                     <Button
                         onClick={handleCreateBuyOrder}
                         className={`w-full ${buyOrderSuccess ? 'button-success' : ''}`}
@@ -566,15 +581,15 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                             </div>
                         </div>
                     ))}
-                    <label className="flex items-center mb-2">
-                        <input
-                            type="checkbox"
-                            checked={allowPartialSell}
-                            onChange={() => setAllowPartialSell(!allowPartialSell)}
-                            className="mr-2"
-                        />
-                        Продавать частями
-                    </label>
+                    {/*<label className="flex items-center mb-2">*/}
+                    {/*    <input*/}
+                    {/*        type="checkbox"*/}
+                    {/*        checked={allowPartialSell}*/}
+                    {/*        onChange={() => setAllowPartialSell(!allowPartialSell)}*/}
+                    {/*        className="mr-2"*/}
+                    {/*    />*/}
+                    {/*    Продавать частями*/}
+                    {/*</label>*/}
                     <Button
                         onClick={handleCreateSellOrder}
                         className={`w-full ${sellOrderSuccess ? 'button-success' : ''}`}
@@ -604,13 +619,9 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                         <TableCell className="w-1/4">
                                             {order.orderP2PPoints}
                                         </TableCell>
-                                        <TableCell className="w-1/4 text-right"> {/* Выравнивание текста вправо */}
-                                            {order.orderP2PPart ? 'Частями' : 'Целиком'}
-                                        </TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
-
                         </AccordionTrigger>
                         <AccordionContent>
                             <Table>
@@ -647,8 +658,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                     </TableRow>
                                 </TableBody>
                             </Table>
-                            <select onChange={(e) => handleSelectBankDetailForInteraction(e.target.value)}
-                                    className="mb-2">
+                            <select onChange={(e) => handleSelectBankDetailForInteraction(e.target.value, order)} className="mb-2">
                                 <option value="">Выберите реквизиты банка для сделки</option>
                                 {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
                                     order.orderBankDetails.map((detail, index) => {
@@ -658,7 +668,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                             const details = typeof detail.details === 'string' ? detail.details : '';
 
                                             return (
-                                                <option key={index} value={name}>
+                                                <option key={index} value={JSON.stringify(detail)}>
                                                     {price} - {name} - {details}
                                                 </option>
                                             );
@@ -669,6 +679,11 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                     <option disabled>Нет доступных банковских реквизитов</option>
                                 )}
                             </select>
+                            {calculatedValues[order.id] !== null && (
+                                <p className="text-lg font-semibold">
+                                    Итоговая сумма: {calculatedValues[order.id]}
+                                </p>
+                            )}
                             {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id === user.id && (
                                 <Button className="ml-3 h-6" onClick={() => handleCloseBuyOrder(order)}>
                                     Закрыть сделку покупки
