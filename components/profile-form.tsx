@@ -35,9 +35,10 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
     const [referrals, setReferrals] = useState<any[]>([]);
     const [bankDetails, setBankDetails] = useState<any[]>(Array.isArray(data.bankDetails) ? data.bankDetails : []);
-    const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '' });
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '' });
+    const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '', pricePerPoint: '' });
+    const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', pricePerPoint: '' });
+
 
     useEffect(() => {
         const fetchReferrals = async () => {
@@ -82,7 +83,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
             }
             const updatedBankDetails = await addBankDetails(newBankDetail);
             setBankDetails(updatedBankDetails);
-            setNewBankDetail({ name: '', details: '', description: '' });
+            setNewBankDetail({ name: '', details: '', description: '', pricePerPoint: '' });
             toast.success('Банковский реквизит добавлен');
         } catch (error) {
             toast.error('Ошибка при добавлении банковского реквизита');
@@ -201,24 +202,30 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                 <AccordionContent>
                                     <div className="mb-4">
                                         <FormProvider {...form}>
-                                        <FormInput
-                                            name="bankName"
-                                            label="Название"
-                                            value={newBankDetail.name}
-                                            onChange={(e) => setNewBankDetail({ ...newBankDetail, name: e.target.value })}
-                                        />
-                                        <FormInput
-                                            name="bankDetails"
-                                            label="Реквизиты"
-                                            value={newBankDetail.details}
-                                            onChange={(e) => setNewBankDetail({ ...newBankDetail, details: e.target.value })}
-                                        />
-                                        <FormInput
-                                            name="bankDescription"
-                                            label="Описание"
-                                            value={newBankDetail.description}
-                                            onChange={(e) => setNewBankDetail({ ...newBankDetail, description: e.target.value })}
-                                        />
+                                            <FormInput
+                                                name="bankName"
+                                                label="Название"
+                                                value={newBankDetail.name || ''} // Убедитесь, что значение всегда строка
+                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, name: e.target.value })}
+                                            />
+                                            <FormInput
+                                                name="bankDetails"
+                                                label="Реквизиты"
+                                                value={newBankDetail.details || ''} // Убедитесь, что значение всегда строка
+                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, details: e.target.value })}
+                                            />
+                                            <FormInput
+                                                name="bankDescription"
+                                                label="Описание"
+                                                value={newBankDetail.description || ''} // Убедитесь, что значение всегда строка
+                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, description: e.target.value })}
+                                            />
+                                            <FormInput
+                                                name="pricePerPoint"
+                                                label="Цена за 1 Point"
+                                                value={newBankDetail.pricePerPoint || ''} // Убедитесь, что значение всегда строка
+                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, pricePerPoint: e.target.value })}
+                                            />
                                             </FormProvider>
                                         <Button onClick={handleAddBankDetail} className="mt-2">Добавить</Button>
                                     </div>
@@ -230,20 +237,26 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                     <div>
                                                         <input
                                                             type="text"
-                                                            value={editedDetail.name}
+                                                            value={editedDetail.name || ''} // Убедитесь, что значение всегда строка
                                                             onChange={(e) => setEditedDetail({ ...editedDetail, name: e.target.value })}
                                                             className="block w-full mb-1"
                                                         />
                                                         <input
                                                             type="text"
-                                                            value={editedDetail.details}
+                                                            value={editedDetail.details || ''} // Убедитесь, что значение всегда строка
                                                             onChange={(e) => setEditedDetail({ ...editedDetail, details: e.target.value })}
                                                             className="block w-full mb-1"
                                                         />
                                                         <input
                                                             type="text"
-                                                            value={editedDetail.description}
+                                                            value={editedDetail.description || ''} // Убедитесь, что значение всегда строка
                                                             onChange={(e) => setEditedDetail({ ...editedDetail, description: e.target.value })}
+                                                            className="block w-full mb-1"
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            value={editedDetail.pricePerPoint || ''} // Убедитесь, что значение всегда строка
+                                                            onChange={(e) => setEditedDetail({ ...editedDetail, pricePerPoint: e.target.value })}
                                                             className="block w-full mb-1"
                                                         />
                                                         <Button onClick={handleSaveBankDetail} className="mt-2">Сохранить</Button>
@@ -253,6 +266,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                         <p><strong>Название:</strong> {detail.name}</p>
                                                         <p><strong>Реквизиты:</strong> {detail.details}</p>
                                                         <p><strong>Описание:</strong> {detail.description}</p>
+                                                        <p><strong>Цена за 1 Point:</strong> {detail.pricePerPoint}</p>
                                                     </div>
                                                 )}
                                                 <div className="flex space-x-2">

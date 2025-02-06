@@ -33,6 +33,7 @@ interface OrderP2PWithUser extends OrderP2P {
 
 interface BankDetail {
     name: string;
+    pricePerPoint: string;
     details: string;
     description: string;
 }
