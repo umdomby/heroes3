@@ -37,7 +37,7 @@ interface BankDetail {
 }
 interface orderBankDetail {
     name: string;
-    price: number; // или string, в зависимости от вашего использования
+    price: string; // или string, в зависимости от вашего использования
     details: string;
     description: string;
 }
@@ -79,7 +79,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                     if (prevDetails.includes(detail)) {
                         return prevDetails.filter((d) => d !== detail);
                     } else {
-                        return [...prevDetails, { ...detail, price: 0 }];
+                        return [...prevDetails, { ...detail, price: '' }];
                     }
                 });
             }
@@ -99,7 +99,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                     if (prevDetails.includes(detail)) {
                         return prevDetails.filter((d) => d !== detail);
                     } else {
-                        return [...prevDetails, { ...detail, price: 0 }];
+                        return [...prevDetails, { ...detail, price: '' }];
                     }
                 });
             }
@@ -335,7 +335,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
     // Добавление всех банковских реквизитов для покупки
     const handleAddAllBankDetailsForBuy = () => {
         if (Array.isArray(user.bankDetails)) {
-            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: 0 }));
+            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: '' }));
             setSelectedBankDetailsForBuy(allDetails);
         } else {
             alert('Нет доступных банковских реквизитов для добавления.');
@@ -350,7 +350,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
     // Добавление всех банковских реквизитов для продажи
     const handleAddAllBankDetailsForSell = () => {
         if (user.bankDetails) {
-            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: 0 }));
+            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: '' }));
             setSelectedBankDetailsForSell(allDetails);
         } else {
             alert('Нет доступных банковских реквизитов для добавления.');
@@ -605,7 +605,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                                         if (detail && typeof detail === 'object' && 'name' in detail && 'price' in detail && 'details' in detail && 'description' in detail) {
                                                             const bankDetail: orderBankDetail = {
                                                                 name: typeof detail.name === 'string' ? detail.name : '',
-                                                                price: typeof detail.price === 'number' ? detail.price : 0,
+                                                                price: typeof detail.price === 'string' ? detail.price : '',
                                                                 details: typeof detail.details === 'string' ? detail.details : '',
                                                                 description: typeof detail.description === 'string' ? detail.description : '',
                                                             };
@@ -634,13 +634,14 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                 <option value="">Выберите реквизиты банка для сделки</option>
                                 {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
                                     order.orderBankDetails.map((detail, index) => {
-                                        if (detail && typeof detail === 'object' && 'name' in detail && 'details' in detail) {
+                                        if (detail && typeof detail === 'object' && 'price' in detail && 'name' in detail && 'details' in detail) {
+                                            const price = typeof detail.price === 'string' ? detail.price : '';
                                             const name = typeof detail.name === 'string' ? detail.name : '';
                                             const details = typeof detail.details === 'string' ? detail.details : '';
 
                                             return (
                                                 <option key={index} value={name}>
-                                                    {name} - {details}
+                                                    {price} - {name} - {details}
                                                 </option>
                                             );
                                         }
