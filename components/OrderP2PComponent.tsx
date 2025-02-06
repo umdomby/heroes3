@@ -284,8 +284,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
     };
 
     // Проверка, можно ли создать заявку
-    const isCreateOrderDisabled = (points: number, selectedDetails: any[]) => {
-        return points < 30 || selectedDetails.length === 0 || selectedDetails.some(detail => detail.price <= 0);
+    const isCreateOrderDisabled = (points: number) => {
+        return points < 30 ;
     };
 
     // Обработчик изменения значения для покупки
@@ -544,7 +544,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     <Button
                         onClick={handleCreateBuyOrder}
                         className={`w-full ${buyOrderSuccess ? 'button-success' : ''}`}
-                        disabled={isCreateOrderDisabled(buyPoints, selectedBankDetailsForBuy)}
+                        disabled={isCreateOrderDisabled(buyPoints)}
                     >
                         {buyOrderSuccess ? 'Заявка создана!' : 'Создать заявку'}
                     </Button>
@@ -626,7 +626,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     <Button
                         onClick={handleCreateSellOrder}
                         className={`w-full ${sellOrderSuccess ? 'button-success' : ''}`}
-                        disabled={isCreateOrderDisabled(sellPoints, selectedBankDetailsForSell)}
+                        disabled={isCreateOrderDisabled(sellPoints)}
                     >
                         {sellOrderSuccess ? 'Заявка создана!' : 'Создать заявку'}
                     </Button>
