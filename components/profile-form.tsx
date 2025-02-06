@@ -9,7 +9,7 @@ import { signOut } from 'next-auth/react';
 import { Container } from './container';
 import { Title } from './title';
 import { FormInput } from './form';
-import { Button } from '@/components/ui';
+import {Button, Input} from '@/components/ui';
 import { referralGet, updateUserInfo, addBankDetails, deleteBankDetail, updateBankDetails } from '@/app/actions';
 import {
     Accordion,
@@ -220,11 +220,20 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                 value={newBankDetail.description || ''} // Убедитесь, что значение всегда строка
                                                 onChange={(e) => setNewBankDetail({ ...newBankDetail, description: e.target.value })}
                                             />
+
                                             <FormInput
                                                 name="price"
                                                 label="Цена за 1 Point"
                                                 value={newBankDetail.price || ''} // Убедитесь, что значение всегда строка
-                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, price: e.target.value })}
+
+                                                onChange={(e) => {
+                                                    let value = e.target.value;
+                                                    value = value.replace('.', ',');
+                                                    const regex = /^\d*[,]?\d*$/;
+                                                    if (regex.test(value)) {
+                                                        setNewBankDetail({...newBankDetail, value})}
+                                                    }
+                                                }
                                             />
                                             </FormProvider>
                                         <Button onClick={handleAddBankDetail} className="mt-2">Добавить</Button>

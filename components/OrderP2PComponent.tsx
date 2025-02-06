@@ -704,7 +704,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                                         };
                                                         return (
                                                             <div key={index} className="flex border-b py-2">
-                                                                <div style={{width: '25%'}}>
+                                                                <div style={{width: '35%'}}>
                                                                     <div>
                                                                         <strong>{bankDetail.price}</strong> за one Point
                                                                     </div>
@@ -712,7 +712,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                                                         <strong>{bankDetail.name}</strong>
                                                                     </div>
                                                                 </div>
-                                                                <div style={{width: '55%'}}>
+                                                                <div style={{width: '65%'}}>
                                                                     <div>
                                                                         {bankDetail.details}
                                                                     </div>
