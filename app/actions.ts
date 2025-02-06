@@ -1028,7 +1028,23 @@ export async function createSellOrder(points: number, bankDetails: any[],  allow
 }
 
 // Функция для открытия сделки
-export async function buyPayPointsOpen() {
+export async function openSellOrder() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/buy-pay-point');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
+
+// Функция для открытия сделки
+export async function openBuyOrder() {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
@@ -1044,7 +1060,7 @@ export async function buyPayPointsOpen() {
 }
 
 
-export async function buyPayPointsClose() {
+export async function confirmSellOrderUser2() {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
@@ -1059,4 +1075,48 @@ export async function buyPayPointsClose() {
     }
 }
 
+export async function confirmSellOrderCreator() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/buy-pay-point');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
+
+export async function confirmBuyOrderUser2() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/buy-pay-point');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
+
+export async function confirmBuyOrderCreator() {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        revalidatePath('/buy-pay-point');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
 

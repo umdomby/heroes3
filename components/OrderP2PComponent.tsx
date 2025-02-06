@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { OrderP2P, User } from "@prisma/client";
-import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions';
+import {createBuyOrder, createSellOrder, openBuyOrder, openSellOrder} from '@/app/actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -226,15 +226,31 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
         setSelectedBankDetailsForInteraction([detail]);
     };
 
-    // Обработчик заключения сделки
-    const handleConcludeDeal = async (order: OrderP2P) => {
+    // Обработчик заключения сделки покупки
+    const handleConcludeDealBuy = async (order: OrderP2P) => {
         if (order.orderP2PUser1Id === user.id) {
             alert('Вы не можете заключать сделку с самим собой');
             return;
         }
 
         try {
-            await buyPayPointsOpen();
+            await openBuyOrder();
+            alert('Сделка успешно заключена');
+        } catch (error) {
+            console.error('Ошибка при заключении сделки:', error);
+            alert('Не удалось заключить сделку');
+        }
+    };
+
+    // Обработчик заключения сделки продажи
+    const handleConcludeDealSell = async (order: OrderP2P) => {
+        if (order.orderP2PUser1Id === user.id) {
+            alert('Вы не можете заключать сделку с самим собой');
+            return;
+        }
+
+        try {
+            await openSellOrder();
             alert('Сделка успешно заключена');
         } catch (error) {
             console.error('Ошибка при заключении сделки:', error);
@@ -584,9 +600,13 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                     <option disabled>Нет доступных банковских реквизитов</option>
                                 )}
                             </select>
-                            <Button onClick={() => handleConcludeDeal(order)}
+                            <Button onClick={() => handleConcludeDealSell(order)}
                                     disabled={order.orderP2PUser1Id === user.id}>
-                                Заключить сделку
+                                Заключить сделку продажи
+                            </Button>
+                            <Button onClick={() => handleConcludeDealBuy(order)}
+                                    disabled={order.orderP2PUser1Id === user.id}>
+                                Заключить сделку покупки
                             </Button>
                         </AccordionContent>
                     </AccordionItem>
