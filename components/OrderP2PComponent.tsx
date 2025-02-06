@@ -1,5 +1,5 @@
 "use client";
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Accordion,
     AccordionContent,
@@ -14,7 +14,8 @@ import {
     createBuyOrder,
     createSellOrder,
     openBuyOrder,
-    openSellOrder
+    openSellOrder,
+    getOpenOrders,
 } from '@/app/actions';
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -52,7 +53,7 @@ interface Props {
 
 // Компонент для работы с P2P заказами
 export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}) => {
-    const orders = openOrders as OrderP2PWithUser[];
+    const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
     const [buyOrderSuccess, setBuyOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
     const [sellOrderSuccess, setSellOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
     const [buyPoints, setBuyPoints] = useState<number>(0); // Количество очков для покупки
@@ -68,6 +69,25 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
     const [selectedSellOption, setSelectedSellOption] = useState<string>(''); // Текущее выбранное значение для продажи
     const [successMessage, setSuccessMessage] = useState<string | null>(null); // Состояние для управления сообщением об успешном закрытии сделки
     const [calculatedValues, setCalculatedValues] = useState<{ [key: number]: number | null }>({}); // Состояние для хранения результата умножения
+
+
+    useEffect(() => {
+        setOpenOrders(openOrders as OrderP2PWithUser[]);
+    }, [openOrders]);
+
+    useEffect(() => {
+        const fetchOpenOrders = async () => {
+            try {
+                const orders = await getOpenOrders(); // Fetch the latest open orders
+                setOpenOrders(orders as OrderP2PWithUser[]);
+            } catch (error) {
+                console.error('Error fetching open orders:', error);
+            }
+        };
+        fetchOpenOrders(); // Initial fetch
+        const intervalId = setInterval(fetchOpenOrders, 5000); // Set interval to fetch every 5 seconds
+        return () => clearInterval(intervalId); // Clear interval on component unmount
+    }, []);
 
     // Обработчик выбора банковских реквизитов для покупки
     const handleSelectBankDetailForBuy = (event: React.ChangeEvent<HTMLSelectElement>) => {

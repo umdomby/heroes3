@@ -1,11 +1,12 @@
 'use server';
-import { prisma } from '@/prisma/prisma-client';
-import { getUserSession } from '@/components/lib/get-user-session';
-import { PlayerChoice, Prisma, IsCovered, BetParticipant, Bet } from '@prisma/client';
-import { hashSync } from 'bcrypt';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import {prisma} from '@/prisma/prisma-client';
+import {getUserSession} from '@/components/lib/get-user-session';
+import {Bet, BetParticipant, IsCovered, OrderP2P, PlayerChoice, Prisma} from '@prisma/client';
+import {hashSync} from 'bcrypt';
+import {revalidatePath, revalidateTag} from 'next/cache';
 import axios from "axios";
-import { JsonArray } from 'type-fest';
+import {JsonArray} from 'type-fest';
+
 const MARGIN = parseFloat(process.env.MARGIN || '0.05');
 
 export async function updateGlobalData() {
@@ -1136,4 +1137,32 @@ export async function openBuyOrder() {
         return false;
     }
 } // Функция для открытия сделки
+
+
+export async function getOpenOrders(): Promise<OrderP2P[]> {
+    try {
+        return await prisma.orderP2P.findMany({
+            where: {orderP2PStatus: 'OPEN'},
+            include: {
+                orderP2PUser1: {
+                    select: {
+                        id: true,
+                        cardId: true,
+                        // Добавьте другие необходимые поля
+                    }
+                },
+                orderP2PUser2: {
+                    select: {
+                        id: true,
+                        cardId: true,
+                        // Добавьте другие необходимые поля
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Ошибка при получении открытых заказов:', error);
+        throw new Error('Не удалось получить открытые заказы'); // Выбрасывание ошибки для лучшей обработки
+    }
+}
 
