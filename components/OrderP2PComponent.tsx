@@ -97,7 +97,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
 
         if (Array.isArray(user.bankDetails)) {
             const detail = user.bankDetails.find((d: any) => d.name === selectedValue);
-            if (detail && typeof detail === 'object') {
+            if (isBankDetail(detail)) { // Use the type guard here
                 const orderDetail: orderBankDetail = {
                     name: detail.name,
                     price: detail.price, // Устанавливаем начальную цену из BankDetail
@@ -123,7 +123,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
 
         if (Array.isArray(user.bankDetails)) {
             const detail = user.bankDetails.find((d: any) => d.name === selectedValue);
-            if (detail && typeof detail === 'object') {
+            if (isBankDetail(detail)) { // Use the type guard here
                 const orderDetail: orderBankDetail = {
                     name: detail.name,
                     price: detail.price, // Устанавливаем начальную цену из BankDetail
@@ -709,7 +709,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                             {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
                                                 order.orderBankDetails.map((detail, index) => {
                                                     if (detail && typeof detail === 'object' && 'name' in detail && 'price' in detail && 'details' in detail && 'description' in detail) {
-                                                        const bankDetail: OrderBankDetail = {
+                                                        const bankDetail: orderBankDetail = { // Change OrderBankDetail to orderBankDetail
                                                             name: typeof detail.name === 'string' ? detail.name : '',
                                                             price: typeof detail.price === 'string' ? detail.price : '',
                                                             details: typeof detail.details === 'string' ? detail.details : '',
