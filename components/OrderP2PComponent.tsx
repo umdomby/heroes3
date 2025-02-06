@@ -651,6 +651,10 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                         <TableCell className="w-1/4">
                                             {order.orderP2PPoints}
                                         </TableCell>
+                                        <TableCell className="w-1/4">
+                                            {new Date(order.createdAt).toLocaleString()}
+                                        </TableCell>
+
                                     </TableRow>
                                 </TableBody>
                             </Table>

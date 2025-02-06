@@ -1143,6 +1143,9 @@ export async function getOpenOrders(): Promise<OrderP2P[]> {
     try {
         return await prisma.orderP2P.findMany({
             where: {orderP2PStatus: 'OPEN'},
+            orderBy: {
+                createdAt: 'desc',
+            },
             include: {
                 orderP2PUser1: {
                     select: {
