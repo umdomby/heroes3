@@ -1,13 +1,13 @@
 "use client";
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { OrderP2P, User } from "@prisma/client";
+import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
+import {OrderP2P, User} from "@prisma/client";
 import {
     closeBuyOrderOpen,
     closeSellOrderOpen,
@@ -16,8 +16,8 @@ import {
     openBuyOrder,
     openSellOrder
 } from '@/app/actions';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
 
 interface OrderP2PWithUser extends OrderP2P {
     orderP2PUser1: {
@@ -35,6 +35,7 @@ interface BankDetail {
     details: string;
     description: string;
 }
+
 interface orderBankDetail {
     name: string;
     price: string; // или string, в зависимости от вашего использования
@@ -50,7 +51,7 @@ interface Props {
 }
 
 // Компонент для работы с P2P заказами
-export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className }) => {
+export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}) => {
     const orders = openOrders as OrderP2PWithUser[];
     const [buyOrderSuccess, setBuyOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
     const [sellOrderSuccess, setSellOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
@@ -79,7 +80,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                     if (prevDetails.includes(detail)) {
                         return prevDetails.filter((d) => d !== detail);
                     } else {
-                        return [...prevDetails, { ...detail, price: '' }];
+                        return [...prevDetails, {...detail, price: ''}];
                     }
                 });
             }
@@ -99,7 +100,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                     if (prevDetails.includes(detail)) {
                         return prevDetails.filter((d) => d !== detail);
                     } else {
-                        return [...prevDetails, { ...detail, price: '' }];
+                        return [...prevDetails, {...detail, price: ''}];
                     }
                 });
             }
@@ -335,7 +336,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
     // Добавление всех банковских реквизитов для покупки
     const handleAddAllBankDetailsForBuy = () => {
         if (Array.isArray(user.bankDetails)) {
-            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: '' }));
+            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({...detail, price: ''}));
             setSelectedBankDetailsForBuy(allDetails);
         } else {
             alert('Нет доступных банковских реквизитов для добавления.');
@@ -350,7 +351,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
     // Добавление всех банковских реквизитов для продажи
     const handleAddAllBankDetailsForSell = () => {
         if (user.bankDetails) {
-            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: '' }));
+            const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({...detail, price: ''}));
             setSelectedBankDetailsForSell(allDetails);
         } else {
             alert('Нет доступных банковских реквизитов для добавления.');
@@ -591,7 +592,25 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                         className={order.orderP2PUser1Id === user.id ? 'bg-gray-700' : ''}
                     >
                         <AccordionTrigger>
-                            {order.orderP2PUser1.cardId} хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
+                            <Table>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell className="w-1/4">
+                                            {order.orderP2PUser1.cardId}
+                                        </TableCell>
+                                        <TableCell className="w-1/4">
+                                            {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'}
+                                        </TableCell>
+                                        <TableCell className="w-1/4">
+                                            {order.orderP2PPoints}
+                                        </TableCell>
+                                        <TableCell className="w-1/4 text-right"> {/* Выравнивание текста вправо */}
+                                            {order.orderP2PPart ? 'Частями' : 'Целиком'}
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+
                         </AccordionTrigger>
                         <AccordionContent>
                             <Table>
@@ -625,7 +644,6 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                                 <span>Нет доступных банковских реквизитов</span>
                                             )}
                                         </TableCell>
-                                        <TableCell>{order.orderP2PPart ? 'Частями' : 'Целиком'}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
@@ -666,7 +684,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                     Заключить сделку продажи
                                 </Button>
                             )}
-                            {order.orderP2PBuySell === 'SELL' &&  order.orderP2PUser1Id !== user.id && (
+                            {order.orderP2PBuySell === 'SELL' && order.orderP2PUser1Id !== user.id && (
                                 <Button className="ml-3 h-6" onClick={() => handleConcludeDealBuy(order)}>
                                     Заключить сделку покупки
                                 </Button>
