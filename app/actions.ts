@@ -1035,7 +1035,7 @@ export async function openSellOrder() {
             throw new Error('Пользователь не найден');
         }
 
-        revalidatePath('/buy-pay-point');
+        revalidatePath('/order-p2p');
         return true;
     } catch (error) {
         console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
@@ -1051,7 +1051,7 @@ export async function openBuyOrder() {
             throw new Error('Пользователь не найден');
         }
 
-        revalidatePath('/buy-pay-point');
+        revalidatePath('/order-p2p');
         return true;
     } catch (error) {
         console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
@@ -1067,7 +1067,7 @@ export async function confirmSellOrderUser2() {
             throw new Error('Пользователь не найден');
         }
 
-        revalidatePath('/buy-pay-point');
+        revalidatePath('/order-p2p');
         return true;
     } catch (error) {
         console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
@@ -1082,7 +1082,7 @@ export async function confirmSellOrderCreator() {
             throw new Error('Пользователь не найден');
         }
 
-        revalidatePath('/buy-pay-point');
+        revalidatePath('/order-p2p');
         return true;
     } catch (error) {
         console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
@@ -1097,7 +1097,7 @@ export async function confirmBuyOrderUser2() {
             throw new Error('Пользователь не найден');
         }
 
-        revalidatePath('/buy-pay-point');
+        revalidatePath('/order-p2p');
         return true;
     } catch (error) {
         console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
@@ -1112,11 +1112,73 @@ export async function confirmBuyOrderCreator() {
             throw new Error('Пользователь не найден');
         }
 
-        revalidatePath('/buy-pay-point');
+        revalidatePath('/order-p2p');
         return true;
     } catch (error) {
         console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
         return false;
     }
 }
+
+
+// Функция закрытия открытой сделки покупки
+export async function closeBuyOrderOpen(orderId: number) {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        // Обновление статуса сделки на RETURN
+        await prisma.orderP2P.update({
+            where: { id: orderId },
+            data: { orderP2PStatus: 'RETURN' },
+        });
+
+        // Здесь можно добавить дополнительную логику, если необходимо
+        revalidatePath('/order-p2p');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при закрытии сделки покупки:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
+
+// Функция закрытия открытой сделки продажи
+export async function closeSellOrderOpen(orderId: number) {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        // Получение сделки для возврата points
+        const order = await prisma.orderP2P.findUnique({
+            where: { id: orderId },
+        });
+
+        if (!order) {
+            throw new Error('Сделка не найдена');
+        }
+
+        // Возврат points пользователю
+        await prisma.user.update({
+            where: { id: Number(currentUser.id)},
+            data: { points: { increment: order.orderP2PPoints || 0 } },
+        });
+
+        // Обновление статуса сделки на RETURN
+        await prisma.orderP2P.update({
+            where: { id: orderId },
+            data: { orderP2PStatus: 'RETURN' },
+        });
+        revalidatePath('/order-p2p');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при закрытии сделки продажи:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
+
+
 

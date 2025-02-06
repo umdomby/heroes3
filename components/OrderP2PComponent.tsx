@@ -8,7 +8,14 @@ import {
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { OrderP2P, User } from "@prisma/client";
-import {createBuyOrder, createSellOrder, openBuyOrder, openSellOrder} from '@/app/actions';
+import {
+    closeBuyOrderOpen,
+    closeSellOrderOpen,
+    createBuyOrder,
+    createSellOrder,
+    openBuyOrder,
+    openSellOrder
+} from '@/app/actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -58,6 +65,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
     const [selectedBankDetailsForInteraction, setSelectedBankDetailsForInteraction] = useState<any[]>([]); // Выбранные банковские реквизиты для взаимодействия
     const [selectedBuyOption, setSelectedBuyOption] = useState<string>(''); // Текущее выбранное значение для покупки
     const [selectedSellOption, setSelectedSellOption] = useState<string>(''); // Текущее выбранное значение для продажи
+    const [successMessage, setSuccessMessage] = useState<string | null>(null); // Состояние для управления сообщением об успешном закрытии сделки:
 
     // Обработчик выбора банковских реквизитов для покупки
     const handleSelectBankDetailForBuy = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -360,8 +368,51 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
         return detail && typeof detail.name === 'string' && typeof detail.details === 'string';
     };
 
+    const handleCloseBuyOrder = async (order: OrderP2P) => {
+        if (order.orderP2PUser1Id !== user.id) {
+            alert('Вы не можете закрыть чужую сделку');
+            return;
+        }
+
+        try {
+            const success = await closeBuyOrderOpen(order.id);
+            if (success) {
+                setSuccessMessage('Сделка покупки успешно закрыта');
+                setTimeout(() => setSuccessMessage(null), 2000); // Скрыть сообщение через 3 секунды
+            }
+        } catch (error) {
+            console.error('Ошибка при закрытии сделки покупки:', error);
+        }
+    };
+
+    const handleCloseSellOrder = async (order: OrderP2P) => {
+        if (order.orderP2PUser1Id !== user.id) {
+            alert('Вы не можете закрыть чужую сделку');
+            return;
+        }
+
+        try {
+            const success = await closeSellOrderOpen(order.id);
+            if (success) {
+                setSuccessMessage('Сделка продажи успешно закрыта');
+                setTimeout(() => setSuccessMessage(null), 2000); // Скрыть сообщение через 3 секунды
+            }
+        } catch (error) {
+            console.error('Ошибка при закрытии сделки продажи:', error);
+        }
+    };
+
+
     return (
         <div className={className}>
+            {successMessage && (
+                <div className="relative">
+                    <div
+                        className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 p-2 mb-4 rounded mt-4">
+                        {successMessage}
+                    </div>
+                </div>
+            )}
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <p className="text-lg font-semibold">Points: {Math.floor(user.points * 100) / 100}</p>
@@ -540,8 +591,8 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                         value={order.id.toString()}
                         className={order.orderP2PUser1Id === user.id ? 'bg-gray-700' : ''}
                     >
-                        <AccordionTrigger disabled={order.orderP2PUser1Id === user.id}>
-                            {order.orderP2PUser1.cardId} {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
+                        <AccordionTrigger>
+                            {order.orderP2PUser1.cardId} хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
                         </AccordionTrigger>
                         <AccordionContent>
                             <Table>
@@ -600,18 +651,33 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                     <option disabled>Нет доступных банковских реквизитов</option>
                                 )}
                             </select>
-                            <Button onClick={() => handleConcludeDealSell(order)}
+                            {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id === user.id && (
+                                <Button className="ml-3 h-6" onClick={() => handleCloseBuyOrder(order)}>
+                                    Закрыть сделку покупки
+                                </Button>
+                            )}
+                            {order.orderP2PBuySell === 'SELL' && order.orderP2PUser1Id === user.id && (
+                                <Button className="ml-3 h-6" onClick={() => handleCloseSellOrder(order)}>
+                                    Закрыть сделку продажи
+                                </Button>
+                            )}
+
+                            <Button className="ml-3 h-6" onClick={() => handleConcludeDealSell(order)}
                                     disabled={order.orderP2PUser1Id === user.id}>
                                 Заключить сделку продажи
                             </Button>
-                            <Button onClick={() => handleConcludeDealBuy(order)}
+                            <Button className="ml-3 h-6" onClick={() => handleConcludeDealBuy(order)}
                                     disabled={order.orderP2PUser1Id === user.id}>
                                 Заключить сделку покупки
                             </Button>
+
+
                         </AccordionContent>
                     </AccordionItem>
                 ))}
             </Accordion>
+
+
         </div>
     );
 };
