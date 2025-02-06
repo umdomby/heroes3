@@ -12,6 +12,16 @@ import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+interface OrderP2PWithUser extends OrderP2P {
+    orderP2PUser1: {
+        id: number;
+        cardId: string;
+    };
+    orderP2PUser2?: {
+        id: number;
+        cardId: string;
+    };
+}
 
 interface BankDetail {
     name: string;
@@ -25,7 +35,6 @@ interface orderBankDetail {
     description: string;
 }
 
-
 // Интерфейс для свойств компонента
 interface Props {
     user: User;
@@ -35,6 +44,7 @@ interface Props {
 
 // Компонент для работы с P2P заказами
 export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className }) => {
+    const orders = openOrders as OrderP2PWithUser[];
     const [buyPoints, setBuyPoints] = useState<number>(0); // Количество очков для покупки
     const [sellPoints, setSellPoints] = useState<number>(0); // Количество очков для продажи
     const [selectedBankDetailsForBuy, setSelectedBankDetailsForBuy] = useState<any[]>([]); // Выбранные банковские реквизиты для покупки
@@ -478,15 +488,14 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                 </div>
             </div>
             <Accordion className="mt-4" type="multiple">
-                {openOrders.map((order) => (
+                {orders.map((order) => (
                     <AccordionItem
                         key={order.id}
                         value={order.id.toString()}
                         className={order.orderP2PUser1Id === user.id ? 'bg-gray-700' : ''}
                     >
                         <AccordionTrigger disabled={order.orderP2PUser1Id === user.id}>
-                            {/*{order.orderP2PUser1?.cardId} */}
-                            хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
+                            {order.orderP2PUser1.cardId} {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'} {order.orderP2PPoints} points
                         </AccordionTrigger>
                         <AccordionContent>
                             <Table>
@@ -498,12 +507,10 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                             {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
                                                 <ul>
                                                     {order.orderBankDetails.map((detail, index) => {
-                                                        // Проверяем, является ли detail объектом и содержит ли необходимые свойства
                                                         if (detail && typeof detail === 'object' && 'name' in detail && 'price' in detail && 'details' in detail && 'description' in detail) {
-                                                            // Проверяем типы свойств перед присвоением
                                                             const bankDetail: orderBankDetail = {
                                                                 name: typeof detail.name === 'string' ? detail.name : '',
-                                                                price: typeof detail.price === 'number' ? detail.price : 0, // или другое значение по умолчанию
+                                                                price: typeof detail.price === 'number' ? detail.price : 0,
                                                                 details: typeof detail.details === 'string' ? detail.details : '',
                                                                 description: typeof detail.description === 'string' ? detail.description : '',
                                                             };
@@ -516,7 +523,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                                                 </li>
                                                             );
                                                         }
-                                                        return null; // Если detail не является объектом BankDetail, возвращаем null
+                                                        return null;
                                                     })}
                                                 </ul>
                                             ) : (
@@ -532,10 +539,9 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                 <option value="">Выберите реквизиты банка для сделки</option>
                                 {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
                                     order.orderBankDetails.map((detail, index) => {
-                                        // Проверяем, является ли detail объектом и содержит ли необходимые свойства
                                         if (detail && typeof detail === 'object' && 'name' in detail && 'details' in detail) {
-                                            const name = typeof detail.name === 'string' ? detail.name : ''; // Проверка типа для name
-                                            const details = typeof detail.details === 'string' ? detail.details : ''; // Проверка типа для details
+                                            const name = typeof detail.name === 'string' ? detail.name : '';
+                                            const details = typeof detail.details === 'string' ? detail.details : '';
 
                                             return (
                                                 <option key={index} value={name}>
@@ -543,7 +549,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                                 </option>
                                             );
                                         }
-                                        return null; // Если detail не является объектом или не содержит нужных свойств, возвращаем null
+                                        return null;
                                     })
                                 ) : (
                                     <option disabled>Нет доступных банковских реквизитов</option>
