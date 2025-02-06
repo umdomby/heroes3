@@ -139,6 +139,12 @@ html {
   padding: .2rem;
 }
 
+.button-success {
+  background-color: #718dff; /* Светло-зеленый цвет */
+  color: #1a293e; /* Светло-красный цвет текста */
+}
+
+
 /*.dialog-content {*/
 /*  width: 95vw; !* Полная ширина экрана *!*/
 /*  height: 90vh; !* Полная высота экрана *!*/

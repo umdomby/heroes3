@@ -956,8 +956,8 @@ export async function createBuyOrder(points: number, bankDetails: any[], allowPa
             throw new Error('Пользователь не найден');
         }
 
-        if (points < 50 || points > 100000) {
-            throw new Error('Количество points должно быть от 50 до 100000');
+        if (points < 30 || points > 100000) {
+            throw new Error('Количество points должно быть от 30 до 100000');
         }
 
         const newOrder = await prisma.orderP2P.create({
@@ -987,8 +987,8 @@ export async function createSellOrder(points: number, bankDetails: any[],  allow
             throw new Error('Пользователь не найден');
         }
 
-        if (points < 50 || points > 100000) {
-            throw new Error('Количество points должно быть от 50 до 100000');
+        if (points < 30 || points > 100000) {
+            throw new Error('Количество points должно быть от 30 до 100000');
         }
 
         const user = await prisma.user.findUnique({

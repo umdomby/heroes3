@@ -45,7 +45,7 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
             setErrorMessage(''); // Clear error message if valid
         }
 
-        if (points < 50 || points > user.points) {
+        if (points < 30 || points > user.points) {
             alert('Недопустимое количество баллов');
             return;
         }

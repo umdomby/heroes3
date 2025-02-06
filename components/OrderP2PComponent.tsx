@@ -7,7 +7,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import {OrderP2P, User} from "@prisma/client";
+import { OrderP2P, User } from "@prisma/client";
 import { createBuyOrder, createSellOrder, buyPayPointsOpen } from '@/app/actions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,8 +45,12 @@ interface Props {
 // Компонент для работы с P2P заказами
 export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className }) => {
     const orders = openOrders as OrderP2PWithUser[];
+    const [buyOrderSuccess, setBuyOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
+    const [sellOrderSuccess, setSellOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
     const [buyPoints, setBuyPoints] = useState<number>(0); // Количество очков для покупки
     const [sellPoints, setSellPoints] = useState<number>(0); // Количество очков для продажи
+    const [buyPointsError, setBuyPointsError] = useState<string | null>(null);
+    const [sellPointsError, setSellPointsError] = useState<string | null>(null);
     const [selectedBankDetailsForBuy, setSelectedBankDetailsForBuy] = useState<any[]>([]); // Выбранные банковские реквизиты для покупки
     const [selectedBankDetailsForSell, setSelectedBankDetailsForSell] = useState<any[]>([]); // Выбранные банковские реквизиты для продажи
     const [allowPartialBuy, setAllowPartialBuy] = useState<boolean>(false); // Разрешить частичную покупку
@@ -55,8 +59,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
     const [selectedBuyOption, setSelectedBuyOption] = useState<string>(''); // Текущее выбранное значение для покупки
     const [selectedSellOption, setSelectedSellOption] = useState<string>(''); // Текущее выбранное значение для продажи
 
-
-// Обработчик выбора банковских реквизитов для покупки
+    // Обработчик выбора банковских реквизитов для покупки
     const handleSelectBankDetailForBuy = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedValue = event.target.value;
         setSelectedBuyOption(selectedValue); // Устанавливаем выбранное значение
@@ -76,7 +79,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
         setSelectedBuyOption(''); // Сбрасываем выбор
     };
 
-// Обработчик выбора банковских реквизитов для продажи
+    // Обработчик выбора банковских реквизитов для продажи
     const handleSelectBankDetailForSell = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedValue = event.target.value;
         setSelectedSellOption(selectedValue); // Устанавливаем выбранное значение
@@ -194,7 +197,8 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
         }
         try {
             await createBuyOrder(buyPoints, selectedBankDetailsForBuy, allowPartialBuy);
-            alert('Заявка на покупку успешно создана');
+            setBuyOrderSuccess(true);
+            setTimeout(() => setBuyOrderSuccess(false), 3000); // Скрыть сообщение через 3 секунды
         } catch (error) {
             console.error('Ошибка при создании заявки на покупку:', error);
             alert('Не удалось создать заявку на покупку');
@@ -209,7 +213,8 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
         }
         try {
             await createSellOrder(sellPoints, selectedBankDetailsForSell, allowPartialSell);
-            alert('Заявка на продажу успешно создана');
+            setSellOrderSuccess(true);
+            setTimeout(() => setSellOrderSuccess(false), 3000); // Скрыть сообщение через 3 секунды
         } catch (error) {
             console.error('Ошибка при создании заявки на продажу:', error);
             alert('Не удалось создать заявку на продажу');
@@ -239,34 +244,50 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
 
     // Проверка, можно ли создать заявку
     const isCreateOrderDisabled = (points: number, selectedDetails: any[]) => {
-        return points <= 0 || selectedDetails.length === 0 || selectedDetails.some(detail => detail.price <= 0);
+        return points < 30 || selectedDetails.length === 0 || selectedDetails.some(detail => detail.price <= 0);
     };
 
     // Обработчик изменения значения для покупки
     const handleBuyPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        // Удаляем все символы, кроме цифр
         const sanitizedValue = value.replace(/[^0-9]/g, '');
         const points = sanitizedValue ? Number(sanitizedValue) : 0;
-        // Ограничиваем покупку до 100,000 points
-        if (points <= 100000) {
-            setBuyPoints(points);
+        setBuyPoints(points);
+        if (points < 30) {
+            setBuyPointsError('Минимальное количество для покупки - 30');
         } else {
-            setBuyPoints(100000); // Устанавливаем максимум, если превышает
+            setBuyPointsError(null);
         }
     };
 
     // Обработчик изменения значения для продажи
     const handleSellPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        // Удаляем все символы, кроме цифр
         const sanitizedValue = value.replace(/[^0-9]/g, '');
         const points = sanitizedValue ? Number(sanitizedValue) : 0;
-        // Ограничиваем продажу до количества points у пользователя
-        if (points <= user.points) {
-            setSellPoints(points);
+        setSellPoints(points);
+        if (points < 30) {
+            setSellPointsError('Минимальное количество для продажи - 30');
         } else {
-            setSellPoints(user.points); // Устанавливаем максимум, если превышает
+            setSellPointsError(null);
+        }
+    };
+
+    // Обработчик потери фокуса для покупки
+    const handleBuyPointsBlur = () => {
+        if (buyPoints < 30) {
+            setBuyPointsError('Минимальное количество для покупки - 30');
+        } else {
+            setBuyPointsError(null);
+        }
+    };
+
+    // Обработчик потери фокуса для продажи
+    const handleSellPointsBlur = () => {
+        if (sellPoints < 30) {
+            setSellPointsError('Минимальное количество для продажи - 30');
+        } else {
+            setSellPointsError(null);
         }
     };
 
@@ -288,14 +309,13 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
         });
     };
 
-// Добавление всех банковских реквизитов для покупки
+    // Добавление всех банковских реквизитов для покупки
     const handleAddAllBankDetailsForBuy = () => {
-        if (Array.isArray(user.bankDetails)) { // Check if bankDetails is an array
-            // Use type assertion to convert JsonValue to BankDetail[]
+        if (Array.isArray(user.bankDetails)) {
             const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: 0 }));
             setSelectedBankDetailsForBuy(allDetails);
         } else {
-            alert('Нет доступных банковских реквизитов для добавления.'); // Optional: Alert the user if there are no bank details
+            alert('Нет доступных банковских реквизитов для добавления.');
         }
     };
 
@@ -304,13 +324,13 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
         setSelectedBankDetailsForBuy([]);
     };
 
-// Добавление всех банковских реквизитов для продажи
+    // Добавление всех банковских реквизитов для продажи
     const handleAddAllBankDetailsForSell = () => {
-        if (user.bankDetails) { // Check if bankDetails is not null
+        if (user.bankDetails) {
             const allDetails = (user.bankDetails as unknown as BankDetail[]).map((detail) => ({ ...detail, price: 0 }));
             setSelectedBankDetailsForSell(allDetails);
         } else {
-            alert('Нет доступных банковских реквизитов для добавления.'); // Optional: Alert the user if there are no bank details
+            alert('Нет доступных банковских реквизитов для добавления.');
         }
     };
 
@@ -338,9 +358,11 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                         type="text"
                         value={buyPoints}
                         onChange={handleBuyPointsChange}
+                        onBlur={handleBuyPointsBlur}
                         placeholder="Сколько хотите купить"
                         className="mb-2"
                     />
+                    {buyPointsError && <p className="text-red-500">{buyPointsError}</p>}
                     <div className="flex items-center space-x-2 mb-2">
                         <select
                             value={selectedBuyOption}
@@ -349,14 +371,14 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                         >
                             <option value="">Выберите реквизиты банка</option>
                             {Array.isArray(user.bankDetails) && user.bankDetails.map((detail, index) => {
-                                if (isBankDetail(detail)) { // Используем защиту типов
+                                if (isBankDetail(detail)) {
                                     return (
                                         <option key={index} value={detail.name}>
                                             {detail.name} - {detail.details}
                                         </option>
                                     );
                                 }
-                                return null; // Возвращаем null, если detail не является BankDetail
+                                return null;
                             })}
                         </select>
                         <Button onClick={handleAddAllBankDetailsForBuy} className="whitespace-nowrap">
@@ -366,7 +388,6 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                             Удалить все
                         </Button>
                     </div>
-                    {/*Создание реквизитов банка с price для покупки*/}
                     {selectedBankDetailsForBuy.map((detail, index) => (
                         <div key={index} className="mt-1 border border-gray-300 rounded p-2">
                             <div className="flex items-center mt-1 w-full">
@@ -405,9 +426,13 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                         />
                         Покупать частями
                     </label>
-                    <Button onClick={handleCreateBuyOrder} className="w-full"
-                            disabled={isCreateOrderDisabled(buyPoints, selectedBankDetailsForBuy)}>Создать
-                        заявку</Button>
+                    <Button
+                        onClick={handleCreateBuyOrder}
+                        className={`w-full ${buyOrderSuccess ? 'button-success' : ''}`}
+                        disabled={isCreateOrderDisabled(buyPoints, selectedBankDetailsForBuy)}
+                    >
+                        {buyOrderSuccess ? 'Заявка создана!' : 'Создать заявку'}
+                    </Button>
                 </div>
                 <div className="w-1/2">
                     <h2 className="text-xl font-bold mb-2">Продать Points</h2>
@@ -415,9 +440,11 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                         type="text"
                         value={sellPoints}
                         onChange={handleSellPointsChange}
+                        onBlur={handleSellPointsBlur}
                         placeholder="Сколько хотите продать"
                         className="mb-2"
                     />
+                    {sellPointsError && <p className="text-red-500">{sellPointsError}</p>}
                     <div className="flex items-center space-x-2 mb-2">
                         <select
                             value={selectedSellOption}
@@ -426,14 +453,14 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                         >
                             <option value="">Выберите реквизиты банка</option>
                             {Array.isArray(user.bankDetails) && user.bankDetails.map((detail, index) => {
-                                if (isBankDetail(detail)) { // Используем защиту типов
+                                if (isBankDetail(detail)) {
                                     return (
                                         <option key={index} value={detail.name}>
                                             {detail.name} - {detail.details}
                                         </option>
                                     );
                                 }
-                                return null; // Возвращаем null, если detail не является BankDetail
+                                return null;
                             })}
                         </select>
                         <Button onClick={handleAddAllBankDetailsForSell} className="whitespace-nowrap">
@@ -443,7 +470,6 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                             Удалить все
                         </Button>
                     </div>
-                    {/*Создание реквизитов банка с price для продажи*/}
                     {selectedBankDetailsForSell.map((detail, index) => (
                         <div key={index} className="mt-1 border border-gray-300 rounded p-2">
                             <div className="flex items-center mt-1 w-full">
@@ -482,9 +508,13 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                         />
                         Продавать частями
                     </label>
-                    <Button onClick={handleCreateSellOrder} className="w-full"
-                            disabled={isCreateOrderDisabled(sellPoints, selectedBankDetailsForSell)}>Создать
-                        заявку</Button>
+                    <Button
+                        onClick={handleCreateSellOrder}
+                        className={`w-full ${sellOrderSuccess ? 'button-success' : ''}`}
+                        disabled={isCreateOrderDisabled(sellPoints, selectedBankDetailsForSell)}
+                    >
+                        {sellOrderSuccess ? 'Заявка создана!' : 'Создать заявку'}
+                    </Button>
                 </div>
             </div>
             <Accordion className="mt-4" type="multiple">
@@ -503,7 +533,6 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                     <TableRow>
                                         <TableCell>{order.orderP2PPoints}</TableCell>
                                         <TableCell>
-                                            {/* Отображение банковских реквизитов */}
                                             {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
                                                 <ul>
                                                     {order.orderBankDetails.map((detail, index) => {
