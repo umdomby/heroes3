@@ -660,15 +660,13 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, className
                                     Закрыть сделку продажи
                                 </Button>
                             )}
-                            {order.orderP2PBuySell === 'BUY' && (
-                                <Button className="ml-3 h-6" onClick={() => handleConcludeDealSell(order)}
-                                        disabled={order.orderP2PUser1Id === user.id}>
+                            {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id !== user.id && (
+                                <Button className="ml-3 h-6" onClick={() => handleConcludeDealSell(order)}>
                                     Заключить сделку продажи
                                 </Button>
                             )}
-                            {order.orderP2PBuySell === 'SELL' && (
-                                <Button className="ml-3 h-6" onClick={() => handleConcludeDealBuy(order)}
-                                        disabled={order.orderP2PUser1Id === user.id}>
+                            {order.orderP2PBuySell === 'SELL' &&  order.orderP2PUser1Id !== user.id && (
+                                <Button className="ml-3 h-6" onClick={() => handleConcludeDealBuy(order)}>
                                     Заключить сделку покупки
                                 </Button>
                             )}
