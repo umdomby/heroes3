@@ -370,11 +370,17 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
             return;
         }
 
+        // Show confirmation dialog
+        const confirmClose = window.confirm('Вы уверены, что хотите закрыть свою сделку покупки?');
+        if (!confirmClose) {
+            return; // Exit if the user cancels
+        }
+
         try {
             const success = await closeBuyOrderOpen(order.id);
             if (success) {
                 setSuccessMessage('Сделка покупки успешно закрыта');
-                setTimeout(() => setSuccessMessage(null), 2000); // Скрыть сообщение через 3 секунды
+                setTimeout(() => setSuccessMessage(null), 2000); // Скрыть сообщение через 2 секунды
             }
         } catch (error) {
             console.error('Ошибка при закрытии сделки покупки:', error);
@@ -387,11 +393,17 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
             return;
         }
 
+        // Show confirmation dialog
+        const confirmClose = window.confirm('Вы уверены, что хотите закрыть свою сделку продажи?');
+        if (!confirmClose) {
+            return; // Exit if the user cancels
+        }
+
         try {
             const success = await closeSellOrderOpen(order.id);
             if (success) {
                 setSuccessMessage('Сделка продажи успешно закрыта');
-                setTimeout(() => setSuccessMessage(null), 2000); // Скрыть сообщение через 3 секунды
+                setTimeout(() => setSuccessMessage(null), 2000); // Скрыть сообщение через 2 секунды
             }
         } catch (error) {
             console.error('Ошибка при закрытии сделки продажи:', error);
