@@ -408,8 +408,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         const detail = JSON.parse(selectedValue);
         if (detail && typeof detail.price === 'string') {
             const price = parseFloat(detail.price.replace(',', '.'));
-            if (!isNaN(price)) {
-                setCalculatedValues((prev) => ({ ...prev, [order.id]: order.orderP2PPoints * price }));
+            if (!isNaN(price) && order.orderP2PPoints !== null && order.orderP2PPoints !== undefined) {
+                setCalculatedValues((prev) => ({ ...prev, [order.id]: order.orderP2PPoints! * price }));
             } else {
                 setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
             }
