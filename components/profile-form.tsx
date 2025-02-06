@@ -36,8 +36,8 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     const [referrals, setReferrals] = useState<any[]>([]);
     const [bankDetails, setBankDetails] = useState<any[]>(Array.isArray(data.bankDetails) ? data.bankDetails : []);
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '', pricePerPoint: '' });
-    const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', pricePerPoint: '' });
+    const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '', price: '' });
+    const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', price: '' });
 
 
     useEffect(() => {
@@ -83,7 +83,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
             }
             const updatedBankDetails = await addBankDetails(newBankDetail);
             setBankDetails(updatedBankDetails);
-            setNewBankDetail({ name: '', details: '', description: '', pricePerPoint: '' });
+            setNewBankDetail({ name: '', details: '', description: '', price: '' });
             toast.success('Банковский реквизит добавлен');
         } catch (error) {
             toast.error('Ошибка при добавлении банковского реквизита');
@@ -221,10 +221,10 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                 onChange={(e) => setNewBankDetail({ ...newBankDetail, description: e.target.value })}
                                             />
                                             <FormInput
-                                                name="pricePerPoint"
+                                                name="price"
                                                 label="Цена за 1 Point"
-                                                value={newBankDetail.pricePerPoint || ''} // Убедитесь, что значение всегда строка
-                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, pricePerPoint: e.target.value })}
+                                                value={newBankDetail.price || ''} // Убедитесь, что значение всегда строка
+                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, price: e.target.value })}
                                             />
                                             </FormProvider>
                                         <Button onClick={handleAddBankDetail} className="mt-2">Добавить</Button>
@@ -255,8 +255,8 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                         />
                                                         <input
                                                             type="text"
-                                                            value={editedDetail.pricePerPoint || ''} // Убедитесь, что значение всегда строка
-                                                            onChange={(e) => setEditedDetail({ ...editedDetail, pricePerPoint: e.target.value })}
+                                                            value={editedDetail.price || ''} // Убедитесь, что значение всегда строка
+                                                            onChange={(e) => setEditedDetail({ ...editedDetail, price: e.target.value })}
                                                             className="block w-full mb-1"
                                                         />
                                                         <Button onClick={handleSaveBankDetail} className="mt-2">Сохранить</Button>
@@ -266,7 +266,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                         <p><strong>Название:</strong> {detail.name}</p>
                                                         <p><strong>Реквизиты:</strong> {detail.details}</p>
                                                         <p><strong>Описание:</strong> {detail.description}</p>
-                                                        <p><strong>Цена за 1 Point:</strong> {detail.pricePerPoint}</p>
+                                                        <p><strong>Цена за 1 Point:</strong> {detail.price}</p>
                                                     </div>
                                                 )}
                                                 <div className="flex space-x-2">

@@ -33,7 +33,7 @@ interface OrderP2PWithUser extends OrderP2P {
 
 interface BankDetail {
     name: string;
-    pricePerPoint: string;
+    price: string;
     details: string;
     description: string;
 }
@@ -489,7 +489,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 if (isBankDetail(detail)) {
                                     return (
                                         <option key={index} value={detail.name}>
-                                            {detail.name} - {detail.details}, Цена за 1 Point: {detail.pricePerPoint}
+                                            {detail.name} - {detail.details}, Цена за 1 Point: {detail.price}
                                         </option>
                                     );
                                 }
@@ -509,7 +509,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 <span className="flex-shrink-0">1 Point =</span>
                                 <Input
                                     type="text"
-                                    value={detail.price.toString().replace('.', ',') || detail.pricePerPoint}
+                                    value={detail.price.toString().replace('.', ',') || detail.price}
                                     onChange={(e) => {
                                         let value = e.target.value;
                                         value = value.replace('.', ',');
@@ -528,7 +528,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 </Button>
                             </div>
                             <div className="flex items-center w-full">
-                                <span className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.pricePerPoint}</span>
+                                <span className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.price}</span>
                             </div>
                         </div>
                     ))}
@@ -571,7 +571,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 if (isBankDetail(detail)) {
                                     return (
                                         <option key={index} value={detail.name}>
-                                            {detail.name} - {detail.details}, Цена за 1 Point: {detail.pricePerPoint}
+                                            {detail.name} - {detail.details}, Цена за 1 Point: {detail.price}
                                         </option>
                                     );
                                 }
@@ -591,7 +591,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 <span className="flex-shrink-0">1 Point =</span>
                                 <Input
                                     type="text"
-                                    value={detail.price.toString().replace('.', ',') || detail.pricePerPoint}
+                                    value={detail.price.toString().replace('.', ',') || detail.price}
                                     onChange={(e) => {
                                         let value = e.target.value;
                                         value = value.replace('.', ',');
@@ -610,7 +610,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 </Button>
                             </div>
                             <div className="flex items-center w-full">
-                                <span className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.pricePerPoint}</span>
+                                <span className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.price}</span>
                             </div>
                         </div>
                     ))}
