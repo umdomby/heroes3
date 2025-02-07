@@ -1104,7 +1104,7 @@ export async function confirmSellOrderUser2(orderId: number) {
     }
 }
 
-// завершение сделки-покупки, подтверждением создателем
+// завершение сделки-продажи, подтверждением создателем
 export async function confirmSellOrderCreator(orderId: number) {
     try {
         const currentUser = await getUserSession();

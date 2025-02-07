@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { OrderP2P, User } from "@prisma/client";
@@ -10,21 +10,26 @@ interface OrderP2PWithUser extends OrderP2P {
     orderP2PUser1: {
         id: number;
         cardId: string;
+        fullName: string;
     };
     orderP2PUser2?: {
         id: number;
         cardId: string;
+        fullName: string;
     };
 }
 
 interface Props {
-    user: User;
     openOrders: OrderP2P[];
     className?: string;
 }
 
-export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }) => {
+export const OrderP2PPending: React.FC<Props> = ({ openOrders, className }) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
+
+    useEffect(() => {
+        setOpenOrders(openOrders as OrderP2PWithUser[]);
+    }, [openOrders]);
 
     const handleConfirm = async (order: OrderP2PWithUser, isCreator: boolean) => {
         if (order.orderP2PBuySell === 'BUY') {
@@ -64,7 +69,9 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                         <AccordionContent className="border-b border-gray-200">
                             <div className="flex justify-between">
                                 <div>
-                                    <p>User1: {order.orderP2PUser1.cardId}</p>
+
+                                    <p>User 1: {order.orderP2PUser1.fullName}</p>
+                                    <p>Card ID: {order.orderP2PUser1.cardId}</p>
                                     <p>Points: {order.orderP2PPoints}</p>
                                     <Button
                                         onClick={() => handleConfirm(order, true)}
@@ -74,7 +81,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                     </Button>
                                 </div>
                                 <div>
-                                    <p>User2: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
+                                    <p>User 2: {order.orderP2PUser2?.fullName}</p>
+                                    <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
                                     <p>Points: {order.orderP2PPointsUser2}</p>
                                     <Button
                                         onClick={() => handleConfirm(order, false)}

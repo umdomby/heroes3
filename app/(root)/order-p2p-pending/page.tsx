@@ -38,6 +38,7 @@ export default async function OrderP2PPendingPage() {
                 select: {
                     id: true,
                     cardId: true,
+                    fullName: true,
                     // Добавьте другие необходимые поля
                 }
             },
@@ -45,6 +46,7 @@ export default async function OrderP2PPendingPage() {
                 select: {
                     id: true,
                     cardId: true,
+                    fullName: true,
                     // Добавьте другие необходимые поля
                 }
             }
@@ -55,7 +57,7 @@ export default async function OrderP2PPendingPage() {
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <OrderP2PPending user={user} openOrders={openOrders} />
+                <OrderP2PPending openOrders={openOrders} />
             </Suspense>
         </Container>
     );
