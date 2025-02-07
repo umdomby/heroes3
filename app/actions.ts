@@ -1204,33 +1204,6 @@ export async function confirmBuyOrderCreator(orderId: number) {
     }
 }
 
-// Функция для открытия сделки продажи
-export async function openSellOrder(orderId: number, userId: number, bankDetails: any, price: number) {
-    try {
-        const currentUser = await getUserSession();
-        if (!currentUser) {
-            throw new Error('Пользователь не найден');
-        }
-
-        // Обновляем сделку
-        await prisma.orderP2P.update({
-            where: { id: orderId },
-            data: {
-                orderP2PUser2Id: userId,
-                orderBankPay: bankDetails,
-                orderP2PPrice: price,
-                orderP2PStatus: 'PENDING',
-            },
-        });
-
-        revalidatePath('/order-p2p');
-        return true;
-    } catch (error) {
-        console.error('Ошибка при открытии сделки продажи:', error instanceof Error ? error.message : error);
-        return false;
-    }
-}
-
 // Функция для открытия сделки покупки
 export async function openBuyOrder(orderId: number, userId: number, bankDetails: any, price: number) {
     try {
@@ -1262,6 +1235,33 @@ export async function openBuyOrder(orderId: number, userId: number, bankDetails:
         return true;
     } catch (error) {
         console.error('Ошибка при открытии сделки покупки:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
+
+// Функция для открытия сделки продажи
+export async function openSellOrder(orderId: number, userId: number, bankDetails: any, price: number) {
+    try {
+        const currentUser = await getUserSession();
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        // Обновляем сделку
+        await prisma.orderP2P.update({
+            where: { id: orderId },
+            data: {
+                orderP2PUser2Id: userId,
+                orderBankPay: bankDetails,
+                orderP2PPrice: price,
+                orderP2PStatus: 'PENDING',
+            },
+        });
+
+        revalidatePath('/order-p2p');
+        return true;
+    } catch (error) {
+        console.error('Ошибка при открытии сделки продажи:', error instanceof Error ? error.message : error);
         return false;
     }
 }
