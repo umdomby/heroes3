@@ -1134,7 +1134,7 @@ export async function confirmSellOrderCreator(orderId: number) {
             });
         }
 
-        revalidatePath('/order-p2p');
+        revalidatePath('/order-p2p-pending');
         return true;
     } catch (error) {
         console.error('Ошибка при завершении сделки-продажи:', error instanceof Error ? error.message : error);
@@ -1158,7 +1158,7 @@ export async function confirmBuyOrderUser2(orderId: number) {
             },
         });
 
-        revalidatePath('/order-p2p');
+        revalidatePath('/order-p2p-pending');
         return true;
     } catch (error) {
         console.error('Ошибка при подтверждении оплаты для покупки:', error instanceof Error ? error.message : error);
@@ -1196,7 +1196,7 @@ export async function confirmBuyOrderCreator(orderId: number) {
             });
         }
 
-        revalidatePath('/order-p2p');
+        revalidatePath('/order-p2p-pending');
         return true;
     } catch (error) {
         console.error('Ошибка при завершении сделки-покупки:', error instanceof Error ? error.message : error);
