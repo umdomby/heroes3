@@ -170,6 +170,14 @@ html {
 .width-10 { width: 10%; }
 .width-15 { width: 15%; }
 
+
+@layer utilities {
+  .no-hover-bg:hover {
+    background-color: transparent !important;
+  }
+}
+
+
 .flex-container {
   display: flex;
   flex-wrap: wrap;
@@ -181,7 +189,7 @@ html {
   min-width: 300px; /* Минимальная ширина для каждого блока */
 }
 
-@media (max-width: 850px) {
+@media (max-width: 868px) {
   .flex-container {
     flex-direction: column; /* Изменяет направление на колонку при уменьшении ширины экрана */
   }

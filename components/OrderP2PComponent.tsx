@@ -662,7 +662,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     >
                         <AccordionTrigger>
                             <Table>
-                                <TableBody>
+                                <TableBody >
                                     <TableRow className="no-hover-bg">
                                         <TableCell className="w-1/4">
                                             {order.orderP2PUser1.cardId}
