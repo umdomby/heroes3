@@ -503,8 +503,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     <p className="text-lg font-semibold">Points: {Math.floor(user.points * 100) / 100}</p>
                 </div>
             </div>
-            <div className="flex space-x-4">
-                <div className="w-1/2">
+            <div className={`flex-container ${className}`}>
+                <div className="buy-section mr-1 ml-1">
                     <h2 className="text-xl font-bold mb-2">Купить Points</h2>
                     <Input
                         type="text"
@@ -526,7 +526,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 if (isBankDetail(detail)) {
                                     return (
                                         <option key={index} value={detail.name}>
-                                            {detail.name} - {detail.details}, Цена за 1 Point: {detail.price}
+                                            {detail.name} - {detail.details} - {detail.price}
                                         </option>
                                     );
                                 }
@@ -578,7 +578,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                         {buyOrderSuccess ? 'Заявка создана!' : 'Создать заявку'}
                     </Button>
                 </div>
-                <div className="w-1/2">
+                <div className="sell-section mr-1 ml-1">
                     <h2 className="text-xl font-bold mb-2">Продать Points</h2>
                     <Input
                         type="text"
@@ -600,7 +600,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 if (isBankDetail(detail)) {
                                     return (
                                         <option key={index} value={detail.name}>
-                                            {detail.name} - {detail.details}, Цена за 1 Point: {detail.price}
+                                            {detail.name} - {detail.details} - {detail.price}
                                         </option>
                                     );
                                 }
@@ -697,7 +697,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                                         };
                                                         return (
                                                             <div key={index} className="flex py-2">
-                                                                <div style={{ width: '35%' }}>
+                                                                <div style={{width: '35%'}}>
                                                                     <div>
                                                                         <strong>{bankDetail.price}</strong> за one Point
                                                                     </div>
@@ -705,7 +705,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                                                         <strong>{bankDetail.name}</strong>
                                                                     </div>
                                                                 </div>
-                                                                <div style={{ width: '65%' }}>
+                                                                <div style={{width: '65%'}}>
                                                                     <div>
                                                                         {bankDetail.details}
                                                                     </div>

@@ -170,9 +170,23 @@ html {
 .width-10 { width: 10%; }
 .width-15 { width: 15%; }
 
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
 
-@layer utilities {
-  .no-hover-bg:hover {
-    background-color: transparent !important;
+.buy-section, .sell-section {
+  flex: 1 1 45%; /* Задает начальную ширину и позволяет сжиматься */
+  min-width: 300px; /* Минимальная ширина для каждого блока */
+}
+
+@media (max-width: 850px) {
+  .flex-container {
+    flex-direction: column; /* Изменяет направление на колонку при уменьшении ширины экрана */
+  }
+
+  .buy-section, .sell-section {
+    flex: 1 1 100%; /* Задает ширину 100% для каждого блока */
   }
 }
