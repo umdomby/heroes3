@@ -52,6 +52,11 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                         BUY/PAY POINTS
                                     </DropdownMenuRadioItem>
                                 </Link>
+                                <Link href="/order-p2p-pending">
+                                    <DropdownMenuRadioItem value="bet-closed">
+                                        BUY/PAY POINTS OPEN
+                                    </DropdownMenuRadioItem>
+                                </Link>
                                 <Link href="/contacts">
                                     <DropdownMenuRadioItem value="bet-closed">
                                         CONTACTS

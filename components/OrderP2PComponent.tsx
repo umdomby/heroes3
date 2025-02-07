@@ -267,14 +267,16 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         }
     };
 
-    // Обработчик заключения сделки покупки
+   // Обработчик заключения сделки покупки
     const handleConcludeDealBuy = async (order: OrderP2P) => {
         if (order.orderP2PUser1Id === user.id) {
             alert('Вы не можете заключать сделку с самим собой');
             return;
         }
         try {
-            await openBuyOrder();
+            const bankDetails = selectedBankDetails[order.id];
+            const price = calculatedValues[order.id];
+            await openBuyOrder(order.id, user.id, bankDetails, price);
             alert('Сделка успешно заключена');
         } catch (error) {
             console.error('Ошибка при заключении сделки:', error);
@@ -288,9 +290,10 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
             alert('Вы не можете заключать сделку с самим собой');
             return;
         }
-
         try {
-            await openSellOrder();
+            const bankDetails = selectedBankDetails[order.id];
+            const price = calculatedValues[order.id];
+            await openSellOrder(order.id, user.id, bankDetails, price);
             alert('Сделка успешно заключена');
         } catch (error) {
             console.error('Ошибка при заключении сделки:', error);
@@ -320,7 +323,6 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
     };
 
     // Обработчик изменения значения для продажи
-// Обработчик изменения значения для продажи
     const handleSellPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -348,7 +350,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         }
     };
 
-// Обработчик потери фокуса для продажи
+    // Обработчик потери фокуса для продажи
     const handleSellPointsBlur = () => {
         if (sellPoints > user.points) {
             setSellPoints(user.points); // Устанавливаем значение в максимальное количество Points
@@ -378,7 +380,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         });
     };
 
-// Добавление всех банковских реквизитов для покупки
+    // Добавление всех банковских реквизитов для покупки
     const handleAddAllBankDetailsForBuy = () => {
         if (Array.isArray(user.bankDetails)) {
             const allDetails = user.bankDetails.map((detail: any) => ({
@@ -398,7 +400,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         setSelectedBankDetailsForBuy([]);
     };
 
-// Добавление всех банковских реквизитов для продажи
+    // Добавление всех банковских реквизитов для продажи
     const handleAddAllBankDetailsForSell = () => {
         if (Array.isArray(user.bankDetails)) {
             const allDetails = user.bankDetails.map((detail: any) => ({
@@ -514,7 +516,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                         placeholder="Сколько хотите купить"
                         className="mb-2"
                     />
-                    {buyPointsError && <p>{buyPointsError}</p>}
+                    {buyPointsError && <p className="text-red-500">{buyPointsError}</p>}
                     <div className="flex items-center space-x-2 mb-2">
                         <select
                             value={selectedBuyOption}

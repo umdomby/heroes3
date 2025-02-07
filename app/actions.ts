@@ -1079,91 +1079,191 @@ export async function getOpenOrders(): Promise<OrderP2P[]> {
 } // 5 секунд обновление открытых сделок для OrderP2PComponent
 
 // ################################################
-export async function confirmBuyOrderUser2() {
+
+// подтверждение оплаты для продажи
+export async function confirmSellOrderUser2(orderId: number) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
 
+        // Обновляем статус сделки и подтверждение пользователя 2
+        await prisma.orderP2P.update({
+            where: { id: orderId },
+            data: {
+                orderP2PCheckUser2: true,
+            },
+        });
+
         revalidatePath('/order-p2p');
         return true;
     } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        console.error('Ошибка при подтверждении оплаты для продажи:', error instanceof Error ? error.message : error);
         return false;
     }
-} // подтверждение оплаты для покупки
-export async function confirmBuyOrderCreator() {
+}
+
+// завершение сделки-покупки, подтверждением создателем
+export async function confirmSellOrderCreator(orderId: number) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
 
+        // Получаем сделку
+        const order = await prisma.orderP2P.findUnique({ where: { id: orderId } });
+
+        if (order?.orderP2PCheckUser2) {
+            // Обновляем статус сделки и подтверждение пользователя 1
+            await prisma.orderP2P.update({
+                where: { id: orderId },
+                data: {
+                    orderP2PCheckUser1: true,
+                    orderP2PStatus: 'CLOSED',
+                },
+            });
+
+            // Обновляем баланс пользователя
+            await prisma.user.update({
+                where: { id: order.orderP2PUser2Id },
+                data: {
+                    points: { increment: order.orderP2PPoints || 0 },
+                },
+            });
+        }
+
         revalidatePath('/order-p2p');
         return true;
     } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        console.error('Ошибка при завершении сделки-продажи:', error instanceof Error ? error.message : error);
         return false;
     }
-} // завершение сделки-покупки, подтверждением создателем
-export async function confirmSellOrderUser2() {
+}
+
+// подтверждение оплаты для покупки
+export async function confirmBuyOrderUser2(orderId: number) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
 
+        // Обновляем статус сделки и подтверждение пользователя 2
+        await prisma.orderP2P.update({
+            where: { id: orderId },
+            data: {
+                orderP2PCheckUser2: true,
+            },
+        });
+
         revalidatePath('/order-p2p');
         return true;
     } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        console.error('Ошибка при подтверждении оплаты для покупки:', error instanceof Error ? error.message : error);
         return false;
     }
-} // подтверждение оплаты для продажи
-export async function confirmSellOrderCreator() {
+}
+
+// завершение сделки-покупки, подтверждением создателем
+export async function confirmBuyOrderCreator(orderId: number) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
 
+        // Получаем сделку
+        const order = await prisma.orderP2P.findUnique({ where: { id: orderId } });
+
+        if (order?.orderP2PCheckUser2) {
+            // Обновляем статус сделки и подтверждение пользователя 1
+            await prisma.orderP2P.update({
+                where: { id: orderId },
+                data: {
+                    orderP2PCheckUser1: true,
+                    orderP2PStatus: 'CLOSED',
+                },
+            });
+
+            // Обновляем баланс пользователя
+            await prisma.user.update({
+                where: { id: order.orderP2PUser1Id },
+                data: {
+                    points: { increment: order.orderP2PPointsUser2 || 0 },
+                },
+            });
+        }
+
         revalidatePath('/order-p2p');
         return true;
     } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        console.error('Ошибка при завершении сделки-покупки:', error instanceof Error ? error.message : error);
         return false;
     }
-} // завершение сделки-продажи, подтверждением создателем
+}
 
-
-export async function openSellOrder() {
+// Функция для открытия сделки продажи
+export async function openSellOrder(orderId: number, userId: number, bankDetails: any, price: number) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
 
+        // Обновляем сделку
+        await prisma.orderP2P.update({
+            where: { id: orderId },
+            data: {
+                orderP2PUser2Id: userId,
+                orderBankPay: bankDetails,
+                orderP2PPrice: price,
+                orderP2PStatus: 'PENDING',
+            },
+        });
+
         revalidatePath('/order-p2p');
         return true;
     } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        console.error('Ошибка при открытии сделки продажи:', error instanceof Error ? error.message : error);
         return false;
     }
-} // Функция для открытия сделки
-export async function openBuyOrder() {
+}
+
+// Функция для открытия сделки покупки
+export async function openBuyOrder(orderId: number, userId: number, bankDetails: any, price: number) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
 
+        // Обновляем сделку
+        await prisma.orderP2P.update({
+            where: { id: orderId },
+            data: {
+                orderP2PUser2Id: userId,
+                orderBankPay: bankDetails,
+                orderP2PPrice: price,
+                orderP2PStatus: 'PENDING',
+            },
+        });
+
+        // Списываем Points у пользователя, который заключает сделку
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                points: { decrement: price },
+            },
+        });
+
         revalidatePath('/order-p2p');
         return true;
     } catch (error) {
-        console.error('Ошибка при передаче баллов:', error instanceof Error ? error.message : error);
+        console.error('Ошибка при открытии сделки покупки:', error instanceof Error ? error.message : error);
         return false;
     }
-} // Функция для открытия сделки
+}
 
 
