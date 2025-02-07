@@ -493,7 +493,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
             {successMessage && (
                 <div className="relative">
                     <div
-                        className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-green-100 text-green-800 p-2 mb-4 rounded mt-4">
+                        className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4">
                         {successMessage}
                     </div>
                 </div>
@@ -514,7 +514,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                         placeholder="Сколько хотите купить"
                         className="mb-2"
                     />
-                    {buyPointsError && <p className="text-red-500">{buyPointsError}</p>}
+                    {buyPointsError && <p>{buyPointsError}</p>}
                     <div className="flex items-center space-x-2 mb-2">
                         <select
                             value={selectedBuyOption}
@@ -676,7 +676,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     <AccordionItem
                         key={order.id}
                         value={order.id.toString()}
-                        className={order.orderP2PUser1Id === user.id ? 'bg-gray-600' : 'bg-gray-500'}
+                        // className={order.orderP2PUser1Id === user.id ? 'bg-gray-600' : 'bg-gray-500'}
                     >
                         <AccordionTrigger>
                             <Table>
@@ -699,8 +699,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 </TableBody>
                             </Table>
                         </AccordionTrigger>
-                        <AccordionContent className="border-b border-gray-500 bg-gray-400 ">
-                            <span className="text-green-800 font-bold ml-1"> Points: {order.orderP2PPoints} </span>
+                        <AccordionContent className="border-b border-gray-500 ">
+                            <span className=" font-bold ml-1"> Points: {order.orderP2PPoints} </span>
                             <Table>
                                 <TableBody>
                                     <TableRow>
@@ -768,7 +768,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 )}
                             </select>
                             {calculatedValues[order.id] !== undefined && calculatedValues[order.id] !== null && (
-                                <span className="ml-3 h-6 text-lg font-semibold text-blue-800">
+                                <span className="ml-3 h-6 text-lg font-semibold">
             Итоговая сумма: {calculatedValues[order.id]}
         </span>
                             )}
