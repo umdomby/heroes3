@@ -70,6 +70,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
     const [selectedSellOption, setSelectedSellOption] = useState<string>(''); // Текущее выбранное значение для продажи
     const [successMessage, setSuccessMessage] = useState<string | null>(null); // Состояние для управления сообщением об успешном закрытии сделки
     const [calculatedValues, setCalculatedValues] = useState<{ [key: number]: number | null }>({}); // Состояние для хранения результата умножения
+    const [selectedBankDetails, setSelectedBankDetails] = useState<{ [key: number]: string }>({});
 
 
     useEffect(() => {
@@ -470,21 +471,21 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
 
     // Обработчик выбора банковских реквизитов для взаимодействия
     const handleSelectBankDetailForInteraction = (selectedValue: string, order: OrderP2P) => {
+        setSelectedBankDetails((prev) => ({ ...prev, [order.id]: selectedValue })); // Сохраняем выбранное значение
         if (!selectedValue) {
-            setCalculatedValues((prev) => ({...prev, [order.id]: null}));
+            setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
             return;
         }
-        console.log('Calculated Value for Order ID:', order.id, calculatedValues[order.id]);
         const detail = JSON.parse(selectedValue);
         if (detail && typeof detail.price === 'string') {
             const price = parseFloat(detail.price.replace(',', '.'));
             if (!isNaN(price) && order.orderP2PPoints !== null && order.orderP2PPoints !== undefined) {
-                setCalculatedValues((prev) => ({...prev, [order.id]: order.orderP2PPoints! * price}));
+                setCalculatedValues((prev) => ({ ...prev, [order.id]: order.orderP2PPoints! * price }));
             } else {
-                setCalculatedValues((prev) => ({...prev, [order.id]: null}));
+                setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
             }
         } else {
-            setCalculatedValues((prev) => ({...prev, [order.id]: null}));
+            setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
         }
     };
 
@@ -492,8 +493,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         <div className={className}>
             {successMessage && (
                 <div className="relative">
-                    <div
-                        className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4">
                         {successMessage}
                     </div>
                 </div>
@@ -565,20 +565,11 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 </Button>
                             </div>
                             <div className="flex items-center w-full">
-                                <span
-                                    className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.price}</span>
+                <span
+                    className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.price}</span>
                             </div>
                         </div>
                     ))}
-                    {/*<label className="flex items-center mb-2">*/}
-                    {/*    <input*/}
-                    {/*        type="checkbox"*/}
-                    {/*        checked={allowPartialBuy}*/}
-                    {/*        onChange={() => setAllowPartialBuy(!allowPartialBuy)}*/}
-                    {/*        className="mr-2"*/}
-                    {/*    />*/}
-                    {/*    Покупать частями*/}
-                    {/*</label>*/}
                     <Button
                         onClick={handleCreateBuyOrder}
                         className={`w-full ${buyOrderSuccess ? 'button-success' : ''}`}
@@ -648,20 +639,11 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                 </Button>
                             </div>
                             <div className="flex items-center w-full">
-                                <span
-                                    className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.price}</span>
+                <span
+                    className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.price}</span>
                             </div>
                         </div>
                     ))}
-                    {/*<label className="flex items-center mb-2">*/}
-                    {/*    <input*/}
-                    {/*        type="checkbox"*/}
-                    {/*        checked={allowPartialSell}*/}
-                    {/*        onChange={() => setAllowPartialSell(!allowPartialSell)}*/}
-                    {/*        className="mr-2"*/}
-                    {/*    />*/}
-                    {/*    Продавать частями*/}
-                    {/*</label>*/}
                     <Button
                         onClick={handleCreateSellOrder}
                         className={`w-full ${sellOrderSuccess ? 'button-success' : ''}`}
@@ -671,19 +653,19 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     </Button>
                 </div>
             </div>
-            <Accordion className="border border-gray-400 mt-4"  type="multiple">
+            <Accordion className="border border-gray-300 mt-4" type="multiple">
                 {orders.map((order) => (
                     <AccordionItem
                         key={order.id}
                         value={order.id.toString()}
-                        // className={order.orderP2PUser1Id === user.id ? 'bg-gray-600' : 'bg-gray-500'}
+                        className={order.orderP2PUser1Id === user.id && 'bg-gray-500'}
                     >
                         <AccordionTrigger>
                             <Table>
                                 <TableBody>
-                                    <TableRow>
+                                    <TableRow className="no-hover-bg">
                                         <TableCell className="w-1/4">
-                                             {order.orderP2PUser1.cardId}
+                                            {order.orderP2PUser1.cardId}
                                         </TableCell>
                                         <TableCell className="w-1/4">
                                             хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'}
@@ -694,30 +676,28 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                         <TableCell className="w-1/4">
                                             {new Date(order.createdAt).toLocaleString()}
                                         </TableCell>
-
                                     </TableRow>
                                 </TableBody>
                             </Table>
                         </AccordionTrigger>
-                        <AccordionContent className="border-b border-gray-500 ">
-                            <span className=" font-bold ml-1"> Points: {order.orderP2PPoints} </span>
+                        <AccordionContent className="border-b border-gray-200">
+                            <span className="font-bold ml-1"> Points: {order.orderP2PPoints} </span>
                             <Table>
                                 <TableBody>
-                                    <TableRow>
-
+                                    <TableRow className="no-hover-bg">
                                         <TableCell>
                                             {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
                                                 order.orderBankDetails.map((detail, index) => {
                                                     if (detail && typeof detail === 'object' && 'name' in detail && 'price' in detail && 'details' in detail && 'description' in detail) {
-                                                        const bankDetail: orderBankDetail = { // Change OrderBankDetail to orderBankDetail
+                                                        const bankDetail: orderBankDetail = {
                                                             name: typeof detail.name === 'string' ? detail.name : '',
                                                             price: typeof detail.price === 'string' ? detail.price : '',
                                                             details: typeof detail.details === 'string' ? detail.details : '',
                                                             description: typeof detail.description === 'string' ? detail.description : '',
                                                         };
                                                         return (
-                                                            <div key={index} className="flex py-2 border-t border-gray-300">
-                                                                <div style={{width: '35%'}}>
+                                                            <div key={index} className="flex py-2">
+                                                                <div style={{ width: '35%' }}>
                                                                     <div>
                                                                         <strong>{bankDetail.price}</strong> за one Point
                                                                     </div>
@@ -725,7 +705,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                                                         <strong>{bankDetail.name}</strong>
                                                                     </div>
                                                                 </div>
-                                                                <div style={{width: '65%'}}>
+                                                                <div style={{ width: '65%' }}>
                                                                     <div>
                                                                         {bankDetail.details}
                                                                     </div>
@@ -745,8 +725,11 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                     </TableRow>
                                 </TableBody>
                             </Table>
-                            <select onChange={(e) => handleSelectBankDetailForInteraction(e.target.value, order)}
-                                    className="mb-2">
+                            <select
+                                value={selectedBankDetails[order.id] || ''} // Устанавливаем значение из состояния
+                                onChange={(e) => handleSelectBankDetailForInteraction(e.target.value, order)}
+                                className="mb-2"
+                            >
                                 <option value="">Выберите реквизиты банка для сделки</option>
                                 {Array.isArray(order.orderBankDetails) && order.orderBankDetails.length > 0 ? (
                                     order.orderBankDetails.map((detail, index) => {
@@ -769,8 +752,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                             </select>
                             {calculatedValues[order.id] !== undefined && calculatedValues[order.id] !== null && (
                                 <span className="ml-3 h-6 text-lg font-semibold">
-            Итоговая сумма: {calculatedValues[order.id]}
-        </span>
+                  Итоговая сумма: {calculatedValues[order.id]}
+                </span>
                             )}
                             {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id === user.id && (
                                 <Button className="ml-3 h-6" onClick={() => handleCloseBuyOrder(order)}>
@@ -803,8 +786,6 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     </AccordionItem>
                 ))}
             </Accordion>
-
-
         </div>
     );
 };

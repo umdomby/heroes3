@@ -169,3 +169,10 @@ html {
 .width-5 { width: 5%; }
 .width-10 { width: 10%; }
 .width-15 { width: 15%; }
+
+
+@layer utilities {
+  .no-hover-bg:hover {
+    background-color: transparent !important;
+  }
+}
