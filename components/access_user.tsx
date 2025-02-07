@@ -44,17 +44,22 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                 </Link>
                                 <Link href="/transfer-points">
                                     <DropdownMenuRadioItem value="bet-closed">
-                                        TRANSFER POINTS
+                                        TRANSFER
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/order-p2p">
                                     <DropdownMenuRadioItem value="bet-closed">
-                                        BUY/PAY POINTS
+                                        BUY/PAY
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/order-p2p-pending">
                                     <DropdownMenuRadioItem value="bet-closed">
-                                        BUY/PAY POINTS OPEN
+                                        BUY/PAY OPEN
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/order-p2p-closed">
+                                    <DropdownMenuRadioItem value="bet-closed">
+                                        BUY/PAY CLOSED
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/contacts">

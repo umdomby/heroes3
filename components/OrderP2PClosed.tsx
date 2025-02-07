@@ -26,22 +26,6 @@ interface Props {
 export const OrderP2PClosed: React.FC<Props> = ({ user, openOrders, className }) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
 
-    const handleConfirm = async (order: OrderP2PWithUser, isCreator: boolean) => {
-        if (order.orderP2PBuySell === 'BUY') {
-            if (isCreator) {
-                await confirmBuyOrderCreator(order.id);
-            } else {
-                await confirmBuyOrderUser2(order.id);
-            }
-        } else {
-            if (isCreator) {
-                await confirmSellOrderCreator(order.id);
-            } else {
-                await confirmSellOrderUser2(order.id);
-            }
-        }
-    };
-
     return (
         <div className={className}>
             <Accordion className="border border-gray-300 mt-4" type="multiple">
@@ -63,26 +47,7 @@ export const OrderP2PClosed: React.FC<Props> = ({ user, openOrders, className })
                         </AccordionTrigger>
                         <AccordionContent className="border-b border-gray-200">
                             <div className="flex justify-between">
-                                <div>
-                                    <p>User1: {order.orderP2PUser1.cardId}</p>
-                                    <p>Points: {order.orderP2PPoints}</p>
-                                    <Button
-                                        onClick={() => handleConfirm(order, true)}
-                                        disabled={order.orderP2PCheckUser1 || (order.orderP2PBuySell === 'BUY' && !order.orderP2PCheckUser2)}
-                                    >
-                                        Подтвердить
-                                    </Button>
-                                </div>
-                                <div>
-                                    <p>User2: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
-                                    <p>Points: {order.orderP2PPointsUser2}</p>
-                                    <Button
-                                        onClick={() => handleConfirm(order, false)}
-                                        disabled={order.orderP2PCheckUser2 || (order.orderP2PBuySell === 'SELL' && !order.orderP2PCheckUser1)}
-                                    >
-                                        Подтвердить
-                                    </Button>
-                                </div>
+                                        ЗАКРЫТА
                             </div>
                         </AccordionContent>
                     </AccordionItem>
