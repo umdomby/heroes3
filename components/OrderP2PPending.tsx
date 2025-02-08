@@ -84,7 +84,7 @@ export const OrderP2PPending: React.FC<Props> = ({ openOrders, className }) => {
                                     {order.orderBankDetails.map((detail, index) => (
                                         <div key={index} className="mb-2">
                                             <h3 className="font-bold">{detail.name}</h3>
-                                            <p>Price: {detail.price} one Point</p>
+                                            <p>Price: {detail.price} one Point = {order.orderP2PPrice}</p>
                                             <p>Details: {detail.details}</p>
                                             <p>Description: {detail.description}</p>
                                         </div>
