@@ -87,24 +87,25 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                     <p>Card ID: {order.orderP2PUser1.cardId}</p>
                                     <p>Points: {order.orderP2PPoints}</p>
 
-                                    {order.orderP2PBuySell === 'BUY' &&
+                                    {order.orderP2PBuySell === 'SELL' &&
                                         <Button
                                             onClick={() => handleConfirm(order, true)}
-                                            disabled={order.orderP2PUser1Id !== user.id || order.orderP2PCheckUser1}
+                                            disabled={order.orderP2PUser1Id !== user.id || order.orderP2PCheckUser1 || !order.orderP2PCheckUser2}
                                         >
-                                            Подтвердить оплату {order.orderP2PPrice}
+                                            Подтвердить перевод {order.orderP2PPoints} Points
                                         </Button>
                                     }
 
-                                    {/*{order.orderP2PBuySell === 'SELL' &&*/}
+                                    {order.orderP2PBuySell === 'BUY' &&
+                                        <Button
+                                            onClick={() => handleConfirm(order, true)}
+                                            disabled={order.orderP2PUser1Id !== user.id || order.orderP2PCheckUser1 || order.orderP2PCheckUser2}
+                                        >
+                                            Подтвердить оплату {order.orderP2PPrice} Price
+                                        </Button>
+                                    }
 
-                                    {/*    <Button*/}
-                                    {/*        onClick={() => handleConfirm(order, true)}*/}
-                                    {/*        disabled={order.orderP2PCheckUser1 || (order.orderP2PBuySell === 'BUY' && !order.orderP2PCheckUser2)}*/}
-                                    {/*    >*/}
-                                    {/*        Подтвердить перевод {order.orderP2PPoints} Points*/}
-                                    {/*    </Button>*/}
-                                    {/*}*/}
+
 
                                 </div>
 
@@ -128,20 +129,21 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                     <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
                                     <p>Points: {order.orderP2PPoints}</p>
 
-                                    {/*{order.orderP2PBuySell === 'SELL' &&*/}
-                                    {/*    <Button*/}
-                                    {/*        onClick={() => handleConfirm(order, false)}*/}
-                                    {/*        disabled={order.orderP2PCheckUser2 || (order.orderP2PBuySell === 'SELL' && !order.orderP2PCheckUser1)}*/}
-                                    {/*    >*/}
-                                    {/*        Подтвердить оплату*/}
-                                    {/*    </Button>*/}
-                                    {/*}*/}
+                                    {order.orderP2PBuySell === 'SELL' &&
+                                        <Button
+                                            onClick={() => handleConfirm(order, false)}
+                                            disabled={order.orderP2PUser2Id !== user.id || order.orderP2PCheckUser1 || order.orderP2PCheckUser2}
+                                        >
+                                            Подтвердить оплату {order.orderP2PPrice} Price
+                                        </Button>
+                                    }
+
                                     {order.orderP2PBuySell === 'BUY' &&
                                         <Button
                                             onClick={() => handleConfirm(order, false)}
                                             disabled={order.orderP2PUser2Id !== user.id || !order.orderP2PCheckUser1 || order.orderP2PCheckUser2}
                                         >
-                                            Подтвердить оплату {order.orderP2PPrice}
+                                            Перевести {order.orderP2PPoints} Points
                                         </Button>
                                     }
                                 </div>
