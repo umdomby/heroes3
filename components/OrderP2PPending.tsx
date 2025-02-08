@@ -67,9 +67,8 @@ export const OrderP2PPending: React.FC<Props> = ({ openOrders, className }) => {
                             </Table>
                         </AccordionTrigger>
                         <AccordionContent className="border-b border-gray-200">
-                            <div className="flex justify-between">
-                                <div>
-
+                            <div className="flex justify-center space-x-4">
+                                <div className="flex flex-col items-center border p-4">
                                     <p>User 1: {order.orderP2PUser1.fullName}</p>
                                     <p>Card ID: {order.orderP2PUser1.cardId}</p>
                                     <p>Points: {order.orderP2PPoints}</p>
@@ -80,7 +79,19 @@ export const OrderP2PPending: React.FC<Props> = ({ openOrders, className }) => {
                                         Подтвердить
                                     </Button>
                                 </div>
-                                <div>
+
+                                <div className="flex flex-col items-center border p-4">
+                                    {order.orderBankDetails.map((detail, index) => (
+                                        <div key={index} className="mb-2">
+                                            <h3 className="font-bold">{detail.name}</h3>
+                                            <p>Price: {detail.price} one Point</p>
+                                            <p>Details: {detail.details}</p>
+                                            <p>Description: {detail.description}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex flex-col items-center border p-4">
                                     <p>User 2: {order.orderP2PUser2?.fullName}</p>
                                     <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
                                     <p>Points: {order.orderP2PPointsUser2}</p>

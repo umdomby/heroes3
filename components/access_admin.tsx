@@ -58,12 +58,12 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 </Link>
                                 <Link href="/order-p2p">
                                     <DropdownMenuRadioItem value="bet-closed">
-                                        BUY/PAY
+                                        BUY/PAY 2P2
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/order-p2p-pending">
                                     <DropdownMenuRadioItem value="bet-closed">
-                                        BUY/PAY OPEN
+                                        BUY/PAY OPEN/CLOSED
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/contacts">
