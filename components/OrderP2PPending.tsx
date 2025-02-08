@@ -81,71 +81,71 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                             </Table>
                         </AccordionTrigger>
                         <AccordionContent className="border-b border-gray-200">
-                            <div className="flex justify-center space-x-4">
-                                <div className="flex flex-col items-center border p-4">
-                                    <p>User 1: {order.orderP2PUser1.fullName}</p>
-                                    <p>Card ID: {order.orderP2PUser1.cardId}</p>
-                                    <p>Points: {order.orderP2PPoints}</p>
+                            <div className="overflow-x-auto">
+                                <div className="flex justify-center space-x-4 min-w-[800px]">
+                                    <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
+                                        <p>User 1: {order.orderP2PUser1.fullName}</p>
+                                        <p>Card ID: {order.orderP2PUser1.cardId}</p>
+                                        <p>Price: {order.orderP2PPoints}</p>
+                                        <p>Price: {order.orderP2PPrice}</p>
+                                        {order.orderP2PBuySell === 'SELL' &&
+                                            <Button
+                                                onClick={() => handleConfirm(order, true)}
+                                                disabled={order.orderP2PUser1Id !== user.id || order.orderP2PCheckUser1 || !order.orderP2PCheckUser2}
+                                            >
+                                                Перевести Points
+                                            </Button>
+                                        }
 
-                                    {order.orderP2PBuySell === 'SELL' &&
-                                        <Button
-                                            onClick={() => handleConfirm(order, true)}
-                                            disabled={order.orderP2PUser1Id !== user.id || order.orderP2PCheckUser1 || !order.orderP2PCheckUser2}
-                                        >
-                                            Подтвердить перевод {order.orderP2PPoints} Points
-                                        </Button>
-                                    }
+                                        {order.orderP2PBuySell === 'BUY' &&
+                                            <Button
+                                                onClick={() => handleConfirm(order, true)}
+                                                disabled={order.orderP2PUser1Id !== user.id || order.orderP2PCheckUser1 || order.orderP2PCheckUser2}
+                                            >
+                                                Подтвердить оплату
+                                            </Button>
+                                        }
+                                    </div>
 
-                                    {order.orderP2PBuySell === 'BUY' &&
-                                        <Button
-                                            onClick={() => handleConfirm(order, true)}
-                                            disabled={order.orderP2PUser1Id !== user.id || order.orderP2PCheckUser1 || order.orderP2PCheckUser2}
-                                        >
-                                            Подтвердить оплату {order.orderP2PPrice} Price
-                                        </Button>
-                                    }
+                                    <div className="flex flex-col items-center border p-4" style={{flex: '0 0 45%'}}>
+                                        {order.orderBankDetails.map((detail, index) => (
+                                            <div key={index} className="mb-2">
+                                                <h3 className="font-bold">{order.orderP2PPrice} {detail.name}</h3>
+                                                <p>Price one Point = {detail.price}</p>
+                                                <p>Details: {detail.details}</p>
+                                                <p>Description: {detail.description}</p>
+                                            </div>
+                                        ))}
+                                        <p>User1: {order.orderP2PUser1.fullName} - {order.orderP2PCheckUser1 ? "Да" : "Нет"}</p>
+                                        <p>User2: {order.orderP2PUser2.fullName} - {order.orderP2PCheckUser2 ? "Да" : "Нет"}</p>
+                                        <p>{order.orderP2PStatus === "PENDING" && "Сделка ждет завершения"}</p>
+                                        <p>{order.orderP2PStatus === "CLOSED" && "Сделка завершена"}</p>
+                                    </div>
 
+                                    <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
+                                        <p>User 2: {order.orderP2PUser2?.fullName}</p>
+                                        <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
+                                        <p>Price: {order.orderP2PPoints}</p>
+                                        <p>Price: {order.orderP2PPrice}</p>
 
+                                        {order.orderP2PBuySell === 'SELL' &&
+                                            <Button
+                                                onClick={() => handleConfirm(order, false)}
+                                                disabled={order.orderP2PUser2Id !== user.id || order.orderP2PCheckUser1 || order.orderP2PCheckUser2}
+                                            >
+                                                Подтвердить оплату
+                                            </Button>
+                                        }
 
-                                </div>
-
-                                <div className="flex flex-col items-center border p-4">
-                                    {order.orderBankDetails.map((detail, index) => (
-                                        <div key={index} className="mb-2">
-                                            <h3 className="font-bold">{order.orderP2PPrice} {detail.name}</h3>
-                                            <p>Price one Point = {detail.price}</p>
-                                            <p>Details: {detail.details}</p>
-                                            <p>Description: {detail.description}</p>
-                                        </div>
-                                    ))}
-                                    <p>User1: {order.orderP2PUser1.fullName} - {order.orderP2PCheckUser1 ? "Да" : "Нет"}</p>
-                                    <p>User2: {order.orderP2PUser2.fullName} - {order.orderP2PCheckUser2 ? "Да" : "Нет"}</p>
-                                    <p>{order.orderP2PStatus === "PENDING" && "Сделка ждет завершения"}</p>
-                                    <p>{order.orderP2PStatus === "CLOSED" && "Сделка завершена"}</p>
-                                </div>
-
-                                <div className="flex flex-col items-center border p-4">
-                                    <p>User 2: {order.orderP2PUser2?.fullName}</p>
-                                    <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
-                                    <p>Points: {order.orderP2PPoints}</p>
-
-                                    {order.orderP2PBuySell === 'SELL' &&
-                                        <Button
-                                            onClick={() => handleConfirm(order, false)}
-                                            disabled={order.orderP2PUser2Id !== user.id || order.orderP2PCheckUser1 || order.orderP2PCheckUser2}
-                                        >
-                                            Подтвердить оплату {order.orderP2PPrice} Price
-                                        </Button>
-                                    }
-
-                                    {order.orderP2PBuySell === 'BUY' &&
-                                        <Button
-                                            onClick={() => handleConfirm(order, false)}
-                                            disabled={order.orderP2PUser2Id !== user.id || !order.orderP2PCheckUser1 || order.orderP2PCheckUser2}
-                                        >
-                                            Перевести {order.orderP2PPoints} Points
-                                        </Button>
-                                    }
+                                        {order.orderP2PBuySell === 'BUY' &&
+                                            <Button
+                                                onClick={() => handleConfirm(order, false)}
+                                                disabled={order.orderP2PUser2Id !== user.id || !order.orderP2PCheckUser1 || order.orderP2PCheckUser2}
+                                            >
+                                                Перевести Points
+                                            </Button>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </AccordionContent>
