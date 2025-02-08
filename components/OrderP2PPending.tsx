@@ -66,7 +66,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
             <Accordion className="border border-gray-300 mt-4" type="multiple">
                 {orders.map((order) => (
                     <AccordionItem key={order.id} value={order.id.toString()}>
-                        <AccordionTrigger>
+                        <AccordionTrigger className={order.orderP2PStatus === "PENDING" && 'bg-gray-400'}>
                             <Table>
                                 <TableBody>
                                     <TableRow className="no-hover-bg">

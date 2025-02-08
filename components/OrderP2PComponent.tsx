@@ -576,7 +576,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     <Button
                         onClick={handleCreateBuyOrder}
                         className={`w-full ${buyOrderSuccess ? 'button-success' : ''}`}
-                        disabled={isCreateOrderDisabled(buyPoints)}
+                        disabled={selectedBankDetailsForBuy.length === 0 || isCreateOrderDisabled(buyPoints)}
                     >
                         {buyOrderSuccess ? 'Заявка создана!' : 'Создать заявку'}
                     </Button>
@@ -650,7 +650,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     <Button
                         onClick={handleCreateSellOrder}
                         className={`w-full ${sellOrderSuccess ? 'button-success' : ''}`}
-                        disabled={isCreateOrderDisabled(sellPoints)}
+                        disabled={selectedBankDetailsForSell.length === 0 || isCreateOrderDisabled(sellPoints)}
                     >
                         {sellOrderSuccess ? 'Заявка создана!' : 'Создать заявку'}
                     </Button>
