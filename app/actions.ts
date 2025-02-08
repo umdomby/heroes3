@@ -6,6 +6,7 @@ import {hashSync} from 'bcrypt';
 import {revalidatePath, revalidateTag} from 'next/cache';
 import axios from "axios";
 import {JsonArray} from 'type-fest';
+import {number} from "zod";
 
 const MARGIN = parseFloat(process.env.MARGIN || '0.05');
 
@@ -1273,4 +1274,77 @@ export async function openSellOrder(orderId: number, userId: number, bankDetails
     }
 }
 
+export async function closeDealTime (orderId: number) {
+    // Получаем сделку
+    const order = await prisma.orderP2P.findUnique({ where: { id: orderId } });
+
+    if (!order) {
+        throw new Error('Сделка не найдена');
+    }
+
+    if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'PENDING') {
+        await prisma.$transaction(async (prisma) => {
+            await prisma.user.update({
+                where: { id: order.orderP2PUser1Id },
+                data: {
+                    points: { increment: order.orderP2PPoints },
+                },
+            });
+
+            await prisma.orderP2P.update({
+                where: { id: order.id },
+                data: {
+                    orderP2PStatus: 'RETURN',
+                },
+            });
+        });
+    }
+
+    if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'PENDING') {
+        await prisma.$transaction(async (prisma) => {
+            await prisma.orderP2P.update({
+                where: { id: order.id },
+                data: {
+                    orderP2PStatus: 'RETURN',
+                },
+            });
+        });
+    }
+}
+export async function checkAndCloseExpiredDeals() {
+    console.log('checkAndCloseExpiredDeals 111111111111111111111')
+    const now = new Date();
+    const expiredDeals = await prisma.orderP2P.findMany({
+        where: {
+            orderP2PStatus: 'PENDING',
+            updatedAt: {
+                lt: new Date(now.getTime() - 60000), // 60 minutes ago 3600000
+            },
+        },
+    });
+
+    for (const deal of expiredDeals) {
+        await closeDealTime(deal);
+    }
+}
+
+export async function getServerSideProps() {
+    // Проверьте и закройте просроченные сделки перед отображением страницы
+    await checkAndCloseExpiredDeals();
+    console.log('getServerSideProps 1111111111111111111')
+    // Извлечь другие необходимые данные для страницы
+    const openOrders = await prisma.orderP2P.findMany({
+        where: { orderP2PStatus: 'PENDING' },
+        include: {
+            orderP2PUser1: true,
+            orderP2PUser2: true,
+        },
+    });
+
+    return {
+        props: {
+            openOrders,
+        },
+    };
+}
 

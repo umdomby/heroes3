@@ -1,11 +1,17 @@
-"use client";
-import React, {useEffect, useState} from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import {OrderP2P, User, BuySell, OrderP2PStatus} from "@prisma/client";
+import { OrderP2P, User, BuySell, OrderP2PStatus } from "@prisma/client";
 import { Button } from "@/components/ui/button";
-import { confirmBuyOrderUser2, confirmBuyOrderCreator, confirmSellOrderUser2, confirmSellOrderCreator } from '@/app/actions';
-import {DateTime} from "next-auth/providers/kakao";
+import {
+    confirmBuyOrderUser2,
+    confirmBuyOrderCreator,
+    confirmSellOrderUser2,
+    confirmSellOrderCreator,
+    closeDealTime
+} from '@/app/actions';
+import { DateTime } from "next-auth/providers/kakao";
 
 interface OrderP2PWithUser extends OrderP2P {
     orderP2PUser1: {
@@ -18,17 +24,18 @@ interface OrderP2PWithUser extends OrderP2P {
         cardId: string;
         fullName: string;
     };
-    id:number;
-    orderP2PPrice : number;
-    orderP2PPoints : number;
-    orderP2PCheckUser1 : boolean;
-    orderP2PCheckUser2 : boolean;
-    orderP2PBuySell : BuySell;
-    orderP2PUser1Id : number;
-    orderP2PUser2Id : number;
-    createdAt : DateTime;
-    orderP2PStatus : OrderP2PStatus;
-    orderBankDetails : JSON;
+    id: number;
+    orderP2PPrice: number;
+    orderP2PPoints: number;
+    orderP2PCheckUser1: boolean;
+    orderP2PCheckUser2: boolean;
+    orderP2PBuySell: BuySell;
+    orderP2PUser1Id: number;
+    orderP2PUser2Id: number;
+    createdAt: DateTime;
+    updatedAt: DateTime;
+    orderP2PStatus: OrderP2PStatus;
+    orderBankDetails: JSON;
 }
 
 interface Props {
@@ -39,10 +46,42 @@ interface Props {
 
 export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
+    const [countdowns, setCountdowns] = useState<{ [key: number]: number }>({});
 
     useEffect(() => {
         setOpenOrders(openOrders as OrderP2PWithUser[]);
     }, [openOrders]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCountdowns(prevCountdowns => {
+                const newCountdowns = { ...prevCountdowns };
+                orders.forEach(order => {
+                    if (order.orderP2PStatus === "PENDING") {
+                        const updatedAt = new Date(order.updatedAt);
+                        const now = new Date();
+                        const timeDiff = now.getTime() - updatedAt.getTime();
+                        const timeLeft = 3600000 - timeDiff; // 60 minutes in milliseconds 3600000
+                        newCountdowns[order.id] = Math.max(0, timeLeft);
+                    }
+                });
+                return newCountdowns;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [orders]);
+
+    useEffect(() => {
+        Object.entries(countdowns).forEach(([orderId, timeLeft]) => {
+            if (timeLeft <= 0) {
+                const order = orders.find(o => o.id === parseInt(orderId));
+                if (order) {
+                    timeCloseDeal(order);
+                }
+            }
+        });
+    }, [countdowns, orders]);
 
     const handleConfirm = async (order: OrderP2PWithUser, isCreator: boolean) => {
         if (order.orderP2PBuySell === 'BUY') {
@@ -60,6 +99,17 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
         }
     };
 
+    const timeCloseDeal = async (order: OrderP2PWithUser) => {
+        await closeDealTime(order.id);
+    };
+
+    const formatTime = (milliseconds: number) => {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    };
+
     return (
         <div className={className}>
             Points: {user.points}
@@ -70,20 +120,37 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                             <Table>
                                 <TableBody>
                                     <TableRow className="no-hover-bg">
-                                        <TableCell className="w-1/4">{order.orderP2PUser1.cardId}</TableCell>
                                         <TableCell className="w-1/4">
-                                            хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'}
+                                            <p>
+                                                {order.orderP2PUser1.cardId}
+                                            </p>
                                         </TableCell>
-                                        <TableCell className="w-1/4">Points: {order.orderP2PPoints}</TableCell>
-                                        <TableCell className="w-1/4">{new Date(order.createdAt).toLocaleString()}</TableCell>
+                                        <TableCell className="w-1/4">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} {order.orderP2PPoints} Points</TableCell>
+                                        <TableCell className="w-1/4">
+                                            {order.orderP2PStatus === "PENDING" && (
+                                                <>
+                                                    <p>Сделка ждет завершения: </p>
+                                                    <p>
+                                                        Закроется через: {formatTime(countdowns[order.id] || 0)}
+                                                    </p>
+                                                </>
+                                            )}
+                                            {order.orderP2PStatus === "CLOSED" && <p>Сделка завершена</p>}
+                                            {order.orderP2PStatus === "RETURN" && <p>Сделка не состоялась</p>}
+                                        </TableCell>
+                                        <TableCell className="w-1/4">
+                                            <p>
+                                                {new Date(order.createdAt).toLocaleString()}
+                                            </p>
+                                        </TableCell>
                                     </TableRow>
                                 </TableBody>
                             </Table>
                         </AccordionTrigger>
-                        <AccordionContent className="border-b border-gray-200">
+                        <AccordionContent className="border-b border-gray-200 mt-3">
                             <div className="overflow-x-auto">
                                 <div className="flex justify-center space-x-4 min-w-[800px]">
-                                    <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
+                                    <div className="flex flex-col items-center border p-4" style={{ flex: '0 0 23%' }}>
                                         <p>User 1: {order.orderP2PUser1.fullName}</p>
                                         <p>Card ID: {order.orderP2PUser1.cardId}</p>
                                         <p>Price: {order.orderP2PPoints}</p>
@@ -107,7 +174,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                         }
                                     </div>
 
-                                    <div className="flex flex-col items-center border p-4" style={{flex: '0 0 45%'}}>
+                                    <div className="flex flex-col items-center border p-4" style={{ flex: '0 0 45%' }}>
                                         {order.orderBankDetails.map((detail, index) => (
                                             <div key={index} className="mb-2">
                                                 <h3 className="font-bold">{order.orderP2PPrice} {detail.name}</h3>
@@ -118,11 +185,9 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                         ))}
                                         <p>User1: {order.orderP2PUser1.fullName} - {order.orderP2PCheckUser1 ? "Да" : "Нет"}</p>
                                         <p>User2: {order.orderP2PUser2.fullName} - {order.orderP2PCheckUser2 ? "Да" : "Нет"}</p>
-                                        <p>{order.orderP2PStatus === "PENDING" && "Сделка ждет завершения"}</p>
-                                        <p>{order.orderP2PStatus === "CLOSED" && "Сделка завершена"}</p>
                                     </div>
 
-                                    <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
+                                    <div className="flex flex-col items-center border p-4" style={{ flex: '0 0 23%' }}>
                                         <p>User 2: {order.orderP2PUser2?.fullName}</p>
                                         <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
                                         <p>Price: {order.orderP2PPoints}</p>
