@@ -25,10 +25,15 @@ export default async function OrderP2PPendingPage() {
     const openOrders = await prisma.orderP2P.findMany({
         where: {
             OR: [
-                { orderP2PUser1: { id: user.id } },
-                { orderP2PUser2: { id: user.id } }
-            ],
-            orderP2PStatus: 'PENDING'
+                {
+                    orderP2PUser1: { id: user.id },
+                    orderP2PStatus: { in: ['PENDING', 'CLOSED'] }
+                },
+                {
+                    orderP2PUser2: { id: user.id },
+                    orderP2PStatus: { in: ['PENDING', 'CLOSED'] }
+                }
+            ]
         },
         orderBy: {
             createdAt: 'desc',

@@ -57,11 +57,6 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                         BUY/PAY OPEN
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <Link href="/order-p2p-closed">
-                                    <DropdownMenuRadioItem value="bet-closed">
-                                        BUY/PAY CLOSED
-                                    </DropdownMenuRadioItem>
-                                </Link>
                                 <Link href="/contacts">
                                     <DropdownMenuRadioItem value="bet-closed">
                                         CONTACTS
