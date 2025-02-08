@@ -1150,13 +1150,36 @@ export async function confirmBuyOrderUser2(orderId: number) {
             throw new Error('Пользователь не найден');
         }
 
-        // Обновляем статус сделки и подтверждение пользователя 2
-        await prisma.orderP2P.update({
-            where: { id: orderId },
-            data: {
-                orderP2PCheckUser2: true,
-            },
-        });
+        // Получаем сделку
+        const order = await prisma.orderP2P.findUnique({ where: { id: orderId } });
+
+        if (order?.orderP2PCheckUser1) {
+
+            await prisma.$transaction(async (prisma) => {
+                const order = await prisma.orderP2P.findUnique({
+                    where: { id: orderId },
+                });
+
+                if (!order) {
+                    throw new Error('Сделка не найдена');
+                }
+
+                await prisma.user.update({
+                    where: { id: order.orderP2PUser1Id },
+                    data: {
+                        points: { increment: order.orderP2PPoints },
+                    },
+                });
+
+                await prisma.orderP2P.update({
+                    where: { id: orderId },
+                    data: {
+                        orderP2PCheckUser2: true,
+                        orderP2PStatus: 'CLOSED',
+                    },
+                });
+            });
+        }
 
         revalidatePath('/order-p2p-pending');
         return true;
@@ -1166,35 +1189,21 @@ export async function confirmBuyOrderUser2(orderId: number) {
     }
 }
 
-// завершение сделки-покупки, подтверждением создателем
+// завершение сделки-покупки, подтверждением создателем оплаты price
 export async function confirmBuyOrderCreator(orderId: number) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
+        console.log("111111111 "  + orderId)
+        await prisma.orderP2P.update({
+            where: { id: Number(orderId)},
+            data: {
+                orderP2PCheckUser1: true,
+            },
+        });
 
-        // Получаем сделку
-        const order = await prisma.orderP2P.findUnique({ where: { id: orderId } });
-
-        if (order?.orderP2PCheckUser2) {
-            // Обновляем статус сделки и подтверждение пользователя 1
-            await prisma.orderP2P.update({
-                where: { id: orderId },
-                data: {
-                    orderP2PCheckUser1: true,
-                    orderP2PStatus: 'CLOSED',
-                },
-            });
-
-            // Обновляем баланс пользователя
-            await prisma.user.update({
-                where: { id: order.orderP2PUser1Id },
-                data: {
-                    points: { increment: order.orderP2PPointsUser2 || 0 },
-                },
-            });
-        }
 
         revalidatePath('/order-p2p-pending');
         return true;

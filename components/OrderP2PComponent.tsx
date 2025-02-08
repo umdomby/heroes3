@@ -774,7 +774,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                     onClick={() => handleConcludeDealBuy(order)}
                                     disabled={calculatedValues[order.id] === undefined || calculatedValues[order.id] === null}
                                 >
-                                    Заключить сделку покупки
+                                    Заключить сделку -{order.orderP2PPoints} Points
                                 </Button>
                             )}
                             {order.orderP2PBuySell === 'SELL' && order.orderP2PUser1Id !== user.id && (
@@ -782,7 +782,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                     onClick={() => handleConcludeDealSell(order)}
                                     disabled={calculatedValues[order.id] === undefined || calculatedValues[order.id] === null}
                                 >
-                                    Заключить сделку продажи
+                                    Заключить сделку
                                 </Button>
                             )}
                         </AccordionContent>

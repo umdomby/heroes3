@@ -49,7 +49,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                 </Link>
                                 <Link href="/order-p2p">
                                     <DropdownMenuRadioItem value="bet-closed">
-                                        BUY/PAY 2P2
+                                        BUY/PAY P2P
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/order-p2p-pending">
