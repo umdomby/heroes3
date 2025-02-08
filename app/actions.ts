@@ -1112,11 +1112,9 @@ export async function confirmSellOrderCreator(orderId: number) {
             throw new Error('Пользователь не найден');
         }
 
-        // Получаем сделку
-        const order = await prisma.orderP2P.findUnique({ where: { id: orderId } });
-
-        if (order?.orderP2PCheckUser2) {
-            // Обновляем статус сделки и подтверждение пользователя 1
+        // Start a transaction
+        await prisma.$transaction(async (prisma) => {
+            // Update the order status and check user 1
             await prisma.orderP2P.update({
                 where: { id: orderId },
                 data: {
@@ -1125,14 +1123,20 @@ export async function confirmSellOrderCreator(orderId: number) {
                 },
             });
 
-            // Обновляем баланс пользователя
-            await prisma.user.update({
-                where: { id: order.orderP2PUser2Id },
-                data: {
-                    points: { increment: order.orderP2PPoints || 0 },
-                },
+            // Check if orderP2PUser2Id is not null and update user points
+            const order = await prisma.orderP2P.findUnique({
+                where: { id: orderId },
             });
-        }
+
+            if (order?.orderP2PUser2Id !== null) {
+                await prisma.user.update({
+                    where: { id: order.orderP2PUser2Id },
+                    data: {
+                        points: { increment: order.orderP2PPoints },
+                    },
+                });
+            }
+        });
 
         revalidatePath('/order-p2p-pending');
         return true;
