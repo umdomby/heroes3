@@ -1205,7 +1205,7 @@ export async function confirmBuyOrderCreator(orderId: number) {
 }
 
 // Функция для открытия сделки покупки
-export async function openBuyOrder(orderId: number, userId: number, bankDetails: any, price: number) {
+export async function openBuyOrder(orderId: number, userId: number, bankDetails: any, price: number, points: number) {
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
@@ -1227,7 +1227,7 @@ export async function openBuyOrder(orderId: number, userId: number, bankDetails:
         await prisma.user.update({
             where: { id: userId },
             data: {
-                points: { decrement: price },
+                points: { decrement: points },
             },
         });
 

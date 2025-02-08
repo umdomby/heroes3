@@ -62,7 +62,7 @@ export default async function OrderP2PPendingPage() {
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <OrderP2PPending openOrders={openOrders} />
+                <OrderP2PPending user={user} openOrders={openOrders} />
             </Suspense>
         </Container>
     );

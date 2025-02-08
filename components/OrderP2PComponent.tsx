@@ -276,7 +276,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         try {
             const bankDetails = selectedBankDetails[order.id];
             const price = calculatedValues[order.id];
-            await openBuyOrder(order.id, user.id, bankDetails, price);
+            const points = order.orderP2PPoints;
+            await openBuyOrder(order.id, user.id, bankDetails, price, points);
             alert('Сделка успешно заключена');
         } catch (error) {
             console.error('Ошибка при заключении сделки:', error);
@@ -778,8 +779,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                             )}
                             {order.orderP2PBuySell === 'SELL' && order.orderP2PUser1Id !== user.id && (
                                 <Button className="ml-3 h-6"
-                                        onClick={() => handleConcludeDealSell(order)}
-                                        disabled={calculatedValues[order.id] === undefined || calculatedValues[order.id] === null}
+                                    onClick={() => handleConcludeDealSell(order)}
+                                    disabled={calculatedValues[order.id] === undefined || calculatedValues[order.id] === null}
                                 >
                                     Заключить сделку продажи
                                 </Button>
