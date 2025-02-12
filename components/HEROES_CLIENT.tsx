@@ -438,7 +438,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                 <TableCell className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
                                                     <div>
                             <span className={playerColors[PlayerChoice.PLAYER1]}>
-                              {bet.player1.name}
+                              Победа {bet.player1.name}
                             </span>{" "}
                                                         :{" "}
                                                         <span
@@ -456,7 +456,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
 
                                                     <div>
                             <span className={playerColors[PlayerChoice.PLAYER2]}>
-                              {bet.player2.name}
+                              Победа {bet.player2.name}
                             </span>{" "}
                                                         :{" "}
                                                         <span
