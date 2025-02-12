@@ -1079,6 +1079,49 @@ export async function getOpenOrders(): Promise<OrderP2P[]> {
     }
 } // 5 секунд обновление открытых сделок для OrderP2PComponent
 
+export async function getPendingOrders(userId: number): Promise<OrderP2P[]> {
+    try {
+        return await prisma.orderP2P.findMany({
+            where: {
+                OR: [
+                    {
+                        orderP2PUser1: { id: userId },
+                        orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
+                    },
+                    {
+                        orderP2PUser2: { id: userId },
+                        orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
+                    }
+                ]
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+            include: {
+                orderP2PUser1: {
+                    select: {
+                        id: true,
+                        cardId: true,
+                        fullName: true,
+                        // Добавьте другие необходимые поля
+                    }
+                },
+                orderP2PUser2: {
+                    select: {
+                        id: true,
+                        cardId: true,
+                        fullName: true,
+                        // Добавьте другие необходимые поля
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Ошибка при получении открытых заказов:', error);
+        throw new Error('Не удалось получить открытые заказы'); // Выбрасывание ошибки для лучшей обработки
+    }
+} // 5 секунд обновление открытых сделок для OrderP2PPending
+
 // ################################################
 
 // подтверждение оплаты для продажи
@@ -1281,7 +1324,6 @@ export async function openSellOrder(orderId: number, userId: number, bankDetails
 export async function closeDealTime (orderId: number) {
     // Получаем сделку
     const order = await prisma.orderP2P.findUnique({ where: { id: orderId } });
-    console.log("server 11111111111111111111111111")
     if (!order) {
         throw new Error('Сделка не найдена');
     }
@@ -1318,7 +1360,6 @@ export async function closeDealTime (orderId: number) {
 
 
 export async function checkAndCloseExpiredDeals() {
-    console.log('checkAndCloseExpiredDeals 111111111111111111111');
     const now = new Date();
     const expiredDeals = await prisma.orderP2P.findMany({
         where: {

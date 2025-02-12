@@ -9,7 +9,7 @@ import {
     confirmBuyOrderCreator,
     confirmSellOrderUser2,
     confirmSellOrderCreator,
-    closeDealTime
+    closeDealTime, getOpenOrders, getPendingOrders
 } from '@/app/actions';
 import { DateTime } from "next-auth/providers/kakao";
 
@@ -52,6 +52,22 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
     useEffect(() => {
         setOpenOrders(openOrders as OrderP2PWithUser[]);
     }, [openOrders]);
+
+
+    useEffect(() => {
+        const fetchOpenOrders = async () => {
+            try {
+                const orders = await getPendingOrders(user.id); // Fetch the latest open orders
+                setOpenOrders(orders as OrderP2PWithUser[]);
+            } catch (error) {
+                console.error('Error fetching open orders:', error);
+            }
+        };
+        fetchOpenOrders(); // Initial fetch
+        const intervalId = setInterval(fetchOpenOrders, 5000); // Set interval to fetch every 5 seconds
+        return () => clearInterval(intervalId); // Clear interval on component unmount
+    }, []);
+
 
     useEffect(() => {
         const interval = setInterval(() => {
