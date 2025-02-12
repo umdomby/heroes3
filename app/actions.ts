@@ -1118,24 +1118,28 @@ export async function confirmSellOrderCreator(orderId: number) {
             throw new Error('Сделка не найдена');
         }
         if (order?.orderP2PCheckUser2) {
+            // Проверяем, что orderP2PUser2Id не равен null
+            const user2Id = order.orderP2PUser2Id;
+            if (user2Id !== null && user2Id !== undefined) {
+                await prisma.$transaction(async (prisma) => {
+                    await prisma.user.update({
+                        where: { id: user2Id },
+                        data: {
+                            points: { increment: order.orderP2PPoints },
+                        },
+                    });
 
-            await prisma.$transaction(async (prisma) => {
-
-                await prisma.user.update({
-                    where: { id: order.orderP2PUser2Id },
-                    data: {
-                        points: { increment: order.orderP2PPoints },
-                    },
+                    await prisma.orderP2P.update({
+                        where: { id: orderId },
+                        data: {
+                            orderP2PCheckUser1: true,
+                            orderP2PStatus: 'CLOSED',
+                        },
+                    });
                 });
-
-                await prisma.orderP2P.update({
-                    where: { id: orderId },
-                    data: {
-                        orderP2PCheckUser1: true,
-                        orderP2PStatus: 'CLOSED',
-                    },
-                });
-            });
+            } else {
+                throw new Error('ID пользователя 2 не определен');
+            }
         }
 
         revalidatePath('/order-p2p-pending');
@@ -1145,6 +1149,7 @@ export async function confirmSellOrderCreator(orderId: number) {
         return false;
     }
 }
+
 
 // подтверждение оплаты для покупки
 export async function confirmBuyOrderUser2(orderId: number) {
