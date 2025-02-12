@@ -9,12 +9,15 @@ import {
     TableHead,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface User {
     fullName: string;
     points: number;
     cardId: string;
     email: string;
+    telegram: string;
+    telegramView: boolean;
     createdAt: Date;
 }
 
@@ -47,11 +50,12 @@ export const Rating: React.FC<Props> = ({ className, users }) => {
                         <TableHead className="text-center">Email</TableHead>
                         <TableHead className="text-center">Card ID</TableHead>
                         <TableHead className="text-center">Дата создания</TableHead>
+                        <TableHead className="text-center">Telegram</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {users.map((user, index) => (
-                        <TableRow key={index} className="hover:bg-gray-900">
+                        <TableRow key={index} className="hover:bg-gray-400">
                             <TableCell className="text-center">{Math.floor(user.points * 100) / 100}</TableCell>
                             <TableCell className="text-center">{user.fullName}</TableCell>
                             <TableCell className="text-center">{user.email.slice(0, 5)}...</TableCell>
@@ -67,6 +71,10 @@ export const Rating: React.FC<Props> = ({ className, users }) => {
                                 </div>
                             </TableCell>
                             <TableCell className="text-center">{user.createdAt.toLocaleDateString()}</TableCell>
+                            <TableCell className="text-center">
+                                {user.telegramView ? <Link className="text-blue-500 hover:text-green-300 font-bold" href={user.telegram.replace(/^@/, 'https://t.me/')} target="_blank">{user.telegram}</Link>
+                                    : <span className="text-gray-500">Скрыто</span>}
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
