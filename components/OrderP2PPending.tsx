@@ -57,7 +57,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
     useEffect(() => {
         const fetchOpenOrders = async () => {
             try {
-                const orders = await getPendingOrders(user.id); // Fetch the latest open orders
+                const orders = await getPendingOrders(user.id); // Вызов серверной функции
                 setOpenOrders(orders as OrderP2PWithUser[]);
             } catch (error) {
                 console.error('Error fetching open orders:', error);
@@ -66,7 +66,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
         fetchOpenOrders(); // Initial fetch
         const intervalId = setInterval(fetchOpenOrders, 5000); // Set interval to fetch every 5 seconds
         return () => clearInterval(intervalId); // Clear interval on component unmount
-    }, []);
+    }, [user.id]);
 
 
     useEffect(() => {
@@ -78,7 +78,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                         const updatedAt = new Date(order.updatedAt);
                         const now = new Date();
                         const timeDiff = now.getTime() - updatedAt.getTime();
-                        const timeLeft = 20000 - timeDiff; // 60 minutes in milliseconds 3600000
+                        const timeLeft = 3600000 - timeDiff; // 60 minutes in milliseconds 3600000
                         newCountdowns[order.id] = Math.max(0, timeLeft);
                     }
                 });

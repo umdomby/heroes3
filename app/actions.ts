@@ -1365,7 +1365,7 @@ export async function checkAndCloseExpiredDeals() {
         where: {
             orderP2PStatus: 'PENDING',
             updatedAt: {
-                lt: new Date(now.getTime() - 60000), // 60 minutes ago 3600000
+                lt: new Date(now.getTime() - 3600000), // 60 minutes ago 3600000
             },
         },
     });
