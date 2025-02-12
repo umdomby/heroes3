@@ -144,6 +144,11 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
     const loginHistory = Array.isArray(data.loginHistory) ? data.loginHistory : [];
 
+    const handleCopyCardId = () => {
+        navigator.clipboard.writeText(data.cardId);
+        toast.success('Card ID скопирован в буфер обмена');
+    };
+
     return (
         <Container className="w-[98%]">
             <div className="flex flex-col gap-3 w-full mt-10">
@@ -151,15 +156,27 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                     <div className="w-full md:w-1/3 p-4 rounded-lg">
                         <Title text={`Личные данные | #${data.id}`} size="md" className="font-bold"/>
 
-                        <div className="mb-4">
+                        <div className=" mb-4">
                             <label className="block text-sm font-medium text-gray-300">Email: {data.email}</label>
-                            <label className="block text-sm font-medium text-gray-300">Card ID: {data.cardId}</label>
+                            <div className="flex">
+                                <label className="block text-sm font-medium text-gray-300">
+                                    Card ID: {data.cardId}
+                                </label>
+                                <Button
+                                    onClick={handleCopyCardId}
+                                    className="ml-2 bg-blue-500 text-white px-2 py-1 rounded h-5"
+                                >
+                                    Copy
+                                </Button>
+                            </div>
+
+
                         </div>
 
                         <FormProvider {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
-                                <FormInput name="fullName" label="Полное имя" required />
-                                <FormInput type="password" name="password" label="Новый пароль" required />
+                                <FormInput name="fullName" label="Полное имя" required/>
+                                <FormInput type="password" name="password" label="Новый пароль" required/>
                                 <FormInput type="password" name="confirmPassword" label="Повторите пароль" required />
 
                                 <Button disabled={form.formState.isSubmitting} className="text-base mt-10" type="submit">

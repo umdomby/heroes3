@@ -5,9 +5,9 @@ import { redirect } from 'next/navigation';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
-import {HEROES_CLIENT_CLOSED_A} from "@/components/HEROES_CLIENT_CLOSED_A";
+import {TRANSFER_POINTS_A} from "@/components/TRANSFER_POINTS_A";
 
-export default async function BetClosedPage() {
+export default async function TransferPointsPage() {
     const session = await getUserSession();
 
     if (!session) {
@@ -20,26 +20,19 @@ export default async function BetClosedPage() {
         return redirect('/not-auth');
     }
 
-    // Получаем все закрытые ставки, в которых участвовал пользователь
-    const closedBets = await prisma.betCLOSED.findMany({
+    // Получение истории переводов с cardId для обоих пользователей
+    const transferHistory = await prisma.transfer.findMany({
         include: {
-            participantsCLOSED: true, // Получаем всех участников, чтобы отобразить выигранные и проигранные ставки
-            player1: true,
-            player2: true,
-            creator: true,
-            category: true,
-            product: true,
-            productItem: true
+            transferUser1: { select: { cardId: true } },
+            transferUser2: { select: { cardId: true } }
         },
-        orderBy: {
-            updatedAt: 'desc'
-        }
+        orderBy: { createdAt: 'desc' }
     });
 
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <HEROES_CLIENT_CLOSED_A user={user} closedBets={closedBets} />
+                <TRANSFER_POINTS_A user={user} transferHistory={transferHistory} />
             </Suspense>
         </Container>
     );

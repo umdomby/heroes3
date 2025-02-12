@@ -32,28 +32,38 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-create">
-                                    <DropdownMenuRadioItem value="create-bet">
+                                    <DropdownMenuRadioItem value="bet-create">
                                        ADMIN CREATE BET 2
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-create-3">
-                                    <DropdownMenuRadioItem value="create-bet">
+                                    <DropdownMenuRadioItem value="bet-create-3">
                                         ADMIN CREATE BET 3
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-create-4">
-                                    <DropdownMenuRadioItem value="create-bet">
+                                    <DropdownMenuRadioItem value="bet-create-4">
                                         ADMIN CREATE BET 4
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/add-player">
-                                    <DropdownMenuRadioItem value="create-bet">
+                                    <DropdownMenuRadioItem value="add-player">
                                         ADMIN ADD PLAYER
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-closed-admin">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-closed-admin">
                                        ADMIN BET CLOSED
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/order-p2p-pending-admin">
+                                    <DropdownMenuRadioItem value="order-p2p-pending-admin">
+                                        ADMIN P2P PENDING
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/transfer-points-admin">
+                                    <DropdownMenuRadioItem value="transfer-points-admin">
+                                        ADMIN TRANSFER
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-closed">
@@ -62,27 +72,27 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-all-closed">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-all-closed">
                                         WINN/LOSE PLAYERS
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/transfer-points">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="transfer-points">
                                         TRANSFER
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/order-p2p">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="order-p2p">
                                         P2P
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/order-p2p-pending">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="order-p2p-pending">
                                         P2P PENDING
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/contacts">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="contacts">
                                         CONTACTS
                                     </DropdownMenuRadioItem>
                                 </Link>
