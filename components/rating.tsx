@@ -16,7 +16,7 @@ interface User {
     points: number;
     cardId: string;
     email: string;
-    telegram: string;
+    telegram: string | null; // Allow telegram to be null
     telegramView: boolean;
     createdAt: Date;
 }
@@ -72,8 +72,17 @@ export const Rating: React.FC<Props> = ({ className, users }) => {
                             </TableCell>
                             <TableCell className="text-center">{user.createdAt.toLocaleDateString()}</TableCell>
                             <TableCell className="text-center">
-                                {user.telegramView ? <Link className="text-blue-500 hover:text-green-300 font-bold" href={user.telegram.replace(/^@/, 'https://t.me/')} target="_blank">{user.telegram}</Link>
-                                    : <span className="text-gray-500">Скрыто</span>}
+                                {user.telegramView && user.telegram ? (
+                                    <Link
+                                        className="text-blue-500 hover:text-green-300 font-bold"
+                                        href={user.telegram.replace(/^@/, 'https://t.me/')}
+                                        target="_blank"
+                                    >
+                                        {user.telegram}
+                                    </Link>
+                                ) : (
+                                    <span className="text-gray-500">Скрыто</span>
+                                )}
                             </TableCell>
                         </TableRow>
                     ))}

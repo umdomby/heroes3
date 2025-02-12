@@ -76,7 +76,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     } = useUser(user ? user.id : null);
 
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
-    const [selectedWinner, setSelectedWinner] = useState<number | null>(null);
+    const [selectedWinner, setSelectedWinner] = useState<number | "draw" | null>(null);
     const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>(
         {}
     );
