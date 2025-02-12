@@ -277,8 +277,14 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
             const bankDetails = selectedBankDetails[order.id];
             const price = calculatedValues[order.id];
             const points = order.orderP2PPoints;
-            await openBuyOrder(order.id, user.id, bankDetails, price, points);
-            alert('Сделка успешно заключена');
+
+            // Проверяем, что price не равен null или undefined
+            if (price !== undefined && price !== null) {
+                await openBuyOrder(order.id, user.id, bankDetails, price, points);
+                alert('Сделка успешно заключена');
+            } else {
+                alert('Пожалуйста, выберите действительные банковские реквизиты и цену');
+            }
         } catch (error) {
             console.error('Ошибка при заключении сделки:', error);
             alert('Не удалось заключить сделку');
@@ -294,8 +300,14 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         try {
             const bankDetails = selectedBankDetails[order.id];
             const price = calculatedValues[order.id];
-            await openSellOrder(order.id, user.id, bankDetails, price);
-            alert('Сделка успешно заключена');
+
+            // Проверяем, что price не равен null или undefined
+            if (price !== undefined && price !== null) {
+                await openSellOrder(order.id, user.id, bankDetails, price);
+                alert('Сделка успешно заключена');
+            } else {
+                alert('Пожалуйста, выберите действительные банковские реквизиты и цену');
+            }
         } catch (error) {
             console.error('Ошибка при заключении сделки:', error);
             alert('Не удалось заключить сделку');
@@ -661,7 +673,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     <AccordionItem
                         key={order.id}
                         value={order.id.toString()}
-                        className={order.orderP2PUser1Id === user.id && 'bg-gray-500'}
+                        className={order.orderP2PUser1Id === user.id ? 'bg-gray-500' : undefined}
                     >
                         <AccordionTrigger>
                             <Table>

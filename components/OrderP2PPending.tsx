@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { OrderP2P, User, BuySell, OrderP2PStatus } from "@prisma/client";
+import {OrderP2P, User, BuySell, OrderP2PStatus, Prisma} from "@prisma/client";
 import { Button } from "@/components/ui/button";
+
 import {
     confirmBuyOrderUser2,
     confirmBuyOrderCreator,
@@ -12,6 +13,13 @@ import {
     closeDealTime, getOpenOrders, getPendingOrders
 } from '@/app/actions';
 import { DateTime } from "next-auth/providers/kakao";
+
+interface OrderBankDetail {
+    name: string;
+    price: string;
+    details: string;
+    description: string;
+}
 
 interface OrderP2PWithUser extends OrderP2P {
     orderP2PUser1: {
@@ -32,10 +40,10 @@ interface OrderP2PWithUser extends OrderP2P {
     orderP2PBuySell: BuySell;
     orderP2PUser1Id: number;
     orderP2PUser2Id: number;
-    createdAt: DateTime;
-    updatedAt: DateTime;
+    createdAt: Date;
+    updatedAt: Date;
     orderP2PStatus: OrderP2PStatus;
-    orderBankDetails: JSON;
+    orderBankDetails: Prisma.JsonValue;
 }
 
 interface Props {
@@ -102,6 +110,17 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
         });
     }, [countdowns, orders, closedOrders]);
 
+    function isOrderBankDetail(detail: any): detail is OrderBankDetail {
+        return (
+            detail &&
+            typeof detail === 'object' &&
+            typeof detail.name === 'string' &&
+            typeof detail.price === 'string' &&
+            typeof detail.details === 'string' &&
+            typeof detail.description === 'string'
+        );
+    }
+
     const handleConfirm = async (order: OrderP2PWithUser, isCreator: boolean) => {
         if (order.orderP2PBuySell === 'BUY') {
             if (isCreator) {
@@ -137,7 +156,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
             <Accordion className="border border-gray-300 mt-4" type="multiple">
                 {orders.map((order) => (
                     <AccordionItem key={order.id} value={order.id.toString()}>
-                        <AccordionTrigger className={order.orderP2PStatus === "PENDING" && 'bg-gray-400'}>
+                        <AccordionTrigger className={order.orderP2PStatus === "PENDING" ? 'bg-gray-400' : undefined}>
                             <Table>
                                 <TableBody>
                                     <TableRow className="no-hover-bg">
@@ -171,7 +190,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                         <AccordionContent className="border-b border-gray-200 mt-3">
                             <div className="overflow-x-auto">
                                 <div className="flex justify-center space-x-4 min-w-[800px]">
-                                    <div className="flex flex-col items-center border p-4" style={{ flex: '0 0 23%' }}>
+                                    <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
                                         <p>User 1: {order.orderP2PUser1.fullName}</p>
                                         <p>Card ID: {order.orderP2PUser1.cardId}</p>
                                         <p>Price: {order.orderP2PPoints}</p>
@@ -195,20 +214,29 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                         }
                                     </div>
 
-                                    <div className="flex flex-col items-center border p-4" style={{ flex: '0 0 45%' }}>
-                                        {order.orderBankDetails.map((detail, index) => (
-                                            <div key={index} className="mb-2">
-                                                <h3 className="font-bold">{order.orderP2PPrice} {detail.name}</h3>
-                                                <p>Price one Point = {detail.price}</p>
-                                                <p>Details: {detail.details}</p>
-                                                <p>Description: {detail.description}</p>
-                                            </div>
-                                        ))}
+                                    <div className="flex flex-col items-center border p-4" style={{flex: '0 0 45%'}}>
+                                        {order.orderBankDetails && Array.isArray(order.orderBankDetails) ? (
+                                            order.orderBankDetails.map((detail, index) => {
+                                                if (isOrderBankDetail(detail)) {
+                                                    return (
+                                                        <div key={index} className="mb-2">
+                                                            <h3 className="font-bold">{order.orderP2PPrice} {detail.name}</h3>
+                                                            <p>Price one Point = {detail.price}</p>
+                                                            <p>Details: {detail.details}</p>
+                                                            <p>Description: {detail.description}</p>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })
+                                        ) : (
+                                            <p>Нет доступных банковских реквизитов</p>
+                                        )}
                                         <p>User1: {order.orderP2PUser1.fullName} - {order.orderP2PCheckUser1 ? "Да" : "Нет"}</p>
-                                        <p>User2: {order.orderP2PUser2.fullName} - {order.orderP2PCheckUser2 ? "Да" : "Нет"}</p>
+                                        <p>User2: {order.orderP2PUser2 ? `${order.orderP2PUser2.fullName} - ${order.orderP2PCheckUser2 ? "Да" : "Нет"}` : "Ожидание"}</p>
                                     </div>
 
-                                    <div className="flex flex-col items-center border p-4" style={{ flex: '0 0 23%' }}>
+                                    <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
                                         <p>User 2: {order.orderP2PUser2?.fullName}</p>
                                         <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
                                         <p>Price: {order.orderP2PPoints}</p>
