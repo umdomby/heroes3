@@ -1150,7 +1150,6 @@ export async function confirmSellOrderCreator(orderId: number) {
     }
 }
 
-
 // подтверждение оплаты для покупки
 export async function confirmBuyOrderUser2(orderId: number) {
     try {
@@ -1319,7 +1318,7 @@ export async function closeDealTime (orderId: number) {
 
 
 export async function checkAndCloseExpiredDeals() {
-    console.log('checkAndCloseExpiredDeals 111111111111111111111')
+    console.log('checkAndCloseExpiredDeals 111111111111111111111');
     const now = new Date();
     const expiredDeals = await prisma.orderP2P.findMany({
         where: {
@@ -1331,7 +1330,7 @@ export async function checkAndCloseExpiredDeals() {
     });
 
     for (const deal of expiredDeals) {
-        await closeDealTime(deal);
+        await closeDealTime(deal.id); // Передаем id сделки
     }
 }
 

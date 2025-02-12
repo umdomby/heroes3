@@ -739,11 +739,12 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                                         if (detail && typeof detail === 'object' && 'price' in detail && 'name' in detail && 'details' in detail) {
                                             const price = typeof detail.price === 'string' ? detail.price : '';
                                             const name = typeof detail.name === 'string' ? detail.name : '';
-                                            const details = typeof detail.details === 'string' ? detail.details : '';
+                                            // const details = typeof detail.details === 'string' ? detail.details : '';
 
                                             return (
                                                 <option key={index} value={JSON.stringify(detail)}>
-                                                    one Point: {price} - {name} - {details}
+                                                    one Point: {price} - {name}
+                                                    {/*- {details}*/}
                                                 </option>
                                             );
                                         }

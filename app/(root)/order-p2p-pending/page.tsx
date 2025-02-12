@@ -4,9 +4,13 @@ import { redirect } from 'next/navigation';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
-import {OrderP2PPending} from "@/components/OrderP2PPending";
+import { OrderP2PPending } from "@/components/OrderP2PPending";
+import { checkAndCloseExpiredDeals } from '@/app/actions'; // Импортируем функцию
 
 export default async function OrderP2PPendingPage() {
+    // Закрываем просроченные сделки перед рендерингом страницы
+    await checkAndCloseExpiredDeals();
+
     const session = await getUserSession();
 
     if (!session) {
