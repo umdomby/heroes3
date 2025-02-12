@@ -67,6 +67,16 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                         RATING
                                     </DropdownMenuRadioItem>
                                 </Link>
+                                <Link href="/manual">
+                                    <DropdownMenuRadioItem value="manual">
+                                        MANUAL
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/tur">
+                                    <DropdownMenuRadioItem value="tur">
+                                        ТУРНИРЫ
+                                    </DropdownMenuRadioItem>
+                                </Link>
                                 <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>

@@ -51,6 +51,11 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                         ADMIN ADD PLAYER
                                     </DropdownMenuRadioItem>
                                 </Link>
+                                <Link href="/admin-user">
+                                    <DropdownMenuRadioItem value="admin-user">
+                                        ADMIN USER
+                                    </DropdownMenuRadioItem>
+                                </Link>
                                 <Link href="/bet-closed-admin">
                                     <DropdownMenuRadioItem value="bet-closed-admin">
                                        ADMIN BET CLOSED
@@ -64,6 +69,16 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 <Link href="/transfer-points-admin">
                                     <DropdownMenuRadioItem value="transfer-points-admin">
                                         ADMIN TRANSFER
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/statistics">
+                                    <DropdownMenuRadioItem value="statistics">
+                                        ADMIN STATISTICS
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/tur-admin">
+                                    <DropdownMenuRadioItem value="tur-admin">
+                                       ADMIN ТУРНИРЫ
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-closed">
@@ -99,6 +114,16 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 <Link href="/rating">
                                     <DropdownMenuRadioItem value="rating">
                                         RATING
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/manual">
+                                    <DropdownMenuRadioItem value="manual">
+                                        MANUAL
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/tur">
+                                    <DropdownMenuRadioItem value="tur">
+                                        ТУРНИРЫ
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
