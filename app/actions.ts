@@ -1277,7 +1277,7 @@ export async function openSellOrder(orderId: number, userId: number, bankDetails
 export async function closeDealTime (orderId: number) {
     // Получаем сделку
     const order = await prisma.orderP2P.findUnique({ where: { id: orderId } });
-
+    console.log("server 11111111111111111111111111")
     if (!order) {
         throw new Error('Сделка не найдена');
     }
@@ -1311,6 +1311,8 @@ export async function closeDealTime (orderId: number) {
         });
     }
 }
+
+
 export async function checkAndCloseExpiredDeals() {
     console.log('checkAndCloseExpiredDeals 111111111111111111111')
     const now = new Date();

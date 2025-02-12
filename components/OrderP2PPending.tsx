@@ -47,6 +47,7 @@ interface Props {
 export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
     const [countdowns, setCountdowns] = useState<{ [key: number]: number }>({});
+    const [closedOrders, setClosedOrders] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         setOpenOrders(openOrders as OrderP2PWithUser[]);
@@ -61,7 +62,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                         const updatedAt = new Date(order.updatedAt);
                         const now = new Date();
                         const timeDiff = now.getTime() - updatedAt.getTime();
-                        const timeLeft = 3600000 - timeDiff; // 60 minutes in milliseconds 3600000
+                        const timeLeft = 20000 - timeDiff; // 60 minutes in milliseconds 3600000
                         newCountdowns[order.id] = Math.max(0, timeLeft);
                     }
                 });
@@ -75,13 +76,15 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
     useEffect(() => {
         Object.entries(countdowns).forEach(([orderId, timeLeft]) => {
             if (timeLeft <= 0) {
+                console.log("client 2222222222222222222");
                 const order = orders.find(o => o.id === parseInt(orderId));
-                if (order) {
+                if (order && !closedOrders.has(order.id)) {
+                    console.log("client 33333333333333333333");
                     timeCloseDeal(order);
                 }
             }
         });
-    }, [countdowns, orders]);
+    }, [countdowns, orders, closedOrders]);
 
     const handleConfirm = async (order: OrderP2PWithUser, isCreator: boolean) => {
         if (order.orderP2PBuySell === 'BUY') {
@@ -100,7 +103,9 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
     };
 
     const timeCloseDeal = async (order: OrderP2PWithUser) => {
+        console.log("client 222222222222222222222");
         await closeDealTime(order.id);
+        setClosedOrders(prev => new Set(prev).add(order.id));
     };
 
     const formatTime = (milliseconds: number) => {
