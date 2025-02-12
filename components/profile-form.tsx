@@ -24,6 +24,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
+import Link from "next/link";
 
 interface Props {
     data: User;
@@ -464,8 +465,9 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                 onChange={(e) => setTelegramView(e.target.checked)}
                                                 className="mr-2"
                                             />
-                                            <p className="text-sm font-medium ">Показывать Telegram на
-                                                сайте и в созданном orderP2P. </p>
+
+
+                                            <p className="text-sm font-medium ">Показывать Telegram на странице <Link className="text-blue-500" href="/rating" target="_blank">Rating</Link></p>
                                         </div>
                                         <p className="text-sm font-medium "> В заключившихся сделках (orderP2P) Telegram
                                             отображается. </p>
