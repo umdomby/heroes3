@@ -195,7 +195,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                 <div className="flex justify-center space-x-4 min-w-[800px]">
                                     <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
                                         <p>User 1: {order.orderP2PUser1.fullName}</p>
-                                        <p>Telegram: <Link href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')} target="_blank">{order.orderP2PUser1.telegram}</Link></p>
+                                        <p>Telegram: <Link className="text-blue-500 hover:text-green-300 font-bold" href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')} target="_blank">{order.orderP2PUser1.telegram}</Link></p>
                                         <p>Card ID: {order.orderP2PUser1.cardId}</p>
                                         <p>Points: {order.orderP2PPoints}</p>
                                         <p>Price: {order.orderP2PPrice}</p>
@@ -243,9 +243,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                     <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
                                         <p>User 2: {order.orderP2PUser2?.fullName}</p>
                                         <p>
-                                            Telegram:
-                                            {order.orderP2PUser2?.telegram ? (
-                                                <Link
+                                            Telegram: {order.orderP2PUser2?.telegram ? (
+                                                <Link className="text-blue-500 hover:text-green-300 font-bold"
                                                     href={order.orderP2PUser2.telegram.replace(/^@/, 'https://t.me/')}
                                                     target="_blank"
                                                 >
