@@ -49,7 +49,7 @@ interface Props {
     closedBets: BetCLOSED[];
 }
 
-export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
+export const HEROES_CLIENT_CLOSED_A: React.FC<Props> = ({ user, closedBets }) => {
     // Подсчитываем общую прибыль/потерю
     const totalProfitLoss = closedBets.reduce((total, bet) => {
         const userBets = bet.participantsCLOSED.filter((p) => p.userId === user.id);
@@ -68,9 +68,6 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
             </div>
 
             {closedBets.map((bet) => {
-                const userBets = bet.participantsCLOSED.filter((p: BetParticipantCLOSED) => p.userId === user.id);
-
-                if (userBets.length === 0) return null;
 
                 return (
                     <div key={bet.id} className="border border-gray-700 mt-1">
@@ -97,14 +94,14 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         <span>{bet.player1.name}</span> :{' '}
                                                         <span
                                                             className={
-                                                                userBets
+                                                                bet.participantsCLOSED
                                                                     .filter((p) => p.player === 'PLAYER1')
                                                                     .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
                                                                     ? 'text-green-500'
                                                                     : 'text-red-500'
                                                             }
                                                         >
-                                                            {Math.floor(userBets
+                                                            {Math.floor(bet.participantsCLOSED
                                                                 .filter((p) => p.player === 'PLAYER1')
                                                                 .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
                                                         </span>
@@ -113,14 +110,14 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                                         <span>{bet.player2.name}</span> :{' '}
                                                         <span
                                                             className={
-                                                                userBets
+                                                                bet.participantsCLOSED
                                                                     .filter((p) => p.player === 'PLAYER2')
                                                                     .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
                                                                     ? 'text-green-500'
                                                                     : 'text-red-500'
                                                             }
                                                         >
-                                                            {Math.floor(userBets
+                                                            {Math.floor(bet.participantsCLOSED
                                                                 .filter((p) => p.player === 'PLAYER2')
                                                                 .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
                                                         </span>
@@ -132,16 +129,17 @@ export const HEROES_CLIENT_CLOSED: React.FC<Props> = ({ user, closedBets }) => {
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="m-1 p-4 rounded-lg">
-                                        <h4 className="text-md font-semibold mb-2">Дата и время закрытия ставок: {new Date(bet.updatedAt).toLocaleString()}</h4>
+                                        <h4 className="text-md font-semibold mb-2">Дата и время закрытия
+                                            ставок: {new Date(bet.updatedAt).toLocaleString()}</h4>
                                         <p>
                                             {/* Победитель: <strong>{winnerName}</strong> */}
                                         </p>
                                     </div>
 
-                                    {userBets.length > 0 && (
+                                    {bet.participantsCLOSED.length > 0 && (
                                         <div className="m-1 p-4 rounded-lg">
-                                            <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
-                                            {userBets.map((participant) => {
+                                        <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
+                                            {bet.participantsCLOSED.map((participant) => {
                                                 const profitToCover =
                                                     participant.amount * (participant.odds - 1);
                                                 const overlapPercentage =

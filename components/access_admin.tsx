@@ -33,22 +33,27 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 </Link>
                                 <Link href="/bet-create">
                                     <DropdownMenuRadioItem value="create-bet">
-                                        CREATE BET
+                                       ADMIN CREATE BET 2
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-create-3">
                                     <DropdownMenuRadioItem value="create-bet">
-                                        CREATE BET 3
+                                        ADMIN CREATE BET 3
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-create-4">
                                     <DropdownMenuRadioItem value="create-bet">
-                                        CREATE BET 4
+                                        ADMIN CREATE BET 4
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/add-player">
                                     <DropdownMenuRadioItem value="create-bet">
-                                        ADD PLAYER
+                                        ADMIN ADD PLAYER
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/bet-closed-admin">
+                                    <DropdownMenuRadioItem value="bet-closed">
+                                       ADMIN BET CLOSED
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-closed">
