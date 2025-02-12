@@ -28,32 +28,32 @@ export const Access_no: React.FC<Props> = ({className}) => {
                         <DropdownMenuContent className="w-56">
                             <DropdownMenuRadioGroup>
                                 <Link href="/">
-                                    <DropdownMenuRadioItem value="home">
+                                    <DropdownMenuRadioItem value="home" className="cursor-pointer">
                                         HOME
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/contacts">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         CONTACTS
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-all-closed">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         WINN/LOSE PLAYERS
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/rating">
-                                    <DropdownMenuRadioItem value="rating">
+                                    <DropdownMenuRadioItem value="rating" className="cursor-pointer">
                                         RATING
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/manual">
-                                    <DropdownMenuRadioItem value="manual">
+                                    <DropdownMenuRadioItem value="manual" className="cursor-pointer">
                                         MANUAL
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/tur">
-                                    <DropdownMenuRadioItem value="tur">
+                                    <DropdownMenuRadioItem value="tur" className="cursor-pointer">
                                         ТУРНИРЫ
                                     </DropdownMenuRadioItem>
                                 </Link>

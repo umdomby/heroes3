@@ -28,52 +28,52 @@ export const Access_user: React.FC<Props> = ({className}) => {
                         <DropdownMenuContent className="w-56">
                             <DropdownMenuRadioGroup>
                                 <Link href="/">
-                                    <DropdownMenuRadioItem value="home">
+                                    <DropdownMenuRadioItem value="home" className="cursor-pointer">
                                         HOME
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-closed">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         BET CLOSED
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-all-closed">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         WINN/LOSE PLAYERS
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/transfer-points">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         TRANSFER
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/order-p2p">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         P2P
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/order-p2p-pending">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         P2P PENDING
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/contacts">
-                                    <DropdownMenuRadioItem value="bet-closed">
+                                    <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         CONTACTS
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/rating">
-                                    <DropdownMenuRadioItem value="rating">
+                                    <DropdownMenuRadioItem value="rating" className="cursor-pointer">
                                         RATING
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/manual">
-                                    <DropdownMenuRadioItem value="manual">
+                                    <DropdownMenuRadioItem value="manual" className="cursor-pointer">
                                         MANUAL
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/tur">
-                                    <DropdownMenuRadioItem value="tur">
+                                    <DropdownMenuRadioItem value="tur" className="cursor-pointer">
                                         ТУРНИРЫ
                                     </DropdownMenuRadioItem>
                                 </Link>
