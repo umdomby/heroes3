@@ -13,6 +13,7 @@ import {
     closeDealTime, getOpenOrders, getPendingOrders
 } from '@/app/actions';
 import { DateTime } from "next-auth/providers/kakao";
+import Link from "next/link";
 
 interface OrderBankDetail {
     name: string;
@@ -26,11 +27,13 @@ interface OrderP2PWithUser extends OrderP2P {
         id: number;
         cardId: string;
         fullName: string;
+        telegram: string;
     };
     orderP2PUser2?: {
         id: number;
         cardId: string;
         fullName: string;
+        telegram: string;
     };
     id: number;
     orderP2PPrice: number;
@@ -192,8 +195,9 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                 <div className="flex justify-center space-x-4 min-w-[800px]">
                                     <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
                                         <p>User 1: {order.orderP2PUser1.fullName}</p>
+                                        <p>Telegram: <Link href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')} target="_blank">{order.orderP2PUser1.telegram}</Link></p>
                                         <p>Card ID: {order.orderP2PUser1.cardId}</p>
-                                        <p>Price: {order.orderP2PPoints}</p>
+                                        <p>Points: {order.orderP2PPoints}</p>
                                         <p>Price: {order.orderP2PPrice}</p>
                                         {order.orderP2PBuySell === 'SELL' &&
                                             <Button
@@ -238,8 +242,21 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
 
                                     <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
                                         <p>User 2: {order.orderP2PUser2?.fullName}</p>
+                                        <p>
+                                            Telegram:
+                                            {order.orderP2PUser2?.telegram ? (
+                                                <Link
+                                                    href={order.orderP2PUser2.telegram.replace(/^@/, 'https://t.me/')}
+                                                    target="_blank"
+                                                >
+                                                    {order.orderP2PUser2.telegram}
+                                                </Link>
+                                            ) : (
+                                                'No Telegram'
+                                            )}
+                                        </p>
                                         <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
-                                        <p>Price: {order.orderP2PPoints}</p>
+                                        <p>Points: {order.orderP2PPoints}</p>
                                         <p>Price: {order.orderP2PPrice}</p>
 
                                         {order.orderP2PBuySell === 'SELL' &&

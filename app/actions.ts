@@ -112,10 +112,44 @@ export async function updateUserInfo(body: Prisma.UserUpdateInput) {
                 password: body.password ? hashSync(body.password as string, 10) : findUser.password,
             },
         });
+        revalidatePath('/profile');
     } catch (err) {
         throw err;
     }
 } // Функция для обновления информации о пользователе
+export async function updateUserInfoTelegram(telegram: string, telegramView: boolean) {
+    try {
+        const currentUser = await getUserSession();
+
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        const findUser = await prisma.user.findFirst({
+            where: {
+                id: Number(currentUser.id),
+            },
+        });
+
+        if (!findUser) {
+            throw new Error('Пользователь не найден в базе данных');
+        }
+
+        await prisma.user.update({
+            where: {
+                id: Number(currentUser.id),
+            },
+            data: {
+                telegram : telegram,
+                telegramView : telegramView
+            },
+        });
+        revalidatePath('/profile');
+    } catch (err) {
+        throw err;
+    }
+} // Функция для обновления информации о пользователе
+
 export async function clientCreateBet(formData: any) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {throw new Error('У вас нет прав для выполнения этой операции');}
@@ -1103,6 +1137,7 @@ export async function getPendingOrders(userId: number): Promise<OrderP2P[]> {
                         id: true,
                         cardId: true,
                         fullName: true,
+                        telegram: true,
                         // Добавьте другие необходимые поля
                     }
                 },
@@ -1111,6 +1146,7 @@ export async function getPendingOrders(userId: number): Promise<OrderP2P[]> {
                         id: true,
                         cardId: true,
                         fullName: true,
+                        telegram: true,
                         // Добавьте другие необходимые поля
                     }
                 }
@@ -1121,9 +1157,6 @@ export async function getPendingOrders(userId: number): Promise<OrderP2P[]> {
         throw new Error('Не удалось получить открытые заказы'); // Выбрасывание ошибки для лучшей обработки
     }
 } // 5 секунд обновление открытых сделок для OrderP2PPending
-
-// ################################################
-
 // подтверждение оплаты для продажи
 export async function confirmSellOrderUser2(orderId: number) {
     try {
@@ -1358,7 +1391,7 @@ export async function closeDealTime (orderId: number) {
     }
 }
 
-
+// серверное обновление серверной страницы сделок components\OrderP2PPending.tsx
 export async function checkAndCloseExpiredDeals() {
     const now = new Date();
     const expiredDeals = await prisma.orderP2P.findMany({
@@ -1374,7 +1407,6 @@ export async function checkAndCloseExpiredDeals() {
         await closeDealTime(deal.id); // Передаем id сделки
     }
 }
-
 export async function getServerSideProps() {
     // Проверьте и закройте просроченные сделки перед отображением страницы
     await checkAndCloseExpiredDeals();
@@ -1394,4 +1426,7 @@ export async function getServerSideProps() {
         },
     };
 }
+// ################################################
+
+
 

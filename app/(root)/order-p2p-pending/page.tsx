@@ -48,6 +48,7 @@ export default async function OrderP2PPendingPage() {
                     id: true,
                     cardId: true,
                     fullName: true,
+                    telegram: true,
                     // Добавьте другие необходимые поля
                 }
             },
@@ -56,6 +57,7 @@ export default async function OrderP2PPendingPage() {
                     id: true,
                     cardId: true,
                     fullName: true,
+                    telegram: true,
                     // Добавьте другие необходимые поля
                 }
             }

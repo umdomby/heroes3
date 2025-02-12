@@ -281,7 +281,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
             // Проверяем, что price не равен null или undefined
             if (price !== undefined && price !== null) {
                 await openBuyOrder(order.id, user.id, bankDetails, price, points);
-                alert('Сделка успешно заключена');
+                alert('Сделка успешно заключена, перейдите в раздел: P2P PENDING');
             } else {
                 alert('Пожалуйста, выберите действительные банковские реквизиты и цену');
             }

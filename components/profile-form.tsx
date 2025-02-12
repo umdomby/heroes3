@@ -10,7 +10,14 @@ import { Container } from './container';
 import { Title } from './title';
 import { FormInput } from './form';
 import {Button, Input} from '@/components/ui';
-import { referralGet, updateUserInfo, addBankDetails, deleteBankDetail, updateBankDetails } from '@/app/actions';
+import {
+    referralGet,
+    updateUserInfo,
+    addBankDetails,
+    deleteBankDetail,
+    updateBankDetails,
+    updateUserInfoTelegram
+} from '@/app/actions';
 import {
     Accordion,
     AccordionContent,
@@ -38,6 +45,8 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '', price: '' });
     const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', price: '' });
+    const [telegram, setTelegram] = useState<string>(data.telegram || '');
+    const [telegramView, setTelegramView] = useState<boolean>(data.telegramView || false);
 
 
     useEffect(() => {
@@ -52,6 +61,15 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
         fetchReferrals();
     }, []);
+
+    const handleUpdateTelegram = async () => {
+        try {
+            await updateUserInfoTelegram(telegram, telegramView);
+            toast.success('Telegram данные обновлены');
+        } catch (error) {
+            toast.error('Ошибка при обновлении Telegram данных');
+        }
+    };
 
     const onSubmit = async (data: TFormRegisterValues) => {
         try {
@@ -396,6 +414,44 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                 </div>
                                             </div>
                                         ))}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="telegram">
+                                <AccordionTrigger>Настройки Telegram</AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium mb-2">Telegram</label>
+                                        <Input
+                                            type="text"
+                                            value={telegram}
+                                            onChange={(e) => {
+                                                let value = e.target.value;
+                                                // Убедитесь, что первый символ всегда '@'
+                                                if (!value.startsWith('@')) {
+                                                    value = '@' + value.replace(/^@+/, ''); // Удаляем все начальные '@' и добавляем один
+                                                }
+                                                setTelegram(value);
+                                            }}
+                                            className="mb-2 p-2 border border-gray-300 rounded"
+                                        />
+                                        <div className="flex items-center mb-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={telegramView}
+                                                onChange={(e) => setTelegramView(e.target.checked)}
+                                                className="mr-2"
+                                            />
+                                            <p className="text-sm font-medium ">Показывать Telegram на
+                                                сайте и в созданном orderP2P. </p>
+                                        </div>
+                                        <p className="text-sm font-medium "> В заключившихся сделках (orderP2P) Telegram
+                                            отображается. </p>
+                                        <Button onClick={handleUpdateTelegram}
+                                                className="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                                            Обновить Telegram
+                                        </Button>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
