@@ -687,7 +687,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                     )}
 
                                     {bet.status === "OPEN" && bet.creatorId === user?.id && (
-                                        <div className="mt-4">
+                                        <div className="m-2">
                                             <h4 className="text-lg font-semibold">Закрыть ставку</h4>
                                             <div className="flex gap-2 mt-2">
                                                 <label>
