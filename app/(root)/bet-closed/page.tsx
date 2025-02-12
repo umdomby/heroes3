@@ -37,6 +37,9 @@ export default async function BetClosedPage() {
             category: true,
             product: true,
             productItem: true
+        },
+        orderBy: {
+            createdAt: 'asc' // Сортировка по дате создания в порядке убывания
         }
     });
 

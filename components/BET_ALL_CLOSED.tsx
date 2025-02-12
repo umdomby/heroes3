@@ -1,3 +1,4 @@
+"use client"
 import React from 'react';
 import {
     Table,
@@ -26,12 +27,14 @@ interface Props {
 export const BET_ALL_CLOSED: React.FC<Props> = ({ closedBets }) => {
     return (
         <div>
-
             {closedBets.map((bet) => {
                 const formattedDate = new Date(bet.createdAt).toLocaleDateString();
+                const isDraw = bet.winnerId === null;
                 const isPlayer1Winner = bet.winnerId === bet.player1.id;
-                const player1Class = isPlayer1Winner ? 'text-green-500' : 'text-red-500';
-                const player2Class = isPlayer1Winner ? 'text-red-500' : 'text-green-500';
+
+                // Set player colors based on the outcome
+                const player1Class = isDraw ? 'text-green-500' : (isPlayer1Winner ? 'text-green-500' : 'text-red-500');
+                const player2Class = isDraw ? 'text-green-500' : (isPlayer1Winner ? 'text-red-500' : 'text-green-500');
 
                 return (
                     <div key={bet.id} className="border border-gray-700 mt-1">

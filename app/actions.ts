@@ -683,6 +683,117 @@ export async function closeBet(betId: number, winnerId: number) {
         }
     }
 } // Функция для закрытия ставки
+
+export async function closeBetDraw(betId: number) {
+    const session = await getUserSession();
+    if (!session || session.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        await prisma.$transaction(async (prisma) => {
+            // Update the bet status to CLOSED and set winnerId to null
+            const bet = await prisma.bet.update({
+                where: { id: betId },
+                data: {
+                    status: 'CLOSED',
+                    winnerId: null,
+                },
+                include: {
+                    participants: true,
+                },
+            });
+
+            if (!bet) {
+                throw new Error("Ставка не найдена");
+            }
+
+            // Create a record in BetCLOSED
+            const betClosed = await prisma.betCLOSED.create({
+                data: {
+                    player1Id: bet.player1Id,
+                    player2Id: bet.player2Id,
+                    initBetPlayer1: bet.initBetPlayer1,
+                    initBetPlayer2: bet.initBetPlayer2,
+                    totalBetPlayer1: bet.totalBetPlayer1,
+                    totalBetPlayer2: bet.totalBetPlayer2,
+                    maxBetPlayer1: bet.maxBetPlayer1,
+                    maxBetPlayer2: bet.maxBetPlayer2,
+                    totalBetAmount: bet.totalBetAmount,
+                    creatorId: bet.creatorId,
+                    status: 'CLOSED',
+                    categoryId: bet.categoryId,
+                    productId: bet.productId,
+                    productItemId: bet.productItemId,
+                    winnerId: null,
+                    margin: 0,
+                    createdAt: bet.createdAt,
+                    updatedAt: bet.updatedAt,
+                    oddsBetPlayer1: bet.oddsBetPlayer1,
+                    oddsBetPlayer2: bet.oddsBetPlayer2,
+                    overlapPlayer1: bet.overlapPlayer1,
+                    overlapPlayer2: bet.overlapPlayer2,
+                },
+            });
+
+            // Return the bet amount to all participants
+            for (const participant of bet.participants) {
+                await prisma.user.update({
+                    where: { id: participant.userId },
+                    data: {
+                        points: {
+                            increment: participant.amount,
+                        },
+                    },
+                });
+
+                // Create a record in BetParticipantCLOSED
+                await prisma.betParticipantCLOSED.create({
+                    data: {
+                        betCLOSEDId: betClosed.id,
+                        userId: participant.userId,
+                        amount: participant.amount,
+                        odds: participant.odds,
+                        profit: participant.profit,
+                        player: participant.player,
+                        isWinner: false,
+                        margin: 0,
+                        createdAt: participant.createdAt,
+                        isCovered: participant.isCovered,
+                        overlap: participant.overlap,
+                        return: participant.amount,
+                    },
+                });
+            }
+
+            // Delete participants and the bet
+            await prisma.betParticipant.deleteMany({
+                where: { betId: betId },
+            });
+
+            await prisma.bet.delete({
+                where: { id: betId },
+            });
+        });
+
+        // Revalidate data
+        await updateGlobalData();
+        revalidatePath('/');
+        revalidateTag('bets');
+        revalidateTag('user');
+
+        return { success: true, message: 'Ставка успешно закрыта как ничья' };
+    } catch (error) {
+        console.error("Ошибка при закрытии ставки как ничья:", error);
+
+        if (error instanceof Error) {
+            throw new Error(error.message);
+        } else {
+            throw new Error("Не удалось закрыть ставку как ничья.");
+        }
+    }
+}
+
 export async function addEditPlayer(playerId: number | null, playerName: string) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {throw new Error('У вас нет прав для выполнения этой операции');}

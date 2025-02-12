@@ -12,7 +12,7 @@ import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { placeBet, closeBet } from "@/app/actions";
+import {placeBet, closeBet, closeBetDraw} from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
 import { useUser } from "@/hooks/useUser";
 
@@ -323,24 +323,20 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
     };
 
     const handleCloseBet = async (betId: number) => {
-        if (!selectedWinner) {
+        if (selectedWinner === null) {
             setCloseBetError("Выберите победителя!");
             return;
         }
 
         try {
-            if (selectedWinner === null || selectedWinner === undefined) {
-                throw new Error("Не выбран победитель.");
+            if (selectedWinner === "draw") {
+                await closeBetDraw(betId);
+            } else {
+                await closeBet(betId, selectedWinner);
             }
 
-            // Закрываем ставку
-            await closeBet(betId, selectedWinner);
-
-            // Обновляем данные ставок и пользователя
-            mutate(); // Принудительно выполняем повторный запрос
-            mutateUser(); // Обновляем данные пользователя
-
-            // Сбрасываем состояние
+            mutate();
+            mutateUser();
             setSelectedWinner(null);
             setCloseBetError(null);
         } catch (error) {
@@ -481,7 +477,7 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                     </Table>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    {/* Остальной код остается без изменений */}
+
                                     {bet.status === "OPEN" && (
                                         <div className="m-4">
                                             <p>
@@ -702,8 +698,8 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                         onChange={() => setSelectedWinner(bet.player1Id)}
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER1]}>
-                            {bet.player1.name}
-                          </span>{" "}
+                       {bet.player1.name}
+                   </span>{" "}
                                                 </label>
                                                 <label>
                                                     <input
@@ -713,8 +709,17 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                         onChange={() => setSelectedWinner(bet.player2Id)}
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER2]}>
-                            {bet.player2.name}
-                          </span>{" "}
+                       {bet.player2.name}
+                   </span>{" "}
+                                                </label>
+                                                <label>
+                                                    <input
+                                                        type="radio"
+                                                        name="winner"
+                                                        value="draw"
+                                                        onChange={() => setSelectedWinner("draw")}
+                                                    />
+                                                    <span>Ничья</span>
                                                 </label>
                                             </div>
                                             <Button

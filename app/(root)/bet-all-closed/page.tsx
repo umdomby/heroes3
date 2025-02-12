@@ -18,7 +18,7 @@ export default async function BetAllClosedPage() {
             productItem: true
         },
         orderBy: {
-            createdAt: 'desc'
+            createdAt: 'asc'
         }
     });
 
