@@ -34,7 +34,7 @@ model User {
   betsCLOSEDPlaced      BetParticipantCLOSED[]
   bankDetails           Json?
   referralUserIpAddress ReferralUserIpAddress[]
-  telegram              String?
+  telegram              String?                 @unique
   telegramView          Boolean                 @default(false)
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt

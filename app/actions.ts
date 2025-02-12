@@ -135,15 +135,30 @@ export async function updateUserInfoTelegram(telegram: string, telegramView: boo
             throw new Error('Пользователь не найден в базе данных');
         }
 
+        // Check if the telegram handle is already taken by another user
+        const existingUserWithTelegram = await prisma.user.findFirst({
+            where: {
+                telegram: telegram,
+                id: {
+                    not: Number(currentUser.id), // Exclude the current user from the check
+                },
+            },
+        });
+
+        if (existingUserWithTelegram) {
+            throw new Error('Этот Telegram уже используется другим пользователем');
+        }
+
         await prisma.user.update({
             where: {
                 id: Number(currentUser.id),
             },
             data: {
-                telegram : telegram,
-                telegramView : telegramView
+                telegram: telegram,
+                telegramView: telegramView,
             },
         });
+
         revalidatePath('/profile');
     } catch (err) {
         throw err;

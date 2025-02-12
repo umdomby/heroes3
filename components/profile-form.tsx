@@ -67,7 +67,11 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
             await updateUserInfoTelegram(telegram, telegramView);
             toast.success('Telegram данные обновлены');
         } catch (error) {
-            toast.error('Ошибка при обновлении Telegram данных');
+            if (error instanceof Error) {
+                toast.error(error.message);
+            } else {
+                toast.error('Ошибка при обновлении Telegram данных');
+            }
         }
     };
 
