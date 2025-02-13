@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import {
-    Bet as PrismaBet,
+    Bet3 as PrismaBet3,
     Player,
     PlayerChoice,
     User,
@@ -30,7 +30,7 @@ const fetcher = (url: string, options?: RequestInit) =>
 // Константа для минимального допустимого коэффициента
 const MIN_ODDS = 1.02;
 
-interface Bet extends PrismaBet {
+interface Bet extends PrismaBet3 {
     player1: Player;
     player2: Player;
     player3: Player;
@@ -58,9 +58,10 @@ interface Props {
 
 // Цвета для игроков
 const playerColors = {
-    [PlayerChoice.PLAYER1]: "text-blue-400", // Синий для Player1
-    [PlayerChoice.PLAYER2]: "text-red-400", // Красный для Player2
-    [PlayerChoice.PLAYER3]: "text-green-400", // Зеленый для Player3
+    [PlayerChoice.PLAYER1]: "text-blue-400", // Color for Player 1
+    [PlayerChoice.PLAYER2]: "text-red-400",  // Color for Player 2
+    [PlayerChoice.PLAYER3]: "text-green-400", // Color for Player 3
+    [PlayerChoice.PLAYER4]: "text-yellow-400", // Color for Player 4
 };
 
 export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
@@ -789,12 +790,12 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                                     <input
                                                         type="radio"
                                                         name="winner"
-                                                        value={bet.player3Id}
+                                                        value={bet.player3Id} // Убедитесь, что player3Id существует в интерфейсе Bet
                                                         onChange={() => setSelectedWinner(bet.player3Id)}
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER3]}>
-                       {bet.player3.name}
-                   </span>{" "}
+        {bet.player3.name}
+    </span>{" "}
                                                 </label>
                                                 <label>
                                                     <input
@@ -811,7 +812,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                                 onClick={() => handleCloseBet(bet.id)}
                                                 className="mt-2 w-full"
                                             >
-                                                Закрыть ставку
+                                            Закрыть ставку
                                             </Button>
                                             {closeBetError && (
                                                 <p className="text-red-500">{closeBetError}</p>

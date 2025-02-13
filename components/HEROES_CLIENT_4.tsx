@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import {
-    Bet as PrismaBet,
+    Bet4 as PrismaBet4,
     Player,
     PlayerChoice,
     User,
@@ -29,7 +29,7 @@ const fetcher = (url: string, options?: RequestInit) =>
 
 const MIN_ODDS = 1.02;
 
-interface Bet extends PrismaBet {
+interface Bet extends PrismaBet4 {
     player1: Player;
     player2: Player;
     player3: Player;
