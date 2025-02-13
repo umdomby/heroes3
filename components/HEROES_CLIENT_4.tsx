@@ -12,7 +12,7 @@ import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import {placeBet, closeBet, closeBetDraw} from "@/app/actions";
+import { placeBet4, closeBet4, closeBetDraw4 } from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
 import { useUser } from "@/hooks/useUser";
 
@@ -27,22 +27,31 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
 
-// Константа для минимального допустимого коэффициента
 const MIN_ODDS = 1.02;
 
 interface Bet extends PrismaBet {
     player1: Player;
     player2: Player;
+    player3: Player;
+    player4: Player;
     participants: BetParticipant[];
     maxBetPlayer1: number;
     maxBetPlayer2: number;
-    oddsBetPlayer1: number; // Текущий коэффициент для игрока 1
-    oddsBetPlayer2: number; // Текущий коэффициент для игрока 2
+    maxBetPlayer3: number;
+    maxBetPlayer4: number;
+    oddsBetPlayer1: number;
+    oddsBetPlayer2: number;
+    oddsBetPlayer3: number;
+    oddsBetPlayer4: number;
     margin: number;
     overlapPlayer1: number;
     overlapPlayer2: number;
+    overlapPlayer3: number;
+    overlapPlayer4: number;
     totalBetPlayer1: number;
     totalBetPlayer2: number;
+    totalBetPlayer3: number;
+    totalBetPlayer4: number;
     totalBetAmount: number;
 }
 
@@ -51,10 +60,11 @@ interface Props {
     className?: string;
 }
 
-// Цвета для игроков
 const playerColors = {
-    [PlayerChoice.PLAYER1]: "text-blue-400", // Синий для Player1
-    [PlayerChoice.PLAYER2]: "text-red-400", // Красный для Player2
+    [PlayerChoice.PLAYER1]: "text-blue-400",
+    [PlayerChoice.PLAYER2]: "text-red-400",
+    [PlayerChoice.PLAYER3]: "text-green-400",
+    [PlayerChoice.PLAYER4]: "text-yellow-400",
 };
 
 export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
@@ -64,9 +74,9 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         error,
         isLoading,
         mutate,
-    } = useSWR<Bet[]>("/api/get-bets", fetcher, {
-        refreshInterval: 10000, // Опционально: периодическое обновление
-        revalidateOnFocus: true, // Обновление при фокусе на вкладке
+    } = useSWR<Bet[]>("/api/get-bets4", fetcher, {
+        refreshInterval: 10000,
+        revalidateOnFocus: true,
     });
     const {
         user: userUp,
@@ -87,11 +97,11 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         {}
     );
     const [potentialProfit, setPotentialProfit] = useState<{
-        [key: number]: { player1: number; player2: number };
+        [key: number]: { player1: number; player2: number; player3: number; player4: number };
     }>({});
 
     useEffect(() => {
-        let source = new EventSource("/api/sse");
+        let source = new EventSource("/api/sse4");
 
         source.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -102,8 +112,8 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                     data.type === "update" ||
                     data.type === "delete"
                 ) {
-                    mutate(); // Обновляем данные ставок
-                    mutateUser(); // Обновляем данные пользователя
+                    mutate();
+                    mutateUser();
                 }
             });
         };
@@ -112,7 +122,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             console.error("SSE Error:", err);
             source.close();
             setTimeout(() => {
-                source = new EventSource("/api/sse");
+                source = new EventSource("/api/sse4");
             }, 5000);
         };
 
@@ -121,24 +131,24 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         };
     }, [mutate, mutateUser]);
 
-    // Условные операторы перенесены после всех хуков
     if (isLoadingUser) return <div>Загрузка данных пользователя...</div>;
     if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
 
-    // Фильтрация ставок по статусу OPEN
     const filteredBets =
         bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
 
     const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
-        const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2;
+        const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2 + bet.totalBetPlayer3 + bet.totalBetPlayer4;
         const totalBetOnPlayer =
-            player === PlayerChoice.PLAYER1 ? bet.totalBetPlayer1 : bet.totalBetPlayer2;
+            player === PlayerChoice.PLAYER1 ? bet.totalBetPlayer1 :
+                player === PlayerChoice.PLAYER2 ? bet.totalBetPlayer2 :
+                    player === PlayerChoice.PLAYER3 ? bet.totalBetPlayer3 : bet.totalBetPlayer4;
 
-        // Рассчитываем новый коэффициент после добавления ставки
         const newOdds = totalBets / totalBetOnPlayer;
 
-        // Проверка на минимальный допустимый коэффициент
-        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
+        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 :
+            player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 :
+                player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 : bet.oddsBetPlayer4;
         if (currentOdds < MIN_ODDS) {
             setOddsErrors((prev) => ({
                 ...prev,
@@ -151,9 +161,10 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             return;
         }
 
-        // Проверка на максимальную допустимую ставку
         const maxAllowedBet =
-            player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
+            player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 :
+                player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 :
+                    player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer4;
 
         if (amount > maxAllowedBet) {
             setPlaceBetErrors((prev) => ({
@@ -167,7 +178,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             return;
         }
 
-        // Если проверка пройдена, очищаем ошибки и разблокируем кнопку
         setOddsErrors((prev) => ({
             ...prev,
             [bet.id]: null,
@@ -190,15 +200,18 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         if (!isNaN(value) && value > 0 && selectedPlayer) {
             handleValidation(bet, value, selectedPlayer);
 
-            // Рассчитываем потенциальную прибыль для каждого игрока
             const potentialProfitPlayer1 = Math.floor((value * bet.oddsBetPlayer1) * 100) / 100;
             const potentialProfitPlayer2 = Math.floor((value * bet.oddsBetPlayer2) * 100) / 100;
+            const potentialProfitPlayer3 = Math.floor((value * bet.oddsBetPlayer3) * 100) / 100;
+            const potentialProfitPlayer4 = Math.floor((value * bet.oddsBetPlayer4) * 100) / 100;
 
             setPotentialProfit((prev) => ({
                 ...prev,
                 [bet.id]: {
                     player1: potentialProfitPlayer1,
                     player2: potentialProfitPlayer2,
+                    player3: potentialProfitPlayer3,
+                    player4: potentialProfitPlayer4,
                 },
             }));
         }
@@ -212,15 +225,18 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         if (!isNaN(amount) && amount > 0) {
             handleValidation(bet, amount, selectedPlayer);
 
-            // Рассчитываем потенциальную прибыль для каждого игрока
             const potentialProfitPlayer1 = Math.floor((amount * bet.oddsBetPlayer1) * 100) / 100;
             const potentialProfitPlayer2 = Math.floor((amount * bet.oddsBetPlayer2) * 100) / 100;
+            const potentialProfitPlayer3 = Math.floor((amount * bet.oddsBetPlayer3) * 100) / 100;
+            const potentialProfitPlayer4 = Math.floor((amount * bet.oddsBetPlayer4) * 100) / 100;
 
             setPotentialProfit((prev) => ({
                 ...prev,
                 [bet.id]: {
                     player1: potentialProfitPlayer1,
                     player2: potentialProfitPlayer2,
+                    player3: potentialProfitPlayer3,
+                    player4: potentialProfitPlayer4,
                 },
             }));
         }
@@ -232,32 +248,12 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                 throw new Error("Пользователь не найден");
             }
 
-            const response = await placeBet({
+            const response = await placeBet4({
                 betId: bet.id,
                 userId: user.id,
                 amount,
                 player,
             });
-
-            // Уведомление пользователя в зависимости от статуса перекрытия
-            // switch (response.isCovered) {
-            //     case "OPEN":
-            //         alert("Ваша ставка не перекрыта!");
-            //         break;
-            //     case "CLOSED":
-            //         alert("Ваша ставка полностью перекрыта!");
-            //         break;
-            //     case "PENDING":
-            //         alert("Ваша ставка частично перекрыта!");
-            //         break;
-            //     case "CP":
-            //         alert(
-            //             "Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий!"
-            //         );
-            //         break;
-            //     default:
-            //         alert("Неизвестный статус перекрытия.");
-            // }
 
             mutate();
             setIsBetDisabled((prev) => ({
@@ -266,18 +262,18 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             }));
             setPlaceBetErrors((prev) => ({
                 ...prev,
-                [bet.id]: null, // Очищаем ошибку при успешной ставке
+                [bet.id]: null,
             }));
         } catch (err) {
             if (err instanceof Error) {
                 setPlaceBetErrors((prev) => ({
                     ...prev,
-                    [bet.id]: err.message, // Устанавливаем ошибку для конкретной ставки
+                    [bet.id]: err.message,
                 }));
             } else {
                 setPlaceBetErrors((prev) => ({
                     ...prev,
-                    [bet.id]: "Неизвестная ошибка", // Устанавливаем общую ошибку
+                    [bet.id]: "Неизвестная ошибка",
                 }));
             }
             console.error("Error placing bet:", err);
@@ -330,9 +326,9 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
 
         try {
             if (selectedWinner === "draw") {
-                await closeBetDraw(betId);
+                await closeBetDraw4(betId);
             } else {
-                await closeBet(betId, selectedWinner);
+                await closeBet4(betId, selectedWinner);
             }
 
             mutate();
@@ -373,11 +369,9 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                 </p>
             </div>
 
-            {/* Отображение отфильтрованных ставок */}
             {filteredBets.map((bet: Bet) => {
                 const userBets = bet.participants.filter((p) => p.userId === user?.id);
 
-                // Рассчитываем прибыль и убытки для каждого исхода
                 const totalBetOnPlayer1 = userBets
                     .filter((p) => p.player === PlayerChoice.PLAYER1)
                     .reduce((sum, p) => sum + p.amount, 0);
@@ -386,15 +380,33 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                     .filter((p) => p.player === PlayerChoice.PLAYER2)
                     .reduce((sum, p) => sum + p.amount, 0);
 
+                const totalBetOnPlayer3 = userBets
+                    .filter((p) => p.player === PlayerChoice.PLAYER3)
+                    .reduce((sum, p) => sum + p.amount, 0);
+
+                const totalBetOnPlayer4 = userBets
+                    .filter((p) => p.player === PlayerChoice.PLAYER4)
+                    .reduce((sum, p) => sum + p.amount, 0);
+
                 const profitIfPlayer1Wins =
                     userBets
                         .filter((p) => p.player === PlayerChoice.PLAYER1)
-                        .reduce((sum, p) => sum + p.profit, 0) - totalBetOnPlayer2;
+                        .reduce((sum, p) => sum + p.profit, 0) - (totalBetOnPlayer2 + totalBetOnPlayer3 + totalBetOnPlayer4);
 
                 const profitIfPlayer2Wins =
                     userBets
                         .filter((p) => p.player === PlayerChoice.PLAYER2)
-                        .reduce((sum, p) => sum + p.profit, 0) - totalBetOnPlayer1;
+                        .reduce((sum, p) => sum + p.profit, 0) - (totalBetOnPlayer1 + totalBetOnPlayer3 + totalBetOnPlayer4);
+
+                const profitIfPlayer3Wins =
+                    userBets
+                        .filter((p) => p.player === PlayerChoice.PLAYER3)
+                        .reduce((sum, p) => sum + p.profit, 0) - (totalBetOnPlayer1 + totalBetOnPlayer2 + totalBetOnPlayer4);
+
+                const profitIfPlayer4Wins =
+                    userBets
+                        .filter((p) => p.player === PlayerChoice.PLAYER4)
+                        .reduce((sum, p) => sum + p.profit, 0) - (totalBetOnPlayer1 + totalBetOnPlayer2 + totalBetOnPlayer3);
 
                 return (
                     <div key={bet.id} className="border border-gray-700 mt-1">
@@ -404,24 +416,35 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                     <Table>
                                         <TableBody>
                                             <TableRow>
-                                                {/* Игрок 1 */}
                                                 <TableCell
-                                                    className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[25%]`}
+                                                    className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[20%]`}
                                                 >
                                                     <div>{bet.player1.name}</div>
-                                                    <div>{Math.floor(bet.totalBetPlayer1* 100) / 100}</div>
+                                                    <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                                 </TableCell>
 
-                                                {/* Игрок 2 */}
                                                 <TableCell
-                                                    className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[25%]`}
+                                                    className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[20%]`}
                                                 >
                                                     <div>{bet.player2.name}</div>
-                                                    <div>{Math.floor(bet.totalBetPlayer2* 100) / 100}</div>
+                                                    <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                                 </TableCell>
 
-                                                {/* Коэффициент для игрока 1 и 2*/}
-                                                <TableCell className="w-[15%]">
+                                                <TableCell
+                                                    className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap w-[20%]`}
+                                                >
+                                                    <div>{bet.player3.name}</div>
+                                                    <div>{Math.floor(bet.totalBetPlayer3 * 100) / 100}</div>
+                                                </TableCell>
+
+                                                <TableCell
+                                                    className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis overflow-hidden whitespace-nowrap w-[20%]`}
+                                                >
+                                                    <div>{bet.player4.name}</div>
+                                                    <div>{Math.floor(bet.totalBetPlayer4 * 100) / 100}</div>
+                                                </TableCell>
+
+                                                <TableCell className="w-[20%]">
                                                     <div
                                                         className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                     >
@@ -432,10 +455,19 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                     >
                                                         {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
                                                     </div>
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                    >
+                                                        {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
+                                                    </div>
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                    >
+                                                        {Math.floor(bet.oddsBetPlayer4 * 100) / 100}
+                                                    </div>
                                                 </TableCell>
 
-                                                {/* Прибыль/убыток */}
-                                                <TableCell className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
                                                     <div>
                             <span className={playerColors[PlayerChoice.PLAYER1]}>
                               Победа {bet.player1.name}
@@ -471,6 +503,42 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                   : Math.floor(profitIfPlayer2Wins * 100) / 100}
                             </span>
                                                     </div>
+
+                                                    <div>
+                            <span className={playerColors[PlayerChoice.PLAYER3]}>
+                              Победа {bet.player3.name}
+                            </span>{" "}
+                                                        :{" "}
+                                                        <span
+                                                            className={
+                                                                profitIfPlayer3Wins >= 0
+                                                                    ? "text-green-600"
+                                                                    : "text-red-600"
+                                                            }
+                                                        >
+                              {profitIfPlayer3Wins >= 0
+                                  ? `+${Math.floor(profitIfPlayer3Wins * 100) / 100}`
+                                  : Math.floor(profitIfPlayer3Wins * 100) / 100}
+                            </span>
+                                                    </div>
+
+                                                    <div>
+                            <span className={playerColors[PlayerChoice.PLAYER4]}>
+                              Победа {bet.player4.name}
+                            </span>{" "}
+                                                        :{" "}
+                                                        <span
+                                                            className={
+                                                                profitIfPlayer4Wins >= 0
+                                                                    ? "text-green-600"
+                                                                    : "text-red-600"
+                                                            }
+                                                        >
+                              {profitIfPlayer4Wins >= 0
+                                  ? `+${Math.floor(profitIfPlayer4Wins * 100) / 100}`
+                                  : Math.floor(profitIfPlayer4Wins * 100) / 100}
+                            </span>
+                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
@@ -504,7 +572,26 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                 {Math.floor(bet.maxBetPlayer2 * 100) / 100}
             </span>
                                             </p>
-                                            {/* Calculate and display the difference in coverage bets as points */}
+                                            <p>
+                                                Максимальная ставка на{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER3]}>
+                {bet.player3.name}
+            </span>
+                                                :{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER3]}>
+                {Math.floor(bet.maxBetPlayer3 * 100) / 100}
+            </span>
+                                            </p>
+                                            <p>
+                                                Максимальная ставка на{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER4]}>
+                {bet.player4.name}
+            </span>
+                                                :{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER4]}>
+                {Math.floor(bet.maxBetPlayer4 * 100) / 100}
+            </span>
+                                            </p>
                                             <p>
                                                 Разница ставок перекрытия для{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
@@ -525,6 +612,26 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                  {Math.floor(bet.overlapPlayer2 * 100) / 100} Points
             </span>
                                             </p>
+                                            <p>
+                                                Разница ставок перекрытия для{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER3]}>
+                {bet.player3.name}
+            </span>
+                                                :{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER3]}>
+                 {Math.floor(bet.overlapPlayer3 * 100) / 100} Points
+            </span>
+                                            </p>
+                                            <p>
+                                                Разница ставок перекрытия для{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER4]}>
+                {bet.player4.name}
+            </span>
+                                                :{" "}
+                                                <span className={playerColors[PlayerChoice.PLAYER4]}>
+                 {Math.floor(bet.overlapPlayer4 * 100) / 100} Points
+            </span>
+                                            </p>
                                         </div>
                                     )}
 
@@ -534,14 +641,12 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 Ваши ставки на этот матч:
                                             </h4>
                                             {userBets.map((participant) => {
-                                                // Рассчитываем процент перекрытия на основе прибыли
                                                 const profitToCover = participant.amount * (participant.odds - 1);
                                                 const overlapPercentage =
                                                     participant.overlap > 0
                                                         ? Math.floor((participant.overlap / profitToCover) * 10000) / 100
                                                         : 0;
 
-                                                // Определяем статус перекрытия
                                                 let overlapStatus = "";
                                                 switch (participant.isCovered) {
                                                     case "OPEN":
@@ -572,7 +677,11 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                             <strong className={playerColors[participant.player]}>
                                                                 {participant.player === PlayerChoice.PLAYER1
                                                                     ? bet.player1.name
-                                                                    : bet.player2.name}
+                                                                    : participant.player === PlayerChoice.PLAYER2
+                                                                        ? bet.player2.name
+                                                                        : participant.player === PlayerChoice.PLAYER3
+                                                                            ? bet.player3.name
+                                                                            : bet.player4.name}
                                                             </strong>
                                                             {", "} Коэффициент:{" "}
                                                             <span className={playerColors[participant.player]}>
@@ -584,7 +693,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                         </span>
                                                             {", "} {new Date(participant.createdAt).toLocaleString()}
                                                         </p>
-                                                        {/* Отображаем информацию о перекрытии */}
                                                         <p>
                         <span
                             className={
@@ -618,7 +726,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         required
                                                         onChange={(e) => handleAmountChange(e, bet)}
                                                     />
-                                                    <label className="border p-2 rounded w-[30%] text-center">
+                                                    <label className="border p-2 rounded w-[20%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
@@ -642,7 +750,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             </span>
                                                     </label>
 
-                                                    <label className="border p-2 rounded w-[30%] text-center">
+                                                    <label className="border p-2 rounded w-[20%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
@@ -663,6 +771,54 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         />
                                                         <span className={playerColors[PlayerChoice.PLAYER2]}>
                 {bet.player2.name}
+            </span>
+                                                    </label>
+
+                                                    <label className="border p-2 rounded w-[20%] text-center">
+                                                        <div
+                                                            className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                        >
+                                                            {"("}
+                                                            {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
+                                                            {") "}
+                                                            {potentialProfit[bet.id]?.player3
+                                                                ? `+${Math.floor(potentialProfit[bet.id].player3 * 100) / 100}`
+                                                                : ""}
+                                                        </div>
+                                                        <input
+                                                            className="mt-1"
+                                                            type="radio"
+                                                            name="player"
+                                                            value={PlayerChoice.PLAYER3}
+                                                            required
+                                                            onChange={(e) => handlePlayerChange(e, bet)}
+                                                        />
+                                                        <span className={playerColors[PlayerChoice.PLAYER3]}>
+                {bet.player3.name}
+            </span>
+                                                    </label>
+
+                                                    <label className="border p-2 rounded w-[20%] text-center">
+                                                        <div
+                                                            className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                        >
+                                                            {"("}
+                                                            {Math.floor(bet.oddsBetPlayer4 * 100) / 100}
+                                                            {") "}
+                                                            {potentialProfit[bet.id]?.player4
+                                                                ? `+${Math.floor(potentialProfit[bet.id].player4 * 100) / 100}`
+                                                                : ""}
+                                                        </div>
+                                                        <input
+                                                            className="mt-1"
+                                                            type="radio"
+                                                            name="player"
+                                                            value={PlayerChoice.PLAYER4}
+                                                            required
+                                                            onChange={(e) => handlePlayerChange(e, bet)}
+                                                        />
+                                                        <span className={playerColors[PlayerChoice.PLAYER4]}>
+                {bet.player4.name}
             </span>
                                                     </label>
                                                     <Button
@@ -710,6 +866,28 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER2]}>
                        {bet.player2.name}
+                   </span>{" "}
+                                                </label>
+                                                <label>
+                                                    <input
+                                                        type="radio"
+                                                        name="winner"
+                                                        value={bet.player3Id}
+                                                        onChange={() => setSelectedWinner(bet.player3Id)}
+                                                    />
+                                                    <span className={playerColors[PlayerChoice.PLAYER3]}>
+                       {bet.player3.name}
+                   </span>{" "}
+                                                </label>
+                                                <label>
+                                                    <input
+                                                        type="radio"
+                                                        name="winner"
+                                                        value={bet.player4Id}
+                                                        onChange={() => setSelectedWinner(bet.player4Id)}
+                                                    />
+                                                    <span className={playerColors[PlayerChoice.PLAYER4]}>
+                       {bet.player4.name}
                    </span>{" "}
                                                 </label>
                                                 <label>

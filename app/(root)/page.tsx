@@ -11,6 +11,7 @@ import { HEROES_CLIENT_NO_REG } from "@/components/HEROES_CLIENT_NO_REG";
 import BanedNotification from "@/components/BanedNotification";
 import Link from "next/link";
 import {HEROES_CLIENT_3} from "@/components/HEROES_CLIENT_3";
+import {HEROES_CLIENT_4} from "@/components/HEROES_CLIENT_4";
 
 const FixedLink = () => (
     <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
@@ -42,6 +43,7 @@ export default async function Home() {
                         <GlobalData />
                         <HEROES_CLIENT user={user} />
                         <HEROES_CLIENT_3 user={user} />
+                        <HEROES_CLIENT_4 user={user} />
                     </Suspense>
                 </>
             )}

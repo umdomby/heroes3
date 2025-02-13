@@ -15,16 +15,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import React, { useState } from 'react';
 import { Category, Product, ProductItem, User, Player } from '@prisma/client';
-import { clientCreateBet } from "@/app/actions";
+import { clientCreateBet4 } from "@/app/actions";
 
 const createBetSchema = z.object({
-    player1Id: z.coerce.number().int(), // Только целые числа
-    player2Id: z.coerce.number().int(), // Только целые числа
-    initBetPlayer1: z.number().int().min(10, { message: 'Минимальная ставка на игрока 1: 10 баллов' }), // Только целые числа
-    initBetPlayer2: z.number().int().min(10, { message: 'Минимальная ставка на игрока 2: 10 баллов' }), // Только целые числа
-    categoryId: z.coerce.number().int(), // Только целые числа
-    productId: z.coerce.number().int(), // Только целые числа
-    productItemId: z.coerce.number().int(), // Только целые числа
+    player1Id: z.coerce.number().int(),
+    player2Id: z.coerce.number().int(),
+    player3Id: z.coerce.number().int(),
+    player4Id: z.coerce.number().int(),
+    initBetPlayer1: z.number().int().min(10, { message: 'Минимальная ставка на игрока 1: 10 баллов' }),
+    initBetPlayer2: z.number().int().min(10, { message: 'Минимальная ставка на игрока 2: 10 баллов' }),
+    initBetPlayer3: z.number().int().min(10, { message: 'Минимальная ставка на игрока 3: 10 баллов' }),
+    initBetPlayer4: z.number().int().min(10, { message: 'Минимальная ставка на игрока 4: 10 баллов' }),
+    categoryId: z.coerce.number().int(),
+    productId: z.coerce.number().int(),
+    productItemId: z.coerce.number().int(),
 });
 
 interface Props {
@@ -33,7 +37,7 @@ interface Props {
     products: Product[];
     productItems: ProductItem[];
     players: Player[];
-    createBet: typeof clientCreateBet;
+    createBet: typeof clientCreateBet4;
 }
 
 export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
@@ -42,8 +46,12 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
         defaultValues: {
             player1Id: players[0]?.id,
             player2Id: players[1]?.id,
-            initBetPlayer1: 50,
-            initBetPlayer2: 50,
+            player3Id: players[2]?.id,
+            player4Id: players[3]?.id,
+            initBetPlayer1: 25,
+            initBetPlayer2: 25,
+            initBetPlayer3: 25,
+            initBetPlayer4: 25,
             categoryId: categories[0]?.id,
             productId: products[0]?.id,
             productItemId: productItems[0]?.id,
@@ -53,33 +61,39 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
     const [createBetError, setCreateBetError] = useState<string | null>(null);
 
     const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
-        const { initBetPlayer1, initBetPlayer2 } = values;
+        const { initBetPlayer1, initBetPlayer2, initBetPlayer3, initBetPlayer4 } = values;
 
-        // Проверка на минимальную сумму ставки
-        if (initBetPlayer1 < 10 || initBetPlayer2 < 10) {
+        // Check minimum bet amount
+        if (initBetPlayer1 < 10 || initBetPlayer2 < 10 || initBetPlayer3 < 10 || initBetPlayer4 < 10) {
             setCreateBetError('Минимальная ставка на каждого игрока: 10 баллов');
             return;
         }
 
-        // Проверка на максимальную сумму ставки (100 баллов)
-        const totalBetAmount = initBetPlayer1 + initBetPlayer2;
+        // Check maximum total bet amount (100 points)
+        const totalBetAmount = initBetPlayer1 + initBetPlayer2 + initBetPlayer3 + initBetPlayer4;
         if (totalBetAmount > 100) {
-            setCreateBetError('Максимальная сумма ставок на обоих игроков: 100 баллов');
+            setCreateBetError('Максимальная сумма ставок на всех игроков: 100 баллов');
             return;
         }
 
-        // Рассчитываем коэффициенты
-        const totalBets = initBetPlayer1 + initBetPlayer2;
+        // Calculate odds
+        const totalBets = initBetPlayer1 + initBetPlayer2 + initBetPlayer3 + initBetPlayer4;
         const oddsBetPlayer1 = totalBets / initBetPlayer1;
         const oddsBetPlayer2 = totalBets / initBetPlayer2;
+        const oddsBetPlayer3 = totalBets / initBetPlayer3;
+        const oddsBetPlayer4 = totalBets / initBetPlayer4;
 
         const betData = {
             ...values,
             oddsBetPlayer1,
             oddsBetPlayer2,
+            oddsBetPlayer3,
+            oddsBetPlayer4,
             creatorId: user.id,
             totalBetPlayer1: initBetPlayer1,
             totalBetPlayer2: initBetPlayer2,
+            totalBetPlayer3: initBetPlayer3,
+            totalBetPlayer4: initBetPlayer4,
         };
 
         try {
@@ -99,7 +113,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
         <div>
             <div>Ваши баллы: {user?.points}</div>
             <div style={{ color: 'blue', marginBottom: '10px' }}>
-                Вы можете распределить только 100 баллов между двумя игроками. Баллы не списываются с вашего баланса.
+                Вы можете распределить только 100 баллов между четырьмя игроками. Баллы не списываются с вашего баланса.
             </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -141,6 +155,44 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
+                    {/* Поле выбора Player 3 */}
+                    <FormField
+                        control={form.control}
+                        name="player3Id"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Player 3</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {players.map((player) => (
+                                            <option key={player.id} value={player.id}>{player.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Поле выбора Player 4 */}
+                    <FormField
+                        control={form.control}
+                        name="player4Id"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Player 4</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {players.map((player) => (
+                                            <option key={player.id} value={player.id}>{player.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
                     {/* Поле для ставки на Player 1 */}
                     <FormField
                         control={form.control}
@@ -156,7 +208,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         value={field.value === undefined ? '' : field.value}
                                         onChange={(e) => {
                                             const value = e.target.valueAsNumber;
-                                            if (Number.isInteger(value)) { // Проверка на целое число
+                                            if (Number.isInteger(value)) {
                                                 field.onChange(value);
                                             }
                                         }}
@@ -182,7 +234,59 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         value={field.value === undefined ? '' : field.value}
                                         onChange={(e) => {
                                             const value = e.target.valueAsNumber;
-                                            if (Number.isInteger(value)) { // Проверка на целое число
+                                            if (Number.isInteger(value)) {
+                                                field.onChange(value);
+                                            }
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Поле для ставки на Player 3 */}
+                    <FormField
+                        control={form.control}
+                        name="initBetPlayer3"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Ставка на Player 3</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Сумма ставки"
+                                        type="number"
+                                        {...field}
+                                        value={field.value === undefined ? '' : field.value}
+                                        onChange={(e) => {
+                                            const value = e.target.valueAsNumber;
+                                            if (Number.isInteger(value)) {
+                                                field.onChange(value);
+                                            }
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Поле для ставки на Player 4 */}
+                    <FormField
+                        control={form.control}
+                        name="initBetPlayer4"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Ставка на Player 4</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Сумма ставки"
+                                        type="number"
+                                        {...field}
+                                        value={field.value === undefined ? '' : field.value}
+                                        onChange={(e) => {
+                                            const value = e.target.valueAsNumber;
+                                            if (Number.isInteger(value)) {
                                                 field.onChange(value);
                                             }
                                         }}
@@ -232,23 +336,23 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     />
 
                     {/* Поле выбора элемента продукта */}
-                    {/*<FormField*/}
-                    {/*    control={form.control}*/}
-                    {/*    name="productItemId"*/}
-                    {/*    render={({ field }) => (*/}
-                    {/*        <FormItem>*/}
-                    {/*            <FormLabel>Product Item</FormLabel>*/}
-                    {/*            <FormControl>*/}
-                    {/*                <select {...field}>*/}
-                    {/*                    {productItems.map((productItem) => (*/}
-                    {/*                        <option key={productItem.id} value={productItem.id}>{productItem.name}</option>*/}
-                    {/*                    ))}*/}
-                    {/*                </select>*/}
-                    {/*            </FormControl>*/}
-                    {/*            <FormMessage />*/}
-                    {/*        </FormItem>*/}
-                    {/*    )}*/}
-                    {/*/>*/}
+                    <FormField
+                        control={form.control}
+                        name="productItemId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Product Item</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {productItems.map((productItem) => (
+                                            <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     {/* Кнопка отправки формы */}
                     <Button type="submit">Create Bet</Button>

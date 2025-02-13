@@ -2244,3 +2244,681 @@ export async function closeBetDraw3(betId: number) {
     }
 }
 
+
+// Функция для расчета коэффициентов на 4 игроков
+// Функция для расчета коэффициентов на 4 игроков
+function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number, totalWithInitPlayer4: number) {
+    const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2 + totalWithInitPlayer3 + totalWithInitPlayer4;
+
+    const oddsPlayer1 = totalWithInitPlayer1 === 0 ? 1 : totalWithInit / totalWithInitPlayer1;
+    const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : totalWithInit / totalWithInitPlayer2;
+    const oddsPlayer3 = totalWithInitPlayer3 === 0 ? 1 : totalWithInit / totalWithInitPlayer3;
+    const oddsPlayer4 = totalWithInitPlayer4 === 0 ? 1 : totalWithInit / totalWithInitPlayer4;
+
+    return {
+        oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+        oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+        oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
+        oddsPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
+    };
+}
+// Функция для расчета максимальных ставок на 4 игрока
+function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initBetPlayer3: number, initBetPlayer4: number): {
+    maxBetPlayer1: number,
+    maxBetPlayer2: number,
+    maxBetPlayer3: number,
+    maxBetPlayer4: number
+} {
+    const maxBetPlayer1 = Math.floor((initBetPlayer2 + initBetPlayer3 + initBetPlayer4) * 100) / 100;
+    const maxBetPlayer2 = Math.floor((initBetPlayer1 + initBetPlayer3 + initBetPlayer4) * 100) / 100;
+    const maxBetPlayer3 = Math.floor((initBetPlayer1 + initBetPlayer2 + initBetPlayer4) * 100) / 100;
+    const maxBetPlayer4 = Math.floor((initBetPlayer1 + initBetPlayer2 + initBetPlayer3) * 100) / 100;
+    return { maxBetPlayer1, maxBetPlayer2, maxBetPlayer3, maxBetPlayer4 };
+}
+// создание ставок на 4 игрока
+export async function clientCreateBet4(formData: any) {
+    const session = await getUserSession();
+    if (!session || session.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+    console.log("Form Data:", formData);
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: Number(session.id) },
+        });
+
+        if (!user) {
+            throw new Error("Пользователь не найден");
+        }
+
+        const totalBetAmount = Math.floor((formData.initBetPlayer1 + formData.initBetPlayer2 + formData.initBetPlayer3 + formData.initBetPlayer4) * 100) / 100;
+        if (totalBetAmount > 100) {
+            throw new Error("Сумма начальных ставок не должна превышать 100 баллов");
+        }
+
+        const { maxBetPlayer1, maxBetPlayer2, maxBetPlayer3, maxBetPlayer4 } = calculateMaxBets4(formData.initBetPlayer1, formData.initBetPlayer2, formData.initBetPlayer3, formData.initBetPlayer4);
+
+        const newBet = await prisma.bet4.create({
+            data: {
+                status: 'OPEN',
+                totalBetAmount: 0,
+                maxBetPlayer1,
+                maxBetPlayer2,
+                maxBetPlayer3,
+                maxBetPlayer4,
+                oddsBetPlayer1: Math.floor((parseFloat(formData.oddsBetPlayer1) * 100)) / 100,
+                oddsBetPlayer2: Math.floor((parseFloat(formData.oddsBetPlayer2) * 100)) / 100,
+                oddsBetPlayer3: Math.floor((parseFloat(formData.oddsBetPlayer3) * 100)) / 100,
+                oddsBetPlayer4: Math.floor((parseFloat(formData.oddsBetPlayer4) * 100)) / 100,
+                player1Id: formData.player1Id,
+                player2Id: formData.player2Id,
+                player3Id: formData.player3Id,
+                player4Id: formData.player4Id,
+                initBetPlayer1: Math.floor((parseFloat(formData.initBetPlayer1) * 100)) / 100,
+                initBetPlayer2: Math.floor((parseFloat(formData.initBetPlayer2) * 100)) / 100,
+                initBetPlayer3: Math.floor((parseFloat(formData.initBetPlayer3) * 100)) / 100,
+                initBetPlayer4: Math.floor((parseFloat(formData.initBetPlayer4) * 100)) / 100,
+                overlapPlayer1: 0,
+                overlapPlayer2: 0,
+                overlapPlayer3: 0,
+                overlapPlayer4: 0,
+                categoryId: formData.categoryId,
+                productId: formData.productId,
+                productItemId: formData.productItemId,
+                creatorId: formData.creatorId,
+                totalBetPlayer1: 0,
+                totalBetPlayer2: 0,
+                totalBetPlayer3: 0,
+                totalBetPlayer4: 0,
+                margin: 0,
+            },
+        });
+
+        console.log("New bet created:", newBet);
+        await updateGlobalData();
+        revalidatePath('/');
+
+        return newBet;
+    } catch (error) {
+        if (error === null || error === undefined) {
+            console.error('Неизвестная ошибка (error is null или undefined)');
+        } else if (error instanceof Error) {
+            console.error(error.message);
+            console.error('Стек ошибки:', error.stack);
+        } else {
+            console.error('Ошибка в placeBet:', error);
+        }
+
+        throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+    }
+}
+// ставки на 4 игрока
+export async function placeBet4(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
+    try {
+        console.log('Запуск функции placeBet с formData:', formData);
+
+        if (!formData || typeof formData !== 'object') {
+            throw new Error('Неверные данные формы');
+        }
+
+        const { betId, userId, amount, player } = formData;
+
+        if (!betId || !userId || !amount || !player) {
+            throw new Error('Отсутствуют обязательные поля в данных формы');
+        }
+
+        const bet = await prisma.bet3.findUnique({
+            where: { id: betId },
+            include: { participants: true },
+        });
+
+        if (!bet || bet.status !== 'OPEN') {
+            throw new Error('Ставка недоступна для участия');
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user || user.points < amount) {
+            throw new Error('Недостаточно баллов для совершения ставки');
+        }
+
+        const totalPlayer1 = bet.participants
+            .filter(p => p.player === PlayerChoice.PLAYER1)
+            .reduce((sum, p) => sum + p.profit, 0);
+
+        const totalPlayer2 = bet.participants
+            .filter(p => p.player === PlayerChoice.PLAYER2)
+            .reduce((sum, p) => sum + p.profit, 0);
+
+        const totalPlayer3 = bet.participants
+            .filter(p => p.player === PlayerChoice.PLAYER3)
+            .reduce((sum, p) => sum + p.profit, 0);
+
+        const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
+        const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
+        const totalWithInitPlayer3 = totalPlayer3 + (bet.initBetPlayer3 || 0);
+
+        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
+        if (currentOdds <= 1.01) {
+            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.02');
+        }
+
+        const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
+
+        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer3;
+        if (amount > maxAllowedBet) {
+            throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
+        }
+
+        await prisma.betParticipant3.create({
+            data: {
+                betId,
+                userId,
+                amount,
+                player,
+                odds: currentOdds,
+                profit: potentialProfit,
+                margin: 0,
+                isCovered: "OPEN",
+                overlap: 0,
+            },
+        });
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                points: user.points - amount,
+            },
+        });
+
+        const {
+            oddsPlayer1,
+            oddsPlayer2,
+            oddsPlayer3
+        } = calculateOdds3(
+            totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? amount : 0),
+            totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? amount : 0),
+            totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? amount : 0)
+        );
+
+        const totalMargin = await prisma.betParticipant3.aggregate({
+            _sum: {
+                margin: true,
+            },
+            where: {
+                betId: betId,
+            },
+        });
+
+        const updatedBetData = {
+            oddsBetPlayer1: Math.floor((oddsPlayer1 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
+            oddsBetPlayer2: Math.floor((oddsPlayer2 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
+            oddsBetPlayer3: Math.floor((oddsPlayer3 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
+            totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
+            totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
+            totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
+            totalBetAmount: totalPlayer1 + totalPlayer2 + totalPlayer3 + amount,
+            margin: totalMargin._sum.margin || 0,
+            maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
+            maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
+            maxBetPlayer3: player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer3 + amount,
+            overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
+            overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
+            overlapPlayer3: player === PlayerChoice.PLAYER3 ? bet.overlapPlayer3 + amount : bet.overlapPlayer3,
+        };
+
+        await prisma.bet3.update({
+            where: { id: betId },
+            data: updatedBetData,
+        }).then(async () => {
+            await balanceOverlaps3(betId);
+        }).then(async () => {
+            const participants = await prisma.betParticipant3.findMany({
+                where: { betId },
+                orderBy: { createdAt: 'asc' },
+            });
+            for (const participant of participants) {
+                let newIsCoveredStatus: IsCovered;
+
+                if (areNumbersEqual(participant.overlap, 0)) {
+                    newIsCoveredStatus = IsCovered.OPEN;
+                } else if (participant.overlap >= participant.profit) {
+                    newIsCoveredStatus = IsCovered.CLOSED;
+                } else {
+                    newIsCoveredStatus = IsCovered.PENDING;
+                }
+
+                if (participant.isCovered !== newIsCoveredStatus) {
+                    await prisma.betParticipant3.update({
+                        where: { id: participant.id },
+                        data: { isCovered: newIsCoveredStatus },
+                    });
+                }
+            }
+        }).then(async () => {
+            await updateGlobalData();
+        });
+
+        revalidatePath('/');
+
+        return { success: true };
+    } catch (error) {
+        if (error === null || error === undefined) {
+            console.error('Ошибка в placeBet: Неизвестная ошибка (error is null или undefined)');
+        } else if (error instanceof Error) {
+            console.error('Ошибка в placeBet:', error.message);
+            console.error('Стек ошибки:', error.stack);
+        } else {
+            console.error('Ошибка в placeBet:', error);
+        }
+
+        throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+    }
+}
+// Функция для балансировки перекрытий на 4 игроков
+async function balanceOverlaps4(betId: number) {
+    console.log(`Начало balanceOverlaps для betId: ${betId}`);
+
+    const participants = await prisma.betParticipant3.findMany({
+        where: { betId },
+        orderBy: { createdAt: 'asc' },
+    });
+
+    let bet = await prisma.bet3.findUnique({
+        where: { id: betId },
+    });
+
+    if (!bet) {
+        throw new Error('Ставка не найдена');
+    }
+
+    async function transferOverlap(
+        targetParticipants: BetParticipant3[],
+        overlapField: 'overlapPlayer1' | 'overlapPlayer2' | 'overlapPlayer3',
+        bet: Bet3
+    ) {
+        let processedParticipants = 0;
+        const totalParticipants = targetParticipants.length;
+
+        while (bet[overlapField] > 0) {
+            let allProfitEqualOverlap = true;
+
+            for (let i = 0; i < targetParticipants.length; i++) {
+                const target = targetParticipants[i];
+
+                if (Math.floor(target.profit * 100) / 100 !== Math.floor(target.overlap * 100) / 100) {
+                    allProfitEqualOverlap = false;
+
+                    const neededOverlap = Math.floor((target.profit - target.overlap) * 100) / 100;
+                    const overlapToAdd = Math.min(neededOverlap, bet[overlapField]);
+
+                    if (overlapToAdd > 0) {
+                        const newOverlap = Math.floor((target.overlap + overlapToAdd) * 100) / 100;
+                        if (newOverlap > target.profit) {
+                            throw new Error('Ошибка: overlap не может быть больше profit');
+                        }
+
+                        await prisma.betParticipant3.update({
+                            where: { id: target.id },
+                            data: {
+                                overlap: newOverlap,
+                            },
+                        });
+
+                        await prisma.bet3.update({
+                            where: { id: betId },
+                            data: {
+                                [overlapField]: Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100,
+                            },
+                        });
+
+                        bet[overlapField] = Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100;
+
+                        targetParticipants[i].overlap = newOverlap;
+
+                        if (bet[overlapField] <= 0) break;
+                    }
+                }
+
+                processedParticipants++;
+
+                if (processedParticipants >= totalParticipants) break;
+            }
+
+            if (allProfitEqualOverlap || processedParticipants >= totalParticipants) break;
+        }
+    }
+
+    const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
+    const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
+    const participantsPlayer3 = participants.filter(p => p.player === PlayerChoice.PLAYER3);
+
+    console.log('Переносим перекрытия от участников PLAYER1');
+    await transferOverlap(participantsPlayer1, 'overlapPlayer2', bet);
+    await transferOverlap(participantsPlayer1, 'overlapPlayer3', bet);
+
+    console.log('Переносим перекрытия от участников PLAYER2');
+    await transferOverlap(participantsPlayer2, 'overlapPlayer1', bet);
+    await transferOverlap(participantsPlayer2, 'overlapPlayer3', bet);
+
+    console.log('Переносим перекрытия от участников PLAYER3');
+    await transferOverlap(participantsPlayer3, 'overlapPlayer1', bet);
+    await transferOverlap(participantsPlayer3, 'overlapPlayer2', bet);
+
+    console.log(`Завершение balanceOverlaps для betId: ${betId}`);
+}
+// Функция для закрытия ставки на 4 игрока
+export async function closeBet4(betId: number, winnerId: number) {
+    const session = await getUserSession();
+    if (!session || session.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        if (winnerId === null || winnerId === undefined) {
+            throw new Error("Не выбран победитель.");
+        }
+
+        await prisma.$transaction(async (prisma) => {
+            // Обновляем статус ставки и получаем данные
+            const bet = await prisma.bet3.update({
+                where: { id: betId },
+                data: {
+                    status: 'CLOSED',
+                    winnerId: winnerId,
+                },
+                include: {
+                    participants: true,
+                    player1: true,
+                    player2: true,
+                    player3: true,
+                },
+            });
+
+            if (!bet) {
+                throw new Error("Ставка не найдена");
+            }
+
+            // Создаем запись в BetCLOSED3
+            const betClosed = await prisma.betCLOSED3.create({
+                data: {
+                    player1Id: bet.player1Id,
+                    player2Id: bet.player2Id,
+                    player3Id: bet.player3Id,
+                    initBetPlayer1: bet.initBetPlayer1,
+                    initBetPlayer2: bet.initBetPlayer2,
+                    initBetPlayer3: bet.initBetPlayer3,
+                    totalBetPlayer1: bet.totalBetPlayer1,
+                    totalBetPlayer2: bet.totalBetPlayer2,
+                    totalBetPlayer3: bet.totalBetPlayer3,
+                    maxBetPlayer1: bet.maxBetPlayer1,
+                    maxBetPlayer2: bet.maxBetPlayer2,
+                    maxBetPlayer3: bet.maxBetPlayer3,
+                    totalBetAmount: bet.totalBetAmount,
+                    creatorId: bet.creatorId,
+                    status: 'CLOSED',
+                    categoryId: bet.categoryId,
+                    productId: bet.productId,
+                    productItemId: bet.productItemId,
+                    winnerId: bet.winnerId,
+                    margin: bet.margin,
+                    createdAt: bet.createdAt,
+                    updatedAt: bet.updatedAt,
+                    oddsBetPlayer1: bet.oddsBetPlayer1,
+                    oddsBetPlayer2: bet.oddsBetPlayer2,
+                    oddsBetPlayer3: bet.oddsBetPlayer3,
+                    overlapPlayer1: bet.overlapPlayer1,
+                    overlapPlayer2: bet.overlapPlayer2,
+                    overlapPlayer3: bet.overlapPlayer3,
+                },
+            });
+
+            // Определяем победителя
+            const winningPlayer =
+                bet.winnerId === bet.player1Id ? PlayerChoice.PLAYER1 :
+                    bet.winnerId === bet.player2Id ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER3;
+
+            // Обновляем статус участников
+            await prisma.betParticipant3.updateMany({
+                where: { betId: betId },
+                data: {
+                    isWinner: false,
+                },
+            });
+
+            await prisma.betParticipant3.updateMany({
+                where: {
+                    betId: betId,
+                    player: winningPlayer,
+                },
+                data: {
+                    isWinner: true,
+                },
+            });
+
+            // Перераспределяем баллы
+            const allParticipants = await prisma.betParticipant3.findMany({
+                where: { betId: betId },
+            });
+
+            let totalMargin = 0;
+
+            for (const participant of allParticipants) {
+                let pointsToReturn = 0;
+                let margin = 0;
+
+                if (participant.isWinner) {
+                    if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
+                        margin = participant.overlap * MARGIN;
+                        pointsToReturn = participant.overlap + participant.amount - margin;
+                    } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
+                        pointsToReturn = participant.amount;
+                    } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
+                        margin = participant.overlap * MARGIN;
+                        pointsToReturn = participant.overlap + participant.amount - margin;
+                    }
+                    totalMargin += margin;
+                } else {
+                    if (participant.isCovered === "CLOSED" && participant.profit === participant.overlap) {
+                        pointsToReturn = 0;
+                    } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
+                        pointsToReturn = participant.amount;
+                    } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
+                        pointsToReturn = (participant.amount - (participant.overlap / participant.odds)) / (parseFloat(process.env.LOSE_PENDING_BET || '2'));
+                    }
+                }
+
+                // Обновляем баллы пользователя
+                if (pointsToReturn > 0) {
+                    await prisma.user.update({
+                        where: { id: participant.userId },
+                        data: {
+                            points: {
+                                increment: Math.floor(pointsToReturn * 100) / 100,
+                            },
+                        },
+                    });
+                }
+
+                // Создаем запись в BetParticipantCLOSED3
+                await prisma.betParticipantCLOSED3.create({
+                    data: {
+                        betCLOSED3Id: betClosed.id,
+                        userId: participant.userId,
+                        amount: participant.amount,
+                        odds: participant.odds,
+                        profit: participant.profit,
+                        player: participant.player,
+                        isWinner: participant.isWinner,
+                        margin: margin,
+                        createdAt: participant.createdAt,
+                        isCovered: participant.isCovered,
+                        overlap: participant.overlap,
+                        return: Math.floor(pointsToReturn * 100) / 100,
+                    },
+                });
+            }
+
+            // Обновляем поле margin в BetCLOSED3
+            await prisma.betCLOSED3.update({
+                where: { id: betClosed.id },
+                data: {
+                    margin: Math.floor(totalMargin * 100) / 100,
+                },
+            });
+
+            // Удаляем участников и ставку
+            await prisma.betParticipant3.deleteMany({
+                where: { betId: betId },
+            });
+
+            await prisma.bet3.delete({
+                where: { id: betId },
+            });
+
+            // Обновляем глобальные данные
+            await prisma.globalData.update({
+                where: { id: 1 },
+                data: {
+                    margin: {
+                        increment: Math.floor((bet.margin ?? 0) * 100) / 100,
+                    },
+                },
+            });
+        });
+
+        // Ревалидация данных
+        await updateGlobalData();
+        revalidatePath('/');
+        revalidateTag('bets');
+        revalidateTag('user');
+
+        return { success: true, message: 'Ставка успешно закрыта' };
+    } catch (error) {
+        console.error("Ошибка при закрытии ставки:", error);
+
+        if (error instanceof Error) {
+            throw new Error(error.message);
+        } else {
+            throw new Error("Не удалось закрыть ставку.");
+        }
+    }
+}
+// ничья на 4 игрока
+export async function closeBetDraw4(betId: number) {
+    const session = await getUserSession();
+    if (!session || session.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        await prisma.$transaction(async (prisma) => {
+            // Обновляем статус ставки на CLOSED и устанавливаем winnerId в null
+            const bet = await prisma.bet3.update({
+                where: { id: betId },
+                data: {
+                    status: 'CLOSED',
+                    winnerId: null,
+                },
+                include: {
+                    participants: true,
+                },
+            });
+
+            if (!bet) {
+                throw new Error("Ставка не найдена");
+            }
+
+            // Создаем запись в BetCLOSED3
+            const betClosed = await prisma.betCLOSED3.create({
+                data: {
+                    player1Id: bet.player1Id,
+                    player2Id: bet.player2Id,
+                    player3Id: bet.player3Id,
+                    initBetPlayer1: bet.initBetPlayer1,
+                    initBetPlayer2: bet.initBetPlayer2,
+                    initBetPlayer3: bet.initBetPlayer3,
+                    totalBetPlayer1: bet.totalBetPlayer1,
+                    totalBetPlayer2: bet.totalBetPlayer2,
+                    totalBetPlayer3: bet.totalBetPlayer3,
+                    maxBetPlayer1: bet.maxBetPlayer1,
+                    maxBetPlayer2: bet.maxBetPlayer2,
+                    maxBetPlayer3: bet.maxBetPlayer3,
+                    totalBetAmount: bet.totalBetAmount,
+                    creatorId: bet.creatorId,
+                    status: 'CLOSED',
+                    categoryId: bet.categoryId,
+                    productId: bet.productId,
+                    productItemId: bet.productItemId,
+                    winnerId: null,
+                    margin: 0,
+                    createdAt: bet.createdAt,
+                    updatedAt: bet.updatedAt,
+                    oddsBetPlayer1: bet.oddsBetPlayer1,
+                    oddsBetPlayer2: bet.oddsBetPlayer2,
+                    oddsBetPlayer3: bet.oddsBetPlayer3,
+                    overlapPlayer1: bet.overlapPlayer1,
+                    overlapPlayer2: bet.overlapPlayer2,
+                    overlapPlayer3: bet.overlapPlayer3,
+                },
+            });
+
+            // Возвращаем сумму ставки всем участникам
+            for (const participant of bet.participants) {
+                await prisma.user.update({
+                    where: { id: participant.userId },
+                    data: {
+                        points: {
+                            increment: participant.amount,
+                        },
+                    },
+                });
+
+                // Создаем запись в BetParticipantCLOSED3
+                await prisma.betParticipantCLOSED3.create({
+                    data: {
+                        betCLOSED3Id: betClosed.id,
+                        userId: participant.userId,
+                        amount: participant.amount,
+                        odds: participant.odds,
+                        profit: participant.profit,
+                        player: participant.player,
+                        isWinner: false,
+                        margin: 0,
+                        createdAt: participant.createdAt,
+                        isCovered: participant.isCovered,
+                        overlap: participant.overlap,
+                        return: participant.amount,
+                    },
+                });
+            }
+
+            // Удаляем участников и ставку
+            await prisma.betParticipant3.deleteMany({
+                where: { betId: betId },
+            });
+
+            await prisma.bet3.delete({
+                where: { id: betId },
+            });
+        });
+
+        // Обновляем глобальные данные
+        await updateGlobalData();
+        revalidatePath('/');
+        revalidateTag('bets');
+        revalidateTag('user');
+
+        return { success: true, message: 'Ставка успешно закрыта как ничья' };
+    } catch (error) {
+        console.error("Ошибка при закрытии ставки как ничья:", error);
+
+        if (error instanceof Error) {
+            throw new Error(error.message);
+        } else {
+            throw new Error("Не удалось закрыть ставку как ничья.");
+        }
+    }
+}
