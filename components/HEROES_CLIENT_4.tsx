@@ -363,11 +363,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
 
     return (
         <div>
-            <div className="flex justify-between items-center">
-                <p>
-                    Points: <span className="text-red-500">{Math.floor((userUp?.points ?? 0) * 100) / 100}</span>
-                </p>
-            </div>
 
             {filteredBets.map((bet: Bet) => {
                 const userBets = bet.participants.filter((p) => p.userId === user?.id);
