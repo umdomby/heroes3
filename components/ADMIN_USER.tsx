@@ -10,23 +10,27 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { updateUserRole } from '@/app/actions'; // Импортируем функцию для обновления роли
 
 interface User {
+    id: number;
     fullName: string;
     points: number;
     cardId: string;
     email: string;
-    telegram: string | null; // Allow telegram to be null
+    telegram: string | null;
     telegramView: boolean;
     createdAt: Date;
+    role: string; // Добавляем поле для роли
 }
 
 interface Props {
     className?: string;
     users: User[];
+    user: User;
 }
 
-export const ADMIN_USER: React.FC<Props> = ({ className, users }) => {
+export const ADMIN_USER: React.FC<Props> = ({ className, user, users }) => {
     const [showCopyMessage, setShowCopyMessage] = useState(false);
     const [copiedUserName, setCopiedUserName] = useState('');
 
@@ -34,13 +38,23 @@ export const ADMIN_USER: React.FC<Props> = ({ className, users }) => {
         navigator.clipboard.writeText(cardId);
         setCopiedUserName(fullName);
         setShowCopyMessage(true);
-        setTimeout(() => setShowCopyMessage(false), 1000); // Убираем сообщение через 1 секунду
+        setTimeout(() => setShowCopyMessage(false), 1000);
+    };
+
+    const handleRoleChange = async (userId: number, role: string) => {
+        try {
+            await updateUserRole(userId, role);
+            alert(`Роль пользователя обновлена до ${role}`);
+        } catch (error) {
+            console.error('Ошибка при обновлении роли:', error);
+            alert('Не удалось обновить роль пользователя');
+        }
     };
 
     return (
         <div className={`p-4 ${className}`}>
             <h1 className="text-2xl font-bold text-center mb-6 p-2 bg-gray-400 rounded-lg">
-                Rating
+                USER ADMIN
             </h1>
             <Table className="w-full">
                 <TableHeader>
@@ -51,6 +65,7 @@ export const ADMIN_USER: React.FC<Props> = ({ className, users }) => {
                         <TableHead className="text-center">Card ID</TableHead>
                         <TableHead className="text-center">Дата создания</TableHead>
                         <TableHead className="text-center">Telegram</TableHead>
+                        <TableHead className="text-center">Role</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -58,7 +73,7 @@ export const ADMIN_USER: React.FC<Props> = ({ className, users }) => {
                         <TableRow key={index} className="hover:bg-gray-400">
                             <TableCell className="text-center">{Math.floor(user.points * 100) / 100}</TableCell>
                             <TableCell className="text-center">{user.fullName}</TableCell>
-                            <TableCell className="text-center">{user.email.slice(0, 5)}...</TableCell>
+                            <TableCell className="text-center">{user.email}</TableCell>
                             <TableCell className="text-center">
                                 <div className="flex justify-center items-center">
                                     <span className="mr-2">{user.cardId}</span>
@@ -83,6 +98,37 @@ export const ADMIN_USER: React.FC<Props> = ({ className, users }) => {
                                 ) : (
                                     <span className="text-gray-500">Скрыто</span>
                                 )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                                <div className="flex justify-center items-center">
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name={`role-${user.id}`}
+                                            checked={user.role === 'USER'}
+                                            onChange={() => handleRoleChange(user.id, 'USER')}
+                                        />
+                                        USER
+                                    </label>
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name={`role-${user.id}`}
+                                            checked={user.role === 'ADMIN'}
+                                            onChange={() => handleRoleChange(user.id, 'ADMIN')}
+                                        />
+                                        ADMIN
+                                    </label>
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name={`role-${user.id}`}
+                                            checked={user.role === 'BANED'}
+                                            onChange={() => handleRoleChange(user.id, 'BANED')}
+                                        />
+                                        BANED
+                                    </label>
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}

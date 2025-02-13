@@ -1,12 +1,11 @@
 'use server';
 import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
-import {Bet, BetParticipant, IsCovered, OrderP2P, PlayerChoice, Prisma} from '@prisma/client';
+import {Bet, BetParticipant, IsCovered, OrderP2P, PlayerChoice, Prisma, UserRole} from '@prisma/client';
 import {hashSync} from 'bcrypt';
 import {revalidatePath, revalidateTag} from 'next/cache';
 import axios from "axios";
 import {JsonArray} from 'type-fest';
-import {number} from "zod";
 
 const MARGIN = parseFloat(process.env.MARGIN || '0.05');
 
@@ -164,7 +163,6 @@ export async function updateUserInfoTelegram(telegram: string, telegramView: boo
         throw err;
     }
 } // Функция для обновления информации о пользователе
-
 export async function clientCreateBet(formData: any) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {throw new Error('У вас нет прав для выполнения этой операции');}
@@ -698,7 +696,6 @@ export async function closeBet(betId: number, winnerId: number) {
         }
     }
 } // Функция для закрытия ставки
-
 export async function closeBetDraw(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -808,7 +805,6 @@ export async function closeBetDraw(betId: number) {
         }
     }
 }
-
 export async function addEditPlayer(playerId: number | null, playerName: string) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {throw new Error('У вас нет прав для выполнения этой операции');}
@@ -1238,7 +1234,6 @@ export async function getOpenOrders(): Promise<OrderP2P[]> {
         throw new Error('Не удалось получить открытые заказы'); // Выбрасывание ошибки для лучшей обработки
     }
 } // 5 секунд обновление открытых сделок для OrderP2PComponent
-
 export async function getPendingOrders(userId: number): Promise<OrderP2P[]> {
     try {
         return await prisma.orderP2P.findMany({
@@ -1306,8 +1301,6 @@ export async function confirmSellOrderUser2(orderId: number) {
         return false;
     }
 }
-
-// завершение сделки-продажи, подтверждением создателем
 export async function confirmSellOrderCreator(orderId: number) {
     try {
         const currentUser = await getUserSession();
@@ -1350,9 +1343,7 @@ export async function confirmSellOrderCreator(orderId: number) {
         console.error('Ошибка при завершении сделки-продажи:', error instanceof Error ? error.message : error);
         return false;
     }
-}
-
-// подтверждение оплаты для покупки
+}// завершение сделки-продажи, подтверждением создателем
 export async function confirmBuyOrderUser2(orderId: number) {
     try {
         const currentUser = await getUserSession();
@@ -1392,9 +1383,7 @@ export async function confirmBuyOrderUser2(orderId: number) {
         console.error('Ошибка при подтверждении оплаты для покупки:', error instanceof Error ? error.message : error);
         return false;
     }
-}
-
-// завершение сделки-покупки, подтверждением создателем оплаты price
+}// подтверждение оплаты для покупки
 export async function confirmBuyOrderCreator(orderId: number) {
     try {
         const currentUser = await getUserSession();
@@ -1416,9 +1405,7 @@ export async function confirmBuyOrderCreator(orderId: number) {
         console.error('Ошибка при завершении сделки-покупки:', error instanceof Error ? error.message : error);
         return false;
     }
-}
-
-// Функция для открытия сделки покупки
+}// завершение сделки-покупки, подтверждением создателем оплаты price
 export async function openBuyOrder(orderId: number, userId: number, bankDetails: any, price: number, points: number) {
     try {
         const currentUser = await getUserSession();
@@ -1451,9 +1438,7 @@ export async function openBuyOrder(orderId: number, userId: number, bankDetails:
         console.error('Ошибка при открытии сделки покупки:', error instanceof Error ? error.message : error);
         return false;
     }
-}
-
-// Функция для открытия сделки продажи
+}// Функция для открытия сделки покупки
 export async function openSellOrder(orderId: number, userId: number, bankDetails: any, price: number) {
     try {
         const currentUser = await getUserSession();
@@ -1478,8 +1463,7 @@ export async function openSellOrder(orderId: number, userId: number, bankDetails
         console.error('Ошибка при открытии сделки продажи:', error instanceof Error ? error.message : error);
         return false;
     }
-}
-
+}// Функция для открытия сделки продажи
 export async function closeDealTime (orderId: number) {
     // Получаем сделку
     const order = await prisma.orderP2P.findUnique({ where: { id: orderId } });
@@ -1516,8 +1500,6 @@ export async function closeDealTime (orderId: number) {
         });
     }
 }
-
-// серверное обновление серверной страницы сделок components\OrderP2PPending.tsx
 export async function checkAndCloseExpiredDeals() {
     const now = new Date();
     const expiredDeals = await prisma.orderP2P.findMany({
@@ -1532,7 +1514,7 @@ export async function checkAndCloseExpiredDeals() {
     for (const deal of expiredDeals) {
         await closeDealTime(deal.id); // Передаем id сделки
     }
-}
+}// серверное обновление серверной страницы сделок components\OrderP2PPending.tsx
 export async function getServerSideProps() {
     // Проверьте и закройте просроченные сделки перед отображением страницы
     await checkAndCloseExpiredDeals();
@@ -1551,8 +1533,41 @@ export async function getServerSideProps() {
             openOrders,
         },
     };
-}
+}// серверное обновление серверной страницы сделок components\OrderP2PPending.tsx
 // ################################################
+
+export async function updateUserRole(id: number, role: UserRole) {
+    try {
+        const currentUser = await getUserSession();
+
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        const findUser = await prisma.user.findFirst({
+            where: {
+                id: Number(currentUser.id),
+            },
+        });
+
+        if (!findUser || findUser.role !== 'ADMIN') {
+            throw new Error('Пользователь не найден в базе данных или вы не admin');
+        }
+
+        await prisma.user.update({
+            where: {
+                id: Number(id),
+            },
+            data: {
+                role: role,
+            },
+        });
+        revalidatePath('/admin-user');
+    } catch (err) {
+        throw err;
+    }
+}
+
 
 
 

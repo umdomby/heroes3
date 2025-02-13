@@ -35,7 +35,7 @@ async function fetchData() {
 export default async function CreateBetPage() {
     const {user, categories, products, productItems, players} = await fetchData();
 
-    if (!user) {
+    if (!user || user.role !== 'ADMIN') {
         redirect('/not-auth');
     }
 

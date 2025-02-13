@@ -1,14 +1,14 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { TFormRegisterValues, formRegisterSchema } from './modals/auth-modal/forms/schemas';
-import { User } from '@prisma/client';
+import React, {useEffect, useState} from 'react';
+import {FormProvider, useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {TFormRegisterValues, formRegisterSchema} from './modals/auth-modal/forms/schemas';
+import {User} from '@prisma/client';
 import toast from 'react-hot-toast';
-import { signOut } from 'next-auth/react';
-import { Container } from './container';
-import { Title } from './title';
-import { FormInput } from './form';
+import {signOut} from 'next-auth/react';
+import {Container} from './container';
+import {Title} from './title';
+import {FormInput} from './form';
 import {Button, Input} from '@/components/ui';
 import {
     referralGet,
@@ -30,7 +30,7 @@ interface Props {
     data: User;
 }
 
-export const ProfileForm: React.FC<Props> = ({ data }) => {
+export const ProfileForm: React.FC<Props> = ({data}) => {
     const form = useForm({
         resolver: zodResolver(formRegisterSchema),
         defaultValues: {
@@ -44,8 +44,8 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     const [referrals, setReferrals] = useState<any[]>([]);
     const [bankDetails, setBankDetails] = useState<any[]>(Array.isArray(data.bankDetails) ? data.bankDetails : []);
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '', price: '' });
-    const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', price: '' });
+    const [newBankDetail, setNewBankDetail] = useState({name: '', details: '', description: '', price: ''});
+    const [editedDetail, setEditedDetail] = useState({name: '', details: '', description: '', price: ''});
     const [telegram, setTelegram] = useState<string>(data.telegram || '');
     const [telegramView, setTelegramView] = useState<boolean>(data.telegramView || false);
 
@@ -106,7 +106,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
             }
             const updatedBankDetails = await addBankDetails(newBankDetail);
             setBankDetails(updatedBankDetails);
-            setNewBankDetail({ name: '', details: '', description: '', price: '' });
+            setNewBankDetail({name: '', details: '', description: '', price: ''});
             toast.success('Банковский реквизит добавлен');
         } catch (error) {
             toast.error('Ошибка при добавлении банковского реквизита');
@@ -170,7 +170,11 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                     Copy
                                 </Button>
                             </div>
-
+                            <label className="flex items-center">
+                                Role:
+                                <span
+                                    className={`block text-sm font-medium ml-2 ${data.role === 'BANED' ? 'text-red-500' : 'text-green-500'}`}>{data.role}</span>
+                            </label>
 
                         </div>
 
@@ -178,9 +182,10 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                             <form onSubmit={form.handleSubmit(onSubmit)}>
                                 <FormInput name="fullName" label="Полное имя" required/>
                                 <FormInput type="password" name="password" label="Новый пароль" required/>
-                                <FormInput type="password" name="confirmPassword" label="Повторите пароль" required />
+                                <FormInput type="password" name="confirmPassword" label="Повторите пароль" required/>
 
-                                <Button disabled={form.formState.isSubmitting} className="text-base mt-10" type="submit">
+                                <Button disabled={form.formState.isSubmitting} className="text-base mt-10"
+                                        type="submit">
                                     Сохранить
                                 </Button>
 
@@ -226,7 +231,8 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                             {referrals.map((referral, index) => (
                                                 <div key={index} className="p-1 border border-gray-300 rounded-lg">
                                                     <p className={referral.referralStatus ? 'text-green-600' : 'text-gray-400'}>
-                                                        <strong>IP:</strong> {referral.referralIpAddress}, <strong>Дата:</strong> {new Date(referral.createdAt).toLocaleString()}, +{referral.referralPoints}
+                                                        <strong>IP:</strong> {referral.referralIpAddress}, <strong>Дата:</strong> {new Date(referral.createdAt).toLocaleString()},
+                                                        +{referral.referralPoints}
                                                     </p>
                                                 </div>
                                             ))}
@@ -246,19 +252,28 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                 name="bankName"
                                                 label="Название"
                                                 value={newBankDetail.name || ''} // Убедитесь, что значение всегда строка
-                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, name: e.target.value })}
+                                                onChange={(e) => setNewBankDetail({
+                                                    ...newBankDetail,
+                                                    name: e.target.value
+                                                })}
                                             />
                                             <FormInput
                                                 name="bankDetails"
                                                 label="Реквизиты"
                                                 value={newBankDetail.details || ''} // Убедитесь, что значение всегда строка
-                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, details: e.target.value })}
+                                                onChange={(e) => setNewBankDetail({
+                                                    ...newBankDetail,
+                                                    details: e.target.value
+                                                })}
                                             />
                                             <FormInput
                                                 name="bankDescription"
                                                 label="Описание"
                                                 value={newBankDetail.description || ''} // Убедитесь, что значение всегда строка
-                                                onChange={(e) => setNewBankDetail({ ...newBankDetail, description: e.target.value })}
+                                                onChange={(e) => setNewBankDetail({
+                                                    ...newBankDetail,
+                                                    description: e.target.value
+                                                })}
                                             />
 
                                             <FormInput
@@ -312,12 +327,12 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                         // Преобразуем строку в число с плавающей точкой и проверяем, является ли оно числом
                                                         const floatValue = parseFloat(value.replace(',', '.'));
                                                         if (!isNaN(floatValue)) {
-                                                            setNewBankDetail({ ...newBankDetail, price: value });
+                                                            setNewBankDetail({...newBankDetail, price: value});
                                                         }
                                                     }
                                                 }}
                                             />
-                                            </FormProvider>
+                                        </FormProvider>
                                         <Button
                                             onClick={handleAddBankDetail}
                                             disabled={!newBankDetail.name || !newBankDetail.details || !newBankDetail.description || !newBankDetail.price}
@@ -327,7 +342,8 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
                                     <div className="space-y-1">
                                         {bankDetails.map((detail, index) => (
-                                            <div key={index} className="p-1 border border-gray-300 rounded-lg flex justify-between items-center">
+                                            <div key={index}
+                                                 className="p-1 border border-gray-300 rounded-lg flex justify-between items-center">
                                                 {editIndex === index ? (
                                                     <div>
                                                         <input
@@ -467,7 +483,9 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                             />
 
 
-                                            <p className="text-sm font-medium ">Показывать Telegram на странице <Link className="text-blue-500" href="/rating" target="_blank">Rating</Link></p>
+                                            <p className="text-sm font-medium ">Показывать Telegram на странице <Link
+                                                className="text-blue-500" href="/rating" target="_blank">Rating</Link>
+                                            </p>
                                         </div>
                                         <p className="text-sm font-medium "> В заключившихся сделках (orderP2P) Telegram
                                             отображается. </p>
