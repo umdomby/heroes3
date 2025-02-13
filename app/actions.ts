@@ -2,9 +2,9 @@
 import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
 import {
-    Bet, Bet3,
+    Bet, Bet3, Bet4,
     BetParticipant,
-    BetParticipant3,
+    BetParticipant3, BetParticipant4,
     IsCovered,
     OrderP2P,
     PlayerChoice,
@@ -2354,6 +2354,7 @@ function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initB
     return { maxBetPlayer1, maxBetPlayer2, maxBetPlayer3, maxBetPlayer4 };
 }
 // ставки на 4 игрока
+// Function to place a bet for four players
 export async function placeBet4(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
     try {
         console.log('Запуск функции placeBet с formData:', formData);
@@ -2368,7 +2369,7 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             throw new Error('Отсутствуют обязательные поля в данных формы');
         }
 
-        const bet = await prisma.bet3.findUnique({
+        const bet = await prisma.bet4.findUnique({
             where: { id: betId },
             include: { participants: true },
         });
@@ -2397,23 +2398,28 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             .filter(p => p.player === PlayerChoice.PLAYER3)
             .reduce((sum, p) => sum + p.profit, 0);
 
+        const totalPlayer4 = bet.participants
+            .filter(p => p.player === PlayerChoice.PLAYER4)
+            .reduce((sum, p) => sum + p.profit, 0);
+
         const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
         const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
         const totalWithInitPlayer3 = totalPlayer3 + (bet.initBetPlayer3 || 0);
+        const totalWithInitPlayer4 = totalPlayer4 + (bet.initBetPlayer4 || 0);
 
-        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
+        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 : bet.oddsBetPlayer4;
         if (currentOdds <= 1.01) {
             throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.02');
         }
 
         const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
 
-        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer3;
+        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer4;
         if (amount > maxAllowedBet) {
             throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
         }
 
-        await prisma.betParticipant3.create({
+        await prisma.betParticipant4.create({
             data: {
                 betId,
                 userId,
@@ -2437,14 +2443,16 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
         const {
             oddsPlayer1,
             oddsPlayer2,
-            oddsPlayer3
-        } = calculateOdds3(
+            oddsPlayer3,
+            oddsPlayer4
+        } = calculateOdds4(
             totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? amount : 0),
             totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? amount : 0),
-            totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? amount : 0)
+            totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? amount : 0),
+            totalWithInitPlayer4 + (player === PlayerChoice.PLAYER4 ? amount : 0)
         );
 
-        const totalMargin = await prisma.betParticipant3.aggregate({
+        const totalMargin = await prisma.betParticipant4.aggregate({
             _sum: {
                 margin: true,
             },
@@ -2457,26 +2465,30 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             oddsBetPlayer1: Math.floor((oddsPlayer1 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
             oddsBetPlayer2: Math.floor((oddsPlayer2 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
             oddsBetPlayer3: Math.floor((oddsPlayer3 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
+            oddsBetPlayer4: Math.floor((oddsPlayer4 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
             totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
             totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
             totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
-            totalBetAmount: totalPlayer1 + totalPlayer2 + totalPlayer3 + amount,
+            totalBetPlayer4: player === PlayerChoice.PLAYER4 ? totalPlayer4 + amount : totalPlayer4,
+            totalBetAmount: totalPlayer1 + totalPlayer2 + totalPlayer3 + totalPlayer4 + amount,
             margin: totalMargin._sum.margin || 0,
             maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
             maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
             maxBetPlayer3: player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer3 + amount,
+            maxBetPlayer4: player === PlayerChoice.PLAYER4 ? bet.maxBetPlayer4 : bet.maxBetPlayer4 + amount,
             overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
             overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
             overlapPlayer3: player === PlayerChoice.PLAYER3 ? bet.overlapPlayer3 + amount : bet.overlapPlayer3,
+            overlapPlayer4: player === PlayerChoice.PLAYER4 ? bet.overlapPlayer4 + amount : bet.overlapPlayer4,
         };
 
-        await prisma.bet3.update({
+        await prisma.bet4.update({
             where: { id: betId },
             data: updatedBetData,
         }).then(async () => {
-            await balanceOverlaps3(betId);
+            await balanceOverlaps4(betId);
         }).then(async () => {
-            const participants = await prisma.betParticipant3.findMany({
+            const participants = await prisma.betParticipant4.findMany({
                 where: { betId },
                 orderBy: { createdAt: 'asc' },
             });
@@ -2492,7 +2504,7 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
                 }
 
                 if (participant.isCovered !== newIsCoveredStatus) {
-                    await prisma.betParticipant3.update({
+                    await prisma.betParticipant4.update({
                         where: { id: participant.id },
                         data: { isCovered: newIsCoveredStatus },
                     });
@@ -2518,16 +2530,17 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }
+
 // Функция для балансировки перекрытий на 4 игроков
 async function balanceOverlaps4(betId: number) {
     console.log(`Начало balanceOverlaps для betId: ${betId}`);
 
-    const participants = await prisma.betParticipant3.findMany({
+    const participants = await prisma.betParticipant4.findMany({
         where: { betId },
         orderBy: { createdAt: 'asc' },
     });
 
-    let bet = await prisma.bet3.findUnique({
+    let bet = await prisma.bet4.findUnique({
         where: { id: betId },
     });
 
@@ -2536,9 +2549,9 @@ async function balanceOverlaps4(betId: number) {
     }
 
     async function transferOverlap(
-        targetParticipants: BetParticipant3[],
-        overlapField: 'overlapPlayer1' | 'overlapPlayer2' | 'overlapPlayer3',
-        bet: Bet3
+        targetParticipants: BetParticipant4[],
+        overlapField: 'overlapPlayer1' | 'overlapPlayer2' | 'overlapPlayer3' | 'overlapPlayer4',
+        bet: Bet4
     ) {
         let processedParticipants = 0;
         const totalParticipants = targetParticipants.length;
@@ -2561,14 +2574,14 @@ async function balanceOverlaps4(betId: number) {
                             throw new Error('Ошибка: overlap не может быть больше profit');
                         }
 
-                        await prisma.betParticipant3.update({
+                        await prisma.betParticipant4.update({
                             where: { id: target.id },
                             data: {
                                 overlap: newOverlap,
                             },
                         });
 
-                        await prisma.bet3.update({
+                        await prisma.bet4.update({
                             where: { id: betId },
                             data: {
                                 [overlapField]: Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100,
@@ -2595,22 +2608,33 @@ async function balanceOverlaps4(betId: number) {
     const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
     const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
     const participantsPlayer3 = participants.filter(p => p.player === PlayerChoice.PLAYER3);
+    const participantsPlayer4 = participants.filter(p => p.player === PlayerChoice.PLAYER4);
 
     console.log('Переносим перекрытия от участников PLAYER1');
     await transferOverlap(participantsPlayer1, 'overlapPlayer2', bet);
     await transferOverlap(participantsPlayer1, 'overlapPlayer3', bet);
+    await transferOverlap(participantsPlayer1, 'overlapPlayer4', bet);
 
     console.log('Переносим перекрытия от участников PLAYER2');
     await transferOverlap(participantsPlayer2, 'overlapPlayer1', bet);
     await transferOverlap(participantsPlayer2, 'overlapPlayer3', bet);
+    await transferOverlap(participantsPlayer2, 'overlapPlayer4', bet);
 
     console.log('Переносим перекрытия от участников PLAYER3');
     await transferOverlap(participantsPlayer3, 'overlapPlayer1', bet);
     await transferOverlap(participantsPlayer3, 'overlapPlayer2', bet);
+    await transferOverlap(participantsPlayer3, 'overlapPlayer4', bet);
+
+    console.log('Переносим перекрытия от участников PLAYER4');
+    await transferOverlap(participantsPlayer4, 'overlapPlayer1', bet);
+    await transferOverlap(participantsPlayer4, 'overlapPlayer2', bet);
+    await transferOverlap(participantsPlayer4, 'overlapPlayer3', bet);
 
     console.log(`Завершение balanceOverlaps для betId: ${betId}`);
 }
+
 // Функция для закрытия ставки на 4 игрока
+// Function to close a bet for four players
 export async function closeBet4(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2624,7 +2648,7 @@ export async function closeBet4(betId: number, winnerId: number) {
 
         await prisma.$transaction(async (prisma) => {
             // Обновляем статус ставки и получаем данные
-            const bet = await prisma.bet3.update({
+            const bet = await prisma.bet4.update({
                 where: { id: betId },
                 data: {
                     status: 'CLOSED',
@@ -2635,6 +2659,7 @@ export async function closeBet4(betId: number, winnerId: number) {
                     player1: true,
                     player2: true,
                     player3: true,
+                    player4: true,
                 },
             });
 
@@ -2642,21 +2667,25 @@ export async function closeBet4(betId: number, winnerId: number) {
                 throw new Error("Ставка не найдена");
             }
 
-            // Создаем запись в BetCLOSED3
-            const betClosed = await prisma.betCLOSED3.create({
+            // Создаем запись в BetCLOSED4
+            const betClosed = await prisma.betCLOSED4.create({
                 data: {
                     player1Id: bet.player1Id,
                     player2Id: bet.player2Id,
                     player3Id: bet.player3Id,
+                    player4Id: bet.player4Id,
                     initBetPlayer1: bet.initBetPlayer1,
                     initBetPlayer2: bet.initBetPlayer2,
                     initBetPlayer3: bet.initBetPlayer3,
+                    initBetPlayer4: bet.initBetPlayer4,
                     totalBetPlayer1: bet.totalBetPlayer1,
                     totalBetPlayer2: bet.totalBetPlayer2,
                     totalBetPlayer3: bet.totalBetPlayer3,
+                    totalBetPlayer4: bet.totalBetPlayer4,
                     maxBetPlayer1: bet.maxBetPlayer1,
                     maxBetPlayer2: bet.maxBetPlayer2,
                     maxBetPlayer3: bet.maxBetPlayer3,
+                    maxBetPlayer4: bet.maxBetPlayer4,
                     totalBetAmount: bet.totalBetAmount,
                     creatorId: bet.creatorId,
                     status: 'CLOSED',
@@ -2670,26 +2699,29 @@ export async function closeBet4(betId: number, winnerId: number) {
                     oddsBetPlayer1: bet.oddsBetPlayer1,
                     oddsBetPlayer2: bet.oddsBetPlayer2,
                     oddsBetPlayer3: bet.oddsBetPlayer3,
+                    oddsBetPlayer4: bet.oddsBetPlayer4,
                     overlapPlayer1: bet.overlapPlayer1,
                     overlapPlayer2: bet.overlapPlayer2,
                     overlapPlayer3: bet.overlapPlayer3,
+                    overlapPlayer4: bet.overlapPlayer4,
                 },
             });
 
             // Определяем победителя
             const winningPlayer =
                 bet.winnerId === bet.player1Id ? PlayerChoice.PLAYER1 :
-                    bet.winnerId === bet.player2Id ? PlayerChoice.PLAYER2 : PlayerChoice.PLAYER3;
+                    bet.winnerId === bet.player2Id ? PlayerChoice.PLAYER2 :
+                        bet.winnerId === bet.player3Id ? PlayerChoice.PLAYER3 : PlayerChoice.PLAYER4;
 
             // Обновляем статус участников
-            await prisma.betParticipant3.updateMany({
+            await prisma.betParticipant4.updateMany({
                 where: { betId: betId },
                 data: {
                     isWinner: false,
                 },
             });
 
-            await prisma.betParticipant3.updateMany({
+            await prisma.betParticipant4.updateMany({
                 where: {
                     betId: betId,
                     player: winningPlayer,
@@ -2700,7 +2732,7 @@ export async function closeBet4(betId: number, winnerId: number) {
             });
 
             // Перераспределяем баллы
-            const allParticipants = await prisma.betParticipant3.findMany({
+            const allParticipants = await prisma.betParticipant4.findMany({
                 where: { betId: betId },
             });
 
@@ -2743,10 +2775,10 @@ export async function closeBet4(betId: number, winnerId: number) {
                     });
                 }
 
-                // Создаем запись в BetParticipantCLOSED3
-                await prisma.betParticipantCLOSED3.create({
+                // Создаем запись в BetParticipantCLOSED4
+                await prisma.betParticipantCLOSED4.create({
                     data: {
-                        betCLOSED3Id: betClosed.id,
+                        betCLOSED4Id: betClosed.id,
                         userId: participant.userId,
                         amount: participant.amount,
                         odds: participant.odds,
@@ -2762,8 +2794,8 @@ export async function closeBet4(betId: number, winnerId: number) {
                 });
             }
 
-            // Обновляем поле margin в BetCLOSED3
-            await prisma.betCLOSED3.update({
+            // Обновляем поле margin в BetCLOSED4
+            await prisma.betCLOSED4.update({
                 where: { id: betClosed.id },
                 data: {
                     margin: Math.floor(totalMargin * 100) / 100,
@@ -2771,11 +2803,11 @@ export async function closeBet4(betId: number, winnerId: number) {
             });
 
             // Удаляем участников и ставку
-            await prisma.betParticipant3.deleteMany({
+            await prisma.betParticipant4.deleteMany({
                 where: { betId: betId },
             });
 
-            await prisma.bet3.delete({
+            await prisma.bet4.delete({
                 where: { id: betId },
             });
 
@@ -2807,7 +2839,9 @@ export async function closeBet4(betId: number, winnerId: number) {
         }
     }
 }
+
 // ничья на 4 игрока
+// Function to handle a draw for four players
 export async function closeBetDraw4(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2817,7 +2851,7 @@ export async function closeBetDraw4(betId: number) {
     try {
         await prisma.$transaction(async (prisma) => {
             // Обновляем статус ставки на CLOSED и устанавливаем winnerId в null
-            const bet = await prisma.bet3.update({
+            const bet = await prisma.bet4.update({
                 where: { id: betId },
                 data: {
                     status: 'CLOSED',
@@ -2832,21 +2866,25 @@ export async function closeBetDraw4(betId: number) {
                 throw new Error("Ставка не найдена");
             }
 
-            // Создаем запись в BetCLOSED3
-            const betClosed = await prisma.betCLOSED3.create({
+            // Создаем запись в BetCLOSED4
+            const betClosed = await prisma.betCLOSED4.create({
                 data: {
                     player1Id: bet.player1Id,
                     player2Id: bet.player2Id,
                     player3Id: bet.player3Id,
+                    player4Id: bet.player4Id,
                     initBetPlayer1: bet.initBetPlayer1,
                     initBetPlayer2: bet.initBetPlayer2,
                     initBetPlayer3: bet.initBetPlayer3,
+                    initBetPlayer4: bet.initBetPlayer4,
                     totalBetPlayer1: bet.totalBetPlayer1,
                     totalBetPlayer2: bet.totalBetPlayer2,
                     totalBetPlayer3: bet.totalBetPlayer3,
+                    totalBetPlayer4: bet.totalBetPlayer4,
                     maxBetPlayer1: bet.maxBetPlayer1,
                     maxBetPlayer2: bet.maxBetPlayer2,
                     maxBetPlayer3: bet.maxBetPlayer3,
+                    maxBetPlayer4: bet.maxBetPlayer4,
                     totalBetAmount: bet.totalBetAmount,
                     creatorId: bet.creatorId,
                     status: 'CLOSED',
@@ -2860,9 +2898,11 @@ export async function closeBetDraw4(betId: number) {
                     oddsBetPlayer1: bet.oddsBetPlayer1,
                     oddsBetPlayer2: bet.oddsBetPlayer2,
                     oddsBetPlayer3: bet.oddsBetPlayer3,
+                    oddsBetPlayer4: bet.oddsBetPlayer4,
                     overlapPlayer1: bet.overlapPlayer1,
                     overlapPlayer2: bet.overlapPlayer2,
                     overlapPlayer3: bet.overlapPlayer3,
+                    overlapPlayer4: bet.overlapPlayer4,
                 },
             });
 
@@ -2877,10 +2917,10 @@ export async function closeBetDraw4(betId: number) {
                     },
                 });
 
-                // Создаем запись в BetParticipantCLOSED3
-                await prisma.betParticipantCLOSED3.create({
+                // Создаем запись в BetParticipantCLOSED4
+                await prisma.betParticipantCLOSED4.create({
                     data: {
-                        betCLOSED3Id: betClosed.id,
+                        betCLOSED4Id: betClosed.id,
                         userId: participant.userId,
                         amount: participant.amount,
                         odds: participant.odds,
@@ -2897,11 +2937,11 @@ export async function closeBetDraw4(betId: number) {
             }
 
             // Удаляем участников и ставку
-            await prisma.betParticipant3.deleteMany({
+            await prisma.betParticipant4.deleteMany({
                 where: { betId: betId },
             });
 
-            await prisma.bet3.delete({
+            await prisma.bet4.delete({
                 where: { id: betId },
             });
         });
@@ -2923,3 +2963,4 @@ export async function closeBetDraw4(betId: number) {
         }
     }
 }
+
