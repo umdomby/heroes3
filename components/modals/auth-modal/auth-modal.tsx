@@ -31,9 +31,9 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                     <DialogTitle></DialogTitle>
                 </VisuallyHidden>
                 <div className="text-center">
-                    Регистрация и вход одной кнопкой Google
+                    Регистрация одной кнопкой
                 </div>
-                    <Button
+                <Button
                         variant="secondary"
                         onClick={() =>
                             signIn('google', {
@@ -50,7 +50,7 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                         Google
                     </Button>
                     <div className="text-center">
-                        VPN = NO BONUS 25 Points
+                        VPN YES = NO BONUS
                     </div>
                     {type === 'login' ? (
                         <LoginForm onClose={handleClose}/>
