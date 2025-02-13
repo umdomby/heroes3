@@ -2245,36 +2245,7 @@ export async function closeBetDraw3(betId: number) {
 }
 
 
-// Функция для расчета коэффициентов на 4 игроков
-// Функция для расчета коэффициентов на 4 игроков
-function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number, totalWithInitPlayer4: number) {
-    const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2 + totalWithInitPlayer3 + totalWithInitPlayer4;
 
-    const oddsPlayer1 = totalWithInitPlayer1 === 0 ? 1 : totalWithInit / totalWithInitPlayer1;
-    const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : totalWithInit / totalWithInitPlayer2;
-    const oddsPlayer3 = totalWithInitPlayer3 === 0 ? 1 : totalWithInit / totalWithInitPlayer3;
-    const oddsPlayer4 = totalWithInitPlayer4 === 0 ? 1 : totalWithInit / totalWithInitPlayer4;
-
-    return {
-        oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
-        oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
-        oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
-        oddsPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
-    };
-}
-// Функция для расчета максимальных ставок на 4 игрока
-function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initBetPlayer3: number, initBetPlayer4: number): {
-    maxBetPlayer1: number,
-    maxBetPlayer2: number,
-    maxBetPlayer3: number,
-    maxBetPlayer4: number
-} {
-    const maxBetPlayer1 = Math.floor((initBetPlayer2 + initBetPlayer3 + initBetPlayer4) * 100) / 100;
-    const maxBetPlayer2 = Math.floor((initBetPlayer1 + initBetPlayer3 + initBetPlayer4) * 100) / 100;
-    const maxBetPlayer3 = Math.floor((initBetPlayer1 + initBetPlayer2 + initBetPlayer4) * 100) / 100;
-    const maxBetPlayer4 = Math.floor((initBetPlayer1 + initBetPlayer2 + initBetPlayer3) * 100) / 100;
-    return { maxBetPlayer1, maxBetPlayer2, maxBetPlayer3, maxBetPlayer4 };
-}
 // создание ставок на 4 игрока
 export async function clientCreateBet4(formData: any) {
     const session = await getUserSession();
@@ -2351,6 +2322,36 @@ export async function clientCreateBet4(formData: any) {
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
+}
+// Функция для расчета коэффициентов на 4 игроков
+// Функция для расчета коэффициентов на 4 игроков
+function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number, totalWithInitPlayer4: number) {
+    const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2 + totalWithInitPlayer3 + totalWithInitPlayer4;
+
+    const oddsPlayer1 = totalWithInitPlayer1 === 0 ? 1 : totalWithInit / totalWithInitPlayer1;
+    const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : totalWithInit / totalWithInitPlayer2;
+    const oddsPlayer3 = totalWithInitPlayer3 === 0 ? 1 : totalWithInit / totalWithInitPlayer3;
+    const oddsPlayer4 = totalWithInitPlayer4 === 0 ? 1 : totalWithInit / totalWithInitPlayer4;
+
+    return {
+        oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+        oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+        oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
+        oddsPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
+    };
+}
+// Функция для расчета максимальных ставок на 4 игрока
+function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initBetPlayer3: number, initBetPlayer4: number): {
+    maxBetPlayer1: number,
+    maxBetPlayer2: number,
+    maxBetPlayer3: number,
+    maxBetPlayer4: number
+} {
+    const maxBetPlayer1 = Math.floor((initBetPlayer2 + initBetPlayer3 + initBetPlayer4) * 100) / 100;
+    const maxBetPlayer2 = Math.floor((initBetPlayer1 + initBetPlayer3 + initBetPlayer4) * 100) / 100;
+    const maxBetPlayer3 = Math.floor((initBetPlayer1 + initBetPlayer2 + initBetPlayer4) * 100) / 100;
+    const maxBetPlayer4 = Math.floor((initBetPlayer1 + initBetPlayer2 + initBetPlayer3) * 100) / 100;
+    return { maxBetPlayer1, maxBetPlayer2, maxBetPlayer3, maxBetPlayer4 };
 }
 // ставки на 4 игрока
 export async function placeBet4(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
