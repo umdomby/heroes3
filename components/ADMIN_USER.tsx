@@ -88,7 +88,7 @@ export const ADMIN_USER: React.FC<Props> = ({ className, user, users }) => {
                             </TableCell>
                             <TableCell className="text-center">{user.createdAt.toLocaleDateString()}</TableCell>
                             <TableCell className="text-center">
-                                {user.telegramView && user.telegram ? (
+                                {user.telegram ? (
                                     <Link
                                         className="text-blue-500 hover:text-green-300 font-bold"
                                         href={user.telegram.replace(/^@/, 'https://t.me/')}
