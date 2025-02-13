@@ -1588,9 +1588,9 @@ function calculateMaxBets3(initBetPlayer1: number, initBetPlayer2: number, initB
     maxBetPlayer2: number,
     maxBetPlayer3: number
 } {
-    const maxBetPlayer1 = Math.floor((initBetPlayer2 + initBetPlayer3) * 0.5 * 100) / 100;
-    const maxBetPlayer2 = Math.floor((initBetPlayer1 + initBetPlayer3) * 0.5 * 100) / 100;
-    const maxBetPlayer3 = Math.floor((initBetPlayer1 + initBetPlayer2) * 0.5 * 100) / 100;
+    const maxBetPlayer1 = Math.floor((initBetPlayer2 + initBetPlayer3) * 100) / 100;
+    const maxBetPlayer2 = Math.floor((initBetPlayer1 + initBetPlayer3) * 100) / 100;
+    const maxBetPlayer3 = Math.floor((initBetPlayer1 + initBetPlayer2) * 100) / 100;
     return { maxBetPlayer1, maxBetPlayer2, maxBetPlayer3 };
 }
 // создание ставок на 3 игрока
@@ -1647,7 +1647,6 @@ export async function clientCreateBet3(formData: any) {
         });
 
         console.log("New bet created:", newBet);
-        console.log("User points remain unchanged:", user.points);
         await updateGlobalData();
         revalidatePath('/');
 
