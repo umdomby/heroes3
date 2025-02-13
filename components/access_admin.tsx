@@ -61,6 +61,11 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                        ADMIN BET CLOSED
                                     </DropdownMenuRadioItem>
                                 </Link>
+                                <Link href="/bet-closed-admin-3">
+                                    <DropdownMenuRadioItem value="bet-closed-admin-3" className="cursor-pointer">
+                                        ADMIN BET CLOSED 3
+                                    </DropdownMenuRadioItem>
+                                </Link>
                                 <Link href="/order-p2p-pending-admin">
                                     <DropdownMenuRadioItem value="order-p2p-pending-admin" className="cursor-pointer">
                                         ADMIN P2P PENDING
@@ -84,6 +89,11 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 <Link href="/bet-closed">
                                     <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         BET CLOSED
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/bet-closed-3">
+                                    <DropdownMenuRadioItem value="bet-closed-3" className="cursor-pointer">
+                                        BET CLOSED 3
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-all-closed">

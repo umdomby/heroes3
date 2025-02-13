@@ -1577,7 +1577,6 @@ export async function closeBetDraw(betId: number) {
 }
 
 
-
 // Функция для расчета коэффициентов на 3 игроков
 function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number) {
     const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2 + totalWithInitPlayer3;
@@ -2128,7 +2127,6 @@ export async function closeBet3(betId: number, winnerId: number) {
         }
     }
 }
-
 // ничья на 3 игрока
 export async function closeBetDraw3(betId: number) {
     const session = await getUserSession();
