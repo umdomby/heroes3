@@ -13,9 +13,9 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-interface BetParticipantCLOSED3 {
+interface BetParticipantCLOSED4 {
     id: number;
-    betCLOSED3Id: number;
+    betCLOSED4Id: number;
     userId: number;
     amount: number;
     odds: number;
@@ -29,18 +29,21 @@ interface BetParticipantCLOSED3 {
     return: number;
 }
 
-interface BetCLOSED3 {
+interface BetCLOSED4 {
     id: number;
-    participantsCLOSED3: BetParticipantCLOSED3[];
+    participantsCLOSED4: BetParticipantCLOSED4[];
     player1: { name: string };
     player2: { name: string };
     player3: { name: string };
+    player4: { name: string };
     totalBetPlayer1: number;
     totalBetPlayer2: number;
     totalBetPlayer3: number;
+    totalBetPlayer4: number;
     oddsBetPlayer1: number;
     oddsBetPlayer2: number;
     oddsBetPlayer3: number;
+    oddsBetPlayer4: number;
     createdAt: Date;
     margin: number | null;
     winnerId: number | null;
@@ -49,13 +52,13 @@ interface BetCLOSED3 {
 
 interface Props {
     user: any;
-    closedBets: BetCLOSED3[];
+    closedBets: BetCLOSED4[];
 }
 
 export const HEROES_CLIENT_CLOSED_4: React.FC<Props> = ({ user, closedBets }) => {
-    // Подсчитываем общую прибыль/потерю
+    // Calculate total profit/loss
     const totalProfitLoss = closedBets.reduce((total, bet) => {
-        const userBets = bet.participantsCLOSED3.filter((p) => p.userId === user.id);
+        const userBets = bet.participantsCLOSED4.filter((p) => p.userId === user.id);
         return total + userBets.reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0);
     }, 0);
 
@@ -71,7 +74,7 @@ export const HEROES_CLIENT_CLOSED_4: React.FC<Props> = ({ user, closedBets }) =>
             </div>
 
             {closedBets.map((bet) => {
-                const userBets = bet.participantsCLOSED3.filter((p: BetParticipantCLOSED3) => p.userId === user.id);
+                const userBets = bet.participantsCLOSED4.filter((p: BetParticipantCLOSED4) => p.userId === user.id);
 
                 if (userBets.length === 0) return null;
 
@@ -83,72 +86,49 @@ export const HEROES_CLIENT_CLOSED_4: React.FC<Props> = ({ user, closedBets }) =>
                                     <Table>
                                         <TableBody>
                                             <TableRow>
-                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[15%]">
                                                     <div>{bet.player1.name}</div>
                                                     <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                                 </TableCell>
-                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[15%]">
                                                     <div>{bet.player2.name}</div>
                                                     <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                                 </TableCell>
-                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[15%]">
                                                     <div>{bet.player3.name}</div>
                                                     <div>{Math.floor(bet.totalBetPlayer3 * 100) / 100}</div>
+                                                </TableCell>
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[15%]">
+                                                    <div>{bet.player4.name}</div>
+                                                    <div>{Math.floor(bet.totalBetPlayer4 * 100) / 100}</div>
                                                 </TableCell>
                                                 <TableCell className="w-[15%]">
                                                     <div>{Math.floor(bet.oddsBetPlayer1 * 100) / 100}</div>
                                                     <div>{Math.floor(bet.oddsBetPlayer2 * 100) / 100}</div>
                                                     <div>{Math.floor(bet.oddsBetPlayer3 * 100) / 100}</div>
+                                                    <div>{Math.floor(bet.oddsBetPlayer4 * 100) / 100}</div>
                                                 </TableCell>
                                                 <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
-                                                    <div>
-                                                        <span>{bet.player1.name}</span> :{' '}
-                                                        <span
-                                                            className={
-                                                                userBets
-                                                                    .filter((p) => p.player === 'PLAYER1')
-                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
-                                                                    ? 'text-green-500'
-                                                                    : 'text-red-500'
-                                                            }
-                                                        >
-                                                            {Math.floor(userBets
-                                                                .filter((p) => p.player === 'PLAYER1')
-                                                                .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
-                                                        </span>
-                                                    </div>
-                                                    <div>
-                                                        <span>{bet.player2.name}</span> :{' '}
-                                                        <span
-                                                            className={
-                                                                userBets
-                                                                    .filter((p) => p.player === 'PLAYER2')
-                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
-                                                                    ? 'text-green-500'
-                                                                    : 'text-red-500'
-                                                            }
-                                                        >
-                                                            {Math.floor(userBets
-                                                                .filter((p) => p.player === 'PLAYER2')
-                                                                .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
-                                                        </span>
-                                                    </div>
-                                                    <div>
-                                                        <span>{bet.player3.name}</span> :{' '}
-                                                        <span
-                                                            className={
-                                                                userBets
-                                                                    .filter((p) => p.player === 'PLAYER3')
-                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
-                                                                    ? 'text-green-500'
-                                                                    : 'text-red-500'
-                                                            }
-                                                        >
-                                                            {Math.floor(userBets
-                                                                .filter((p) => p.player === 'PLAYER3')
-                                                                .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
-                                                        </span>
-                                                    </div>
+                                                    {[bet.player1, bet.player2, bet.player3, bet.player4].map((player, index) => {
+                                                        const playerKey = `PLAYER${index + 1}`;
+                                                        const playerProfitLoss = userBets
+                                                            .filter((p) => p.player === playerKey)
+                                                            .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0);
+                                                        return (
+                                                            <div key={playerKey}>
+                                                                <span>{player.name}</span> :{' '}
+                                                                <span
+                                                                    className={
+                                                                        playerProfitLoss >= 0
+                                                                            ? 'text-green-500'
+                                                                            : 'text-red-500'
+                                                                    }
+                                                                >
+                                                                    {Math.floor(playerProfitLoss * 100) / 100}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
@@ -175,7 +155,9 @@ export const HEROES_CLIENT_CLOSED_4: React.FC<Props> = ({ user, closedBets }) =>
                                                         <p>
                                                             Ставка: <strong>{participant.amount}</strong> на{' '}
                                                             <strong>
-                                                                {participant.player === 'PLAYER1' ? bet.player1.name : participant.player === 'PLAYER2' ? bet.player2.name : bet.player3.name}
+                                                                {participant.player === 'PLAYER1' ? bet.player1.name :
+                                                                    participant.player === 'PLAYER2' ? bet.player2.name :
+                                                                        participant.player === 'PLAYER3' ? bet.player3.name : bet.player4.name}
                                                             </strong>
                                                             {','} Коэффициент: <span>{Math.floor(participant.odds * 100) / 100}</span>
                                                             {','} Прибыль: <span>{Math.floor(participant.profit * 100) / 100}</span>

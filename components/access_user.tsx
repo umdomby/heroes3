@@ -42,6 +42,11 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                         BET CLOSED 3
                                     </DropdownMenuRadioItem>
                                 </Link>
+                                <Link href="/bet-closed-4">
+                                    <DropdownMenuRadioItem value="bet-closed-4" className="cursor-pointer">
+                                        BET CLOSED 4
+                                    </DropdownMenuRadioItem>
+                                </Link>
                                 <Link href="/bet-all-closed">
                                     <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         WINN/LOSE PLAYERS
