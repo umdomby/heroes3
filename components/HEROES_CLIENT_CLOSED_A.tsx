@@ -12,6 +12,12 @@ import {
     TableCell,
     TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
+
+interface Users {
+    telegram: string | null; // Allow telegram to be null
+    // Add other properties if needed
+}
 
 interface BetParticipantCLOSED {
     id: number;
@@ -27,6 +33,7 @@ interface BetParticipantCLOSED {
     isCovered: string;
     overlap: number;
     return: number;
+    user: Users; // Change this from Users[] to Users
 }
 
 interface BetCLOSED {
@@ -150,7 +157,19 @@ export const HEROES_CLIENT_CLOSED_A: React.FC<Props> = ({ user, closedBets }) =>
                                                 return (
                                                     <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
                                                         <p>
-                                                            Ставка: <strong>{participant.amount}</strong> на{' '}
+                                                            Ставка: <span className="text-blue-500">
+                                                                    {participant.user.telegram ? (
+                                                                        <Link
+                                                                            className="text-blue-500 hover:text-green-300 font-bold"
+                                                                            href={`https://t.me/${participant.user.telegram.replace(/^@/, '')}`}
+                                                                            target="_blank"
+                                                                        >
+                                                                            {participant.user.telegram}
+                                                                        </Link>
+                                                                    ) : (
+                                                                        <span>No Telegram</span> // Or any other placeholder text you prefer
+                                                                    )}
+                                                        </span> ,  <strong>{participant.amount}</strong> на{' '}
                                                             <strong>
                                                                 {participant.player === 'PLAYER1' ? bet.player1.name : bet.player2.name}
                                                             </strong>
