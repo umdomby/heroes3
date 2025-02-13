@@ -20,6 +20,9 @@ export default async function OrderP2PPage() {
     if (!user) {
         return redirect('/not-auth');
     }
+    if (user.role === 'BANED') {
+        return redirect('/');
+    }
 
     // Запрос к базе данных
     const openOrders = await prisma.orderP2P.findMany({

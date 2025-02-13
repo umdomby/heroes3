@@ -8,6 +8,7 @@ import { getUserSession } from "@/components/lib/get-user-session";
 import { GlobalData } from "@/components/globalData";
 import TelegramNotification from '@/components/TelegramNotification';
 import {HEROES_CLIENT_NO_REG} from "@/components/HEROES_CLIENT_NO_REG";
+import BanedNotification from "@/components/BanedNotification";
 
 export default async function Home() {
     const session = await getUserSession();
@@ -17,7 +18,7 @@ export default async function Home() {
         user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
     }
 
-    if (user) {
+    if (user && user.role !== 'BANED') {
         const isTelegramEmpty = !user.telegram || user.telegram.trim() === '';
 
         return (
@@ -35,6 +36,7 @@ export default async function Home() {
         return (
             <Container className="w-[100%]">
                 <Suspense fallback={<Loading />}>
+                    <BanedNotification />
                     <GlobalData />
                     <HEROES_CLIENT_NO_REG />
                 </Suspense>

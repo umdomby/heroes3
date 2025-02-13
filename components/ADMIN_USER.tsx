@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { updateUserRole } from '@/app/actions'; // Импортируем функцию для обновления роли
+import { updateUserRole } from '@/app/actions';
+import {UserRole} from "@prisma/client"; // Импортируем функцию для обновления роли
 
 interface User {
     id: number;
@@ -21,7 +22,7 @@ interface User {
     telegram: string | null;
     telegramView: boolean;
     createdAt: Date;
-    role: string; // Добавляем поле для роли
+    role: UserRole; // Добавляем поле для роли
 }
 
 interface Props {
@@ -41,7 +42,7 @@ export const ADMIN_USER: React.FC<Props> = ({ className, user, users }) => {
         setTimeout(() => setShowCopyMessage(false), 1000);
     };
 
-    const handleRoleChange = async (userId: number, role: string) => {
+    const handleRoleChange = async (userId: number, role: UserRole) => {
         try {
             await updateUserRole(userId, role);
             alert(`Роль пользователя обновлена до ${role}`);

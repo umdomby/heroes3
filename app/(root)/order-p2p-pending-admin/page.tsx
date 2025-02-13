@@ -21,7 +21,7 @@ export default async function OrderP2PPendingPage() {
         where: { id: Number(session?.id) },
     });
 
-    if (!user) {
+    if (!user || user.role !== 'ADMIN') {
         return redirect('/not-auth');
     }
 

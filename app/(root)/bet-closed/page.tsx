@@ -20,6 +20,10 @@ export default async function BetClosedPage() {
         return redirect('/not-auth');
     }
 
+    if (user.role === 'BANED') {
+        return redirect('/');
+    }
+
     // Получаем все закрытые ставки, в которых участвовал пользователь
     const closedBets = await prisma.betCLOSED.findMany({
         where: {

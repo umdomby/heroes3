@@ -19,6 +19,9 @@ export default async function TransferPointsPage() {
     if (!user) {
         return redirect('/not-auth');
     }
+    if (user.role === 'BANED') {
+        return redirect('/');
+    }
 
     // Получение истории переводов с cardId для обоих пользователей
     const transferHistory = await prisma.transfer.findMany({
