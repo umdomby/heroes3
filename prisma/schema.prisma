@@ -212,11 +212,7 @@ model Player {
   player2Bets       Bet[]       @relation(name: "Player2Bets") // Relation for bets as player 2
   player1BetsCLOSED BetCLOSED[] @relation(name: "Player1BetsCLOSED") // Relation for bets as player 1
   player2BetsCLOSED BetCLOSED[] @relation(name: "Player2BetsCLOSED") // Relation for bets as player 2
-}
 
-model Player3 {
-  id                 Int          @id @default(autoincrement())
-  name               String       @unique
   player1Bets3       Bet3[]       @relation(name: "Player1Bets3") // Relation for bets as player 1
   player2Bets3       Bet3[]       @relation(name: "Player2Bets3") // Relation for bets as player 2
   player3Bets3       Bet3[]       @relation(name: "Player3Bets3") // Relation for bets as player 3
@@ -298,11 +294,11 @@ enum PlayerChoice {
 
 model Bet3 {
   id              Int               @id @default(autoincrement())
-  player1         Player3           @relation(name: "Player1Bets3", fields: [player1Id], references: [id]) // ставки на игрока 1
+  player1         Player            @relation(name: "Player1Bets3", fields: [player1Id], references: [id]) // ставки на игрока 1
   player1Id       Int
-  player2         Player3           @relation(name: "Player2Bets3", fields: [player2Id], references: [id]) // ставки на игрока 2
+  player2         Player            @relation(name: "Player2Bets3", fields: [player2Id], references: [id]) // ставки на игрока 2
   player2Id       Int
-  player3         Player3           @relation(name: "Player3Bets3", fields: [player3Id], references: [id]) // ставки на игрока 3
+  player3         Player            @relation(name: "Player3Bets3", fields: [player3Id], references: [id]) // ставки на игрока 3
   player3Id       Int
   initBetPlayer1  Float // инициализация ставок на игрока 1
   initBetPlayer2  Float // инициализация ставок на игрока 2
@@ -358,11 +354,11 @@ model BetParticipant3 {
 model BetCLOSED3 {
   id                  Int                     @id @default(autoincrement())
   participantsCLOSED3 BetParticipantCLOSED3[] @relation("BetCLOSEDParticipants3") // Обратная связь с BetParticipantCLOSED3
-  player1             Player3                 @relation(name: "Player1BetsCLOSED3", fields: [player1Id], references: [id])
+  player1             Player                  @relation(name: "Player1BetsCLOSED3", fields: [player1Id], references: [id])
   player1Id           Int
-  player2             Player3                 @relation(name: "Player2BetsCLOSED3", fields: [player2Id], references: [id])
+  player2             Player                  @relation(name: "Player2BetsCLOSED3", fields: [player2Id], references: [id])
   player2Id           Int
-  player3             Player3                 @relation(name: "Player3BetsCLOSED3", fields: [player3Id], references: [id])
+  player3             Player                  @relation(name: "Player3BetsCLOSED3", fields: [player3Id], references: [id])
   player3Id           Int
   initBetPlayer1      Float // Инициализация ставок на игрока 1
   initBetPlayer2      Float // Инициализация ставок на игрока 2

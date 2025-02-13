@@ -6,7 +6,6 @@ import {hashSync} from 'bcrypt';
 import {revalidatePath, revalidateTag} from 'next/cache';
 import axios from "axios";
 import {JsonArray} from 'type-fest';
-
 const MARGIN = parseFloat(process.env.MARGIN || '0.05');
 
 export async function updateGlobalData() {
@@ -1599,7 +1598,7 @@ export async function clientCreateBet3(formData: any) {
     if (!session || session.role !== 'ADMIN') {
         throw new Error('У вас нет прав для выполнения этой операции');
     }
-
+    console.log("Form Data:", formData);
     try {
         const user = await prisma.user.findUnique({
             where: { id: Number(session.id) },
@@ -1652,10 +1651,16 @@ export async function clientCreateBet3(formData: any) {
 
         return newBet;
     } catch (error) {
-        if (error instanceof Error) {
-            console.log(error.stack);
+        if (error === null || error === undefined) {
+            console.error('Неизвестная ошибка (error is null или undefined)');
+        } else if (error instanceof Error) {
+            console.error(error.message);
+            console.error('Стек ошибки:', error.stack);
+        } else {
+            console.error('Ошибка в placeBet:', error);
         }
-        throw new Error('Failed to create bet. Please try again.');
+
+        throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }
 // ставки на 3 игрока

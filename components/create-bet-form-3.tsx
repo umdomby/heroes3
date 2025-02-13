@@ -35,10 +35,10 @@ interface Props {
     products: Product[];
     productItems: ProductItem[];
     players: Player[];
-    createBet: typeof clientCreateBet3;
+    createBet3: typeof clientCreateBet3;
 }
 
-export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
+export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, productItems, players, createBet3 }) => {
     const form = useForm<z.infer<typeof createBetSchema3>>({
         resolver: zodResolver(createBetSchema3),
         defaultValues: {
@@ -90,7 +90,7 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
         };
 
         try {
-            await createBet(betData);
+            await createBet3(betData);
             form.reset();
             setCreateBetError(null);
         } catch (error) {

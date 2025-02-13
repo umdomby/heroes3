@@ -4,7 +4,7 @@ import {getUserSession} from '@/components/lib/get-user-session';
 import {redirect} from 'next/navigation';
 import {Suspense} from 'react';
 import Loading from "@/app/(root)/loading";
-import {clientCreateBet} from "@/app/actions";
+import {clientCreateBet3} from "@/app/actions";
 import {Container} from '@/components/container';
 import {CreateBetForm3} from "@/components/create-bet-form-3";
 
@@ -49,7 +49,7 @@ export default async function CreateBetPage() {
                     products={products}
                     productItems={productItems}
                     players={players}
-                    createBet={clientCreateBet}
+                    createBet3={clientCreateBet3}
                 />
             </Suspense>
         </Container>
