@@ -16,82 +16,6 @@ import {revalidatePath, revalidateTag} from 'next/cache';
 import axios from "axios";
 import {JsonArray} from 'type-fest';
 const MARGIN = parseFloat(process.env.MARGIN || '0.05');
-
-export async function updateGlobalData() {
-    try {
-        // 1. Количество пользователей, участвующих в открытых ставках
-        const usersPlay = await prisma.betParticipant.count({
-            where: {
-                bet: {
-                    status: 'OPEN', // Предполагаем, что статус открытой ставки — 'OPEN'
-                },
-            },
-        });
-
-        // 2. Общая сумма ставок в открытых ставках
-        const pointsBetResult = await prisma.bet.aggregate({
-            _sum: {
-                totalBetAmount: true,
-            },
-            where: {
-                status: 'OPEN', // Только открытые ставки
-            },
-        });
-        // Округляем до двух знаков после запятой
-        const pointsBet = Math.floor((pointsBetResult._sum.totalBetAmount || 0) * 100) / 100;
-
-        // 3. Количество зарегистрированных пользователей
-        const users = await prisma.user.count();
-
-        // 4. Начальные очки (количество пользователей * 1000)
-        const pointsStart = Math.floor(users * 1000 * 100) / 100;
-
-        // 5. Сумма всех очков пользователей
-        const pointsAllUsersResult = await prisma.user.aggregate({
-            _sum: {
-                points: true,
-            },
-        });
-        // Округляем до двух знаков после запятой
-        const pointsAllUsers = Math.floor((pointsAllUsersResult._sum.points || 0) * 100) / 100;
-
-        // 6. Общая маржа из всех закрытых ставок
-        const marginResult = await prisma.betCLOSED.aggregate({
-            _sum: {
-                margin: true,
-            },
-        });
-        // Округляем до двух знаков после запятой
-        const margin = Math.floor((marginResult._sum.margin || 0) * 100) / 100;
-
-        // Обновляем или создаем запись в GlobalData
-        await prisma.globalData.upsert({
-            where: { id: 1 },
-            update: {
-                usersPlay,
-                pointsBet,
-                users,
-                pointsStart,
-                pointsAllUsers,
-                margin, // Обновляем общую маржу
-            },
-            create: {
-                id: 1,
-                usersPlay,
-                pointsBet,
-                users,
-                pointsStart,
-                pointsAllUsers,
-                margin, // Создаем запись с общей маржой
-            },
-        });
-
-        console.log('GlobalData updated successfully');
-    } catch (error) {
-        console.error('Error updating GlobalData:', error);
-        throw new Error('Failed to update GlobalData');
-    }
-} // Функция для обновления глобальных данных
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
     try {
         const currentUser = await getUserSession();
@@ -1008,7 +932,7 @@ export async function clientCreateBet(formData: any) {
         console.log("New bet created:", newBet); // Логируем созданную ставку
 
         console.log("User points remain unchanged:", user.points); // Логируем неизмененный баланс
-        await updateGlobalData();
+        
         revalidatePath('/');
 
         return newBet; // Возвращаем созданную ставку
@@ -1153,7 +1077,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
                 }
             }
         }).then(async () => {
-            await updateGlobalData();
+            
         });
 
         revalidatePath('/');
@@ -1450,7 +1374,7 @@ export async function closeBet(betId: number, winnerId: number) {
         });
 
         // Ревалидация данных
-        await updateGlobalData();
+        
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -1559,7 +1483,7 @@ export async function closeBetDraw(betId: number) {
         });
 
         // Revalidate data
-        await updateGlobalData();
+        
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -1652,7 +1576,7 @@ export async function clientCreateBet3(formData: any) {
         });
 
         console.log("New bet created:", newBet);
-        await updateGlobalData();
+        
         revalidatePath('/');
 
         return newBet;
@@ -1814,7 +1738,7 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
                 }
             }
         }).then(async () => {
-            await updateGlobalData();
+            
         });
 
         revalidatePath('/');
@@ -2104,7 +2028,7 @@ export async function closeBet3(betId: number, winnerId: number) {
         });
 
         // Ревалидация данных
-        await updateGlobalData();
+        
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -2219,7 +2143,7 @@ export async function closeBetDraw3(betId: number) {
         });
 
         // Обновляем глобальные данные
-        await updateGlobalData();
+        
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -2295,7 +2219,7 @@ export async function clientCreateBet4(formData: any) {
         });
 
         console.log("New bet created:", newBet);
-        await updateGlobalData();
+        
         revalidatePath('/');
 
         return newBet;
@@ -2497,7 +2421,7 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
                 }
             }
         }).then(async () => {
-            await updateGlobalData();
+            
         });
 
         revalidatePath('/');
@@ -2804,7 +2728,7 @@ export async function closeBet4(betId: number, winnerId: number) {
         });
 
         // Ревалидация данных
-        await updateGlobalData();
+        
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -2926,7 +2850,7 @@ export async function closeBetDraw4(betId: number) {
         });
 
         // Обновляем глобальные данные
-        await updateGlobalData();
+        
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');

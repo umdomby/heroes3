@@ -81,22 +81,22 @@ export const GlobalData = () => {
             <TableHeader>
                 <TableRow style={{ backgroundColor: '#1f2937' }}>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Users</TableHead>
-                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Start</TableHead>
-                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>User</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Reg</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Ref</TableHead>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Pay</TableHead>
-                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Open</TableHead>
-                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Bet open</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>All</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Users</TableHead>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Margin</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
                 <TableRow style={{ transition: 'background-color 0.3s', cursor: 'pointer' }}>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#868788' }}>{globalData.users}</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.pointsStart}</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#16a34a' }}>{globalData.pointsAllUsers}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#9333ea' }}>{globalData.pointsPay}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#dc2626' }}>{globalData.usersPlay}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#4f46e5' }}>{globalData.pointsBet}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.pointsStart}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#16a34a' }}>{globalData.pointsAllUsers}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#db2777' }}>{globalData.margin}</TableCell>
                 </TableRow>
             </TableBody>
