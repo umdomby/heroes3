@@ -9,7 +9,7 @@ import TelegramNotification from '@/components/TelegramNotification';
 import BanedNotification from "@/components/BanedNotification";
 import Link from "next/link";
 import { HEROES_CLIENT } from "@/components/HEROES_CLIENT";
-import { HEROES_CLIENT_NO_REG } from "@/components/HEROES_CLIENT_NO_REG";
+import { HEROES_CLIENT_NO_REG_2 } from "@/components/HEROES_CLIENT_NO_REG_2";
 import { HEROES_CLIENT_3 } from "@/components/HEROES_CLIENT_3";
 import { HEROES_CLIENT_NO_REG_3 } from "@/components/HEROES_CLIENT_NO_REG_3";
 import { HEROES_CLIENT_4 } from "@/components/HEROES_CLIENT_4";
@@ -53,14 +53,14 @@ export default async function Home() {
                 <Suspense fallback={<Loading />}>
                     <BanedNotification />
                     <GlobalData />
-                    <HEROES_CLIENT_NO_REG />
+                    <HEROES_CLIENT_NO_REG_2 />
                 </Suspense>
             )}
             {!user && (
                 <Suspense fallback={<Loading />}>
                     <FixedLink />
                     <GlobalData />
-                    <HEROES_CLIENT_NO_REG />
+                    <HEROES_CLIENT_NO_REG_2 />
                     <HEROES_CLIENT_NO_REG_3 />
                     <HEROES_CLIENT_NO_REG_4 />
                 </Suspense>

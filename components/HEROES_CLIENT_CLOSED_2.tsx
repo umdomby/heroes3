@@ -12,12 +12,6 @@ import {
     TableCell,
     TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
-
-interface Users {
-    telegram: string | null; // Allow telegram to be null
-    // Add other properties if needed
-}
 
 interface BetParticipantCLOSED {
     id: number;
@@ -33,7 +27,6 @@ interface BetParticipantCLOSED {
     isCovered: string;
     overlap: number;
     return: number;
-    user: Users; // Change this from Users[] to Users
 }
 
 interface BetCLOSED {
@@ -56,7 +49,7 @@ interface Props {
     closedBets: BetCLOSED[];
 }
 
-export const HEROES_CLIENT_CLOSED_A: React.FC<Props> = ({ user, closedBets }) => {
+export const HEROES_CLIENT_CLOSED_2: React.FC<Props> = ({ user, closedBets }) => {
     // Подсчитываем общую прибыль/потерю
     const totalProfitLoss = closedBets.reduce((total, bet) => {
         const userBets = bet.participantsCLOSED.filter((p) => p.userId === user.id);
@@ -75,6 +68,9 @@ export const HEROES_CLIENT_CLOSED_A: React.FC<Props> = ({ user, closedBets }) =>
             </div>
 
             {closedBets.map((bet) => {
+                const userBets = bet.participantsCLOSED.filter((p: BetParticipantCLOSED) => p.userId === user.id);
+
+                if (userBets.length === 0) return null;
 
                 return (
                     <div key={bet.id} className="border border-gray-700 mt-1">
@@ -84,51 +80,44 @@ export const HEROES_CLIENT_CLOSED_A: React.FC<Props> = ({ user, closedBets }) =>
                                     <Table>
                                         <TableBody>
                                             <TableRow>
-                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
+                                                <TableCell className="text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]">
                                                     <div>{bet.player1.name}</div>
+                                                    <div>  <span
+                                                        className={
+                                                            userBets
+                                                                .filter((p) => p.player === 'PLAYER1')
+                                                                .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
+                                                                ? 'text-green-500'
+                                                                : 'text-red-500'
+                                                        }
+                                                    >
+                                                            {Math.floor(userBets
+                                                                .filter((p) => p.player === 'PLAYER1')
+                                                                .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
+                                                        </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                                 </TableCell>
-                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
+                                                <TableCell
+                                                    className="text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]">
                                                     <div>{bet.player2.name}</div>
+                                                    <div> <span
+                                                        className={
+                                                            userBets
+                                                                .filter((p) => p.player === 'PLAYER2')
+                                                                .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
+                                                                ? 'text-green-500'
+                                                                : 'text-red-500'
+                                                        }
+                                                    >
+                                                            {Math.floor(userBets
+                                                                .filter((p) => p.player === 'PLAYER2')
+                                                                .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
+                                                        </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                                 </TableCell>
                                                 <TableCell className="w-[15%]">
                                                     <div>{Math.floor(bet.oddsBetPlayer1 * 100) / 100}</div>
                                                     <div>{Math.floor(bet.oddsBetPlayer2 * 100) / 100}</div>
-                                                </TableCell>
-                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
-                                                    <div>
-                                                        <span>{bet.player1.name}</span> :{' '}
-                                                        <span
-                                                            className={
-                                                                bet.participantsCLOSED
-                                                                    .filter((p) => p.player === 'PLAYER1')
-                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
-                                                                    ? 'text-green-500'
-                                                                    : 'text-red-500'
-                                                            }
-                                                        >
-                                                            {Math.floor(bet.participantsCLOSED
-                                                                .filter((p) => p.player === 'PLAYER1')
-                                                                .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
-                                                        </span>
-                                                    </div>
-                                                    <div>
-                                                        <span>{bet.player2.name}</span> :{' '}
-                                                        <span
-                                                            className={
-                                                                bet.participantsCLOSED
-                                                                    .filter((p) => p.player === 'PLAYER2')
-                                                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
-                                                                    ? 'text-green-500'
-                                                                    : 'text-red-500'
-                                                            }
-                                                        >
-                                                            {Math.floor(bet.participantsCLOSED
-                                                                .filter((p) => p.player === 'PLAYER2')
-                                                                .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
-                                                        </span>
-                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
@@ -136,17 +125,16 @@ export const HEROES_CLIENT_CLOSED_A: React.FC<Props> = ({ user, closedBets }) =>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="m-1 p-4 rounded-lg">
-                                        <h4 className="text-md font-semibold mb-2">Дата и время закрытия
-                                            ставок: {new Date(bet.updatedAt).toLocaleString()}</h4>
+                                        <h4 className="text-md font-semibold mb-2">Дата и время закрытия ставок: {new Date(bet.updatedAt).toLocaleString()}</h4>
                                         <p>
                                             {/* Победитель: <strong>{winnerName}</strong> */}
                                         </p>
                                     </div>
 
-                                    {bet.participantsCLOSED.length > 0 && (
+                                    {userBets.length > 0 && (
                                         <div className="m-1 p-4 rounded-lg">
-                                        <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
-                                            {bet.participantsCLOSED.map((participant) => {
+                                            <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
+                                            {userBets.map((participant) => {
                                                 const profitToCover =
                                                     participant.amount * (participant.odds - 1);
                                                 const overlapPercentage =
@@ -157,19 +145,7 @@ export const HEROES_CLIENT_CLOSED_A: React.FC<Props> = ({ user, closedBets }) =>
                                                 return (
                                                     <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
                                                         <p>
-                                                            Ставка: <span className="text-blue-500">
-                                                                    {participant.user.telegram ? (
-                                                                        <Link
-                                                                            className="text-blue-500 hover:text-green-300 font-bold"
-                                                                            href={`https://t.me/${participant.user.telegram.replace(/^@/, '')}`}
-                                                                            target="_blank"
-                                                                        >
-                                                                            {participant.user.telegram}
-                                                                        </Link>
-                                                                    ) : (
-                                                                        <span>No Telegram</span> // Or any other placeholder text you prefer
-                                                                    )}
-                                                        </span> ,  <strong>{participant.amount}</strong> на{' '}
+                                                            Ставка: <strong>{participant.amount}</strong> на{' '}
                                                             <strong>
                                                                 {participant.player === 'PLAYER1' ? bet.player1.name : bet.player2.name}
                                                             </strong>

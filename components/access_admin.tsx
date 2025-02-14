@@ -31,7 +31,7 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                         HOME
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <Link href="/bet-create">
+                                <Link href="/bet-create-2">
                                     <DropdownMenuRadioItem value="bet-create" className="cursor-pointer">
                                        ADMIN CREATE BET 2
                                     </DropdownMenuRadioItem>
@@ -56,9 +56,9 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                         ADMIN USER
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <Link href="/bet-closed-admin">
+                                <Link href="/bet-closed-admin-2">
                                     <DropdownMenuRadioItem value="bet-closed-admin" className="cursor-pointer">
-                                       ADMIN BET CLOSED
+                                       ADMIN BET CLOSED 2
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-closed-admin-3">
@@ -91,9 +91,9 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                        ADMIN ТУРНИРЫ
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <Link href="/bet-closed">
+                                <Link href="/bet-closed-2">
                                     <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
-                                        BET CLOSED
+                                        BET CLOSED 2
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-closed-3">

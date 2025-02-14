@@ -50,7 +50,7 @@ const playerColors = {
     [PlayerChoice.PLAYER2]: "text-red-400",
 };
 
-export const HEROES_CLIENT_NO_REG: React.FC<Props> = ({ className }) => {
+export const HEROES_CLIENT_NO_REG_2: React.FC<Props> = ({ className }) => {
     const {
         data: bets,
         error,

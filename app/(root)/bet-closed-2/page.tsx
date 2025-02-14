@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
-import {HEROES_CLIENT_CLOSED_A} from "@/components/HEROES_CLIENT_CLOSED_A";
+import { HEROES_CLIENT_CLOSED_2 } from "@/components/HEROES_CLIENT_CLOSED_2";
 
 export default async function BetClosedPage() {
     const session = await getUserSession();
@@ -16,18 +16,25 @@ export default async function BetClosedPage() {
 
     const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user) {
         return redirect('/not-auth');
+    }
+
+    if (user.role === 'BANED') {
+        return redirect('/');
     }
 
     // Получаем все закрытые ставки, в которых участвовал пользователь
     const closedBets = await prisma.betCLOSED.findMany({
-        include: {
+        where: {
             participantsCLOSED: {
-                include: {
-                    user: true, // Add a comma here
-                }, // Получаем всех участников, чтобы отобразить выигранные и проигранные ставки
-            },
+                some: {
+                    userId: user.id
+                }
+            }
+        },
+        include: {
+            participantsCLOSED: true, // Получаем всех участников, чтобы отобразить выигранные и проигранные ставки
             player1: true,
             player2: true,
             creator: true,
@@ -36,14 +43,14 @@ export default async function BetClosedPage() {
             productItem: true,
         },
         orderBy: {
-            updatedAt: 'desc'
+            updatedAt: 'desc' // Сортировка по дате создания в порядке убывания
         }
     });
 
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <HEROES_CLIENT_CLOSED_A user={user} closedBets={closedBets} />
+                <HEROES_CLIENT_CLOSED_2 user={user} closedBets={closedBets} />
             </Suspense>
         </Container>
     );
