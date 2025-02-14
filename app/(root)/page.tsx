@@ -14,11 +14,25 @@ import { HEROES_CLIENT_3 } from "@/components/HEROES_CLIENT_3";
 import { HEROES_CLIENT_NO_REG_3 } from "@/components/HEROES_CLIENT_NO_REG_3";
 import { HEROES_CLIENT_4 } from "@/components/HEROES_CLIENT_4";
 import { HEROES_CLIENT_NO_REG_4 } from "@/components/HEROES_CLIENT_NO_REG_4";
+import { User } from "@prisma/client";
 
 const FixedLink = () => (
     <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
         <p className="text-md text-blue-500 font-bold">
-            <Link className="text-blue-500 hover:text-green-300 font-bold text-xl" href={'https://t.me/navatar85'} target="_blank">@navatar85</Link>
+            <Link className="text-blue-500 hover:text-green-300 font-bold text-xl" href={'https://t.me/navatar85'}
+                  target="_blank">@navatar85</Link>
+        </p>
+    </div>
+);
+
+interface PointsUserProps {
+    user: User;
+}
+
+const PointsUser: React.FC<PointsUserProps> = ({ user }) => (
+    <div className="absolute top-0 left-0 right-0 flex justify-center items-center py-2 z-50 transform -translate-y-9">
+        <p className="text-sm font-bold">
+            Points: <span className="text-red-500">{Math.floor((user.points ?? 0) * 100) / 100}</span>
         </p>
     </div>
 );
@@ -34,7 +48,10 @@ export default async function Home() {
     const isTelegramEmpty = user && (!user.telegram || user.telegram.trim() === '');
 
     return (
-        <Container className="w-[100%]">
+        <Container className="w-[100%] relative">
+            {user && (
+                <PointsUser user={user} />
+            )}
             {user && user.role !== 'BANED' && (
                 <>
                     {isTelegramEmpty && (
