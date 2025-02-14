@@ -120,30 +120,42 @@ export const HEROES_CLIENT_NO_REG_4: React.FC<Props> = ({ className }) => {
                                     <TableBody>
                                         <TableRow>
                                             <TableCell
-                                                className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[15%]`}
+                                                className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                             >
-                                                <div>{bet.player1.name}</div>
+                                                <div>
+                                                    {bet.player1.name}
+                                                </div>
                                                 <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                             </TableCell>
+
                                             <TableCell
-                                                className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[15%]`}
+                                                className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                             >
-                                                <div>{bet.player2.name}</div>
+                                                <div>
+                                                    {bet.player2.name}
+                                                </div>
                                                 <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                             </TableCell>
+
                                             <TableCell
-                                                className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap w-[15%]`}
+                                                className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                             >
-                                                <div>{bet.player3.name}</div>
+                                                <div>
+                                                    {bet.player3.name}
+                                                </div>
                                                 <div>{Math.floor(bet.totalBetPlayer3 * 100) / 100}</div>
                                             </TableCell>
+
                                             <TableCell
-                                                className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis overflow-hidden whitespace-nowrap w-[15%]`}
+                                                className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                             >
-                                                <div>{bet.player4.name}</div>
+                                                <div>
+                                                    {bet.player4.name}
+                                                </div>
                                                 <div>{Math.floor(bet.totalBetPlayer4 * 100) / 100}</div>
                                             </TableCell>
-                                            <TableCell className="w-[15%]">
+
+                                            <TableCell className="w-20">
                                                 <div
                                                     className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                 >
@@ -165,68 +177,7 @@ export const HEROES_CLIENT_NO_REG_4: React.FC<Props> = ({ className }) => {
                                                     {Math.floor(bet.oddsBetPlayer4 * 100) / 100}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[25%]">
-                                                <div>
-                                                    <span className={playerColors[PlayerChoice.PLAYER1]}>
-                                                        {bet.player1.name}
-                                                    </span>{" "}
-                                                    :{" "}
-                                                    <span
-                                                        className={
-                                                            bet.totalBetPlayer1 >= bet.totalBetPlayer2 && bet.totalBetPlayer1 >= bet.totalBetPlayer3 && bet.totalBetPlayer1 >= bet.totalBetPlayer4
-                                                                ? "text-green-600"
-                                                                : "text-red-600"
-                                                        }
-                                                    >
-                                                        {Math.floor(bet.totalBetPlayer1 * 100) / 100}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span className={playerColors[PlayerChoice.PLAYER2]}>
-                                                        {bet.player2.name}
-                                                    </span>{" "}
-                                                    :{" "}
-                                                    <span
-                                                        className={
-                                                            bet.totalBetPlayer2 >= bet.totalBetPlayer1 && bet.totalBetPlayer2 >= bet.totalBetPlayer3 && bet.totalBetPlayer2 >= bet.totalBetPlayer4
-                                                                ? "text-green-600"
-                                                                : "text-red-600"
-                                                        }
-                                                    >
-                                                        {Math.floor(bet.totalBetPlayer2 * 100) / 100}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span className={playerColors[PlayerChoice.PLAYER3]}>
-                                                        {bet.player3.name}
-                                                    </span>{" "}
-                                                    :{" "}
-                                                    <span
-                                                        className={
-                                                            bet.totalBetPlayer3 >= bet.totalBetPlayer1 && bet.totalBetPlayer3 >= bet.totalBetPlayer2 && bet.totalBetPlayer3 >= bet.totalBetPlayer4
-                                                                ? "text-green-600"
-                                                                : "text-red-600"
-                                                        }
-                                                    >
-                                                        {Math.floor(bet.totalBetPlayer3 * 100) / 100}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span className={playerColors[PlayerChoice.PLAYER4]}>
-                                                        {bet.player4.name}
-                                                    </span>{" "}
-                                                    :{" "}
-                                                    <span
-                                                        className={
-                                                            bet.totalBetPlayer4 >= bet.totalBetPlayer1 && bet.totalBetPlayer4 >= bet.totalBetPlayer2 && bet.totalBetPlayer4 >= bet.totalBetPlayer3
-                                                                ? "text-green-600"
-                                                                : "text-red-600"
-                                                        }
-                                                    >
-                                                        {Math.floor(bet.totalBetPlayer4 * 100) / 100}
-                                                    </span>
-                                                </div>
-                                            </TableCell>
+
                                         </TableRow>
                                     </TableBody>
                                 </Table>
