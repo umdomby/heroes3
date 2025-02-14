@@ -154,7 +154,7 @@ export const authOptions: AuthOptions = {
         //     where: { id: referralEntry.referralUserId },
         //     data: {
         //       points: {
-        //         increment: Number(process.env.REFERRAL) || 10, // Преобразуем в число и добавляем 10 баллов по умолчанию
+        //         increment: 10, // Преобразуем в число и добавляем 10 баллов по умолчанию
         //       },
         //     },
         //   });
@@ -163,7 +163,7 @@ export const authOptions: AuthOptions = {
         //     where: { id: referralEntry.id }, // Указываем уникальный идентификатор записи
         //     data: {
         //       referralStatus: true, // Устанавливаем referralStatus в true
-        //       referralPoints: Number(process.env.REFERRAL) || 10,
+        //       referralPoints: 10,
         //     },
         //   });
         // }
@@ -219,20 +219,33 @@ export const authOptions: AuthOptions = {
 
         if (referralEntry) {
           // Если IP-адрес существует, увеличиваем баллы для пользователя, связанного с рефералом
+          const referralPoints = 10; // Получаем количество баллов из переменной окружения или используем 10 по умолчанию
+
           await prisma.user.update({
-            where: { id: referralEntry.referralUserId },
+            where: { id: referralEntry.referralUserId }, // Находим пользователя по ID
             data: {
               points: {
-                increment: Number(process.env.REFERRAL) || 10, // Преобразуем в число и добавляем 10 баллов по умолчанию
+                increment: referralPoints, // Увеличиваем баллы на указанное количество
               },
             },
           });
+
           // Обновляем статус реферала отдельно
           await prisma.referralUserIpAddress.update({
             where: { id: referralEntry.id }, // Указываем уникальный идентификатор записи
             data: {
-              referralStatus: true, // Устанавливаем referralStatus в true
-              referralPoints: Number(process.env.REFERRAL) || 10,
+              referralStatus: true, // Устанавливаем referralStatus в true, чтобы отметить, что реферал подтвержден
+              referralPoints: referralPoints, // Сохраняем количество начисленных баллов
+            },
+          });
+
+          // Отнимаем баллы у пользователя с id = 1
+          await prisma.user.update({
+            where: { id: 1 }, // Находим пользователя с ID 1
+            data: {
+              points: {
+                decrement: referralPoints, // Уменьшаем баллы на то же количество
+              },
             },
           });
         }
