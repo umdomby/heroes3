@@ -408,22 +408,57 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                             <TableRow>
                                                 {/* Игрок 1 */}
                                                 <TableCell
-                                                    className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[25%]`}
+                                                    className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
-                                                    <div>{bet.player1.name}</div>
-                                                    <div>{Math.floor(bet.totalBetPlayer1* 100) / 100}</div>
+                                                    <div>
+                                                        {bet.player1.name}
+
+                                                    </div>
+                                                    <div>                                                        <span
+                                                        className={
+                                                            profitIfPlayer1Wins >= 0
+                                                                ? "text-green-600"
+                                                                : "text-red-600"
+                                                        }
+                                                    >
+                              {profitIfPlayer1Wins >= 0
+                                  ? `+${Math.floor(profitIfPlayer1Wins * 100) / 100}`
+                                  : Math.floor(profitIfPlayer1Wins * 100) / 100}
+                            </span></div>
+                                                    <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                                 </TableCell>
 
                                                 {/* Игрок 2 */}
                                                 <TableCell
-                                                    className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[25%]`}
+                                                    className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
-                                                    <div>{bet.player2.name}</div>
-                                                    <div>{Math.floor(bet.totalBetPlayer2* 100) / 100}</div>
-                                                </TableCell>
+                                                    <div>
+                                                        {bet.player2.name}
 
+                                                    </div>
+                                                    <div>                                                        <span
+                                                        className={
+                                                            profitIfPlayer2Wins >= 0
+                                                                ? "text-green-600"
+                                                                : "text-red-600"
+                                                        }
+                                                    >
+                              {profitIfPlayer2Wins >= 0
+                                  ? `+${Math.floor(profitIfPlayer2Wins * 100) / 100}`
+                                  : Math.floor(profitIfPlayer2Wins * 100) / 100}
+                            </span></div>
+                                                    <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
+                                                </TableCell>
+                                                <TableCell
+                                                    className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
+                                                >
+                                                </TableCell>
+                                                <TableCell
+                                                    className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
+                                                >
+                                                </TableCell>
                                                 {/* Коэффициент для игрока 1 и 2*/}
-                                                <TableCell className="w-[15%]">
+                                                <TableCell className="w-20">
                                                     <div
                                                         className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                     >
@@ -433,45 +468,6 @@ export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
                                                         className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                     >
                                                         {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
-                                                    </div>
-                                                </TableCell>
-
-                                                {/* Прибыль/убыток */}
-                                                <TableCell className="text-ellipsis text-ellipsis overflow-hidden whitespace-nowrap w-[40%]">
-                                                    <div>
-                            <span className={playerColors[PlayerChoice.PLAYER1]}>
-                              Победа {bet.player1.name}
-                            </span>{" "}
-                                                        :{" "}
-                                                        <span
-                                                            className={
-                                                                profitIfPlayer1Wins >= 0
-                                                                    ? "text-green-600"
-                                                                    : "text-red-600"
-                                                            }
-                                                        >
-                              {profitIfPlayer1Wins >= 0
-                                  ? `+${Math.floor(profitIfPlayer1Wins * 100) / 100}`
-                                  : Math.floor(profitIfPlayer1Wins * 100) / 100}
-                            </span>
-                                                    </div>
-
-                                                    <div>
-                            <span className={playerColors[PlayerChoice.PLAYER2]}>
-                              Победа {bet.player2.name}
-                            </span>{" "}
-                                                        :{" "}
-                                                        <span
-                                                            className={
-                                                                profitIfPlayer2Wins >= 0
-                                                                    ? "text-green-600"
-                                                                    : "text-red-600"
-                                                            }
-                                                        >
-                              {profitIfPlayer2Wins >= 0
-                                  ? `+${Math.floor(profitIfPlayer2Wins * 100) / 100}`
-                                  : Math.floor(profitIfPlayer2Wins * 100) / 100}
-                            </span>
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
