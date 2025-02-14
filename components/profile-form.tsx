@@ -1,15 +1,15 @@
 "use client";
-import React, {useEffect, useState} from 'react';
-import {FormProvider, useForm} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {TFormRegisterValues, formRegisterSchema} from './modals/auth-modal/forms/schemas';
-import {User} from '@prisma/client';
+import React, { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { TFormRegisterValues, formRegisterSchema } from './modals/auth-modal/forms/schemas';
+import { User } from '@prisma/client';
 import toast from 'react-hot-toast';
-import {signOut} from 'next-auth/react';
-import {Container} from './container';
-import {Title} from './title';
-import {FormInput} from './form';
-import {Button, Input} from '@/components/ui';
+import { signOut } from 'next-auth/react';
+import { Container } from './container';
+import { Title } from './title';
+import { FormInput } from './form';
+import { Button, Input } from '@/components/ui';
 import {
     referralGet,
     updateUserInfo,
@@ -30,7 +30,7 @@ interface Props {
     data: User;
 }
 
-export const ProfileForm: React.FC<Props> = ({data}) => {
+export const ProfileForm: React.FC<Props> = ({ data }) => {
     const form = useForm({
         resolver: zodResolver(formRegisterSchema),
         defaultValues: {
@@ -44,11 +44,10 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
     const [referrals, setReferrals] = useState<any[]>([]);
     const [bankDetails, setBankDetails] = useState<any[]>(Array.isArray(data.bankDetails) ? data.bankDetails : []);
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [newBankDetail, setNewBankDetail] = useState({name: '', details: '', description: '', price: ''});
-    const [editedDetail, setEditedDetail] = useState({name: '', details: '', description: '', price: ''});
+    const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '', price: '' });
+    const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', price: '' });
     const [telegram, setTelegram] = useState<string>(data.telegram || '');
     const [telegramView, setTelegramView] = useState<boolean>(data.telegramView || false);
-
 
     useEffect(() => {
         const fetchReferrals = async () => {
@@ -106,7 +105,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
             }
             const updatedBankDetails = await addBankDetails(newBankDetail);
             setBankDetails(updatedBankDetails);
-            setNewBankDetail({name: '', details: '', description: '', price: ''});
+            setNewBankDetail({ name: '', details: '', description: '', price: '' });
             toast.success('Банковский реквизит добавлен');
         } catch (error) {
             toast.error('Ошибка при добавлении банковского реквизита');
@@ -150,17 +149,24 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
         toast.success('Card ID скопирован в буфер обмена');
     };
 
+    const handleCopyReferral = () => {
+        const domain = window.location.origin; // Get the current domain
+        const referralLink = `${domain}/referral/${data.id}`;
+        navigator.clipboard.writeText(referralLink);
+        toast.success('Referral link скопирован в буфер обмена');
+    };
+
     return (
         <Container className="w-[98%]">
             <div className="flex flex-col gap-3 w-full mt-10">
                 <div className="flex flex-col md:flex-row gap-3 w-full">
                     <div className="w-full md:w-1/3 p-4 rounded-lg">
-                        <Title text={`Личные данные | #${data.id}`} size="md" className="font-bold"/>
+                        <Title text={`Личные данные | #${data.id}`} size="md" className="font-bold" />
 
-                        <div className=" mb-4">
-                            <label className="block text-sm font-medium text-gray-300">Email: {data.email}</label>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-blue-500">Email: {data.email}</label>
                             <div className="flex">
-                                <label className="block text-sm font-medium text-gray-300">
+                                <label className="block text-sm font-medium text-green-500">
                                     Card ID: {data.cardId}
                                 </label>
                                 <Button
@@ -170,22 +176,34 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                     Copy
                                 </Button>
                             </div>
+                            <div className="flex">
+                                <label className="block text-sm font-medium text-green-500">
+                                    Referral: {`${window.location.origin}/referral/${data.id}`}
+                                </label>
+                                <Button
+                                    onClick={handleCopyReferral}
+                                    className="ml-2 bg-blue-500 text-white px-2 py-1 rounded h-5"
+                                >
+                                    Copy
+                                </Button>
+                            </div>
                             <label className="flex items-center">
                                 Role:
                                 <span
-                                    className={`block text-sm font-medium ml-2 ${data.role === 'BANED' ? 'text-red-500' : 'text-green-500'}`}>{data.role}</span>
+                                    className={`block text-sm font-medium ml-2 ${data.role === 'BANED' ? 'text-red-500' : 'text-green-500'}`}
+                                >
+            {data.role}
+        </span>
                             </label>
-
                         </div>
 
                         <FormProvider {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
-                                <FormInput name="fullName" label="Полное имя" required/>
-                                <FormInput type="password" name="password" label="Новый пароль" required/>
-                                <FormInput type="password" name="confirmPassword" label="Повторите пароль" required/>
+                                <FormInput name="fullName" label="Полное имя" required />
+                                <FormInput type="password" name="password" label="Новый пароль" required />
+                                <FormInput type="password" name="confirmPassword" label="Повторите пароль" required />
 
-                                <Button disabled={form.formState.isSubmitting} className="text-base mt-10"
-                                        type="submit">
+                                <Button disabled={form.formState.isSubmitting} className="text-base mt-10" type="submit">
                                     Сохранить
                                 </Button>
 
@@ -289,7 +307,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                                     if (regex.test(value)) {
                                                         // Если значение пустое, сбрасываем цену
                                                         if (value === '') {
-                                                            setEditedDetail({...editedDetail, price: ''});
+                                                            setEditedDetail({ ...editedDetail, price: '' });
                                                             return;
                                                         }
                                                         // Если значение начинается с запятой или точки, добавляем "0," в начало
@@ -327,7 +345,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                                         // Преобразуем строку в число с плавающей точкой и проверяем, является ли оно числом
                                                         const floatValue = parseFloat(value.replace(',', '.'));
                                                         if (!isNaN(floatValue)) {
-                                                            setNewBankDetail({...newBankDetail, price: value});
+                                                            setNewBankDetail({ ...newBankDetail, price: value });
                                                         }
                                                     }
                                                 }}
@@ -385,7 +403,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                                                 if (regex.test(value)) {
                                                                     // Если значение пустое, сбрасываем цену
                                                                     if (value === '') {
-                                                                        setEditedDetail({...editedDetail, price: ''});
+                                                                        setEditedDetail({ ...editedDetail, price: '' });
                                                                         return;
                                                                     }
                                                                     // Если значение начинается с запятой или точки, добавляем "0," в начало
