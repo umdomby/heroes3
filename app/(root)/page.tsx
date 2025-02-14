@@ -3,15 +3,17 @@ import { Container } from '@/components/container';
 import { prisma } from '@/prisma/prisma-client';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
-import { HEROES_CLIENT } from "@/components/HEROES_CLIENT";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { GlobalData } from "@/components/globalData";
 import TelegramNotification from '@/components/TelegramNotification';
-import { HEROES_CLIENT_NO_REG } from "@/components/HEROES_CLIENT_NO_REG";
 import BanedNotification from "@/components/BanedNotification";
 import Link from "next/link";
-import {HEROES_CLIENT_3} from "@/components/HEROES_CLIENT_3";
-import {HEROES_CLIENT_4} from "@/components/HEROES_CLIENT_4";
+import { HEROES_CLIENT } from "@/components/HEROES_CLIENT";
+import { HEROES_CLIENT_NO_REG } from "@/components/HEROES_CLIENT_NO_REG";
+import { HEROES_CLIENT_3 } from "@/components/HEROES_CLIENT_3";
+import { HEROES_CLIENT_NO_REG_3 } from "@/components/HEROES_CLIENT_NO_REG_3";
+import { HEROES_CLIENT_4 } from "@/components/HEROES_CLIENT_4";
+import { HEROES_CLIENT_NO_REG_4 } from "@/components/HEROES_CLIENT_NO_REG_4";
 
 const FixedLink = () => (
     <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
@@ -59,6 +61,8 @@ export default async function Home() {
                     <FixedLink />
                     <GlobalData />
                     <HEROES_CLIENT_NO_REG />
+                    <HEROES_CLIENT_NO_REG_3 />
+                    <HEROES_CLIENT_NO_REG_4 />
                 </Suspense>
             )}
         </Container>

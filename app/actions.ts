@@ -1576,8 +1576,6 @@ export async function closeBetDraw(betId: number) {
     }
 }
 
-
-// Функция для расчета коэффициентов на 3 игроков
 function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number) {
     const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2 + totalWithInitPlayer3;
 
@@ -1590,8 +1588,7 @@ function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: numb
         oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
         oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
     };
-}
-// Функция для расчета максимальных ставок на 3 игрока
+}// Функция для расчета коэффициентов на 3 игроков
 function calculateMaxBets3(initBetPlayer1: number, initBetPlayer2: number, initBetPlayer3: number): {
     maxBetPlayer1: number,
     maxBetPlayer2: number,
@@ -1601,8 +1598,7 @@ function calculateMaxBets3(initBetPlayer1: number, initBetPlayer2: number, initB
     const maxBetPlayer2 = Math.floor((initBetPlayer1 + initBetPlayer3) * 100) / 100;
     const maxBetPlayer3 = Math.floor((initBetPlayer1 + initBetPlayer2) * 100) / 100;
     return { maxBetPlayer1, maxBetPlayer2, maxBetPlayer3 };
-}
-// создание ставок на 3 игрока
+}// Функция для расчета максимальных ставок на 3 игрока
 export async function clientCreateBet3(formData: any) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -1672,8 +1668,7 @@ export async function clientCreateBet3(formData: any) {
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
-}
-// ставки на 3 игрока
+}// создание ставок на 3 игрока
 export async function placeBet3(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
     try {
         console.log('Запуск функции placeBet с formData:', formData);
@@ -1837,8 +1832,7 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
-}
-// Функция для балансировки перекрытий на 3 игроков
+}// ставки на 3 игрока
 async function balanceOverlaps3(betId: number) {
     console.log(`Начало balanceOverlaps для betId: ${betId}`);
 
@@ -1929,8 +1923,7 @@ async function balanceOverlaps3(betId: number) {
     await transferOverlap(participantsPlayer3, 'overlapPlayer2', bet);
 
     console.log(`Завершение balanceOverlaps для betId: ${betId}`);
-}
-// Функция для закрытия ставки на 3 игрока
+}// Функция для балансировки перекрытий на 3 игроков
 export async function closeBet3(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2126,8 +2119,7 @@ export async function closeBet3(betId: number, winnerId: number) {
             throw new Error("Не удалось закрыть ставку.");
         }
     }
-}
-// ничья на 3 игрока
+}// Функция для закрытия ставки на 3 игрока
 export async function closeBetDraw3(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2242,11 +2234,8 @@ export async function closeBetDraw3(betId: number) {
             throw new Error("Не удалось закрыть ставку как ничья.");
         }
     }
-}
+}// ничья на 3 игрока
 
-
-
-// создание ставок на 4 игрока
 export async function clientCreateBet4(formData: any) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2322,9 +2311,7 @@ export async function clientCreateBet4(formData: any) {
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
-}
-// Функция для расчета коэффициентов на 4 игроков
-// Функция для расчета коэффициентов на 4 игроков
+}// создание ставок на 4 игрока
 function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number, totalWithInitPlayer4: number) {
     const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2 + totalWithInitPlayer3 + totalWithInitPlayer4;
 
@@ -2339,8 +2326,7 @@ function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: numb
         oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
         oddsPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
     };
-}
-// Функция для расчета максимальных ставок на 4 игрока
+}// Функция для расчета коэффициентов на 4 игроков
 function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initBetPlayer3: number, initBetPlayer4: number): {
     maxBetPlayer1: number,
     maxBetPlayer2: number,
@@ -2352,7 +2338,7 @@ function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initB
     const maxBetPlayer3 = Math.floor((initBetPlayer1 + initBetPlayer2 + initBetPlayer4) * 100) / 100;
     const maxBetPlayer4 = Math.floor((initBetPlayer1 + initBetPlayer2 + initBetPlayer3) * 100) / 100;
     return { maxBetPlayer1, maxBetPlayer2, maxBetPlayer3, maxBetPlayer4 };
-}
+}// Функция для расчета максимальных ставок на 4 игрока
 // ставки на 4 игрока
 // Function to place a bet for four players
 export async function placeBet4(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
@@ -2530,8 +2516,6 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }
-
-// Функция для балансировки перекрытий на 4 игроков
 async function balanceOverlaps4(betId: number) {
     console.log(`Начало balanceOverlaps для betId: ${betId}`);
 
@@ -2631,10 +2615,7 @@ async function balanceOverlaps4(betId: number) {
     await transferOverlap(participantsPlayer4, 'overlapPlayer3', bet);
 
     console.log(`Завершение balanceOverlaps для betId: ${betId}`);
-}
-
-// Функция для закрытия ставки на 4 игрока
-// Function to close a bet for four players
+}// Функция для балансировки перекрытий на 4 игроков
 export async function closeBet4(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2838,10 +2819,8 @@ export async function closeBet4(betId: number, winnerId: number) {
             throw new Error("Не удалось закрыть ставку.");
         }
     }
-}
-
-// ничья на 4 игрока
-// Function to handle a draw for four players
+}// Функция для закрытия ставки на 4 игрока
+// Function to close a bet for four players
 export async function closeBetDraw4(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2962,5 +2941,6 @@ export async function closeBetDraw4(betId: number) {
             throw new Error("Не удалось закрыть ставку как ничья.");
         }
     }
-}
+}// ничья на 4 игрока
+// Function to handle a draw for four players
 
