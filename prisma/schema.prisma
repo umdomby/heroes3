@@ -208,7 +208,7 @@ model GlobalData {
   reg         Float?   @default(0) // количество записей regPoints
   ref         Float?   @default(0) // количество записей ReferralUserIpAddress referralStatus=true
   usersPoints Float?   @default(0) // сумма Points всех пользователей
-  margin      Float?   @default(0) // сумма маржи model Bet margin, sum BetClosed, BetClosed3 and BetClosed4 margin
+  margin      Float?   @default(0) // сумма маржи model sum BetClosed, BetClosed3 and BetClosed4 - margin
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

@@ -20,7 +20,7 @@ async function up() {
         email: 'umdom2@gmail.com',
         password: hashSync('123123', 10),
         role: 'ADMIN',
-        points: 1000000,
+        points: 996000,
         cardId: generateCardId(),
         bankDetails: [
             {"name": "USTD - BSC (BEP20)", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)", "price": "1"},
@@ -44,7 +44,7 @@ async function up() {
         email: 'umdom33@gmail.com',
         password: hashSync('123123', 10),
         role: 'USER',
-        points: 15,
+        points: 1000,
         cardId: generateCardId(),
         telegram: "@Pi33",
         bankDetails: [
@@ -67,7 +67,7 @@ async function up() {
         email: 'umdom555@gmail.com',
         password: hashSync('123123', 10),
         role: 'USER',
-        points: 15,
+        points: 1000,
         cardId: generateCardId(),
         telegram: "@Pi555",
         bankDetails: [
@@ -90,7 +90,7 @@ async function up() {
         email: 'yatsyk@gmail.com',
         password: hashSync('123123', 10),
         role: 'USER',
-        points: 15,
+        points: 1000,
         cardId: generateCardId(),
         telegram: "@Yatsyk",
         bankDetails: [
@@ -113,7 +113,7 @@ async function up() {
         email: '123@123.com',
         password: hashSync('123123', 10),
         role: 'USER',
-        points: 15,
+        points: 1000,
         cardId: generateCardId(),
         telegram: "@123",
         bankDetails: [
