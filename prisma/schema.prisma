@@ -48,6 +48,7 @@ model User {
   transferUser1 Transfer[] @relation("TransferUser1") // Отношение для user1
   transferUser2 Transfer[] @relation("TransferUser2") // Отношение для user2
 
+  regPoints             regPoints[]
   bankDetails           Json?
   referralUserIpAddress ReferralUserIpAddress[]
   telegram              String?                 @unique
@@ -192,18 +193,24 @@ model BetParticipantCLOSED {
   createdAt   DateTime     @default(now())
 }
 
+model regPoints {
+  id              Int      @id @default(autoincrement())
+  regPointsUser   User     @relation(fields: [regPointsUserId], references: [id])
+  regPointsUserId Int
+  regPointsPoints Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 model GlobalData {
-  id             Int      @id @default(autoincrement())
-  usersPlay      Int // Количество пользователей, участвующих в открытых ставках
-  pointsBet      Float // Общая сумма ставок в открытых ставках
-  users          Int // Количество зарегистрированных пользователей
-  pointsStart    Float // Количество зарегистрированных пользователей * 1000 free
-  pointsAllUsers Float // Сумма баллов у пользователей  pointsAllStart - pointsAllUsers = pointsSystem
-  pointsAllStart Float?   @default(1000000) // start constantpoints нигде не используется.
-  pointsPay      Float? // сколько баллов куплено
-  margin         Float? // сумма маржи model Bet margin
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  users       Int      @default(0) // Количество зарегистрированных пользователей
+  reg         Float?   @default(0) // количество записей regPoints
+  ref         Float?   @default(0) // количество записей ReferralUserIpAddress referralStatus=true
+  usersPoints Float?   @default(0) // сумма Points всех пользователей
+  margin      Float?   @default(0) // сумма маржи model Bet margin, sum BetClosed, BetClosed3 and BetClosed4 margin
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model ReferralUserIpAddress {

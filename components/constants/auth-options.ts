@@ -299,28 +299,48 @@ export const authOptions: AuthOptions = {
         }
 
         // Если IP уже был в истории входов, points = 0, иначе points = 1000
-        const points = ipExists ? 0 : 1000;
+        const points = ipExists ? 0 : 15;
         console.log('IP уже был в истории входов:', ipExists);
         console.log('Устанавливаем points:', points);
 
-        await prisma.user.create({
-          data: {
-            email: user.email,
-            fullName: user.name || 'User #' + user.id,
-            password: hashSync(user.id.toString(), 10),
-            provider: account?.provider,
-            providerId: account?.providerAccountId,
-            points, // Устанавливаем points
-            cardId,
-            loginHistory: [
-              {
-                ip,
-                lastLogin: new Date().toISOString(),
-                vpn: isVPN,
-                loginCount: 1,
+        await prisma.$transaction(async (prisma) => {
+          const newUser = await prisma.user.create({
+            data: {
+              email: user.email,
+              fullName: user.name || 'User #' + user.id,
+              password: hashSync(user.id.toString(), 10),
+              provider: account?.provider,
+              providerId: account?.providerAccountId,
+              points, // Set points
+              cardId,
+              loginHistory: [
+                {
+                  ip,
+                  lastLogin: new Date().toISOString(),
+                  vpn: isVPN,
+                  loginCount: 1,
+                },
+              ],
+            },
+          });
+
+          // Create a new entry in the regPoints table
+          await prisma.regPoints.create({
+            data: {
+              regPointsUserId: newUser.id,
+              regPointsPoints: points,
+            },
+          });
+
+          // Deduct points from User with id = 1
+          await prisma.user.update({
+            where: { id: 1 },
+            data: {
+              points: {
+                decrement: points, // Deduct the same amount of points
               },
-            ],
-          },
+            },
+          });
         });
 
         return true;
