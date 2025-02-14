@@ -64,7 +64,7 @@ export const Rating: React.FC<Props> = ({ className, users }) => {
                                     <span className="mr-2">{user.cardId}</span>
                                     <Button
                                         onClick={() => handleCopy(user.cardId, user.fullName)}
-                                        className="bg-blue-500 text-white px-2 py-1 rounded"
+                                        className="bg-blue-500 text-white px-2 py-1 rounded h-5"
                                     >
                                         Copy
                                     </Button>
