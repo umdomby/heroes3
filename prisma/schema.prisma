@@ -19,7 +19,7 @@ model User {
   password     String
   role         UserRole @default(USER)
   img          String?
-  points       Float    @default(1000) // баллы пользователя
+  points       Float    @default(0) // баллы пользователя
   p2pPlus      Int?     @default(0)
   p2pMinus     Int?     @default(0)
   contact      Json? // поле для хранения контактных данных
@@ -203,14 +203,15 @@ model regPoints {
 }
 
 model GlobalData {
-  id          Int      @id @default(autoincrement())
-  users       Int      @default(0) // Количество зарегистрированных пользователей
-  reg         Float?   @default(0) // количество записей regPoints
-  ref         Float?   @default(0) // количество записей ReferralUserIpAddress referralStatus=true
-  usersPoints Float?   @default(0) // сумма Points всех пользователей
-  margin      Float?   @default(0) // сумма маржи model sum BetClosed, BetClosed3 and BetClosed4 - margin
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  users          Int      @default(0) // Количество зарегистрированных пользователей
+  reg            Float?   @default(0) // количество записей regPoints
+  ref            Float?   @default(0) // количество записей ReferralUserIpAddress referralStatus=true
+  usersPoints    Float?   @default(0) // сумма Points всех пользователей
+  margin         Float?   @default(0) // сумма маржи model sum BetClosed, BetClosed3 and BetClosed4 - margin
+  openBetsPoints Float?   @default(0) // сумма ставок, которые еще не закрылись Bet-totalBetAmount, Bet3-totalBetAmount and Bet4 - totalBetAmount
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model ReferralUserIpAddress {
@@ -437,7 +438,7 @@ model BetParticipantCLOSED3 {
   odds         Float // Коэффициент ставки
   profit       Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
   overlap      Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
-  margin       Float // маржа пользователя, снимается после закрытия ставки, и только с выигарнной суммой, из поля overlap
+  margin       Float? // маржа пользователя, снимается после закрытия ставки, и только с выигарнной суммой, из поля overlap
   isCovered    IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
   return       Float // возвращаемая сумма пользователю после победы
   isWinner     Boolean      @default(false) // Победила ли ставка

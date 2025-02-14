@@ -932,7 +932,7 @@ export async function clientCreateBet(formData: any) {
         console.log("New bet created:", newBet); // Логируем созданную ставку
 
         console.log("User points remain unchanged:", user.points); // Логируем неизмененный баланс
-        
+
         revalidatePath('/');
 
         return newBet; // Возвращаем созданную ставку
@@ -1077,7 +1077,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
                 }
             }
         }).then(async () => {
-            
+
         });
 
         revalidatePath('/');
@@ -1374,7 +1374,7 @@ export async function closeBet(betId: number, winnerId: number) {
         });
 
         // Ревалидация данных
-        
+
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -1483,7 +1483,7 @@ export async function closeBetDraw(betId: number) {
         });
 
         // Revalidate data
-        
+
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -1576,7 +1576,7 @@ export async function clientCreateBet3(formData: any) {
         });
 
         console.log("New bet created:", newBet);
-        
+
         revalidatePath('/');
 
         return newBet;
@@ -1738,7 +1738,7 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
                 }
             }
         }).then(async () => {
-            
+
         });
 
         revalidatePath('/');
@@ -2028,7 +2028,7 @@ export async function closeBet3(betId: number, winnerId: number) {
         });
 
         // Ревалидация данных
-        
+
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -2143,7 +2143,7 @@ export async function closeBetDraw3(betId: number) {
         });
 
         // Обновляем глобальные данные
-        
+
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -2219,7 +2219,7 @@ export async function clientCreateBet4(formData: any) {
         });
 
         console.log("New bet created:", newBet);
-        
+
         revalidatePath('/');
 
         return newBet;
@@ -2421,7 +2421,7 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
                 }
             }
         }).then(async () => {
-            
+
         });
 
         revalidatePath('/');
@@ -2728,7 +2728,7 @@ export async function closeBet4(betId: number, winnerId: number) {
         });
 
         // Ревалидация данных
-        
+
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -2850,7 +2850,7 @@ export async function closeBetDraw4(betId: number) {
         });
 
         // Обновляем глобальные данные
-        
+
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -2868,3 +2868,90 @@ export async function closeBetDraw4(betId: number) {
 }// ничья на 4 игрока
 // Function to handle a draw for four players
 
+
+// Функция для пересчета и обновления данных в GlobalData
+export async function globalDataPoints() {
+    try {
+        console.log('111111111 1111111')
+        const usersCount = await prisma.user.count();
+        const regCount = await prisma.regPoints.count() * 15;
+        const refCount = await prisma.referralUserIpAddress.count({
+            where: { referralStatus: true }
+        }) * 10;
+        const usersPointsResult = await prisma.user.aggregate({
+            _sum: { points: true }
+        });
+        console.log('usersPointsResult:', usersPointsResult);
+        const usersPointsSum = usersPointsResult._sum?.points || 0;
+
+        // const marginResult = await prisma.betClosed.aggregate({
+        //     _sum: { margin: true }
+        // });
+        // const marginSum = marginResult._sum?.margin || 0;
+
+        // const openBetsPointsResult = await prisma.bet.aggregate({
+        //     _sum: { totalBetAmount: true },
+        //     where: { status: 'OPEN' }
+        // });
+        // const openBetsPointsResult3 = await prisma.bet3.aggregate({
+        //     _sum: { totalBetAmount: true },
+        //     where: { status: 'OPEN' }
+        // });
+        // const openBetsPointsResult4 = await prisma.bet4.aggregate({
+        //     _sum: { totalBetAmount: true },
+        //     where: { status: 'OPEN' }
+        // });
+        //
+        // const openBetsPointsSum = (openBetsPointsResult._sum?.totalBetAmount || 0) +
+        //     (openBetsPointsResult3._sum?.totalBetAmount || 0) +
+        //     (openBetsPointsResult4._sum?.totalBetAmount || 0);
+
+        const marginSum = 0
+        const openBetsPointsSum = 0
+
+        await prisma.globalData.upsert({
+            where: { id: 1 },
+            update: {
+                users: usersCount,
+                reg: regCount,
+                ref: refCount,
+                usersPoints: usersPointsSum,
+                margin: marginSum,
+                openBetsPoints: openBetsPointsSum,
+            },
+            create: {
+                users: 0,
+                reg: 0,
+                ref: 0,
+                usersPoints: 0,
+                margin: 0,
+                openBetsPoints: 0,
+            },
+        });
+
+        console.log('GlobalData updated successfully');
+    } catch (error) {
+        console.error('Error updating GlobalData:', error);
+    }
+}
+
+// Функция для получения данных из GlobalData
+export async function getGlobalData() {
+    try {
+        const globalData = await prisma.globalData.findUnique({
+            where: { id: 1 }
+        });
+
+        if (!globalData) {
+            throw new Error('GlobalData not found');
+        }
+
+        return globalData;
+    } catch (error) {
+        console.error('Error fetching GlobalData:', error);
+        throw new Error('Failed to fetch GlobalData');
+    }
+}
+
+// Запускаем пересчет каждые 10 секунд
+setInterval(globalDataPoints, 20000);
