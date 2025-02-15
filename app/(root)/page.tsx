@@ -4,7 +4,6 @@ import { prisma } from '@/prisma/prisma-client';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
-import { GlobalData } from "@/components/globalData";
 import TelegramNotification from '@/components/TelegramNotification';
 import BanedNotification from "@/components/BanedNotification";
 import Link from "next/link";
@@ -15,6 +14,7 @@ import { HEROES_CLIENT_NO_REG_3 } from "@/components/HEROES_CLIENT_NO_REG_3";
 import { HEROES_CLIENT_4 } from "@/components/HEROES_CLIENT_4";
 import { HEROES_CLIENT_NO_REG_4 } from "@/components/HEROES_CLIENT_NO_REG_4";
 import { User } from "@prisma/client";
+import GlobalDataComponent from "@/components/globalData";
 
 const FixedLink = () => (
     <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
@@ -59,7 +59,7 @@ export default async function Home() {
                     )}
                     <FixedLink />
                     <Suspense fallback={<Loading />}>
-                        {/*<GlobalData />*/}
+                        <GlobalDataComponent/>
                         <HEROES_CLIENT_2 user={user} />
                         <HEROES_CLIENT_3 user={user} />
                         <HEROES_CLIENT_4 user={user} />
@@ -69,7 +69,7 @@ export default async function Home() {
             {user && user.role === 'BANED' && (
                 <Suspense fallback={<Loading />}>
                     <BanedNotification />
-                    {/*<GlobalData />*/}
+                    <GlobalDataComponent/>
                     <HEROES_CLIENT_NO_REG_2 />
                     <HEROES_CLIENT_NO_REG_3 />
                     <HEROES_CLIENT_NO_REG_4 />
@@ -78,7 +78,7 @@ export default async function Home() {
             {!user && (
                 <Suspense fallback={<Loading />}>
                     <FixedLink />
-                    {/*<GlobalData />*/}
+                    <GlobalDataComponent/>
                     <HEROES_CLIENT_NO_REG_2 />
                     <HEROES_CLIENT_NO_REG_3 />
                     <HEROES_CLIENT_NO_REG_4 />
