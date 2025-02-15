@@ -25,6 +25,12 @@ const TelegramNotification: React.FC<TelegramNotificationProps> = ({ initialTele
         }
     };
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            handleUpdateTelegram();
+        }
+    };
+
     return (
         <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
             <p className="text-sm font-medium mb-2">
@@ -40,6 +46,7 @@ const TelegramNotification: React.FC<TelegramNotificationProps> = ({ initialTele
                     }
                     setTelegram(value);
                 }}
+                onKeyDown={handleKeyDown} // Add this line
                 className="mb-2 p-2 border border-gray-300 rounded"
             />
             <Button onClick={handleUpdateTelegram} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">

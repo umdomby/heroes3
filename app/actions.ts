@@ -2998,8 +2998,8 @@ export async function chatUsers(userId?: number, chatText?: string) {
                 orderBy: { createdAt: 'asc' },
             });
 
-            if (allMessages.length > 10) {
-                const messagesToDelete = allMessages.slice(0, allMessages.length - 10);
+            if (allMessages.length > 300) {
+                const messagesToDelete = allMessages.slice(0, allMessages.length - 300);
                 for (const message of messagesToDelete) {
                     await prisma.chatUsers.delete({ where: { id: message.id } });
                 }
@@ -3009,7 +3009,7 @@ export async function chatUsers(userId?: number, chatText?: string) {
         // Возвращаем последние 10 сообщений
         const recentMessages = await prisma.chatUsers.findMany({
             orderBy: { createdAt: 'desc' },
-            take: 10,
+            take: 300,
             include: {
                 chatUser: true, // Включаем информацию о пользователе
             },
@@ -3020,6 +3020,7 @@ export async function chatUsers(userId?: number, chatText?: string) {
 
         return recentMessages.map(msg => ({
             userEmail: msg.chatUser.email,
+            userTelegram: msg.chatUser.telegram,
             chatText: msg.chatText,
         }));
     } catch (error) {
@@ -3032,7 +3033,7 @@ export async function chatUsersGet() {
         // Fetch the latest 10 messages
         const recentMessages = await prisma.chatUsers.findMany({
             orderBy: { createdAt: 'desc' },
-            take: 10,
+            take: 300,
             include: {
                 chatUser: true, // Include user information
             },
@@ -3040,6 +3041,7 @@ export async function chatUsersGet() {
 
         return recentMessages.map(msg => ({
             userEmail: msg.chatUser.email,
+            userTelegram: msg.chatUser.telegram,
             chatText: msg.chatText,
         }));
     } catch (error) {

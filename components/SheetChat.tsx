@@ -13,10 +13,12 @@ import {
 import { User } from "@prisma/client";
 import React, { useState, useEffect } from "react";
 import { chatUsers, chatUsersGet } from "@/app/actions";
+import Link from "next/link";
 
 // Define a type for the message objects
 interface Message {
     userEmail: string;
+    userTelegram?: string; // Optional field for Telegram handle
     chatText: string;
 }
 
@@ -25,7 +27,7 @@ interface PointsUserProps {
 }
 
 export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
-    const [messages, setMessages] = useState<Message[]>([]); // Use the Message type here
+    const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const [isOpen, setIsOpen] = useState(false);
 
@@ -50,11 +52,9 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
         if (newMessage.trim() === "") return;
 
         try {
-            // Send new message
             await chatUsers(user.id, newMessage);
             setNewMessage("");
 
-            // Fetch updated messages
             const updatedMessages = await chatUsersGet();
             setMessages(updatedMessages);
         } catch (error) {
@@ -62,8 +62,14 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
         }
     };
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            handleSendMessage();
+        }
+    };
+
     return (
-        <div className="absolute right-1 flex justify-center items-center py-2 z-50 transform -translate-y-9">
+        <div className="fixed top-4 right-4 p-4 shadow-lg rounded-lg z-50">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger className='h-5' asChild>
                     <Button variant="outline">Chat {user.fullName}</Button>
@@ -72,13 +78,20 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                     <SheetHeader>
                         <SheetTitle>Chat</SheetTitle>
                         <SheetDescription>
-                            This is a chat window where you can send and receive messages.
                         </SheetDescription>
                     </SheetHeader>
                     <div className="flex-grow p-4 overflow-y-auto flex flex-col-reverse">
                         {messages.map((msg, index) => (
                             <div key={index} className="mb-2">
-                                <strong>{msg.userEmail}:</strong> {msg.chatText}
+                                <strong>
+                                    {msg.userTelegram ?                                     <Link
+                                        className="text-blue-500 hover:text-green-300 font-bold"
+                                        href={msg.userTelegram.replace(/^@/, 'https://t.me/')}
+                                        target="_blank"
+                                    >
+                                        {msg.userTelegram}
+                                    </Link> : msg.userEmail.split('@')[0]}:
+                                </strong> {msg.chatText}
                             </div>
                         ))}
                     </div>
@@ -86,6 +99,7 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                         <Input
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyDown={handleKeyDown}
                             placeholder="Type your message..."
                             className="flex-grow mr-2"
                         />
