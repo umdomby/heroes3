@@ -8,6 +8,7 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
+    SheetDescription,
 } from "@/components/ui/sheet";
 import { User } from "@prisma/client";
 import React, { useState, useEffect } from "react";
@@ -20,26 +21,33 @@ interface PointsUserProps {
 export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
+    const [isOpen, setIsOpen] = useState(false); // Track if the sheet is open
 
     useEffect(() => {
-        async function fetchMessages() {
-            try {
-                const fetchedMessages = await chatUsersGet();
-                setMessages(fetchedMessages);
-            } catch (error) {
-                console.error('Error fetching messages:', error);
+        let intervalId: NodeJS.Timeout;
+
+        if (isOpen) {
+
+            async function fetchMessages() {
+                try {
+                    console.log("111111111111 2222222222")
+                    const fetchedMessages = await chatUsersGet();
+                    setMessages(fetchedMessages);
+                } catch (error) {
+                    console.error('Error fetching messages:', error);
+                }
             }
+
+            // Fetch messages initially
+            fetchMessages();
+
+            // Set interval to fetch messages every 5 seconds
+            intervalId = setInterval(fetchMessages, 2000);
         }
 
-        // Fetch messages initially
-        fetchMessages();
-
-        // Set interval to fetch messages every 5 seconds
-        const intervalId = setInterval(fetchMessages, 5000);
-
-        // Clear interval on component unmount
+        // Clear interval on component unmount or when sheet is closed
         return () => clearInterval(intervalId);
-    }, []);
+    }, [isOpen]); // Run effect when `isOpen` changes
 
     const handleSendMessage = async () => {
         if (newMessage.trim() === "") return;
@@ -59,13 +67,16 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
 
     return (
         <div className="absolute right-1 flex justify-center items-center py-2 z-50 transform -translate-y-9">
-            <Sheet>
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger className='h-5 w-19' asChild>
                     <Button variant="outline">Chat {user.fullName}</Button>
                 </SheetTrigger>
-                <SheetContent className="flex flex-col h-full">
+                <SheetContent className="flex flex-col h-full" aria-describedby="chat-description">
                     <SheetHeader>
                         <SheetTitle>Chat</SheetTitle>
+                        <SheetDescription>
+                            This is a chat window where you can send and receive messages.
+                        </SheetDescription>
                     </SheetHeader>
                     <div className="flex-grow p-4 overflow-y-auto flex flex-col-reverse">
                         {messages.map((msg, index) => (
