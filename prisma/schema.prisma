@@ -48,6 +48,7 @@ model User {
   transferUser1 Transfer[] @relation("TransferUser1") // Отношение для user1
   transferUser2 Transfer[] @relation("TransferUser2") // Отношение для user2
 
+  chatUsers             ChatUsers[]
   regPoints             regPoints[]
   bankDetails           Json?
   referralUserIpAddress ReferralUserIpAddress[]
@@ -88,7 +89,15 @@ model Transfer {
   updatedAt       DateTime @updatedAt
 }
 
-// export async function clientCreateBet(formData: any) actions.ts
+model ChatUsers {
+  id         Int      @id @default(autoincrement())
+  chatUser   User     @relation(fields: [chatUserId], references: [id])
+  chatUserId Int
+  chatText   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
 model Bet {
   id              Int              @id @default(autoincrement())
   player1         Player           @relation(name: "Player1Bets", fields: [player1Id], references: [id]) // ставки на игрока 1

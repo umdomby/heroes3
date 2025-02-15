@@ -15,6 +15,9 @@ import { HEROES_CLIENT_4 } from "@/components/HEROES_CLIENT_4";
 import { HEROES_CLIENT_NO_REG_4 } from "@/components/HEROES_CLIENT_NO_REG_4";
 import { User } from "@prisma/client";
 import GlobalDataComponent from "@/components/globalData";
+import {SheetChat} from "@/components/SheetChat";
+
+
 
 const FixedLink = () => (
     <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
@@ -37,6 +40,9 @@ const PointsUser: React.FC<PointsUserProps> = ({ user }) => (
     </div>
 );
 
+
+
+
 export default async function Home() {
     const session = await getUserSession();
     let user = null;
@@ -50,7 +56,11 @@ export default async function Home() {
     return (
         <Container className="w-[100%] relative">
             {user && (
-                <PointsUser user={user} />
+                <>
+                    <PointsUser user={user} />
+                    <SheetChat user={user}/>
+                </>
+
             )}
             {user && user.role !== 'BANED' && (
                 <>

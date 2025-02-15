@@ -2982,3 +2982,51 @@ export async function globalDataPoints() {
         console.error('Ошибка при обновлении GlobalData:', error);
     }
 }
+
+
+// Функция для получения и добавления сообщений
+export async function chatUsers(userId?: number, chatText?: string) {
+    try {
+        if (userId && chatText) {
+            // Добавляем новое сообщение
+            await prisma.chatUsers.create({
+                data: {
+                    chatUserId: userId,
+                    chatText: chatText,
+                },
+            });
+
+            // Удаляем старые сообщения, если их больше 10
+            const allMessages = await prisma.chatUsers.findMany({
+                orderBy: { createdAt: 'asc' },
+            });
+
+            if (allMessages.length > 10) {
+                const messagesToDelete = allMessages.slice(0, allMessages.length - 10);
+                for (const message of messagesToDelete) {
+                    await prisma.chatUsers.delete({ where: { id: message.id } });
+                }
+            }
+        }
+
+        // Возвращаем последние 10 сообщений
+        const recentMessages = await prisma.chatUsers.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 10,
+            include: {
+                chatUser: true, // Включаем информацию о пользователе
+            },
+        });
+
+        // Обновляем кэш
+        revalidatePath('/');
+
+        return recentMessages.map(msg => ({
+            userEmail: msg.chatUser.email,
+            chatText: msg.chatText,
+        }));
+    } catch (error) {
+        console.error('Ошибка в chatUsers:', error);
+        throw new Error('Не удалось обработать запрос чата. Пожалуйста, попробуйте еще раз.');
+    }
+}
