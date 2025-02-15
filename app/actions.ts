@@ -2982,9 +2982,6 @@ export async function globalDataPoints() {
         console.error('Ошибка при обновлении GlobalData:', error);
     }
 }
-
-
-// Функция для получения и добавления сообщений
 export async function chatUsers(userId?: number, chatText?: string) {
     try {
         if (userId && chatText) {
@@ -3029,8 +3026,7 @@ export async function chatUsers(userId?: number, chatText?: string) {
         console.error('Ошибка в chatUsers:', error);
         throw new Error('Не удалось обработать запрос чата. Пожалуйста, попробуйте еще раз.');
     }
-}
-
+}// Функция для получения и добавления сообщений
 export async function chatUsersGet() {
     try {
         // Fetch the latest 10 messages
@@ -3050,4 +3046,4 @@ export async function chatUsersGet() {
         console.error('Error fetching chat messages:', error);
         throw new Error('Failed to fetch chat messages. Please try again.');
     }
-}
+}//get chat message

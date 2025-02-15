@@ -14,40 +14,37 @@ import { User } from "@prisma/client";
 import React, { useState, useEffect } from "react";
 import { chatUsers, chatUsersGet } from "@/app/actions";
 
+// Define a type for the message objects
+interface Message {
+    userEmail: string;
+    chatText: string;
+}
+
 interface PointsUserProps {
     user: User;
 }
 
 export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<Message[]>([]); // Use the Message type here
     const [newMessage, setNewMessage] = useState("");
-    const [isOpen, setIsOpen] = useState(false); // Track if the sheet is open
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
-
         if (isOpen) {
-
             async function fetchMessages() {
                 try {
-                    console.log("111111111111 2222222222")
                     const fetchedMessages = await chatUsersGet();
                     setMessages(fetchedMessages);
                 } catch (error) {
                     console.error('Error fetching messages:', error);
                 }
             }
-
-            // Fetch messages initially
             fetchMessages();
-
-            // Set interval to fetch messages every 5 seconds
-            intervalId = setInterval(fetchMessages, 2000);
+            intervalId = setInterval(fetchMessages, 5000);
         }
-
-        // Clear interval on component unmount or when sheet is closed
         return () => clearInterval(intervalId);
-    }, [isOpen]); // Run effect when `isOpen` changes
+    }, [isOpen]);
 
     const handleSendMessage = async () => {
         if (newMessage.trim() === "") return;
@@ -68,7 +65,7 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
     return (
         <div className="absolute right-1 flex justify-center items-center py-2 z-50 transform -translate-y-9">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <SheetTrigger className='h-5 w-19' asChild>
+                <SheetTrigger className='h-5' asChild>
                     <Button variant="outline">Chat {user.fullName}</Button>
                 </SheetTrigger>
                 <SheetContent className="flex flex-col h-full" aria-describedby="chat-description">
