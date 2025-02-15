@@ -816,7 +816,6 @@ export async function checkAndCloseExpiredDeals() {
 export async function getServerSideProps() {
     // Проверьте и закройте просроченные сделки перед отображением страницы
     await checkAndCloseExpiredDeals();
-    console.log('getServerSideProps 1111111111111111111')
     // Извлечь другие необходимые данные для страницы
     const openOrders = await prisma.orderP2P.findMany({
         where: {orderP2PStatus: 'PENDING'},
