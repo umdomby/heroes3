@@ -80,11 +80,11 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                         <SheetDescription>
                         </SheetDescription>
                     </SheetHeader>
-                    <div className="flex-grow p-4 overflow-y-auto flex flex-col-reverse">
+                    <div className="flex-grow p-4 overflow-y-auto flex flex-col-reverse" style={{ display: 'block' }}>
                         {messages.map((msg, index) => (
                             <div key={index} className="mb-2">
                                 <strong>
-                                    {msg.userTelegram ?                                     <Link
+                                    {msg.userTelegram ? <Link
                                         className="text-blue-500 hover:text-green-300 font-bold"
                                         href={msg.userTelegram.replace(/^@/, 'https://t.me/')}
                                         target="_blank"
