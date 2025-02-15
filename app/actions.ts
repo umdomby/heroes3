@@ -2890,20 +2890,20 @@ export async function closeBetDraw4(betId: number) {
 // Function to handle a draw for four players
 
 
-console.log('Initializing globalDataPoints 11111111111111111');
-// Функция для пересчета и обновления данных в GlobalData
-let isRunning = false;
 export async function globalDataPoints() {
-
-    if (isRunning) {
-        console.log('globalDataPoints is already running');
-        return;
-    }
     try {
-        const startTime = new Date(); // Объявляем переменную один раз
-        console.log('Start globalDataPoints:', startTime);
-        console.log('111111111 1111111');
+        // Получаем текущие данные из GlobalData
+        const currentGlobalData = await prisma.globalData.findUnique({
+            where: { id: 1 },
+        });
 
+        // Проверяем, прошло ли 10 секунд с момента последнего обновления
+        if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 10000) {
+            console.log('Данные обновлены недавно, пропускаем обновление.');
+            return;
+        }
+
+        // Если прошло больше 10 секунд, выполняем обновление
         const usersCount = await prisma.user.count();
         const regCount = await prisma.regPoints.count() * 15;
         const refCount = await prisma.referralUserIpAddress.count({
@@ -2912,10 +2912,10 @@ export async function globalDataPoints() {
         const usersPointsResult = await prisma.user.aggregate({
             _sum: { points: true }
         });
-        console.log('usersPointsResult:', usersPointsResult);
+
         const usersPointsSum = usersPointsResult._sum?.points || 0;
 
-        // Получаем сумму поля margin из таблицы BetCLOSED
+        // Получаем сумму поля margin из таблиц BetCLOSED, BetCLOSED3 и BetCLOSED4
         const marginResult = await prisma.betCLOSED.aggregate({
             _sum: { margin: true }
         });
@@ -2935,7 +2935,7 @@ export async function globalDataPoints() {
             (marginResult3._sum?.margin || 0) +
             (marginResult4._sum?.margin || 0);
 
-        // Получаем сумму поля totalBetAmount из таблицы bet, где статус 'OPEN'
+        // Получаем сумму поля totalBetAmount из таблиц bet, bet3 и bet4, где статус 'OPEN'
         const openBetsPointsResult = await prisma.bet.aggregate({
             _sum: { totalBetAmount: true },
             where: { status: 'OPEN' }
@@ -2958,6 +2958,7 @@ export async function globalDataPoints() {
             (openBetsPointsResult3._sum?.totalBetAmount || 0) +
             (openBetsPointsResult4._sum?.totalBetAmount || 0);
 
+        // Обновляем или создаем запись в GlobalData
         await prisma.globalData.upsert({
             where: { id: 1 },
             update: {
@@ -2969,24 +2970,16 @@ export async function globalDataPoints() {
                 openBetsPoints: openBetsPointsSum,
             },
             create: {
-                users: 0,
-                reg: 0,
-                ref: 0,
-                usersPoints: 0,
-                margin: 0,
-                openBetsPoints: 0,
+                users: usersCount,
+                reg: regCount,
+                ref: refCount,
+                usersPoints: usersPointsSum,
+                margin: marginSum,
+                openBetsPoints: openBetsPointsSum,
             },
         });
-        console.log('22222222222222222 22222222222222');
-        const endTime = new Date();
-        console.log('End globalDataPoints:', endTime, 'Duration:', endTime.getTime() - startTime.getTime(), 'ms');
+        console.log('Данные успешно обновлены.');
     } catch (error) {
-        console.error('Error updating GlobalData:', error);
-    } finally {
-        isRunning = false;
-        // Запускаем следующий вызов через 10 секунд
-        setTimeout(globalDataPoints, 10000);
+        console.error('Ошибка при обновлении GlobalData:', error);
     }
 }
-globalDataPoints();
-

@@ -1,4 +1,3 @@
-// components/GlobalData.tsx
 "use server";
 import { prisma } from '@/prisma/prisma-client';
 import {
@@ -9,6 +8,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {globalDataPoints} from "@/app/actions";
+
 
 interface GlobalData {
     id: number;
@@ -35,6 +36,10 @@ async function fetchGlobalData(): Promise<GlobalData | null> {
 }
 
 export default async function GlobalDataComponent() {
+    // Запускаем обновление данных
+    await globalDataPoints();
+
+    // Получаем обновленные данные
     const globalData = await fetchGlobalData();
 
     if (!globalData) {
