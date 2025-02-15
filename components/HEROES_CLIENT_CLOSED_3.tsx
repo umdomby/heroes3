@@ -63,7 +63,6 @@ export const HEROES_CLIENT_CLOSED_3: React.FC<Props> = ({ user, closedBets }) =>
         <div>
             <div className="flex justify-between items-center">
                 <div>
-                    <p>Ваши баллы: {Math.floor(user.points * 100) / 100}</p>
                     <p className={totalProfitLoss >= 0 ? 'text-green-500' : 'text-red-500'}>
                         Общая прибыль/потеря: {Math.floor(totalProfitLoss * 100) / 100}
                     </p>
@@ -100,8 +99,7 @@ export const HEROES_CLIENT_CLOSED_3: React.FC<Props> = ({ user, closedBets }) =>
                                                         </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                                 </TableCell>
-                                                <TableCell
-                                                    className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
                                                     <div>{bet.player2.name}</div>
                                                     <div>    <span
                                                         className={
@@ -118,8 +116,7 @@ export const HEROES_CLIENT_CLOSED_3: React.FC<Props> = ({ user, closedBets }) =>
                                                         </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                                 </TableCell>
-                                                <TableCell
-                                                    className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
                                                     <div>{bet.player3.name}</div>
                                                     <div> <span
                                                         className={
@@ -136,6 +133,7 @@ export const HEROES_CLIENT_CLOSED_3: React.FC<Props> = ({ user, closedBets }) =>
                                                         </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer3 * 100) / 100}</div>
                                                 </TableCell>
+                                                <TableCell className="text-ellipsis  overflow-hidden whitespace-nowrap w-[20%]"></TableCell>
                                                 <TableCell className="w-[15%]">
                                                     <div>{Math.floor(bet.oddsBetPlayer1 * 100) / 100}</div>
                                                     <div>{Math.floor(bet.oddsBetPlayer2 * 100) / 100}</div>
