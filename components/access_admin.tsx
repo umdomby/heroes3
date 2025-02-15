@@ -31,66 +31,77 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                         HOME
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <Link href="/bet-create-2">
-                                    <DropdownMenuRadioItem value="bet-create" className="cursor-pointer">
-                                       ADMIN CREATE BET 2
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/bet-create-3">
-                                    <DropdownMenuRadioItem value="bet-create-3" className="cursor-pointer">
-                                        ADMIN CREATE BET 3
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/bet-create-4">
-                                    <DropdownMenuRadioItem value="bet-create-4" className="cursor-pointer">
-                                        ADMIN CREATE BET 4
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/add-player">
-                                    <DropdownMenuRadioItem value="add-player" className="cursor-pointer">
-                                        ADMIN ADD PLAYER
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/admin-user">
-                                    <DropdownMenuRadioItem value="admin-user" className="cursor-pointer">
-                                        ADMIN USER
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/bet-closed-admin-2">
-                                    <DropdownMenuRadioItem value="bet-closed-admin" className="cursor-pointer">
-                                       ADMIN BET CLOSED 2
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/bet-closed-admin-3">
-                                    <DropdownMenuRadioItem value="bet-closed-admin-3" className="cursor-pointer">
-                                        ADMIN BET CLOSED 3
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/bet-closed-admin-4">
-                                    <DropdownMenuRadioItem value="bet-closed-admin-4" className="cursor-pointer">
-                                        ADMIN BET CLOSED 4
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/order-p2p-pending-admin">
-                                    <DropdownMenuRadioItem value="order-p2p-pending-admin" className="cursor-pointer">
-                                        ADMIN P2P PENDING
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/transfer-points-admin">
-                                    <DropdownMenuRadioItem value="transfer-points-admin" className="cursor-pointer">
-                                        ADMIN TRANSFER
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/statistics">
-                                    <DropdownMenuRadioItem value="statistics" className="cursor-pointer">
-                                        ADMIN STATISTICS
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/tur-admin">
-                                    <DropdownMenuRadioItem value="tur-admin" className="cursor-pointer">
-                                       ADMIN ТУРНИРЫ
-                                    </DropdownMenuRadioItem>
-                                </Link>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <DropdownMenuRadioItem value="admin" className="cursor-pointer">
+                                            ADMIN OPTIONS
+                                        </DropdownMenuRadioItem>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-56">
+                                        <DropdownMenuRadioGroup>
+                                            <Link href="/bet-create-2">
+                                                <DropdownMenuRadioItem value="bet-create" className="cursor-pointer">
+                                                    ADMIN CREATE BET 2
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/bet-create-3">
+                                                <DropdownMenuRadioItem value="bet-create-3" className="cursor-pointer">
+                                                    ADMIN CREATE BET 3
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/bet-create-4">
+                                                <DropdownMenuRadioItem value="bet-create-4" className="cursor-pointer">
+                                                    ADMIN CREATE BET 4
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/add-player">
+                                                <DropdownMenuRadioItem value="add-player" className="cursor-pointer">
+                                                    ADMIN ADD PLAYER
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/admin-user">
+                                                <DropdownMenuRadioItem value="admin-user" className="cursor-pointer">
+                                                    ADMIN USER
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/bet-closed-admin-2">
+                                                <DropdownMenuRadioItem value="bet-closed-admin" className="cursor-pointer">
+                                                    ADMIN BET CLOSED 2
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/bet-closed-admin-3">
+                                                <DropdownMenuRadioItem value="bet-closed-admin-3" className="cursor-pointer">
+                                                    ADMIN BET CLOSED 3
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/bet-closed-admin-4">
+                                                <DropdownMenuRadioItem value="bet-closed-admin-4" className="cursor-pointer">
+                                                    ADMIN BET CLOSED 4
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/order-p2p-pending-admin">
+                                                <DropdownMenuRadioItem value="order-p2p-pending-admin" className="cursor-pointer">
+                                                    ADMIN P2P PENDING
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/transfer-points-admin">
+                                                <DropdownMenuRadioItem value="transfer-points-admin" className="cursor-pointer">
+                                                    ADMIN TRANSFER
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/statistics">
+                                                <DropdownMenuRadioItem value="statistics" className="cursor-pointer">
+                                                    ADMIN STATISTICS
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                            <Link href="/tur-admin">
+                                                <DropdownMenuRadioItem value="tur-admin" className="cursor-pointer">
+                                                    ADMIN ТУРНИРЫ
+                                                </DropdownMenuRadioItem>
+                                            </Link>
+                                        </DropdownMenuRadioGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                                 <Link href="/bet-closed-2">
                                     <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                         BET CLOSED 2
@@ -146,7 +157,7 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                         ТУРНИРЫ
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="create-bet"><ModeToggle /></DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
