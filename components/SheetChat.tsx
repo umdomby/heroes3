@@ -22,8 +22,6 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
     const [newMessage, setNewMessage] = useState("");
 
     useEffect(() => {
-        // Function to fetch messages
-        console.log("1111111111111111111111")
         async function fetchMessages() {
             try {
                 const fetchedMessages = await chatUsersGet();
