@@ -1,5 +1,3 @@
-// components/globalData.tsx
-
 "use client";
 import { useEffect, useState } from 'react';
 import { getGlobalData } from '@/app/actions'; // Импортируем новую функцию
@@ -13,12 +11,15 @@ import {
 } from "@/components/ui/table";
 
 interface GlobalData {
+    id: number;
+    margin: number | null;
+    createdAt: Date;
+    updatedAt: Date;
+    ref: number | null;
     users: number;
-    reg: number;
-    ref: number;
-    usersPoints: number;
-    margin: number;
-    openBetsPoints: number;
+    reg: number | null;
+    usersPoints: number | null;
+    openBetsPoints: number | null;
 }
 
 export const GlobalData = () => {
@@ -56,7 +57,11 @@ export const GlobalData = () => {
         return <div>Нет доступных данных</div>;
     }
 
-    const totalSum = globalData.reg + globalData.ref + globalData.openBetsPoints + globalData.usersPoints;
+    const totalSum =
+        (globalData.reg ?? 0) +
+        (globalData.ref ?? 0) +
+        (globalData.openBetsPoints ?? 0) +
+        (globalData.usersPoints ?? 0);
 
     return (
         <Table style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0, 0.1)' }}>

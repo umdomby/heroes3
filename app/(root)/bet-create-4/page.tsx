@@ -4,7 +4,7 @@ import { getUserSession } from '@/components/lib/get-user-session';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import Loading from "@/app/(root)/loading";
-import {clientCreateBet4, updateGlobalData} from "@/app/actions";
+import {clientCreateBet4} from "@/app/actions";
 import { Container } from '@/components/container';
 import { CreateBetForm4 } from "@/components/create-bet-form-4";
 

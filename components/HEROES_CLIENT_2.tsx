@@ -59,7 +59,7 @@ const playerColors = {
     [PlayerChoice.PLAYER4]: "text-yellow-400", // Color for Player 4
 };
 
-export const HEROES_CLIENT: React.FC<Props> = ({ className, user }) => {
+export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
     const { data: session } = useSession();
     const {
         data: bets,

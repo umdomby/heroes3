@@ -8,7 +8,7 @@ import { GlobalData } from "@/components/globalData";
 import TelegramNotification from '@/components/TelegramNotification';
 import BanedNotification from "@/components/BanedNotification";
 import Link from "next/link";
-import { HEROES_CLIENT } from "@/components/HEROES_CLIENT";
+import { HEROES_CLIENT_2 } from "@/components/HEROES_CLIENT_2";
 import { HEROES_CLIENT_NO_REG_2 } from "@/components/HEROES_CLIENT_NO_REG_2";
 import { HEROES_CLIENT_3 } from "@/components/HEROES_CLIENT_3";
 import { HEROES_CLIENT_NO_REG_3 } from "@/components/HEROES_CLIENT_NO_REG_3";
@@ -59,8 +59,8 @@ export default async function Home() {
                     )}
                     <FixedLink />
                     <Suspense fallback={<Loading />}>
-                        <GlobalData />
-                        <HEROES_CLIENT user={user} />
+                        {/*<GlobalData />*/}
+                        <HEROES_CLIENT_2 user={user} />
                         <HEROES_CLIENT_3 user={user} />
                         <HEROES_CLIENT_4 user={user} />
                     </Suspense>
@@ -69,14 +69,16 @@ export default async function Home() {
             {user && user.role === 'BANED' && (
                 <Suspense fallback={<Loading />}>
                     <BanedNotification />
-                    <GlobalData />
+                    {/*<GlobalData />*/}
                     <HEROES_CLIENT_NO_REG_2 />
+                    <HEROES_CLIENT_NO_REG_3 />
+                    <HEROES_CLIENT_NO_REG_4 />
                 </Suspense>
             )}
             {!user && (
                 <Suspense fallback={<Loading />}>
                     <FixedLink />
-                    <GlobalData />
+                    {/*<GlobalData />*/}
                     <HEROES_CLIENT_NO_REG_2 />
                     <HEROES_CLIENT_NO_REG_3 />
                     <HEROES_CLIENT_NO_REG_4 />

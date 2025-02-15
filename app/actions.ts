@@ -2889,6 +2889,7 @@ export async function closeBetDraw4(betId: number) {
 }// ничья на 4 игрока
 // Function to handle a draw for four players
 
+
 // let isRunning = false;
 // // Функция для пересчета и обновления данных в GlobalData
 // export async function globalDataPoints() {
@@ -2897,88 +2898,87 @@ export async function closeBetDraw4(betId: number) {
 //         console.log('globalDataPoints is already running');
 //         return;
 //     }
-//
 //     try {
-//         const startTime = new Date();
+//         const startTime = new Date(); // Объявляем переменную один раз
 //         console.log('Start globalDataPoints:', startTime);
-//         console.log('111111111 1111111')
+//         console.log('111111111 1111111');
+//
 //         const usersCount = await prisma.user.count();
 //         const regCount = await prisma.regPoints.count() * 15;
-//
 //         const refCount = await prisma.referralUserIpAddress.count({
-//             where: {referralStatus: true}
+//             where: { referralStatus: true }
 //         }) * 10;
-//
 //         const usersPointsResult = await prisma.user.aggregate({
-//             _sum: {points: true}
+//             _sum: { points: true }
 //         });
-//         console.log('22222222 222222')
+//         console.log('usersPointsResult:', usersPointsResult);
+//         const usersPointsSum = usersPointsResult._sum?.points || 0;
+//
 //         // Получаем сумму поля margin из таблицы BetCLOSED
-//                 const marginResult = await prisma.betCLOSED.aggregate({
-//                     _sum: { margin: true }
-//                 });
+//         const marginResult = await prisma.betCLOSED.aggregate({
+//             _sum: { margin: true }
+//         });
 //
 //         // Получаем сумму поля margin из таблицы BetCLOSED3
-//                 const marginResult3 = await prisma.betCLOSED3.aggregate({
-//                     _sum: { margin: true }
-//                 });
+//         const marginResult3 = await prisma.betCLOSED3.aggregate({
+//             _sum: { margin: true }
+//         });
 //
 //         // Получаем сумму поля margin из таблицы BetCLOSED4
-//                 const marginResult4 = await prisma.betCLOSED4.aggregate({
-//                     _sum: { margin: true }
-//                 });
+//         const marginResult4 = await prisma.betCLOSED4.aggregate({
+//             _sum: { margin: true }
+//         });
 //
 //         // Суммируем все полученные значения margin из трех таблиц
-//                 const marginSum = (marginResult._sum?.margin || 0) +
-//                     (marginResult3._sum?.margin || 0) +
-//                     (marginResult4._sum?.margin || 0);
+//         const marginSum = (marginResult._sum?.margin || 0) +
+//             (marginResult3._sum?.margin || 0) +
+//             (marginResult4._sum?.margin || 0);
 //
 //         // Получаем сумму поля totalBetAmount из таблицы bet, где статус 'OPEN'
-//                 const openBetsPointsResult = await prisma.bet.aggregate({
-//                     _sum: { totalBetAmount: true },
-//                     where: { status: 'OPEN' }
-//                 });
+//         const openBetsPointsResult = await prisma.bet.aggregate({
+//             _sum: { totalBetAmount: true },
+//             where: { status: 'OPEN' }
+//         });
 //
 //         // Получаем сумму поля totalBetAmount из таблицы bet3, где статус 'OPEN'
-//                 const openBetsPointsResult3 = await prisma.bet3.aggregate({
-//                     _sum: { totalBetAmount: true },
-//                     where: { status: 'OPEN' }
-//                 });
+//         const openBetsPointsResult3 = await prisma.bet3.aggregate({
+//             _sum: { totalBetAmount: true },
+//             where: { status: 'OPEN' }
+//         });
 //
 //         // Получаем сумму поля totalBetAmount из таблицы bet4, где статус 'OPEN'
-//                 const openBetsPointsResult4 = await prisma.bet4.aggregate({
-//                     _sum: { totalBetAmount: true },
-//                     where: { status: 'OPEN' }
-//                 });
+//         const openBetsPointsResult4 = await prisma.bet4.aggregate({
+//             _sum: { totalBetAmount: true },
+//             where: { status: 'OPEN' }
+//         });
 //
 //         // Суммируем все полученные значения totalBetAmount из трех таблиц
-//                 const openBetsPointsSum = (openBetsPointsResult._sum?.totalBetAmount || 0) +
-//                     (openBetsPointsResult3._sum?.totalBetAmount || 0) +
-//                     (openBetsPointsResult4._sum?.totalBetAmount || 0);
+//         const openBetsPointsSum = (openBetsPointsResult._sum?.totalBetAmount || 0) +
+//             (openBetsPointsResult3._sum?.totalBetAmount || 0) +
+//             (openBetsPointsResult4._sum?.totalBetAmount || 0);
 //
-//                 await prisma.globalData.upsert({
-//                     where: {id: 1},
-//                     update: {
-//                         users: usersCount,
-//                         reg: regCount,
-//                         ref: refCount,
-//                         usersPoints: usersPointsSum,
-//                         margin: marginSum,
-//                         openBetsPoints: openBetsPointsSum,
-//                     },
-//                     create: {
-//                         users: 0,
-//                         reg: 0,
-//                         ref: 0,
-//                         usersPoints: 0,
-//                         margin: 0,
-//                         openBetsPoints: 0,
-//                     },
-//                 });
-//
+//         await prisma.globalData.upsert({
+//             where: { id: 1 },
+//             update: {
+//                 users: usersCount,
+//                 reg: regCount,
+//                 ref: refCount,
+//                 usersPoints: usersPointsSum,
+//                 margin: marginSum,
+//                 openBetsPoints: openBetsPointsSum,
+//             },
+//             create: {
+//                 users: 0,
+//                 reg: 0,
+//                 ref: 0,
+//                 usersPoints: 0,
+//                 margin: 0,
+//                 openBetsPoints: 0,
+//             },
+//         });
 //         console.log('22222222222222222 22222222222222');
 //         const endTime = new Date();
-//         console.log('End globalDataPoints:', endTime, 'Duration:', endTime - startTime, 'ms');
+//         console.log('End globalDataPoints:', endTime, 'Duration:', endTime.getTime() - startTime.getTime(), 'ms');
 //     } catch (error) {
 //         console.error('Error updating GlobalData:', error);
 //     } finally {
