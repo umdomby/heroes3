@@ -87,18 +87,15 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
 
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
     const [selectedWinner, setSelectedWinner] = useState<number | "draw" | null>(null);
-    const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>(
-        {}
-    );
-    const [placeBetErrors, setPlaceBetErrors] = useState<{
-        [key: number]: string | null;
-    }>({});
-    const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>(
-        {}
-    );
-    const [potentialProfit, setPotentialProfit] = useState<{
-        [key: number]: { player1: number; player2: number; player3: number; player4: number };
-    }>({});
+    const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>({});
+    const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
+    const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
+    const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number; player3: number; player4: number } }>({});
+
+    // Состояние для управления модальным окном и ввода подтверждения
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [confirmationInput, setConfirmationInput] = useState("");
+    const [currentBet, setCurrentBet] = useState<Bet | null>(null);
 
     useEffect(() => {
         let source = new EventSource("/api/sse4");
@@ -318,23 +315,49 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         handlePlaceBet(bet, amount, player);
     };
 
-    const handleCloseBet = async (betId: number) => {
-        if (selectedWinner === null) {
+    // Функция для открытия модального окна
+    const openConfirmationModal = (bet: Bet) => {
+        setCurrentBet(bet);
+        setIsModalOpen(true);
+    };
+
+    // Функция для закрытия модального окна
+    const closeConfirmationModal = () => {
+        setIsModalOpen(false);
+        setConfirmationInput("");
+        setCurrentBet(null);
+    };
+
+    // Функция для обработки подтверждения
+    const handleConfirmation = async () => {
+        if (!currentBet || selectedWinner === null) {
             setCloseBetError("Выберите победителя!");
+            return;
+        }
+
+        const expectedInput = selectedWinner === "draw" ? "ничья" :
+            selectedWinner === currentBet.player1Id ? currentBet.player1.name :
+                selectedWinner === currentBet.player2Id ? currentBet.player2.name :
+                    selectedWinner === currentBet.player3Id ? currentBet.player3.name :
+                        currentBet.player4.name;
+
+        if (confirmationInput.toLowerCase() !== expectedInput.toLowerCase()) {
+            setCloseBetError(`Введите правильное подтверждение: ${expectedInput}`);
             return;
         }
 
         try {
             if (selectedWinner === "draw") {
-                await closeBetDraw4(betId);
+                await closeBetDraw4(currentBet.id);
             } else {
-                await closeBet4(betId, selectedWinner);
+                await closeBet4(currentBet.id, selectedWinner);
             }
 
             mutate();
             mutateUser();
             setSelectedWinner(null);
             setCloseBetError(null);
+            closeConfirmationModal();
         } catch (error) {
             if (error instanceof Error) {
                 setCloseBetError(error.message);
@@ -880,7 +903,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                             </div>
                                             <Button
                                                 type="button"
-                                                onClick={() => handleCloseBet(bet.id)}
+                                                onClick={() => openConfirmationModal(bet)}
                                                 className="mt-2 w-full"
                                             >
                                                 Закрыть ставку
@@ -896,6 +919,27 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                     </div>
                 );
             })}
+
+            {/* Модальное окно для подтверждения закрытия ставки */}
+            {isModalOpen && currentBet && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h4>Подтверждение закрытия ставки</h4>
+                        <p>Введите {selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet.player1Id ? currentBet.player1.name : selectedWinner === currentBet.player2Id ? currentBet.player2.name : selectedWinner === currentBet.player3Id ? currentBet.player3.name : currentBet.player4.name} для подтверждения:</p>
+                        <input
+                            type="text"
+                            value={confirmationInput}
+                            onChange={(e) => setConfirmationInput(e.target.value)}
+                            className="border p-2 rounded w-full"
+                        />
+                        <div className="flex justify-end mt-4">
+                            <Button onClick={closeConfirmationModal} className="mr-2">Отмена</Button>
+                            <Button onClick={handleConfirmation}>Подтвердить</Button>
+                        </div>
+                        {closeBetError && <p className="text-red-500">{closeBetError}</p>}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

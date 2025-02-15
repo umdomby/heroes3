@@ -12,7 +12,7 @@ import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import {placeBet, closeBet, closeBetDraw} from "@/app/actions";
+import { placeBet, closeBet, closeBetDraw } from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
 import { useUser } from "@/hooks/useUser";
 
@@ -79,18 +79,15 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
 
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
     const [selectedWinner, setSelectedWinner] = useState<number | "draw" | null>(null);
-    const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>(
-        {}
-    );
-    const [placeBetErrors, setPlaceBetErrors] = useState<{
-        [key: number]: string | null;
-    }>({});
-    const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>(
-        {}
-    );
-    const [potentialProfit, setPotentialProfit] = useState<{
-        [key: number]: { player1: number; player2: number };
-    }>({});
+    const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>({});
+    const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
+    const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
+    const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number } }>({});
+
+    // Состояние для управления модальным окном и ввода подтверждения
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [confirmationInput, setConfirmationInput] = useState("");
+    const [currentBet, setCurrentBet] = useState<Bet | null>(null); // Состояние для текущей ставки
 
     useEffect(() => {
         let source = new EventSource("/api/sse");
@@ -128,13 +125,11 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
     if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
 
     // Фильтрация ставок по статусу OPEN
-    const filteredBets =
-        bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
+    const filteredBets = bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
 
     const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
         const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2;
-        const totalBetOnPlayer =
-            player === PlayerChoice.PLAYER1 ? bet.totalBetPlayer1 : bet.totalBetPlayer2;
+        const totalBetOnPlayer = player === PlayerChoice.PLAYER1 ? bet.totalBetPlayer1 : bet.totalBetPlayer2;
 
         // Рассчитываем новый коэффициент после добавления ставки
         const newOdds = totalBets / totalBetOnPlayer;
@@ -154,8 +149,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
         }
 
         // Проверка на максимальную допустимую ставку
-        const maxAllowedBet =
-            player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
+        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
 
         if (amount > maxAllowedBet) {
             setPlaceBetErrors((prev) => ({
@@ -186,8 +180,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>, bet: Bet) => {
         const value = parseFloat(e.target.value);
-        const selectedPlayer = (e.target.form?.elements.namedItem("player") as RadioNodeList)
-            ?.value as PlayerChoice;
+        const selectedPlayer = (e.target.form?.elements.namedItem("player") as RadioNodeList)?.value as PlayerChoice;
 
         if (!isNaN(value) && value > 0 && selectedPlayer) {
             handleValidation(bet, value, selectedPlayer);
@@ -240,26 +233,6 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                 amount,
                 player,
             });
-
-            // Уведомление пользователя в зависимости от статуса перекрытия
-            // switch (response.isCovered) {
-            //     case "OPEN":
-            //         alert("Ваша ставка не перекрыта!");
-            //         break;
-            //     case "CLOSED":
-            //         alert("Ваша ставка полностью перекрыта!");
-            //         break;
-            //     case "PENDING":
-            //         alert("Ваша ставка частично перекрыта!");
-            //         break;
-            //     case "CP":
-            //         alert(
-            //             "Ваша ставка полностью перекрыта, но есть остаток для будущих перекрытий!"
-            //         );
-            //         break;
-            //     default:
-            //         alert("Неизвестный статус перекрытия.");
-            // }
 
             mutate();
             setIsBetDisabled((prev) => ({
@@ -324,23 +297,45 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
         handlePlaceBet(bet, amount, player);
     };
 
-    const handleCloseBet = async (betId: number) => {
-        if (selectedWinner === null) {
+    // Функция для открытия модального окна
+    const openConfirmationModal = (bet: Bet) => {
+        setCurrentBet(bet); // Устанавливаем текущую ставку
+        setIsModalOpen(true);
+    };
+
+    // Функция для закрытия модального окна
+    const closeConfirmationModal = () => {
+        setIsModalOpen(false);
+        setConfirmationInput("");
+        setCurrentBet(null); // Сбрасываем текущую ставку
+    };
+
+    // Функция для обработки подтверждения
+    const handleConfirmation = async () => {
+        if (!currentBet || selectedWinner === null) {
             setCloseBetError("Выберите победителя!");
+            return;
+        }
+
+        const expectedInput = selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet.player1Id ? currentBet.player1.name : currentBet.player2.name;
+
+        if (confirmationInput.toLowerCase() !== expectedInput.toLowerCase()) {
+            setCloseBetError(`Введите правильное подтверждение: ${expectedInput}`);
             return;
         }
 
         try {
             if (selectedWinner === "draw") {
-                await closeBetDraw(betId);
+                await closeBetDraw(currentBet.id);
             } else {
-                await closeBet(betId, selectedWinner);
+                await closeBet(currentBet.id, selectedWinner);
             }
 
             mutate();
             mutateUser();
             setSelectedWinner(null);
             setCloseBetError(null);
+            closeConfirmationModal();
         } catch (error) {
             if (error instanceof Error) {
                 setCloseBetError(error.message);
@@ -716,7 +711,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                             </div>
                                             <Button
                                                 type="button"
-                                                onClick={() => handleCloseBet(bet.id)}
+                                                onClick={() => openConfirmationModal(bet)}
                                                 className="mt-2 w-full"
                                             >
                                                 Закрыть ставку
@@ -732,6 +727,27 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                     </div>
                 );
             })}
+
+            {/* Модальное окно для подтверждения закрытия ставки */}
+            {isModalOpen && currentBet && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h4>Подтверждение закрытия ставки</h4>
+                        <p>Введите {selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet.player1Id ? currentBet.player1.name : currentBet.player2.name} для подтверждения:</p>
+                        <input
+                            type="text"
+                            value={confirmationInput}
+                            onChange={(e) => setConfirmationInput(e.target.value)}
+                            className="border p-2 rounded w-full"
+                        />
+                        <div className="flex justify-end mt-4">
+                            <Button onClick={closeConfirmationModal} className="mr-2">Отмена</Button>
+                            <Button onClick={handleConfirmation}>Подтвердить</Button>
+                        </div>
+                        {closeBetError && <p className="text-red-500">{closeBetError}</p>}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
