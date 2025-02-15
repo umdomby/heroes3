@@ -54,7 +54,7 @@ export const ADMIN_USER: React.FC<Props> = ({ className, user, users }) => {
 
     return (
         <div className={`p-4 ${className}`}>
-            <h1 className="text-2xl font-bold text-center mb-6 p-2 bg-gray-400 rounded-lg">
+            <h1 className="text-2xl font-bold text-center mb-6 p-2 rounded-lg">
                 USER ADMIN
             </h1>
             <Table className="w-full">
