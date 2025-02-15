@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { User } from "@prisma/client";
 import React, { useState, useEffect } from "react";
-import { chatUsers } from "@/app/actions";
+import { chatUsers, chatUsersGet } from "@/app/actions";
 
 interface PointsUserProps {
     user: User;
@@ -22,21 +22,41 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
     const [newMessage, setNewMessage] = useState("");
 
     useEffect(() => {
-        // Получаем сообщения при загрузке компонента
+        // Function to fetch messages
+        console.log("1111111111111111111111")
         async function fetchMessages() {
-            const fetchedMessages = await chatUsers();
-            setMessages(fetchedMessages);
+            try {
+                const fetchedMessages = await chatUsersGet();
+                setMessages(fetchedMessages);
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
         }
+
+        // Fetch messages initially
         fetchMessages();
+
+        // Set interval to fetch messages every 5 seconds
+        const intervalId = setInterval(fetchMessages, 5000);
+
+        // Clear interval on component unmount
+        return () => clearInterval(intervalId);
     }, []);
 
     const handleSendMessage = async () => {
         if (newMessage.trim() === "") return;
 
-        // Отправляем новое сообщение
-        const updatedMessages = await chatUsers(user.id, newMessage);
-        setMessages(updatedMessages);
-        setNewMessage("");
+        try {
+            // Send new message
+            await chatUsers(user.id, newMessage);
+            setNewMessage("");
+
+            // Fetch updated messages
+            const updatedMessages = await chatUsersGet();
+            setMessages(updatedMessages);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
     };
 
     return (

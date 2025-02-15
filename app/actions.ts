@@ -3030,3 +3030,24 @@ export async function chatUsers(userId?: number, chatText?: string) {
         throw new Error('Не удалось обработать запрос чата. Пожалуйста, попробуйте еще раз.');
     }
 }
+
+export async function chatUsersGet() {
+    try {
+        // Fetch the latest 10 messages
+        const recentMessages = await prisma.chatUsers.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 10,
+            include: {
+                chatUser: true, // Include user information
+            },
+        });
+
+        return recentMessages.map(msg => ({
+            userEmail: msg.chatUser.email,
+            chatText: msg.chatText,
+        }));
+    } catch (error) {
+        console.error('Error fetching chat messages:', error);
+        throw new Error('Failed to fetch chat messages. Please try again.');
+    }
+}
