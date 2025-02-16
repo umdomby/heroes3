@@ -891,27 +891,25 @@ export async function globalDataPoints() {
             _sum: { points: true }
         });
 
-        const usersPointsSum = usersPointsResult._sum?.points || 0;
+        const usersPointsSum = Math.floor((usersPointsResult._sum?.points || 0) * 100) / 100;
 
         // Получаем сумму поля margin из таблиц BetCLOSED, BetCLOSED3 и BetCLOSED4
         const marginResult = await prisma.betCLOSED.aggregate({
             _sum: { margin: true }
         });
 
-        // Получаем сумму поля margin из таблицы BetCLOSED3
         const marginResult3 = await prisma.betCLOSED3.aggregate({
             _sum: { margin: true }
         });
 
-        // Получаем сумму поля margin из таблицы BetCLOSED4
         const marginResult4 = await prisma.betCLOSED4.aggregate({
             _sum: { margin: true }
         });
 
         // Суммируем все полученные значения margin из трех таблиц
-        const marginSum = (marginResult._sum?.margin || 0) +
+        const marginSum = Math.floor(((marginResult._sum?.margin || 0) +
             (marginResult3._sum?.margin || 0) +
-            (marginResult4._sum?.margin || 0);
+            (marginResult4._sum?.margin || 0)) * 100) / 100;
 
         // Получаем сумму поля totalBetAmount из таблиц bet, bet3 и bet4, где статус 'OPEN'
         const openBetsPointsResult = await prisma.bet.aggregate({
@@ -919,22 +917,20 @@ export async function globalDataPoints() {
             where: { status: 'OPEN' }
         });
 
-        // Получаем сумму поля totalBetAmount из таблицы bet3, где статус 'OPEN'
         const openBetsPointsResult3 = await prisma.bet3.aggregate({
             _sum: { totalBetAmount: true },
             where: { status: 'OPEN' }
         });
 
-        // Получаем сумму поля totalBetAmount из таблицы bet4, где статус 'OPEN'
         const openBetsPointsResult4 = await prisma.bet4.aggregate({
             _sum: { totalBetAmount: true },
             where: { status: 'OPEN' }
         });
 
         // Суммируем все полученные значения totalBetAmount из трех таблиц
-        const openBetsPointsSum = (openBetsPointsResult._sum?.totalBetAmount || 0) +
+        const openBetsPointsSum = Math.floor(((openBetsPointsResult._sum?.totalBetAmount || 0) +
             (openBetsPointsResult3._sum?.totalBetAmount || 0) +
-            (openBetsPointsResult4._sum?.totalBetAmount || 0);
+            (openBetsPointsResult4._sum?.totalBetAmount || 0)) * 100) / 100;
 
         // Обновляем или создаем запись в GlobalData
         await prisma.globalData.upsert({
@@ -961,6 +957,7 @@ export async function globalDataPoints() {
         console.error('Ошибка при обновлении GlobalData:', error);
     }
 }
+
 export async function chatUsers(userId?: number, chatText?: string) {
     try {
         if (userId && chatText) {
@@ -1413,19 +1410,7 @@ export async function closeBet(betId: number, winnerId: number) {
                 throw new Error("Ставка не найдена");
             }
 
-            // Логируем данные ставки
-            console.log('Bet ID:', bet.id);
-            console.log('Total Bet Amount (from DB):', bet.totalBetAmount);
-
-            // Проверяем, что сумма всех ставок равна totalBetAmount
-            const totalBetAmountCalculated = bet.participants.reduce((sum, p) => sum + p.amount, 0);
-            console.log('Total Bet Amount (calculated):', totalBetAmountCalculated);
-
-            if (Math.abs(totalBetAmountCalculated - bet.totalBetAmount) > 0.01) {
-                throw new Error('Ошибка: сумма всех ставок не равна totalBetAmount.');
-            }
-
-            // Создаем запись в BetCLOSED и сохраняем ее в переменной
+            // Создаем запись в BetCLOSED
             const betClosed = await prisma.betCLOSED.create({
                 data: {
                     player1Id: bet.player1Id,
@@ -1483,24 +1468,28 @@ export async function closeBet(betId: number, winnerId: number) {
             let totalMargin = 0;
             let totalPointsToReturn = 0; // Сумма всех возвращаемых баллов
 
+            // Сначала вычисляем общую прибыль победителей
+            let totalProfit = 0;
+            for (const participant of allParticipants) {
+                if (participant.isWinner) {
+                    totalProfit += participant.profit;
+                }
+            }
+
+            // Теперь распределяем общую сумму ставок
             for (const participant of allParticipants) {
                 let pointsToReturn = 0;
                 let margin = 0;
 
                 if (participant.isWinner) {
-                    if (participant.isCovered === "CLOSED") {
-                        // Полностью перекрытые ставки
-                        margin = participant.profit * MARGIN;
-                        pointsToReturn = participant.profit + participant.amount - margin;
-                    } else if (participant.isCovered === "PENDING") {
-                        // Частично перекрытые ставки
-                        const coveredProfit = participant.overlap;
-                        margin = coveredProfit * MARGIN;
-                        pointsToReturn = coveredProfit + participant.amount - margin;
-                    } else if (participant.isCovered === "OPEN") {
-                        // Не перекрытые ставки
-                        pointsToReturn = participant.amount;
-                    }
+                    // Рассчитываем долю от общей суммы
+                    const share = participant.profit / totalProfit;
+                    pointsToReturn = bet.totalBetAmount * share;
+
+                    // Вычитаем маржу
+                    margin = pointsToReturn * MARGIN;
+                    pointsToReturn -= margin;
+
                     totalMargin += margin;
                 }
 
@@ -1524,7 +1513,7 @@ export async function closeBet(betId: number, winnerId: number) {
                 // Создаем запись в BetParticipantCLOSED
                 await prisma.betParticipantCLOSED.create({
                     data: {
-                        betCLOSEDId: betClosed.id, // Используем betClosed.id
+                        betCLOSEDId: betClosed.id,
                         userId: participant.userId,
                         amount: participant.amount,
                         odds: participant.odds,
@@ -1543,12 +1532,9 @@ export async function closeBet(betId: number, winnerId: number) {
             console.log('Total Points to Return:', totalPointsToReturn);
             console.log('Total Margin:', totalMargin);
 
-            // Корректируем маржу, если есть погрешность
-            const discrepancy = totalPointsToReturn + totalMargin - bet.totalBetAmount;
-            if (Math.abs(discrepancy) > 0.5) {
+            // Проверяем, что сумма всех возвращаемых баллов плюс маржа равна общей сумме ставок
+            if (Math.abs(totalPointsToReturn + totalMargin - bet.totalBetAmount) > 0.01) {
                 throw new Error('Ошибка распределения: сумма возвращаемых баллов и маржи не равна общей сумме ставок.');
-            } else {
-                totalMargin -= discrepancy; // Корректируем маржу
             }
 
             // Обновляем поле returnBetAmount в BetCLOSED
