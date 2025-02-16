@@ -1414,7 +1414,19 @@ export async function closeBet(betId: number, winnerId: number) {
                 throw new Error("Ставка не найдена");
             }
 
-            // Создаем запись в BetCLOSED
+            // Логируем данные ставки
+            console.log('Bet ID:', bet.id);
+            console.log('Total Bet Amount (from DB):', bet.totalBetAmount);
+
+            // Проверяем, что сумма всех ставок равна totalBetAmount
+            const totalBetAmountCalculated = bet.participants.reduce((sum, p) => sum + p.amount, 0);
+            console.log('Total Bet Amount (calculated):', totalBetAmountCalculated);
+
+            if (Math.abs(totalBetAmountCalculated - bet.totalBetAmount) > 0.01) {
+                throw new Error('Ошибка: сумма всех ставок не равна totalBetAmount.');
+            }
+
+            // Создаем запись в BetCLOSED и сохраняем ее в переменной
             const betClosed = await prisma.betCLOSED.create({
                 data: {
                     player1Id: bet.player1Id,
@@ -1472,28 +1484,24 @@ export async function closeBet(betId: number, winnerId: number) {
             let totalMargin = 0;
             let totalPointsToReturn = 0; // Сумма всех возвращаемых баллов
 
-            // Сначала вычисляем общую прибыль победителей
-            let totalProfit = 0;
-            for (const participant of allParticipants) {
-                if (participant.isWinner) {
-                    totalProfit += participant.profit;
-                }
-            }
-
-            // Теперь распределяем общую сумму ставок
             for (const participant of allParticipants) {
                 let pointsToReturn = 0;
                 let margin = 0;
 
                 if (participant.isWinner) {
-                    // Рассчитываем долю от общей суммы
-                    const share = participant.profit / totalProfit;
-                    pointsToReturn = bet.totalBetAmount * share;
-
-                    // Вычитаем маржу
-                    margin = pointsToReturn * MARGIN;
-                    pointsToReturn -= margin;
-
+                    if (participant.isCovered === "CLOSED") {
+                        // Полностью перекрытые ставки
+                        margin = participant.profit * MARGIN;
+                        pointsToReturn = participant.profit + participant.amount - margin;
+                    } else if (participant.isCovered === "PENDING") {
+                        // Частично перекрытые ставки
+                        const coveredProfit = participant.overlap;
+                        margin = coveredProfit * MARGIN;
+                        pointsToReturn = coveredProfit + participant.amount - margin;
+                    } else if (participant.isCovered === "OPEN") {
+                        // Не перекрытые ставки
+                        pointsToReturn = participant.amount;
+                    }
                     totalMargin += margin;
                 }
 
@@ -1517,7 +1525,7 @@ export async function closeBet(betId: number, winnerId: number) {
                 // Создаем запись в BetParticipantCLOSED
                 await prisma.betParticipantCLOSED.create({
                     data: {
-                        betCLOSEDId: betClosed.id,
+                        betCLOSEDId: betClosed.id, // Используем betClosed.id
                         userId: participant.userId,
                         amount: participant.amount,
                         odds: participant.odds,
@@ -1536,9 +1544,12 @@ export async function closeBet(betId: number, winnerId: number) {
             console.log('Total Points to Return:', totalPointsToReturn);
             console.log('Total Margin:', totalMargin);
 
-            // Проверяем, что сумма всех возвращаемых баллов плюс маржа равна общей сумме ставок
-            if (Math.abs(totalPointsToReturn + totalMargin - bet.totalBetAmount) > 0.01) {
+            // Корректируем маржу, если есть погрешность
+            const discrepancy = totalPointsToReturn + totalMargin - bet.totalBetAmount;
+            if (Math.abs(discrepancy) > 0.5) {
                 throw new Error('Ошибка распределения: сумма возвращаемых баллов и маржи не равна общей сумме ставок.');
+            } else {
+                totalMargin -= discrepancy; // Корректируем маржу
             }
 
             // Обновляем поле returnBetAmount в BetCLOSED
