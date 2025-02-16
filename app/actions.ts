@@ -1461,7 +1461,7 @@ export async function closeBet(betId: number, winnerId: number) {
             });
 
             // Перераспределяем баллы
-            const allParticipants = await prisma.betParticipant.findMany({
+            let allParticipants = await prisma.betParticipant.findMany({
                 where: { betId: betId },
             });
 
@@ -1476,7 +1476,47 @@ export async function closeBet(betId: number, winnerId: number) {
                 }
             }
 
-            // Теперь распределяем общую сумму ставок
+            // Обрабатываем участников с isCovered = CLOSED
+            for (const participant of allParticipants) {
+                if (participant.isWinner && participant.isCovered === 'CLOSED') {
+                    const pointsToReturn = participant.amount + participant.profit;
+                    totalPointsToReturn += pointsToReturn;
+
+                    // Обновляем баллы пользователя
+                    await prisma.user.update({
+                        where: { id: participant.userId },
+                        data: {
+                            points: {
+                                increment: Math.round(pointsToReturn * 100) / 100,
+                            },
+                        },
+                    });
+
+                    // Создаем запись в BetParticipantCLOSED
+                    await prisma.betParticipantCLOSED.create({
+                        data: {
+                            betCLOSEDId: betClosed.id,
+                            userId: participant.userId,
+                            amount: participant.amount,
+                            odds: participant.odds,
+                            profit: participant.profit,
+                            player: participant.player,
+                            isWinner: participant.isWinner,
+                            margin: 0, // Маржа не взимается
+                            createdAt: participant.createdAt,
+                            isCovered: participant.isCovered,
+                            overlap: participant.overlap,
+                            return: Math.round(pointsToReturn * 100) / 100,
+                        },
+                    });
+                }
+            }
+
+            // Обрабатываем остальных участников, сортируя по убыванию overlap
+            allParticipants = allParticipants.filter(p => !(p.isWinner && p.isCovered === 'CLOSED'));
+            allParticipants.sort((a, b) => b.overlap - a.overlap);
+
+            // Теперь распределяем оставшиеся средства
             for (const participant of allParticipants) {
                 let pointsToReturn = 0;
                 let margin = 0;
@@ -1584,6 +1624,7 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
+
 
 
 
