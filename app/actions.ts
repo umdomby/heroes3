@@ -1491,7 +1491,7 @@ export async function closeBet(betId: number, winnerId: number) {
                     } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
                         pointsToReturn = participant.amount;
                     } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-                        pointsToReturn = (participant.amount - (participant.overlap / participant.odds)) / (parseFloat(process.env.LOSE_PENDING_BET || '2'));
+                        pointsToReturn = (participant.amount - (participant.overlap / participant.odds));
                     }
                 }
 
@@ -2153,7 +2153,7 @@ export async function closeBet3(betId: number, winnerId: number) {
                     } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
                         pointsToReturn = participant.amount;
                     } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-                        pointsToReturn = (participant.amount - (participant.overlap / participant.odds)) / (parseFloat(process.env.LOSE_PENDING_BET || '2'));
+                        pointsToReturn = (participant.amount - (participant.overlap / participant.odds));
                     }
                 }
 
@@ -2858,7 +2858,7 @@ export async function closeBet4(betId: number, winnerId: number) {
                     } else if (participant.isCovered === "OPEN" && participant.overlap === 0) {
                         pointsToReturn = participant.amount;
                     } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-                        pointsToReturn = (participant.amount - (participant.overlap / participant.odds)) / (parseFloat(process.env.LOSE_PENDING_BET || '2'));
+                        pointsToReturn = (participant.amount - (participant.overlap / participant.odds));
                     }
                 }
 
