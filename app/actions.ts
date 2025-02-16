@@ -1439,6 +1439,7 @@ export async function closeBet(betId: number, winnerId: number) {
                     oddsBetPlayer2: bet.oddsBetPlayer2,
                     overlapPlayer1: bet.overlapPlayer1,
                     overlapPlayer2: bet.overlapPlayer2,
+                    returnBetAmount: 0, // Инициализируем returnBetAmount
                 },
             });
 
@@ -1538,11 +1539,12 @@ export async function closeBet(betId: number, winnerId: number) {
                 throw new Error('Ошибка распределения: сумма возвращаемых баллов не равна общей сумме ставок.');
             }
 
-            // Обновляем поле margin в BetCLOSED
+            // Обновляем поле returnBetAmount в BetCLOSED
             await prisma.betCLOSED.update({
                 where: { id: betClosed.id },
                 data: {
                     margin: Math.floor(totalMargin * 100) / 100,
+                    returnBetAmount: Math.floor(totalPointsToReturn * 100) / 100, // Записываем сумму возвращенных баллов
                 },
             });
 
@@ -1573,13 +1575,16 @@ export async function closeBet(betId: number, winnerId: number) {
 
         return { success: true, message: 'Ставка успешно закрыта' };
     } catch (error) {
-        console.error("Ошибка при закрытии ставки:", error);
-
-        if (error instanceof Error) {
-            throw new Error(error.message);
+        if (error === null || error === undefined) {
+            console.error('Ошибка при закрытии ставки: Неизвестная ошибка (error is null или undefined)');
+        } else if (error instanceof Error) {
+            console.error('Ошибка при закрытии ставки:', error.message);
+            console.error('Стек ошибки:', error.stack);
         } else {
-            throw new Error("Не удалось закрыть ставку.");
+            console.error('Ошибка при закрытии ставки:', error);
         }
+
+        throw new Error('Не удалось закрыть ставку.');
     }
 }
 
