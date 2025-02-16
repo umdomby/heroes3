@@ -867,6 +867,180 @@ function areNumbersEqual(num1: number, num2: number): boolean {
     return Math.abs(num1 - num2) < Number.EPSILON;
 } //точное сравнение чисел
 
+//chat
+export async function globalDataPoints() {
+    try {
+        // Получаем текущие данные из GlobalData
+        const currentGlobalData = await prisma.globalData.findUnique({
+            where: { id: 1 },
+        });
+
+        // Проверяем, прошло ли 10 секунд с момента последнего обновления
+        if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 10000) {
+            console.log('Данные обновлены недавно, пропускаем обновление.');
+            return;
+        }
+
+        // Если прошло больше 10 секунд, выполняем обновление
+        const usersCount = await prisma.user.count();
+        const regCount = await prisma.regPoints.count() * 15;
+        const refCount = await prisma.referralUserIpAddress.count({
+            where: { referralStatus: true }
+        }) * 10;
+        const usersPointsResult = await prisma.user.aggregate({
+            _sum: { points: true }
+        });
+
+        const usersPointsSum = usersPointsResult._sum?.points || 0;
+
+        // Получаем сумму поля margin из таблиц BetCLOSED, BetCLOSED3 и BetCLOSED4
+        const marginResult = await prisma.betCLOSED.aggregate({
+            _sum: { margin: true }
+        });
+
+        // Получаем сумму поля margin из таблицы BetCLOSED3
+        const marginResult3 = await prisma.betCLOSED3.aggregate({
+            _sum: { margin: true }
+        });
+
+        // Получаем сумму поля margin из таблицы BetCLOSED4
+        const marginResult4 = await prisma.betCLOSED4.aggregate({
+            _sum: { margin: true }
+        });
+
+        // Суммируем все полученные значения margin из трех таблиц
+        const marginSum = (marginResult._sum?.margin || 0) +
+            (marginResult3._sum?.margin || 0) +
+            (marginResult4._sum?.margin || 0);
+
+        // Получаем сумму поля totalBetAmount из таблиц bet, bet3 и bet4, где статус 'OPEN'
+        const openBetsPointsResult = await prisma.bet.aggregate({
+            _sum: { totalBetAmount: true },
+            where: { status: 'OPEN' }
+        });
+
+        // Получаем сумму поля totalBetAmount из таблицы bet3, где статус 'OPEN'
+        const openBetsPointsResult3 = await prisma.bet3.aggregate({
+            _sum: { totalBetAmount: true },
+            where: { status: 'OPEN' }
+        });
+
+        // Получаем сумму поля totalBetAmount из таблицы bet4, где статус 'OPEN'
+        const openBetsPointsResult4 = await prisma.bet4.aggregate({
+            _sum: { totalBetAmount: true },
+            where: { status: 'OPEN' }
+        });
+
+        // Суммируем все полученные значения totalBetAmount из трех таблиц
+        const openBetsPointsSum = (openBetsPointsResult._sum?.totalBetAmount || 0) +
+            (openBetsPointsResult3._sum?.totalBetAmount || 0) +
+            (openBetsPointsResult4._sum?.totalBetAmount || 0);
+
+        // Обновляем или создаем запись в GlobalData
+        await prisma.globalData.upsert({
+            where: { id: 1 },
+            update: {
+                users: usersCount,
+                reg: regCount,
+                ref: refCount,
+                usersPoints: usersPointsSum,
+                margin: marginSum,
+                openBetsPoints: openBetsPointsSum,
+            },
+            create: {
+                users: usersCount,
+                reg: regCount,
+                ref: refCount,
+                usersPoints: usersPointsSum,
+                margin: marginSum,
+                openBetsPoints: openBetsPointsSum,
+            },
+        });
+        console.log('Данные успешно обновлены.');
+    } catch (error) {
+        console.error('Ошибка при обновлении GlobalData:', error);
+    }
+}
+export async function chatUsers(userId?: number, chatText?: string) {
+    try {
+        if (userId && chatText) {
+            // Добавляем новое сообщение
+            await prisma.chatUsers.create({
+                data: {
+                    chatUserId: userId,
+                    chatText: chatText,
+                },
+            });
+
+            // Удаляем старые сообщения, если их больше 300
+            const allMessages = await prisma.chatUsers.findMany({
+                orderBy: { createdAt: 'asc' },
+            });
+
+            if (allMessages.length > 300) {
+                const messagesToDelete = allMessages.slice(0, allMessages.length - 300);
+                for (const message of messagesToDelete) {
+                    await prisma.chatUsers.delete({ where: { id: message.id } });
+                }
+            }
+        }
+
+        // Возвращаем последние 300 сообщений
+        const recentMessages = await prisma.chatUsers.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 300,
+            include: {
+                chatUser: true, // Включаем информацию о пользователе
+            },
+        });
+
+        // Обновляем кэш
+        revalidatePath('/');
+
+        return recentMessages.map(msg => ({
+            id: msg.id, // Убедитесь, что id включен
+            userEmail: msg.chatUser.email,
+            userTelegram: msg.chatUser.telegram,
+            chatText: msg.chatText,
+        }));
+    } catch (error) {
+        console.error('Ошибка в chatUsers:', error);
+        throw new Error('Не удалось обработать запрос чата. Пожалуйста, попробуйте еще раз.');
+    }
+}
+export async function chatUsersGet() {
+    try {
+        // Fetch the latest 300 messages
+        const recentMessages = await prisma.chatUsers.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 300,
+            include: {
+                chatUser: true, // Include user information
+            },
+        });
+
+        return recentMessages.map(msg => ({
+            id: msg.id, // Убедитесь, что id включен
+            userEmail: msg.chatUser.email,
+            userTelegram: msg.chatUser.telegram,
+            chatText: msg.chatText,
+        }));
+    } catch (error) {
+        console.error('Error fetching chat messages:', error);
+        throw new Error('Failed to fetch chat messages. Please try again.');
+    }
+}
+export async function chatUsersDelete(messageId: number) {
+    try {
+        await prisma.chatUsers.delete({
+            where: { id: messageId },
+        });
+    } catch (error) {
+        console.error('Error deleting chat message:', error);
+        throw new Error('Failed to delete chat message. Please try again.');
+    }
+}
+
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2;
 
@@ -2888,178 +3062,3 @@ export async function closeBetDraw4(betId: number) {
 }// ничья на 4 игрока
 // Function to handle a draw for four players
 
-
-export async function globalDataPoints() {
-    try {
-        // Получаем текущие данные из GlobalData
-        const currentGlobalData = await prisma.globalData.findUnique({
-            where: { id: 1 },
-        });
-
-        // Проверяем, прошло ли 10 секунд с момента последнего обновления
-        if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 10000) {
-            console.log('Данные обновлены недавно, пропускаем обновление.');
-            return;
-        }
-
-        // Если прошло больше 10 секунд, выполняем обновление
-        const usersCount = await prisma.user.count();
-        const regCount = await prisma.regPoints.count() * 15;
-        const refCount = await prisma.referralUserIpAddress.count({
-            where: { referralStatus: true }
-        }) * 10;
-        const usersPointsResult = await prisma.user.aggregate({
-            _sum: { points: true }
-        });
-
-        const usersPointsSum = usersPointsResult._sum?.points || 0;
-
-        // Получаем сумму поля margin из таблиц BetCLOSED, BetCLOSED3 и BetCLOSED4
-        const marginResult = await prisma.betCLOSED.aggregate({
-            _sum: { margin: true }
-        });
-
-        // Получаем сумму поля margin из таблицы BetCLOSED3
-        const marginResult3 = await prisma.betCLOSED3.aggregate({
-            _sum: { margin: true }
-        });
-
-        // Получаем сумму поля margin из таблицы BetCLOSED4
-        const marginResult4 = await prisma.betCLOSED4.aggregate({
-            _sum: { margin: true }
-        });
-
-        // Суммируем все полученные значения margin из трех таблиц
-        const marginSum = (marginResult._sum?.margin || 0) +
-            (marginResult3._sum?.margin || 0) +
-            (marginResult4._sum?.margin || 0);
-
-        // Получаем сумму поля totalBetAmount из таблиц bet, bet3 и bet4, где статус 'OPEN'
-        const openBetsPointsResult = await prisma.bet.aggregate({
-            _sum: { totalBetAmount: true },
-            where: { status: 'OPEN' }
-        });
-
-        // Получаем сумму поля totalBetAmount из таблицы bet3, где статус 'OPEN'
-        const openBetsPointsResult3 = await prisma.bet3.aggregate({
-            _sum: { totalBetAmount: true },
-            where: { status: 'OPEN' }
-        });
-
-        // Получаем сумму поля totalBetAmount из таблицы bet4, где статус 'OPEN'
-        const openBetsPointsResult4 = await prisma.bet4.aggregate({
-            _sum: { totalBetAmount: true },
-            where: { status: 'OPEN' }
-        });
-
-        // Суммируем все полученные значения totalBetAmount из трех таблиц
-        const openBetsPointsSum = (openBetsPointsResult._sum?.totalBetAmount || 0) +
-            (openBetsPointsResult3._sum?.totalBetAmount || 0) +
-            (openBetsPointsResult4._sum?.totalBetAmount || 0);
-
-        // Обновляем или создаем запись в GlobalData
-        await prisma.globalData.upsert({
-            where: { id: 1 },
-            update: {
-                users: usersCount,
-                reg: regCount,
-                ref: refCount,
-                usersPoints: usersPointsSum,
-                margin: marginSum,
-                openBetsPoints: openBetsPointsSum,
-            },
-            create: {
-                users: usersCount,
-                reg: regCount,
-                ref: refCount,
-                usersPoints: usersPointsSum,
-                margin: marginSum,
-                openBetsPoints: openBetsPointsSum,
-            },
-        });
-        console.log('Данные успешно обновлены.');
-    } catch (error) {
-        console.error('Ошибка при обновлении GlobalData:', error);
-    }
-}
-export async function chatUsers(userId?: number, chatText?: string) {
-    try {
-        if (userId && chatText) {
-            // Добавляем новое сообщение
-            await prisma.chatUsers.create({
-                data: {
-                    chatUserId: userId,
-                    chatText: chatText,
-                },
-            });
-
-            // Удаляем старые сообщения, если их больше 300
-            const allMessages = await prisma.chatUsers.findMany({
-                orderBy: { createdAt: 'asc' },
-            });
-
-            if (allMessages.length > 300) {
-                const messagesToDelete = allMessages.slice(0, allMessages.length - 300);
-                for (const message of messagesToDelete) {
-                    await prisma.chatUsers.delete({ where: { id: message.id } });
-                }
-            }
-        }
-
-        // Возвращаем последние 300 сообщений
-        const recentMessages = await prisma.chatUsers.findMany({
-            orderBy: { createdAt: 'desc' },
-            take: 300,
-            include: {
-                chatUser: true, // Включаем информацию о пользователе
-            },
-        });
-
-        // Обновляем кэш
-        revalidatePath('/');
-
-        return recentMessages.map(msg => ({
-            id: msg.id, // Убедитесь, что id включен
-            userEmail: msg.chatUser.email,
-            userTelegram: msg.chatUser.telegram,
-            chatText: msg.chatText,
-        }));
-    } catch (error) {
-        console.error('Ошибка в chatUsers:', error);
-        throw new Error('Не удалось обработать запрос чата. Пожалуйста, попробуйте еще раз.');
-    }
-}
-
-export async function chatUsersGet() {
-    try {
-        // Fetch the latest 300 messages
-        const recentMessages = await prisma.chatUsers.findMany({
-            orderBy: { createdAt: 'desc' },
-            take: 300,
-            include: {
-                chatUser: true, // Include user information
-            },
-        });
-
-        return recentMessages.map(msg => ({
-            id: msg.id, // Убедитесь, что id включен
-            userEmail: msg.chatUser.email,
-            userTelegram: msg.chatUser.telegram,
-            chatText: msg.chatText,
-        }));
-    } catch (error) {
-        console.error('Error fetching chat messages:', error);
-        throw new Error('Failed to fetch chat messages. Please try again.');
-    }
-}
-
-export async function chatUsersDelete(messageId: number) {
-    try {
-        await prisma.chatUsers.delete({
-            where: { id: messageId },
-        });
-    } catch (error) {
-        console.error('Error deleting chat message:', error);
-        throw new Error('Failed to delete chat message. Please try again.');
-    }
-}
