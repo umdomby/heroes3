@@ -1495,7 +1495,9 @@ export async function closeBet(betId: number, winnerId: number) {
                     pointsToReturn = bet.totalBetAmount * share;
 
                     // Вычитаем маржу
-                    margin = pointsToReturn * MARGIN;
+                    if (pointsToReturn > participant.amount) {
+                        margin = (pointsToReturn - participant.amount) * MARGIN;
+                    }
                     pointsToReturn -= margin;
 
                     totalMargin += margin;
