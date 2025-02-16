@@ -1162,8 +1162,17 @@ export async function placeBet(formData: { betId: number; userId: number; amount
             .filter(p => p.player === PlayerChoice.PLAYER2)
             .reduce((sum, p) => sum + p.amount, 0);
 
-        const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
-        const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
+
+        const totalPlayer1Odds = bet.participants
+            .filter(p => p.player === PlayerChoice.PLAYER1)
+            .reduce((sum, p) => sum + p.profit, 0);
+
+        const totalPlayer2Odds = bet.participants
+            .filter(p => p.player === PlayerChoice.PLAYER2)
+            .reduce((sum, p) => sum + p.profit, 0);
+
+        const totalWithInitPlayer1 = totalPlayer1 + totalPlayer1Odds +(bet.initBetPlayer1 || 0);
+        const totalWithInitPlayer2 = totalPlayer2 + totalPlayer2Odds +(bet.initBetPlayer2 || 0);
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
         // Check if the odds are too low
@@ -1624,9 +1633,6 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
-
-
-
 export async function closeBetDraw(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
