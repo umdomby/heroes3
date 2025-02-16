@@ -1568,9 +1568,19 @@ export async function closeBet(betId: number, winnerId: number) {
             // Распределение оставшихся средств для PENDING участников
             const remainingPoints = bet.totalBetAmount - totalPointsToReturn;
             if (remainingPoints > 0) {
+                // Сначала вычисляем общее соотношение overlap к profit для всех PENDING участников
+                let totalPendingRatio = 0;
                 for (const participant of allParticipants) {
                     if (participant.isWinner && participant.isCovered === 'PENDING') {
-                        const share = participant.overlap / totalPendingOverlap;
+                        totalPendingRatio += participant.overlap / participant.profit;
+                    }
+                }
+
+                // Распределяем оставшиеся средства на основе этого соотношения
+                for (const participant of allParticipants) {
+                    if (participant.isWinner && participant.isCovered === 'PENDING') {
+                        const ratio = participant.overlap / participant.profit;
+                        const share = ratio / totalPendingRatio;
                         const additionalReturn = remainingPoints * share;
 
                         await prisma.user.update({
