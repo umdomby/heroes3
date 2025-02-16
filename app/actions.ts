@@ -2993,7 +2993,7 @@ export async function chatUsers(userId?: number, chatText?: string) {
                 },
             });
 
-            // Удаляем старые сообщения, если их больше 10
+            // Удаляем старые сообщения, если их больше 300
             const allMessages = await prisma.chatUsers.findMany({
                 orderBy: { createdAt: 'asc' },
             });
@@ -3006,7 +3006,7 @@ export async function chatUsers(userId?: number, chatText?: string) {
             }
         }
 
-        // Возвращаем последние 10 сообщений
+        // Возвращаем последние 300 сообщений
         const recentMessages = await prisma.chatUsers.findMany({
             orderBy: { createdAt: 'desc' },
             take: 300,
@@ -3019,6 +3019,7 @@ export async function chatUsers(userId?: number, chatText?: string) {
         revalidatePath('/');
 
         return recentMessages.map(msg => ({
+            id: msg.id, // Убедитесь, что id включен
             userEmail: msg.chatUser.email,
             userTelegram: msg.chatUser.telegram,
             chatText: msg.chatText,
@@ -3027,10 +3028,11 @@ export async function chatUsers(userId?: number, chatText?: string) {
         console.error('Ошибка в chatUsers:', error);
         throw new Error('Не удалось обработать запрос чата. Пожалуйста, попробуйте еще раз.');
     }
-}// Функция для получения и добавления сообщений
+}
+
 export async function chatUsersGet() {
     try {
-        // Fetch the latest 10 messages
+        // Fetch the latest 300 messages
         const recentMessages = await prisma.chatUsers.findMany({
             orderBy: { createdAt: 'desc' },
             take: 300,
@@ -3040,6 +3042,7 @@ export async function chatUsersGet() {
         });
 
         return recentMessages.map(msg => ({
+            id: msg.id, // Убедитесь, что id включен
             userEmail: msg.chatUser.email,
             userTelegram: msg.chatUser.telegram,
             chatText: msg.chatText,
@@ -3048,4 +3051,15 @@ export async function chatUsersGet() {
         console.error('Error fetching chat messages:', error);
         throw new Error('Failed to fetch chat messages. Please try again.');
     }
-}//get chat message
+}
+
+export async function chatUsersDelete(messageId: number) {
+    try {
+        await prisma.chatUsers.delete({
+            where: { id: messageId },
+        });
+    } catch (error) {
+        console.error('Error deleting chat message:', error);
+        throw new Error('Failed to delete chat message. Please try again.');
+    }
+}

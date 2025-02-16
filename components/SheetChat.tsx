@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/sheet";
 import { User } from "@prisma/client";
 import React, { useState, useEffect } from "react";
-import { chatUsers, chatUsersGet } from "@/app/actions";
+import { chatUsers, chatUsersGet, chatUsersDelete } from "@/app/actions";
 import Link from "next/link";
 
-// Define a type for the message objects
+// Определяем тип для объектов сообщений
 interface Message {
+    id: number; // Убедитесь, что это поле присутствует
     userEmail: string;
-    userTelegram?: string | null; // Allow null values
+    userTelegram?: string | null; // Разрешаем null значения
     chatText: string;
 }
 
@@ -44,6 +45,7 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
             async function fetchMessages() {
                 try {
                     const fetchedMessages = await chatUsersGet();
+                    console.log('Fetched Messages:', fetchedMessages); // Логируем сообщения для проверки структуры
                     setMessages(fetchedMessages);
                 } catch (error) {
                     console.error('Error fetching messages:', error);
@@ -69,6 +71,20 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
         }
     };
 
+    const handleDeleteMessage = async (messageId: number) => {
+        try {
+            if (!messageId) {
+                console.error('Invalid message ID');
+                return;
+            }
+            await chatUsersDelete(messageId);
+            const updatedMessages = await chatUsersGet();
+            setMessages(updatedMessages);
+        } catch (error) {
+            console.error('Error deleting message:', error);
+        }
+    };
+
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             handleSendMessage();
@@ -76,7 +92,7 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
     };
 
     return (
-        <div className="fixed top-4 right-4 p-4 shadow-lg rounded-lg z-50">
+        <div className="fixed top-4 right-4 shadow-lg rounded-lg z-50 transform -translate-y-3">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger className='h-5' asChild>
                     <Button variant="outline">Chat {user.fullName}</Button>
@@ -88,18 +104,25 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                         </SheetDescription>
                     </SheetHeader>
                     <div className="flex-grow p-4 overflow-y-auto flex flex-col-reverse">
-                        {messages.map((msg, index) => (
-                            <div key={index} className="mb-2">
-                                <strong>
-                                    {msg.userTelegram ?
-                                        <Link
-                                            className="text-blue-500 hover:text-green-300 font-bold"
-                                            href={msg.userTelegram.replace(/^@/, 'https://t.me/')}
-                                            target="_blank"
-                                        >
-                                            {msg.userTelegram}
-                                        </Link> : msg.userEmail.split('@')[0]}:
-                                </strong> <span dangerouslySetInnerHTML={{ __html: linkify(msg.chatText) }} />
+                        {messages.map((msg) => (
+                            <div key={msg.id} className="mb-2 flex justify-between items-center">
+                                <div>
+                                    <strong>
+                                        {msg.userTelegram ?
+                                            <Link
+                                                className="text-blue-500 hover:text-green-300 font-bold"
+                                                href={msg.userTelegram.replace(/^@/, 'https://t.me/')}
+                                                target="_blank"
+                                            >
+                                                {msg.userTelegram}
+                                            </Link> : msg.userEmail.split('@')[0]}:
+                                    </strong> <span dangerouslySetInnerHTML={{ __html: linkify(msg.chatText) }} />
+                                </div>
+                                {user.role === "ADMIN" && (
+                                    <Button variant="ghost" onClick={() => handleDeleteMessage(msg.id)}>
+                                        Delete
+                                    </Button>
+                                )}
                             </div>
                         ))}
                     </div>
