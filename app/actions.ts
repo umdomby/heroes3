@@ -1491,7 +1491,7 @@ export async function closeBet(betId: number, winnerId: number) {
                         pointsToReturn = bet.totalBetAmount * share;
 
                         // Вычитаем маржу
-                        margin = pointsToReturn * MARGIN;
+                        margin = Math.abs((participant.amount - pointsToReturn) * MARGIN);
                         pointsToReturn -= margin;
 
                         totalMargin += margin;
@@ -1525,7 +1525,7 @@ export async function closeBet(betId: number, winnerId: number) {
                         profit: participant.profit,
                         player: participant.player,
                         isWinner: participant.isWinner,
-                        margin: margin,
+                        margin: Math.round(margin * 100) / 100,
                         createdAt: participant.createdAt,
                         isCovered: participant.isCovered,
                         overlap: participant.overlap,
@@ -1584,6 +1584,8 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
+
+
 
 
 
