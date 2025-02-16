@@ -26,6 +26,13 @@ interface PointsUserProps {
     user: User;
 }
 
+const linkify = (text: string) => {
+    const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+    return text.replace(urlPattern, (url) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-green-300">${url}</a>`;
+    });
+};
+
 export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
@@ -80,18 +87,19 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                         <SheetDescription>
                         </SheetDescription>
                     </SheetHeader>
-                    <div className="flex-grow p-4 overflow-y-auto flex flex-col-reverse" style={{ display: 'block' }}>
+                    <div className="flex-grow p-4 overflow-y-auto flex flex-col-reverse">
                         {messages.map((msg, index) => (
                             <div key={index} className="mb-2">
                                 <strong>
-                                    {msg.userTelegram ? <Link
-                                        className="text-blue-500 hover:text-green-300 font-bold"
-                                        href={msg.userTelegram.replace(/^@/, 'https://t.me/')}
-                                        target="_blank"
-                                    >
-                                        {msg.userTelegram}
-                                    </Link> : msg.userEmail.split('@')[0]}:
-                                </strong> {msg.chatText}
+                                    {msg.userTelegram ?
+                                        <Link
+                                            className="text-blue-500 hover:text-green-300 font-bold"
+                                            href={msg.userTelegram.replace(/^@/, 'https://t.me/')}
+                                            target="_blank"
+                                        >
+                                            {msg.userTelegram}
+                                        </Link> : msg.userEmail.split('@')[0]}:
+                                </strong> <span dangerouslySetInnerHTML={{ __html: linkify(msg.chatText) }} />
                             </div>
                         ))}
                     </div>
