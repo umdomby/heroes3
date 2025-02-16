@@ -1470,10 +1470,10 @@ export async function closeBet(betId: number, winnerId: number) {
             });
 
             let totalMargin = 0;
-            let totalProfit = 0;
             let totalPointsToReturn = 0; // Сумма всех возвращаемых баллов
 
             // Сначала вычисляем общую прибыль победителей
+            let totalProfit = 0;
             for (const participant of allParticipants) {
                 if (participant.isWinner) {
                     totalProfit += participant.profit;
@@ -1495,10 +1495,9 @@ export async function closeBet(betId: number, winnerId: number) {
                     pointsToReturn -= margin;
 
                     totalMargin += margin;
-                } else if (participant.isCovered === "PENDING" && participant.profit > participant.overlap) {
-                    // Для частично перекрытых ставок
-                    pointsToReturn = participant.amount - (participant.overlap / participant.odds);
                 }
+
+                console.log(`Participant ID: ${participant.id}, Points to Return: ${pointsToReturn}`);
 
                 // Обновляем баллы пользователя
                 if (pointsToReturn > 0) {
@@ -1534,9 +1533,12 @@ export async function closeBet(betId: number, winnerId: number) {
                 });
             }
 
-            // Проверяем, что сумма всех возвращаемых баллов равна общей сумме ставок
-            if (Math.abs(totalPointsToReturn - bet.totalBetAmount) > 0.01) {
-                throw new Error('Ошибка распределения: сумма возвращаемых баллов не равна общей сумме ставок.');
+            console.log('Total Points to Return:', totalPointsToReturn);
+            console.log('Total Margin:', totalMargin);
+
+            // Проверяем, что сумма всех возвращаемых баллов плюс маржа равна общей сумме ставок
+            if (Math.abs(totalPointsToReturn + totalMargin - bet.totalBetAmount) > 0.01) {
+                throw new Error('Ошибка распределения: сумма возвращаемых баллов и маржи не равна общей сумме ставок.');
             }
 
             // Обновляем поле returnBetAmount в BetCLOSED
@@ -1587,6 +1589,7 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
+
 
 
 export async function closeBetDraw(betId: number) {
