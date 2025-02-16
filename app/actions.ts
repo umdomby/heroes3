@@ -1530,7 +1530,9 @@ export async function closeBet(betId: number, winnerId: number) {
 
             // Проверяем, что сумма всех возвращаемых баллов плюс маржа равна общей сумме ставок
             const discrepancy = totalPointsToReturn + totalMargin - bet.totalBetAmount;
+            const totalPointsToReturnTotalMargin = totalPointsToReturn + totalMargin;
             if (Math.abs(discrepancy) > 0.5) {
+                console.log("totalPointsToReturn + totalMargin " + totalPointsToReturnTotalMargin)
                 console.log("111111111 discrepancy " + discrepancy)
                 console.log("222222222 totalPointsToReturn " + totalPointsToReturn)
                 console.log("333333333 totalMargin " + totalMargin)
@@ -1581,9 +1583,6 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
-
-
-
 
 
 
