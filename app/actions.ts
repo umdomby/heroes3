@@ -1528,9 +1528,17 @@ export async function closeBet(betId: number, winnerId: number) {
             console.log('Total Points to Return:', totalPointsToReturn);
             console.log('Total Margin:', totalMargin);
 
-            // Корректируем маржу, если есть погрешность
+            // Проверяем, что сумма всех возвращаемых баллов плюс маржа равна общей сумме ставок
             const discrepancy = totalPointsToReturn + totalMargin - bet.totalBetAmount;
             if (Math.abs(discrepancy) > 0.5) {
+                console.log("111111111 discrepancy " + discrepancy)
+                console.log("222222222 totalPointsToReturn " + totalPointsToReturn)
+                console.log("333333333 totalMargin " + totalMargin)
+                throw new Error('Ошибка распределения: сумма возвращаемых баллов и маржи не равна общей сумме ставок.');
+            } else {
+                console.log("111111111 discrepancy " + discrepancy)
+                console.log("222222222 totalPointsToReturn " + totalPointsToReturn)
+                console.log("333333333 totalMargin " + totalMargin)
                 totalMargin -= discrepancy; // Корректируем маржу
             }
 
@@ -1544,23 +1552,14 @@ export async function closeBet(betId: number, winnerId: number) {
             });
 
             // Удаляем участников и ставку
-            await prisma.betParticipant.deleteMany({
-                where: { betId: betId },
-            });
+            // await prisma.betParticipant.deleteMany({
+            //     where: { betId: betId },
+            // });
+            //
+            // await prisma.bet.delete({
+            //     where: { id: betId },
+            // });
 
-            await prisma.bet.delete({
-                where: { id: betId },
-            });
-
-            // Обновляем глобальные данные
-            await prisma.globalData.update({
-                where: { id: 1 },
-                data: {
-                    margin: {
-                        increment: Math.floor(totalMargin * 100) / 100,
-                    },
-                },
-            });
         });
 
         // Ревалидация данных
@@ -1582,6 +1581,7 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
+
 
 
 
