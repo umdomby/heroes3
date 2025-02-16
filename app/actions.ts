@@ -1289,13 +1289,13 @@ async function balanceOverlaps(betId: number) {
 
     // Получаем всех участников с данным betId, отсортированных по дате создания
     const participants = await prisma.betParticipant.findMany({
-        where: {betId},
-        orderBy: {createdAt: 'asc'},
+        where: { betId },
+        orderBy: { createdAt: 'asc' },
     });
 
     // Получаем текущие значения overlap для ставки
     let bet = await prisma.bet.findUnique({
-        where: {id: betId},
+        where: { id: betId },
     });
 
     // Проверяем, что ставка существует
@@ -1321,8 +1321,8 @@ async function balanceOverlaps(betId: number) {
             for (let i = 0; i < targetParticipants.length; i++) {
                 const target = targetParticipants[i];
 
-                // Проверяем, что profit не равен overlap
-                if (Math.floor(target.profit * 100) / 100 !== Math.floor(target.overlap * 100) / 100) {
+                // Проверяем, что profit не равен overlap и участник не перекрывает свою собственную ставку
+                if (Math.floor(target.profit * 100) / 100 !== Math.floor(target.overlap * 100) / 100 && target.userId !== bet.userId) {
                     allProfitEqualOverlap = false; // Если найдена запись, где profit не равен overlap, продолжаем цикл
 
                     // Вычисляем, сколько нужно добавить в overlap, чтобы достичь равенства с profit
@@ -1341,7 +1341,7 @@ async function balanceOverlaps(betId: number) {
 
                         // Обновляем overlap у участника-цели
                         await prisma.betParticipant.update({
-                            where: {id: target.id},
+                            where: { id: target.id },
                             data: {
                                 overlap: newOverlap,
                             },
@@ -1349,7 +1349,7 @@ async function balanceOverlaps(betId: number) {
 
                         // Обновляем значение overlap в ставке
                         await prisma.bet.update({
-                            where: {id: betId},
+                            where: { id: betId },
                             data: {
                                 [overlapField]: Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100,
                             },
