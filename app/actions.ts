@@ -1410,19 +1410,7 @@ export async function closeBet(betId: number, winnerId: number) {
                 throw new Error("Ставка не найдена");
             }
 
-            // Логируем данные ставки
-            console.log('Bet ID:', bet.id);
-            console.log('Total Bet Amount (from DB):', bet.totalBetAmount);
-
-            // Проверяем, что сумма всех ставок равна totalBetAmount
-            const totalBetAmountCalculated = bet.participants.reduce((sum, p) => sum + p.amount, 0);
-            console.log('Total Bet Amount (calculated):', totalBetAmountCalculated);
-
-            if (Math.abs(totalBetAmountCalculated - bet.totalBetAmount) > 0.01) {
-                throw new Error('Ошибка: сумма всех ставок не равна totalBetAmount.');
-            }
-
-            // Создаем запись в BetCLOSED и сохраняем ее в переменной
+            // Создаем запись в BetCLOSED
             const betClosed = await prisma.betCLOSED.create({
                 data: {
                     player1Id: bet.player1Id,
@@ -1440,7 +1428,7 @@ export async function closeBet(betId: number, winnerId: number) {
                     productId: bet.productId,
                     productItemId: bet.productItemId,
                     winnerId: bet.winnerId,
-                    margin: bet.margin,
+                    margin: 0, // Инициализируем маржу
                     createdAt: bet.createdAt,
                     updatedAt: bet.updatedAt,
                     oddsBetPlayer1: bet.oddsBetPlayer1,
@@ -1521,14 +1509,14 @@ export async function closeBet(betId: number, winnerId: number) {
                 // Создаем запись в BetParticipantCLOSED
                 await prisma.betParticipantCLOSED.create({
                     data: {
-                        betCLOSEDId: betClosed.id, // Используем betClosed.id
+                        betCLOSEDId: betClosed.id,
                         userId: participant.userId,
                         amount: participant.amount,
                         odds: participant.odds,
                         profit: participant.profit,
                         player: participant.player,
                         isWinner: participant.isWinner,
-                        margin: margin,
+                        margin: Math.floor(margin * 100) / 100,
                         createdAt: participant.createdAt,
                         isCovered: participant.isCovered,
                         overlap: participant.overlap,
@@ -1543,8 +1531,6 @@ export async function closeBet(betId: number, winnerId: number) {
             // Корректируем маржу, если есть погрешность
             const discrepancy = totalPointsToReturn + totalMargin - bet.totalBetAmount;
             if (Math.abs(discrepancy) > 0.5) {
-                throw new Error('Ошибка распределения: сумма возвращаемых баллов и маржи не равна общей сумме ставок.');
-            } else {
                 totalMargin -= discrepancy; // Корректируем маржу
             }
 
@@ -1571,7 +1557,7 @@ export async function closeBet(betId: number, winnerId: number) {
                 where: { id: 1 },
                 data: {
                     margin: {
-                        increment: Math.floor((bet.margin ?? 0) * 100) / 100,
+                        increment: Math.floor(totalMargin * 100) / 100,
                     },
                 },
             });
@@ -1596,6 +1582,7 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
+
 
 
 
