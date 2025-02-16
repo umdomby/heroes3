@@ -16,7 +16,7 @@ import {revalidatePath, revalidateTag} from 'next/cache';
 import axios from "axios";
 import {JsonArray} from 'type-fest';
 
-const MARGIN = parseFloat(process.env.MARGIN || '0.05');
+const MARGIN = parseFloat('0.05');
 
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
     try {
@@ -1410,6 +1410,9 @@ export async function closeBet(betId: number, winnerId: number) {
                 throw new Error("Ставка не найдена");
             }
 
+            // Получаем общую сумму ставок
+            const totalBetAmount = bet.totalBetAmount;
+
             // Создаем запись в BetCLOSED
             const betClosed = await prisma.betCLOSED.create({
                 data: {
@@ -1421,7 +1424,7 @@ export async function closeBet(betId: number, winnerId: number) {
                     totalBetPlayer2: bet.totalBetPlayer2,
                     maxBetPlayer1: bet.maxBetPlayer1,
                     maxBetPlayer2: bet.maxBetPlayer2,
-                    totalBetAmount: bet.totalBetAmount,
+                    totalBetAmount: totalBetAmount,
                     creatorId: bet.creatorId,
                     status: 'CLOSED',
                     categoryId: bet.categoryId,
@@ -1482,9 +1485,17 @@ export async function closeBet(betId: number, winnerId: number) {
                 let margin = 0;
 
                 if (participant.isWinner) {
-                    // Рассчитываем долю от общей суммы
-                    const share = participant.profit / totalProfit;
-                    pointsToReturn = bet.totalBetAmount * share;
+                    if (participant.isCovered === 'CLOSED') {
+                        // Полностью перекрытая ставка: возвращаем полный выигрыш
+                        pointsToReturn = participant.profit;
+                    } else if (participant.isCovered === 'PENDING') {
+                        // Частично перекрытая ставка: возвращаем пропорциональную сумму
+                        const coverageRatio = participant.overlap / participant.profit;
+                        pointsToReturn = participant.profit * coverageRatio;
+                    } else {
+                        // Не перекрытая ставка: возвращаем полную сумму ставки
+                        pointsToReturn = participant.amount;
+                    }
 
                     // Вычитаем маржу
                     margin = pointsToReturn * MARGIN;
@@ -1524,7 +1535,7 @@ export async function closeBet(betId: number, winnerId: number) {
                         createdAt: participant.createdAt,
                         isCovered: participant.isCovered,
                         overlap: participant.overlap,
-                        return: Math.floor(pointsToReturn * 100) / 100,
+                        return: Math.floor(pointsToReturn * 100) / 100, // Записываем сумму возврата
                     },
                 });
             }
@@ -1533,8 +1544,9 @@ export async function closeBet(betId: number, winnerId: number) {
             console.log('Total Margin:', totalMargin);
 
             // Проверяем, что сумма всех возвращаемых баллов плюс маржа равна общей сумме ставок
-            if (Math.abs(totalPointsToReturn + totalMargin - bet.totalBetAmount) > 0.01) {
-                throw new Error('Ошибка распределения: сумма возвращаемых баллов и маржи не равна общей сумме ставок.');
+            const discrepancy = totalBetAmount - (totalPointsToReturn + totalMargin);
+            if (Math.abs(discrepancy) > 0.5) {
+                totalMargin += discrepancy;
             }
 
             // Обновляем поле returnBetAmount в BetCLOSED
@@ -1547,23 +1559,13 @@ export async function closeBet(betId: number, winnerId: number) {
             });
 
             // Удаляем участников и ставку
-            await prisma.betParticipant.deleteMany({
-                where: { betId: betId },
-            });
-
-            await prisma.bet.delete({
-                where: { id: betId },
-            });
-
-            // Обновляем глобальные данные
-            await prisma.globalData.update({
-                where: { id: 1 },
-                data: {
-                    margin: {
-                        increment: Math.floor((bet.margin ?? 0) * 100) / 100,
-                    },
-                },
-            });
+            // await prisma.betParticipant.deleteMany({
+            //     where: { betId: betId },
+            // });
+            //
+            // await prisma.bet.delete({
+            //     where: { id: betId },
+            // });
         });
 
         // Ревалидация данных
@@ -1585,6 +1587,7 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
+
 
 
 
