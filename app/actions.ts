@@ -1540,7 +1540,7 @@ export async function closeBet(betId: number, winnerId: number) {
                         pointsToReturn = bet.totalBetAmount * share;
 
                         // Вычитаем маржу
-                        margin = Math.abs((participant.amount - pointsToReturn) * MARGIN);
+                        margin = Math.abs((participant.overlap) * MARGIN);
                         pointsToReturn -= margin;
 
                         totalMargin += margin;
@@ -2267,7 +2267,7 @@ export async function closeBet3(betId: number, winnerId: number) {
                         pointsToReturn = bet.totalBetAmount * share;
 
                         // Вычитаем маржу
-                        margin = Math.abs((participant.amount - pointsToReturn) * MARGIN);
+                        margin = Math.abs((participant.overlap) * MARGIN);
                         pointsToReturn -= margin;
 
                         totalMargin += margin;
@@ -3049,7 +3049,7 @@ export async function closeBet4(betId: number, winnerId: number) {
                         pointsToReturn = bet.totalBetAmount * share;
 
                         // Вычитаем маржу
-                        margin = Math.abs((participant.amount - pointsToReturn) * MARGIN);
+                        margin = Math.abs((participant.overlap) * MARGIN);
                         pointsToReturn -= margin;
 
                         totalMargin += margin;
