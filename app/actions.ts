@@ -1162,20 +1162,18 @@ export async function placeBet(formData: { betId: number; userId: number; amount
             .filter(p => p.player === PlayerChoice.PLAYER2)
             .reduce((sum, p) => sum + p.amount, 0);
 
-
-        const totalPlayer1Odds = bet.participants
+        const totalPlayer1Profit = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER1)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalPlayer2Odds = bet.participants
+        const totalPlayer2Profit = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER2)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalWithInitPlayer1 = totalPlayer1 + totalPlayer1Odds +(bet.initBetPlayer1 || 0);
-        const totalWithInitPlayer2 = totalPlayer2 + totalPlayer2Odds +(bet.initBetPlayer2 || 0);
+        const totalWithInitPlayer1 = totalPlayer1Profit + (totalPlayer1Profit > 50 ? 0 : (bet.initBetPlayer1 || 0));
+        const totalWithInitPlayer2 = totalPlayer2Profit + (totalPlayer2Profit > 50 ? 0 : (bet.initBetPlayer2 || 0));
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
-        // Check if the odds are too low
         if (currentOdds <= 1.01) {
             throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.02');
         }
@@ -1211,7 +1209,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         const {
             oddsPlayer1,
             oddsPlayer2
-        } = calculateOdds(totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? amount : 0), totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? amount : 0));
+        } = calculateOdds(
+            totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
+            totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0)
+        );
+
         const totalMargin = await prisma.betParticipant.aggregate({
             _sum: {
                 margin: true,
@@ -1222,7 +1224,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         });
 
         const updatedBetData = {
-            // Округляем до двух знаков после запятой
             oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
             oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
             totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
@@ -1241,7 +1242,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         }).then(async () => {
             await balanceOverlaps(betId);
         }).then(async () => {
-            // Обновление статуса isCovered
             const participants = await prisma.betParticipant.findMany({
                 where: {betId},
                 orderBy: {createdAt: 'asc'},
@@ -1264,8 +1264,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
                     });
                 }
             }
-        }).then(async () => {
-
         });
 
         revalidatePath('/');
@@ -1283,7 +1281,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
-}// ставки
+}
+// ставки
 async function balanceOverlaps(betId: number) {
     console.log(`Начало balanceOverlaps для betId: ${betId}`);
 
