@@ -1542,9 +1542,9 @@ export async function closeBet(betId: number, winnerId: number) {
             console.log('Total Margin:', totalMargin);
 
             // Проверяем, что сумма всех возвращаемых баллов плюс маржа равна общей сумме ставок
-            // if (Math.abs(totalPointsToReturn + totalMargin - bet.totalBetAmount) > 0.01) {
-            //     throw new Error('Ошибка распределения: сумма возвращаемых баллов и маржи не равна общей сумме ставок.');
-            // }
+            if (Math.abs(totalPointsToReturn + totalMargin - bet.totalBetAmount) > 0.01) {
+                throw new Error('Ошибка распределения: сумма возвращаемых баллов и маржи не равна общей сумме ставок.');
+            }
             totalPointsToReturn += totalMargin
             // Обновляем поле returnBetAmount в BetCLOSED
             await prisma.betCLOSED.update({
