@@ -1476,8 +1476,7 @@ export async function closeBet(betId: number, winnerId: number) {
             let totalPointsToReturn = 0; // Сумма всех возвращаемых баллов
             let totalPendingOverlap = 0; // Сумма overlap для PENDING участников
 
-            // Сначала вычисляем общую прибыль победителей
-            let totalProfit = 0;
+            let totalProfit = 0; // Сначала вычисляем общую прибыль победителей
             for (const participant of allParticipants) {
                 if (participant.isWinner) {
                     totalProfit += participant.profit;
