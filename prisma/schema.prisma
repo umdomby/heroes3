@@ -168,6 +168,8 @@ model BetCLOSED {
   overlapPlayer1     Float // Перекрытие на игрока 1
   overlapPlayer2     Float // Перекрытие на игрока 2
   totalBetAmount     Float                  @default(0) // Общая сумма ставок
+  // сумма ставок которая справедливо вернулась победителям:  кому ставка вообще не перебита и тем кому частично перебита, кому полностью перебита. totalBetAmount должен быть равен returnBetAmount
+  returnBetAmount    Float                  @default(0)
   creator            User                   @relation("BetsCLOSEDCreated", fields: [creatorId], references: [id])
   creatorId          Int
   status             BetStatus              @default(CLOSED) // Статус ставки
