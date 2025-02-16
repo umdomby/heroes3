@@ -2,7 +2,7 @@
 import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
 import {redirect} from 'next/navigation';
-import {CreateBetForm} from '@/components/create-bet-form';
+import {CreateBetForm2} from '@/components/create-bet-form-2';
 import {Suspense} from 'react';
 import Loading from "@/app/(root)/loading";
 import {clientCreateBet} from "@/app/actions";
@@ -43,7 +43,7 @@ export default async function CreateBetPage() {
     return (
         <Container className="flex flex-col my-10 w-[96%]">
             <Suspense fallback={<Loading/>}>
-                <CreateBetForm
+                <CreateBetForm2
                     user={user}
                     categories={categories}
                     products={products}

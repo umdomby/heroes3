@@ -36,7 +36,7 @@ interface Props {
     createBet: typeof clientCreateBet;
 }
 
-export const CreateBetForm: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
+export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
     const form = useForm<z.infer<typeof createBetSchema>>({
         resolver: zodResolver(createBetSchema),
         defaultValues: {

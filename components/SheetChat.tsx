@@ -18,7 +18,7 @@ import Link from "next/link";
 // Define a type for the message objects
 interface Message {
     userEmail: string;
-    userTelegram?: string; // Optional field for Telegram handle
+    userTelegram?: string | null; // Allow null values
     chatText: string;
 }
 
