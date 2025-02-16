@@ -1428,7 +1428,7 @@ export async function closeBet(betId: number, winnerId: number) {
                     productId: bet.productId,
                     productItemId: bet.productItemId,
                     winnerId: bet.winnerId,
-                    margin: 0, // Инициализируем маржу
+                    margin: bet.margin,
                     createdAt: bet.createdAt,
                     updatedAt: bet.updatedAt,
                     oddsBetPlayer1: bet.oddsBetPlayer1,
@@ -1468,24 +1468,28 @@ export async function closeBet(betId: number, winnerId: number) {
             let totalMargin = 0;
             let totalPointsToReturn = 0; // Сумма всех возвращаемых баллов
 
+            // Сначала вычисляем общую прибыль победителей
+            let totalProfit = 0;
+            for (const participant of allParticipants) {
+                if (participant.isWinner) {
+                    totalProfit += participant.profit;
+                }
+            }
+
+            // Теперь распределяем общую сумму ставок
             for (const participant of allParticipants) {
                 let pointsToReturn = 0;
                 let margin = 0;
 
                 if (participant.isWinner) {
-                    if (participant.isCovered === "CLOSED") {
-                        // Полностью перекрытые ставки
-                        margin = participant.profit * MARGIN;
-                        pointsToReturn = participant.profit + participant.amount - margin;
-                    } else if (participant.isCovered === "PENDING") {
-                        // Частично перекрытые ставки
-                        const coveredProfit = participant.overlap;
-                        margin = coveredProfit * MARGIN;
-                        pointsToReturn = coveredProfit + participant.amount - margin;
-                    } else if (participant.isCovered === "OPEN") {
-                        // Не перекрытые ставки
-                        pointsToReturn = participant.amount;
-                    }
+                    // Рассчитываем долю от общей суммы
+                    const share = participant.profit / totalProfit;
+                    pointsToReturn = bet.totalBetAmount * share;
+
+                    // Вычитаем маржу
+                    margin = pointsToReturn * MARGIN;
+                    pointsToReturn -= margin;
+
                     totalMargin += margin;
                 }
 
@@ -1516,7 +1520,7 @@ export async function closeBet(betId: number, winnerId: number) {
                         profit: participant.profit,
                         player: participant.player,
                         isWinner: participant.isWinner,
-                        margin: Math.floor(margin * 100) / 100,
+                        margin: margin,
                         createdAt: participant.createdAt,
                         isCovered: participant.isCovered,
                         overlap: participant.overlap,
@@ -1529,19 +1533,8 @@ export async function closeBet(betId: number, winnerId: number) {
             console.log('Total Margin:', totalMargin);
 
             // Проверяем, что сумма всех возвращаемых баллов плюс маржа равна общей сумме ставок
-            const discrepancy = totalPointsToReturn + totalMargin - bet.totalBetAmount;
-            const totalPointsToReturnTotalMargin = totalPointsToReturn + totalMargin;
-            if (Math.abs(discrepancy) > 0.5) {
-                console.log("totalPointsToReturn + totalMargin " + totalPointsToReturnTotalMargin)
-                console.log("111111111 discrepancy " + discrepancy)
-                console.log("222222222 totalPointsToReturn " + totalPointsToReturn)
-                console.log("333333333 totalMargin " + totalMargin)
+            if (Math.abs(totalPointsToReturn + totalMargin - bet.totalBetAmount) > 0.01) {
                 throw new Error('Ошибка распределения: сумма возвращаемых баллов и маржи не равна общей сумме ставок.');
-            } else {
-                console.log("111111111 discrepancy " + discrepancy)
-                console.log("222222222 totalPointsToReturn " + totalPointsToReturn)
-                console.log("333333333 totalMargin " + totalMargin)
-                totalMargin -= discrepancy; // Корректируем маржу
             }
 
             // Обновляем поле returnBetAmount в BetCLOSED
@@ -1554,14 +1547,23 @@ export async function closeBet(betId: number, winnerId: number) {
             });
 
             // Удаляем участников и ставку
-            // await prisma.betParticipant.deleteMany({
-            //     where: { betId: betId },
-            // });
-            //
-            // await prisma.bet.delete({
-            //     where: { id: betId },
-            // });
+            await prisma.betParticipant.deleteMany({
+                where: { betId: betId },
+            });
 
+            await prisma.bet.delete({
+                where: { id: betId },
+            });
+
+            // Обновляем глобальные данные
+            await prisma.globalData.update({
+                where: { id: 1 },
+                data: {
+                    margin: {
+                        increment: Math.floor((bet.margin ?? 0) * 100) / 100,
+                    },
+                },
+            });
         });
 
         // Ревалидация данных
@@ -1583,6 +1585,7 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
+
 
 
 
