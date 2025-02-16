@@ -1159,11 +1159,11 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
         const totalPlayer1 = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.profit, 0);
+            .reduce((sum, p) => sum + p.amount, 0);
 
         const totalPlayer2 = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.profit, 0);
+            .reduce((sum, p) => sum + p.amount, 0);
 
         const totalWithInitPlayer1 = totalPlayer1 + (bet.initBetPlayer1 || 0);
         const totalWithInitPlayer2 = totalPlayer2 + (bet.initBetPlayer2 || 0);
@@ -1175,7 +1175,6 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         }
 
         const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
-
 
         const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
         if (amount > maxAllowedBet) {
@@ -1218,8 +1217,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
         const updatedBetData = {
             // Округляем до двух знаков после запятой
-            oddsBetPlayer1: Math.floor((oddsPlayer1 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
-            oddsBetPlayer2: Math.floor((oddsPlayer2 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
+            oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+            oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
             totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
             totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
             totalBetAmount: totalPlayer1 + totalPlayer2 + amount,
@@ -1278,7 +1277,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
-} // ставки
+}// ставки
 async function balanceOverlaps(betId: number) {
     console.log(`Начало balanceOverlaps для betId: ${betId}`);
 
