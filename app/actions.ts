@@ -1488,8 +1488,10 @@ export async function closeBet(betId: number, winnerId: number) {
             // Обрабатываем участников с isCovered = CLOSED
             for (const participant of allParticipants) {
                 if (participant.isWinner && participant.isCovered === 'CLOSED') {
-                    const pointsToReturn = participant.amount + participant.profit;
+                    const margin = Math.abs(participant.overlap * MARGIN);
+                    const pointsToReturn = participant.amount + participant.profit - margin;
                     totalPointsToReturn += pointsToReturn;
+                    totalMargin += margin;
 
                     // Обновляем баллы пользователя
                     await prisma.user.update({
@@ -1511,7 +1513,7 @@ export async function closeBet(betId: number, winnerId: number) {
                             profit: participant.profit,
                             player: participant.player,
                             isWinner: participant.isWinner,
-                            margin: 0, // Маржа не взимается
+                            margin: Math.round(margin * 100) / 100,
                             createdAt: participant.createdAt,
                             isCovered: participant.isCovered,
                             overlap: participant.overlap,
@@ -1539,9 +1541,9 @@ export async function closeBet(betId: number, winnerId: number) {
                         const share = participant.profit / totalProfit;
                         pointsToReturn = bet.totalBetAmount * share;
 
-                        // Вычитаем маржу
-                        margin = Math.abs((participant.overlap) * MARGIN);
-                        pointsToReturn -= margin;
+                        // Вычитаем маржу из overlap
+                        margin = Math.abs(participant.overlap * MARGIN);
+                        pointsToReturn += participant.overlap - margin;
 
                         totalMargin += margin;
                     }
@@ -1633,6 +1635,8 @@ export async function closeBet(betId: number, winnerId: number) {
         throw new Error('Не удалось закрыть ставку.');
     }
 }
+
+
 export async function closeBetDraw(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
