@@ -1805,7 +1805,7 @@ export async function clientCreateBet3(formData: any) {
 }// создание ставок на 3 игрока
 export async function placeBet3(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
     try {
-        console.log('Запуск функции placeBet с formData:', formData);
+        console.log('Запуск функции placeBet3 с formData:', formData);
 
         if (!formData || typeof formData !== 'object') {
             throw new Error('Неверные данные формы');
@@ -1846,21 +1846,21 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
             .filter(p => p.player === PlayerChoice.PLAYER3)
             .reduce((sum, p) => sum + p.amount, 0);
 
-        const totalPlayer1Odds = bet.participants
+        const totalPlayer1Profit = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER1)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalPlayer2Odds = bet.participants
+        const totalPlayer2Profit = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER2)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalPlayer3Odds = bet.participants
+        const totalPlayer3Profit = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER3)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalWithInitPlayer1 = totalPlayer1 + totalPlayer1Odds + (bet.initBetPlayer1 || 0);
-        const totalWithInitPlayer2 = totalPlayer2 + totalPlayer2Odds + (bet.initBetPlayer2 || 0);
-        const totalWithInitPlayer3 = totalPlayer3 + totalPlayer3Odds + (bet.initBetPlayer3 || 0);
+        const totalWithInitPlayer1 = totalPlayer1Profit + (totalPlayer1Profit > 50 ? 0 : (bet.initBetPlayer1 || 0));
+        const totalWithInitPlayer2 = totalPlayer2Profit + (totalPlayer2Profit > 50 ? 0 : (bet.initBetPlayer2 || 0));
+        const totalWithInitPlayer3 = totalPlayer3Profit + (totalPlayer3Profit > 50 ? 0 : (bet.initBetPlayer3 || 0));
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
         if (currentOdds <= 1.01) {
@@ -1900,9 +1900,9 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
             oddsPlayer2,
             oddsPlayer3
         } = calculateOdds3(
-            totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? amount : 0),
-            totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? amount : 0),
-            totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? amount : 0)
+            totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
+            totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
+            totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0)
         );
 
         const totalMargin = await prisma.betParticipant3.aggregate({
@@ -1915,9 +1915,9 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
         });
 
         const updatedBetData = {
-            oddsBetPlayer1: Math.floor((oddsPlayer1 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
-            oddsBetPlayer2: Math.floor((oddsPlayer2 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
-            oddsBetPlayer3: Math.floor((oddsPlayer3 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
+            oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+            oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+            oddsBetPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
             totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
             totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
             totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
@@ -1959,8 +1959,6 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
                     });
                 }
             }
-        }).then(async () => {
-
         });
 
         revalidatePath('/');
@@ -1968,12 +1966,12 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
         return {success: true};
     } catch (error) {
         if (error === null || error === undefined) {
-            console.error('Ошибка в placeBet: Неизвестная ошибка (error is null или undefined)');
+            console.error('Ошибка в placeBet3: Неизвестная ошибка (error is null или undefined)');
         } else if (error instanceof Error) {
-            console.error('Ошибка в placeBet:', error.message);
+            console.error('Ошибка в placeBet3:', error.message);
             console.error('Стек ошибки:', error.stack);
         } else {
-            console.error('Ошибка в placeBet:', error);
+            console.error('Ошибка в placeBet3:', error);
         }
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
@@ -2160,7 +2158,7 @@ export async function closeBet3(betId: number, winnerId: number) {
             });
 
             // Перераспределяем баллы
-            let allParticipants = await prisma.betParticipant3.findMany({
+            const allParticipants = await prisma.betParticipant3.findMany({
                 where: { betId: betId },
             });
 
@@ -2175,67 +2173,26 @@ export async function closeBet3(betId: number, winnerId: number) {
                 }
             }
 
-            // Обрабатываем участников с isCovered = CLOSED
-            for (const participant of allParticipants) {
-                if (participant.isWinner && participant.isCovered === 'CLOSED') {
-                    const pointsToReturn = participant.amount + participant.profit;
-                    totalPointsToReturn += pointsToReturn;
-
-                    // Обновляем баллы пользователя
-                    await prisma.user.update({
-                        where: { id: participant.userId },
-                        data: {
-                            points: {
-                                increment: Math.round(pointsToReturn * 100) / 100,
-                            },
-                        },
-                    });
-
-                    // Создаем запись в BetParticipantCLOSED3
-                    await prisma.betParticipantCLOSED3.create({
-                        data: {
-                            betCLOSED3Id: betClosed.id,
-                            userId: participant.userId,
-                            amount: participant.amount,
-                            odds: participant.odds,
-                            profit: participant.profit,
-                            player: participant.player,
-                            isWinner: participant.isWinner,
-                            margin: 0, // Маржа не взимается
-                            createdAt: participant.createdAt,
-                            isCovered: participant.isCovered,
-                            overlap: participant.overlap,
-                            return: Math.round(pointsToReturn * 100) / 100,
-                        },
-                    });
-                }
-            }
-
-            // Обрабатываем остальных участников, сортируя по убыванию overlap
-            allParticipants = allParticipants.filter(p => !(p.isWinner && p.isCovered === 'CLOSED'));
-            allParticipants.sort((a, b) => b.overlap - a.overlap);
-
-            // Теперь распределяем оставшиеся средства
+            // Теперь распределяем общую сумму ставок
             for (const participant of allParticipants) {
                 let pointsToReturn = 0;
                 let margin = 0;
 
                 if (participant.isWinner) {
-                    if (participant.overlap === 0) {
-                        // Если overlap равен 0, возвращаем полную ставку без маржи
-                        pointsToReturn = participant.amount;
-                    } else {
-                        // Рассчитываем долю от общей суммы
-                        const share = participant.profit / totalProfit;
-                        pointsToReturn = bet.totalBetAmount * share;
+                    // Рассчитываем долю от общей суммы
+                    const share = participant.profit / totalProfit;
+                    pointsToReturn = bet.totalBetAmount * share;
 
-                        // Вычитаем маржу
-                        margin = Math.abs((participant.overlap) * MARGIN);
-                        pointsToReturn -= margin;
-
-                        totalMargin += margin;
+                    // Вычитаем маржу
+                    if (pointsToReturn > participant.amount) {
+                        margin = (pointsToReturn - participant.amount) * MARGIN;
                     }
+                    pointsToReturn -= margin;
+
+                    totalMargin += margin;
                 }
+
+                console.log(`Participant ID: ${participant.id}, Points to Return: ${pointsToReturn}`);
 
                 // Обновляем баллы пользователя
                 if (pointsToReturn > 0) {
@@ -2243,7 +2200,7 @@ export async function closeBet3(betId: number, winnerId: number) {
                         where: { id: participant.userId },
                         data: {
                             points: {
-                                increment: Math.round(pointsToReturn * 100) / 100,
+                                increment: Math.floor(pointsToReturn * 100) / 100,
                             },
                         },
                     });
@@ -2262,31 +2219,27 @@ export async function closeBet3(betId: number, winnerId: number) {
                         profit: participant.profit,
                         player: participant.player,
                         isWinner: participant.isWinner,
-                        margin: Math.round(margin * 100) / 100,
+                        margin: Math.floor(margin * 100) / 100,
                         createdAt: participant.createdAt,
                         isCovered: participant.isCovered,
                         overlap: participant.overlap,
-                        return: Math.round(pointsToReturn * 100) / 100,
+                        return: Math.floor(pointsToReturn * 100) / 100,
                     },
                 });
             }
 
             console.log('Total Points to Return:', totalPointsToReturn);
             console.log('Total Margin:', totalMargin);
-            const discrepancy = totalPointsToReturn + totalMargin - bet.totalBetAmount;
+
             // Проверяем, что сумма всех возвращаемых баллов плюс маржа равна общей сумме ставок
-            if (Math.abs(discrepancy) > 0.01) {
-                console.log("3 discrepancy " + discrepancy)
-                console.log("3 totalPointsToReturn " + totalPointsToReturn)
-                console.log("3 totalMargin " + totalMargin)
-                totalMargin -= discrepancy; // Корректируем маржу
-            }
+            totalPointsToReturn += totalMargin;
 
             // Обновляем поле margin в BetCLOSED3
             await prisma.betCLOSED3.update({
                 where: { id: betClosed.id },
                 data: {
-                    margin: Math.round(totalMargin * 100) / 100,
+                    margin: Math.floor(totalMargin * 100) / 100,
+                    returnBetAmount: Math.floor(totalPointsToReturn * 100) / 100, // Записываем сумму возвращенных баллов
                 },
             });
 
@@ -2304,14 +2257,13 @@ export async function closeBet3(betId: number, winnerId: number) {
                 where: { id: 1 },
                 data: {
                     margin: {
-                        increment: Math.round((bet.margin ?? 0) * 100) / 100,
+                        increment: Math.floor((bet.margin ?? 0) * 100) / 100,
                     },
                 },
             });
         });
 
         // Ревалидация данных
-
         revalidatePath('/');
         revalidateTag('bets');
         revalidateTag('user');
@@ -2326,7 +2278,7 @@ export async function closeBet3(betId: number, winnerId: number) {
             throw new Error("Не удалось закрыть ставку.");
         }
     }
-} // Функция для закрытия ставки на 3 игрока
+}// Функция для закрытия ставки на 3 игрока
 export async function closeBetDraw3(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2555,7 +2507,7 @@ function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initB
 // Function to place a bet for four players
 export async function placeBet4(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
     try {
-        console.log('Запуск функции placeBet с formData:', formData);
+        console.log('Запуск функции placeBet4 с formData:', formData);
 
         if (!formData || typeof formData !== 'object') {
             throw new Error('Неверные данные формы');
@@ -2600,35 +2552,41 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             .filter(p => p.player === PlayerChoice.PLAYER4)
             .reduce((sum, p) => sum + p.amount, 0);
 
-        const totalPlayer1Odds = bet.participants
+        const totalPlayer1Profit = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER1)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalPlayer2Odds = bet.participants
+        const totalPlayer2Profit = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER2)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalPlayer3Odds = bet.participants
+        const totalPlayer3Profit = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER3)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalPlayer4Odds = bet.participants
+        const totalPlayer4Profit = bet.participants
             .filter(p => p.player === PlayerChoice.PLAYER4)
-            .reduce((sum, p) => sum + p.amount, 0);
+            .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalWithInitPlayer1 = totalPlayer1 + totalPlayer1Odds + (bet.initBetPlayer1 || 0);
-        const totalWithInitPlayer2 = totalPlayer2 + totalPlayer2Odds + (bet.initBetPlayer2 || 0);
-        const totalWithInitPlayer3 = totalPlayer3 + totalPlayer3Odds + (bet.initBetPlayer3 || 0);
-        const totalWithInitPlayer4 = totalPlayer4 + totalPlayer4Odds + (bet.initBetPlayer4 || 0);
+        const totalWithInitPlayer1 = totalPlayer1Profit + (totalPlayer1Profit > 50 ? 0 : (bet.initBetPlayer1 || 0));
+        const totalWithInitPlayer2 = totalPlayer2Profit + (totalPlayer2Profit > 50 ? 0 : (bet.initBetPlayer2 || 0));
+        const totalWithInitPlayer3 = totalPlayer3Profit + (totalPlayer3Profit > 50 ? 0 : (bet.initBetPlayer3 || 0));
+        const totalWithInitPlayer4 = totalPlayer4Profit + (totalPlayer4Profit > 50 ? 0 : (bet.initBetPlayer4 || 0));
 
-        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 : bet.oddsBetPlayer4;
+        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 :
+            player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 :
+                player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 :
+                    bet.oddsBetPlayer4;
         if (currentOdds <= 1.01) {
             throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.02');
         }
 
         const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
 
-        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer4;
+        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 :
+            player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 :
+                player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 :
+                    bet.maxBetPlayer4;
         if (amount > maxAllowedBet) {
             throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
         }
@@ -2660,10 +2618,10 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             oddsPlayer3,
             oddsPlayer4
         } = calculateOdds4(
-            totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? amount : 0),
-            totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? amount : 0),
-            totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? amount : 0),
-            totalWithInitPlayer4 + (player === PlayerChoice.PLAYER4 ? amount : 0)
+            totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
+            totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
+            totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0),
+            totalWithInitPlayer4 + (player === PlayerChoice.PLAYER4 ? potentialProfit : 0)
         );
 
         const totalMargin = await prisma.betParticipant4.aggregate({
@@ -2676,10 +2634,10 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
         });
 
         const updatedBetData = {
-            oddsBetPlayer1: Math.floor((oddsPlayer1 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
-            oddsBetPlayer2: Math.floor((oddsPlayer2 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
-            oddsBetPlayer3: Math.floor((oddsPlayer3 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
-            oddsBetPlayer4: Math.floor((oddsPlayer4 * (parseFloat(process.env.CORRECT_ODDS || '0.85')) * 100)) / 100,
+            oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+            oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+            oddsBetPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
+            oddsBetPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
             totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
             totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
             totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
@@ -2724,8 +2682,6 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
                     });
                 }
             }
-        }).then(async () => {
-
         });
 
         revalidatePath('/');
@@ -2733,12 +2689,12 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
         return {success: true};
     } catch (error) {
         if (error === null || error === undefined) {
-            console.error('Ошибка в placeBet: Неизвестная ошибка (error is null или undefined)');
+            console.error('Ошибка в placeBet4: Неизвестная ошибка (error is null или undefined)');
         } else if (error instanceof Error) {
-            console.error('Ошибка в placeBet:', error.message);
+            console.error('Ошибка в placeBet4:', error.message);
             console.error('Стек ошибки:', error.stack);
         } else {
-            console.error('Ошибка в placeBet:', error);
+            console.error('Ошибка в placeBet4:', error);
         }
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
