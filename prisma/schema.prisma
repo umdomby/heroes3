@@ -388,8 +388,8 @@ model BetParticipant3 {
   profit    Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
   overlap   Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
   margin    Float // в placeBet = 0
-  isCovered IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
   isWinner  Boolean      @default(false) // Победила ли ставка
+  isCovered IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
   createdAt DateTime     @default(now())
 }
 // закрытые ставки, после закрытия ставки model Bet3 переносится в model BetCLOSED3
@@ -513,8 +513,8 @@ model BetParticipant4 {
   profit    Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
   overlap   Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
   margin    Float // в placeBet = 0
-  isCovered IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
   isWinner  Boolean      @default(false) // Победила ли ставка
+  isCovered IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
   createdAt DateTime     @default(now())
 }
 // закрытые ставки, после закрытия ставки model Bet4 переносится в model BetCLOSED4
