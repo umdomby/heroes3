@@ -91,6 +91,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
     const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
     const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number; player3: number; player4: number } }>({});
+    const [betAmounts, setBetAmounts] = useState<{ [key: number]: string }>({});
 
     // Состояние для управления модальным окном и ввода подтверждения
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -190,17 +191,23 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
     };
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>, bet: Bet) => {
-        const value = parseFloat(e.target.value);
-        const selectedPlayer = (e.target.form?.elements.namedItem("player") as RadioNodeList)
-            ?.value as PlayerChoice;
+        const value = e.target.value;
+        setBetAmounts((prev) => ({
+            ...prev,
+            [bet.id]: value,
+        }));
 
-        if (!isNaN(value) && value > 0 && selectedPlayer) {
-            handleValidation(bet, value, selectedPlayer);
+        const numericValue = parseFloat(value);
+        const selectedPlayer = (e.target.form?.elements.namedItem("player") as RadioNodeList)?.value as PlayerChoice;
 
-            const potentialProfitPlayer1 = Math.floor((value * bet.oddsBetPlayer1) * 100) / 100;
-            const potentialProfitPlayer2 = Math.floor((value * bet.oddsBetPlayer2) * 100) / 100;
-            const potentialProfitPlayer3 = Math.floor((value * bet.oddsBetPlayer3) * 100) / 100;
-            const potentialProfitPlayer4 = Math.floor((value * bet.oddsBetPlayer4) * 100) / 100;
+        if (!isNaN(numericValue) && numericValue > 0 && selectedPlayer) {
+            handleValidation(bet, numericValue, selectedPlayer);
+
+            // Рассчитываем потенциальную прибыль для каждого игрока
+            const potentialProfitPlayer1 = Math.floor((numericValue * bet.oddsBetPlayer1) * 100) / 100;
+            const potentialProfitPlayer2 = Math.floor((numericValue * bet.oddsBetPlayer2) * 100) / 100;
+            const potentialProfitPlayer3 = Math.floor((numericValue * bet.oddsBetPlayer3) * 100) / 100;
+            const potentialProfitPlayer4 = Math.floor((numericValue * bet.oddsBetPlayer4) * 100) / 100;
 
             setPotentialProfit((prev) => ({
                 ...prev,
@@ -259,18 +266,24 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             }));
             setPlaceBetErrors((prev) => ({
                 ...prev,
-                [bet.id]: null,
+                [bet.id]: null, // Очищаем ошибку при успешной ставке
+            }));
+
+            // Очистка поля ввода после успешной ставки
+            setBetAmounts((prev) => ({
+                ...prev,
+                [bet.id]: "",
             }));
         } catch (err) {
             if (err instanceof Error) {
                 setPlaceBetErrors((prev) => ({
                     ...prev,
-                    [bet.id]: err.message,
+                    [bet.id]: err.message, // Устанавливаем ошибку для конкретной ставки
                 }));
             } else {
                 setPlaceBetErrors((prev) => ({
                     ...prev,
-                    [bet.id]: "Неизвестная ошибка",
+                    [bet.id]: "Неизвестная ошибка", // Устанавливаем общую ошибку
                 }));
             }
             console.error("Error placing bet:", err);
@@ -725,6 +738,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         min="1"
                                                         step="1"
                                                         required
+                                                        value={betAmounts[bet.id] || ""}
                                                         onChange={(e) => handleAmountChange(e, bet)}
                                                     />
                                                     <label className="border p-2 rounded w-[20%] text-center">

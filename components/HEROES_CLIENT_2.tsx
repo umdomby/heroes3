@@ -83,6 +83,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
     const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
     const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number } }>({});
+    const [betAmounts, setBetAmounts] = useState<{ [key: number]: string }>({});
 
     // Состояние для управления модальным окном и ввода подтверждения
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -179,15 +180,21 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
     };
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>, bet: Bet) => {
-        const value = parseFloat(e.target.value);
+        const value = e.target.value;
+        setBetAmounts((prev) => ({
+            ...prev,
+            [bet.id]: value,
+        }));
+
+        const numericValue = parseFloat(value);
         const selectedPlayer = (e.target.form?.elements.namedItem("player") as RadioNodeList)?.value as PlayerChoice;
 
-        if (!isNaN(value) && value > 0 && selectedPlayer) {
-            handleValidation(bet, value, selectedPlayer);
+        if (!isNaN(numericValue) && numericValue > 0 && selectedPlayer) {
+            handleValidation(bet, numericValue, selectedPlayer);
 
             // Рассчитываем потенциальную прибыль для каждого игрока
-            const potentialProfitPlayer1 = Math.floor((value * bet.oddsBetPlayer1) * 100) / 100;
-            const potentialProfitPlayer2 = Math.floor((value * bet.oddsBetPlayer2) * 100) / 100;
+            const potentialProfitPlayer1 = Math.floor((numericValue * bet.oddsBetPlayer1) * 100) / 100;
+            const potentialProfitPlayer2 = Math.floor((numericValue * bet.oddsBetPlayer2) * 100) / 100;
 
             setPotentialProfit((prev) => ({
                 ...prev,
@@ -242,6 +249,12 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
             setPlaceBetErrors((prev) => ({
                 ...prev,
                 [bet.id]: null, // Очищаем ошибку при успешной ставке
+            }));
+
+            // Очистка поля ввода после успешной ставки
+            setBetAmounts((prev) => ({
+                ...prev,
+                [bet.id]: "",
             }));
         } catch (err) {
             if (err instanceof Error) {
@@ -565,25 +578,25 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                             <span className={playerColors[participant.player]}>
                                                                         {Math.floor(participant.odds * 100) / 100}
                                                                     </span>
-                                                                                                        {", "} Прибыль:{" "}
-                                                                                                        <span className={playerColors[participant.player]}>
+                                                            {", "} Прибыль:{" "}
+                                                            <span className={playerColors[participant.player]}>
                                                                         {Math.floor(participant.profit * 100) / 100}
                                                                     </span>
-                                                                                                        {", "} {new Date(participant.createdAt).toLocaleString()}
-                                                                                                    </p>
-                                                                                                    {/* Отображаем информацию о перекрытии */}
-                                                                                                    <p>
-                                                                    {/*<span*/}
-                                                                    {/*    className={*/}
-                                                                    {/*        participant.isCovered === "OPEN"*/}
-                                                                    {/*            ? "text-yellow-500"*/}
-                                                                    {/*            : participant.isCovered === "CLOSED"*/}
-                                                                    {/*                ? "text-green-500"*/}
-                                                                    {/*                : "text-blue-500"*/}
-                                                                    {/*    }*/}
-                                                                    {/*>*/}
-                                                                    {/*    {overlapStatus}*/}
-                                                                    {/*</span>*/}
+                                                            {", "} {new Date(participant.createdAt).toLocaleString()}
+                                                        </p>
+                                                        {/* Отображаем информацию о перекрытии */}
+                                                        <p>
+                                                            {/*<span*/}
+                                                            {/*    className={*/}
+                                                            {/*        participant.isCovered === "OPEN"*/}
+                                                            {/*            ? "text-yellow-500"*/}
+                                                            {/*            : participant.isCovered === "CLOSED"*/}
+                                                            {/*                ? "text-green-500"*/}
+                                                            {/*                : "text-blue-500"*/}
+                                                            {/*    }*/}
+                                                            {/*>*/}
+                                                            {/*    {overlapStatus}*/}
+                                                            {/*</span>*/}
                                                         </p>
                                                     </div>
                                                 );
@@ -603,6 +616,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                         min="1"
                                                         step="1"
                                                         required
+                                                        value={betAmounts[bet.id] || ""}
                                                         onChange={(e) => handleAmountChange(e, bet)}
                                                     />
                                                     <label className="border p-2 rounded w-[30%] text-center">
