@@ -863,10 +863,6 @@ export async function updateUserRole(id: number, role: UserRole) {
     }
 } // изменять роли пользователей
 // ################################################
-function areNumbersEqual(num1: number, num2: number): boolean {
-    return Math.abs(num1 - num2) < Number.EPSILON;
-} //точное сравнение чисел
-
 
 export async function globalDataPoints() {
     try {
@@ -1563,16 +1559,6 @@ export async function closeBet(betId: number, winnerId: number) {
             await prisma.bet.delete({
                 where: { id: betId },
             });
-
-            // Обновляем глобальные данные
-            await prisma.globalData.update({
-                where: { id: 1 },
-                data: {
-                    margin: {
-                        increment: Math.floor(totalMargin * 100) / 100,
-                    },
-                },
-            });
         });
 
         // Ревалидация данных
@@ -1591,8 +1577,6 @@ export async function closeBet(betId: number, winnerId: number) {
         }
     }
 }
-
-
 export async function closeBetDraw(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2130,16 +2114,6 @@ export async function closeBet3(betId: number, winnerId: number) {
 
             await prisma.bet3.delete({
                 where: { id: betId },
-            });
-
-            // Обновляем глобальные данные
-            await prisma.globalData.update({
-                where: { id: 1 },
-                data: {
-                    margin: {
-                        increment: Math.floor((bet.margin ?? 0) * 100) / 100,
-                    },
-                },
             });
         });
 
@@ -2789,16 +2763,6 @@ export async function closeBet4(betId: number, winnerId: number) {
 
             await prisma.bet4.delete({
                 where: { id: betId },
-            });
-
-            // Обновляем глобальные данные
-            await prisma.globalData.update({
-                where: { id: 1 },
-                data: {
-                    margin: {
-                        increment: Math.round((bet.margin ?? 0) * 100) / 100,
-                    },
-                },
             });
         });
 
