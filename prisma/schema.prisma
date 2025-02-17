@@ -110,6 +110,7 @@ model regPoints {
 model GlobalData {
   id             Int      @id @default(autoincrement())
   users          Int      @default(0) // Количество зарегистрированных пользователей
+  betFund        Float?   @default(20000) // Количество зарегистрированных пользователей
   reg            Float?   @default(0) // количество записей regPoints
   ref            Float?   @default(0) // количество записей ReferralUserIpAddress referralStatus=true
   usersPoints    Float?   @default(0) // сумма Points всех пользователей
@@ -288,6 +289,9 @@ model BetCLOSED {
   player1Id          Int
   player2            Player                 @relation(name: "Player2BetsCLOSED", fields: [player2Id], references: [id])
   player2Id          Int
+  totalBetAmount     Float                  @default(0) // Общая сумма ставок
+  returnBetAmount    Float                  @default(0)
+  globalDataBetFund  Float                  @default(0)
   initBetPlayer1     Float // Инициализация ставок на игрока 1
   initBetPlayer2     Float // Инициализация ставок на игрока 2
   totalBetPlayer1    Float // Сумма ставок на игрока 1
@@ -298,8 +302,6 @@ model BetCLOSED {
   maxBetPlayer2      Float // Максимальная сумма ставок на игрока 2
   overlapPlayer1     Float // Перекрытие на игрока 1
   overlapPlayer2     Float // Перекрытие на игрока 2
-  totalBetAmount     Float                  @default(0) // Общая сумма ставок
-  returnBetAmount    Float                  @default(0)
   creator            User                   @relation("BetsCLOSEDCreated", fields: [creatorId], references: [id])
   creatorId          Int
   status             BetStatus              @default(CLOSED) // Статус ставки
@@ -400,6 +402,9 @@ model BetCLOSED3 {
   player2Id           Int
   player3             Player                  @relation(name: "Player3BetsCLOSED3", fields: [player3Id], references: [id])
   player3Id           Int
+  totalBetAmount      Float                   @default(0) // Общая сумма ставок
+  returnBetAmount     Float                   @default(0)
+  globalDataBetFund   Float                   @default(0)
   initBetPlayer1      Float // Инициализация ставок на игрока 1
   initBetPlayer2      Float // Инициализация ставок на игрока 2
   initBetPlayer3      Float // Инициализация ставок на игрока 3
@@ -415,7 +420,6 @@ model BetCLOSED3 {
   overlapPlayer1      Float // Перекрытие на игрока 1
   overlapPlayer2      Float // Перекрытие на игрока 2
   overlapPlayer3      Float // Перекрытие на игрока 3
-  totalBetAmount      Float                   @default(0) // Общая сумма ставок
   creator             User                    @relation("BetsCLOSEDCreated3", fields: [creatorId], references: [id])
   creatorId           Int
   status              BetStatus               @default(CLOSED) // Статус ставки
@@ -525,6 +529,9 @@ model BetCLOSED4 {
   player3Id           Int
   player4             Player                  @relation(name: "Player4BetsCLOSED4", fields: [player4Id], references: [id])
   player4Id           Int
+  totalBetAmount      Float                   @default(0) // Общая сумма ставок
+  returnBetAmount     Float                   @default(0)
+  globalDataBetFund   Float                   @default(0)
   initBetPlayer1      Float // Инициализация ставок на игрока 1
   initBetPlayer2      Float // Инициализация ставок на игрока 2
   initBetPlayer3      Float // Инициализация ставок на игрока 3
@@ -545,7 +552,6 @@ model BetCLOSED4 {
   overlapPlayer2      Float // Перекрытие на игрока 2
   overlapPlayer3      Float // Перекрытие на игрока 3
   overlapPlayer4      Float // Перекрытие на игрока 4
-  totalBetAmount      Float                   @default(0) // Общая сумма ставок
   creator             User                    @relation("BetsCLOSEDCreated4", fields: [creatorId], references: [id])
   creatorId           Int
   status              BetStatus               @default(CLOSED) // Статус ставки
