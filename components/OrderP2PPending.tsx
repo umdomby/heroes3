@@ -155,7 +155,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
 
     return (
         <div className={className}>
-            Points: {user.points}
+            Points: {Math.floor(user.points * 100) / 100}
             <Accordion className="border border-gray-300 mt-4" type="multiple">
                 {orders.map((order) => (
                     <AccordionItem key={order.id} value={order.id.toString()}>

@@ -1139,8 +1139,8 @@ export async function chatUsersDelete(messageId: number) {
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     // Add a constant value to each player's total to stabilize the odds
-    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 1000;
-    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 1000;
+    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 2000;
+    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 2000;
 
     const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2;
 
@@ -1694,9 +1694,9 @@ export async function closeBetDraw(betId: number) {
 
 function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number) {
     // Add a constant value to each player's total to stabilize the odds
-    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 1000;
-    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 1000;
-    const adjustedTotalPlayer3 = totalWithInitPlayer3 + 1000;
+    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 3000;
+    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 3000;
+    const adjustedTotalPlayer3 = totalWithInitPlayer3 + 3000;
 
     const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2 + adjustedTotalPlayer3;
 
@@ -2296,10 +2296,10 @@ export async function closeBetDraw3(betId: number) {
 
 function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number, totalWithInitPlayer4: number) {
     // Add a constant value to each player's total to stabilize the odds
-    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 1000;
-    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 1000;
-    const adjustedTotalPlayer3 = totalWithInitPlayer3 + 1000;
-    const adjustedTotalPlayer4 = totalWithInitPlayer4 + 1000;
+    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 4000;
+    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 4000;
+    const adjustedTotalPlayer3 = totalWithInitPlayer3 + 4000;
+    const adjustedTotalPlayer4 = totalWithInitPlayer4 + 4000;
 
     const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2 + adjustedTotalPlayer3 + adjustedTotalPlayer4;
 
