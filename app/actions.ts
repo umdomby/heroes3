@@ -1273,8 +1273,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
         const totalWithInitPlayer2 = totalPlayer2Profit + (totalPlayer2Profit > 50 ? 0 : (bet.initBetPlayer2 || 0));
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
-        if (currentOdds <= 1.01) {
-            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.02');
+        if (currentOdds <= 1.04) {
+            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
         }
 
         const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
@@ -1845,8 +1845,8 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
         const totalWithInitPlayer3 = totalPlayer3Profit + (totalPlayer3Profit > 50 ? 0 : (bet.initBetPlayer3 || 0));
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
-        if (currentOdds <= 1.01) {
-            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.02');
+        if (currentOdds <= 1.04) {
+            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
         }
 
         const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
@@ -2432,8 +2432,8 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 :
                 player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 :
                     bet.oddsBetPlayer4;
-        if (currentOdds <= 1.01) {
-            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.02');
+        if (currentOdds <= 1.04) {
+            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
         }
 
         const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;

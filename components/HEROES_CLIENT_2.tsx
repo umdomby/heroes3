@@ -28,7 +28,7 @@ const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
 
 // Константа для минимального допустимого коэффициента
-const MIN_ODDS = 1.02;
+const MIN_ODDS = 1.05;
 
 interface Bet extends PrismaBet {
     player1: Player;

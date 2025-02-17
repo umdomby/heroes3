@@ -27,7 +27,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
 
-const MIN_ODDS = 1.02;
+const MIN_ODDS = 1.05;
 
 interface Bet extends PrismaBet4 {
     player1: Player;
