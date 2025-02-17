@@ -1442,8 +1442,8 @@ export async function closeBet(betId: number, winnerId: number) {
                 where: { id: 1 },
             });
 
-            if (!globalData) {
-                throw new Error('Данные фонда ставок не найдены');
+            if (!globalData || globalData.betFund === null) {
+                throw new Error('Данные фонда ставок не найдены или betFund равен null');
             }
 
             let betFundAdjustment = 0;
@@ -1649,10 +1649,10 @@ export async function closeBetDraw(betId: number) {
                         odds: participant.odds,
                         profit: participant.profit,
                         player: participant.player,
-                        isWinner: "CLOSED", // Устанавливаем isWinner в "CLOSED"
+                        isWinner: false, // Устанавливаем isWinner в "CLOSED"
                         margin: 0,
                         createdAt: participant.createdAt,
-                        isCovered: participant.isCovered,
+                        isCovered: "CLOSED", // Устанавливаем isCovered в "CLOSED"
                         overlap: participant.overlap,
                         return: participant.amount,
                     },
@@ -2212,10 +2212,10 @@ export async function closeBetDraw3(betId: number) {
                         odds: participant.odds,
                         profit: participant.profit,
                         player: participant.player,
-                        isWinner: "CLOSED", // Устанавливаем isWinner в "CLOSED"
+                        isWinner: false, // Устанавливаем isWinner в "CLOSED"
                         margin: 0,
                         createdAt: participant.createdAt,
-                        isCovered: participant.isCovered,
+                        isCovered: "CLOSED", // Устанавливаем isCovered в "CLOSED"
                         overlap: participant.overlap,
                         return: participant.amount,
                     },
@@ -2868,10 +2868,10 @@ export async function closeBetDraw4(betId: number) {
                         odds: participant.odds,
                         profit: participant.profit,
                         player: participant.player,
-                        isWinner: "CLOSED", // Устанавливаем isWinner в "CLOSED"
+                        isWinner: false, // Устанавливаем isWinner в "CLOSED"
                         margin: 0,
                         createdAt: participant.createdAt,
-                        isCovered: participant.isCovered,
+                        isCovered: "CLOSED", // Устанавливаем isCovered в "CLOSED"
                         overlap: participant.overlap,
                         return: participant.amount,
                     },
