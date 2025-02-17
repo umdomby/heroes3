@@ -1585,7 +1585,7 @@ export async function closeBetDraw(betId: number) {
 
     try {
         await prisma.$transaction(async (prisma) => {
-            // Update the bet status to CLOSED and set winnerId to null
+            // Обновляем статус ставки на CLOSED и устанавливаем winnerId в null
             const bet = await prisma.bet.update({
                 where: {id: betId},
                 data: {
@@ -1601,7 +1601,7 @@ export async function closeBetDraw(betId: number) {
                 throw new Error("Ставка не найдена");
             }
 
-            // Create a record in BetCLOSED
+            // Создаем запись в BetCLOSED
             const betClosed = await prisma.betCLOSED.create({
                 data: {
                     player1Id: bet.player1Id,
@@ -1629,7 +1629,7 @@ export async function closeBetDraw(betId: number) {
                 },
             });
 
-            // Return the bet amount to all participants
+            // Возвращаем сумму ставки всем участникам
             for (const participant of bet.participants) {
                 await prisma.user.update({
                     where: {id: participant.userId},
@@ -1640,7 +1640,7 @@ export async function closeBetDraw(betId: number) {
                     },
                 });
 
-                // Create a record in BetParticipantCLOSED
+                // Создаем запись в BetParticipantCLOSED
                 await prisma.betParticipantCLOSED.create({
                     data: {
                         betCLOSEDId: betClosed.id,
@@ -1649,7 +1649,7 @@ export async function closeBetDraw(betId: number) {
                         odds: participant.odds,
                         profit: participant.profit,
                         player: participant.player,
-                        isWinner: false,
+                        isWinner: "CLOSED", // Устанавливаем isWinner в "CLOSED"
                         margin: 0,
                         createdAt: participant.createdAt,
                         isCovered: participant.isCovered,
@@ -1659,7 +1659,7 @@ export async function closeBetDraw(betId: number) {
                 });
             }
 
-            // Delete participants and the bet
+            // Удаляем участников и ставку
             await prisma.betParticipant.deleteMany({
                 where: {betId: betId},
             });
@@ -1669,7 +1669,7 @@ export async function closeBetDraw(betId: number) {
             });
         });
 
-        // Revalidate data
+        // Обновляем данные
 
         revalidatePath('/');
         revalidateTag('bets');
@@ -1686,6 +1686,7 @@ export async function closeBetDraw(betId: number) {
         }
     }
 }
+
 
 function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number) {
     const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2 + totalWithInitPlayer3;
@@ -2211,7 +2212,7 @@ export async function closeBetDraw3(betId: number) {
                         odds: participant.odds,
                         profit: participant.profit,
                         player: participant.player,
-                        isWinner: false,
+                        isWinner: "CLOSED", // Устанавливаем isWinner в "CLOSED"
                         margin: 0,
                         createdAt: participant.createdAt,
                         isCovered: participant.isCovered,
@@ -2867,7 +2868,7 @@ export async function closeBetDraw4(betId: number) {
                         odds: participant.odds,
                         profit: participant.profit,
                         player: participant.player,
-                        isWinner: false,
+                        isWinner: "CLOSED", // Устанавливаем isWinner в "CLOSED"
                         margin: 0,
                         createdAt: participant.createdAt,
                         isCovered: participant.isCovered,
@@ -2904,4 +2905,3 @@ export async function closeBetDraw4(betId: number) {
         }
     }
 }// ничья на 4 игрока
-// Function to handle a draw for four players
