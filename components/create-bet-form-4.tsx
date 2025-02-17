@@ -48,10 +48,10 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
             player2Id: players[1]?.id,
             player3Id: players[2]?.id,
             player4Id: players[3]?.id,
-            initBetPlayer1: 25,
-            initBetPlayer2: 25,
-            initBetPlayer3: 25,
-            initBetPlayer4: 25,
+            initBetPlayer1: 250,
+            initBetPlayer2: 250,
+            initBetPlayer3: 250,
+            initBetPlayer4: 250,
             categoryId: categories[0]?.id,
             productId: products[0]?.id,
             productItemId: productItems[0]?.id,
@@ -64,14 +64,14 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
         const { initBetPlayer1, initBetPlayer2, initBetPlayer3, initBetPlayer4 } = values;
 
         // Check minimum bet amount
-        if (initBetPlayer1 < 10 || initBetPlayer2 < 10 || initBetPlayer3 < 10 || initBetPlayer4 < 10) {
+        if (initBetPlayer1 < 100 || initBetPlayer2 < 100 || initBetPlayer3 < 100 || initBetPlayer4 < 100) {
             setCreateBetError('Минимальная ставка на каждого игрока: 10 баллов');
             return;
         }
 
-        // Check maximum total bet amount (100 points)
+        // Check maximum total bet amount (1000 points)
         const totalBetAmount = initBetPlayer1 + initBetPlayer2 + initBetPlayer3 + initBetPlayer4;
-        if (totalBetAmount > 100) {
+        if (totalBetAmount > 1000) {
             setCreateBetError('Максимальная сумма ставок на всех игроков: 100 баллов');
             return;
         }

@@ -42,8 +42,8 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
         defaultValues: {
             player1Id: players[0]?.id,
             player2Id: players[1]?.id,
-            initBetPlayer1: 50,
-            initBetPlayer2: 50,
+            initBetPlayer1: 500,
+            initBetPlayer2: 500,
             categoryId: categories[0]?.id,
             productId: products[0]?.id,
             productItemId: productItems[0]?.id,
@@ -56,15 +56,15 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
         const { initBetPlayer1, initBetPlayer2 } = values;
 
         // Проверка на минимальную сумму ставки
-        if (initBetPlayer1 < 10 || initBetPlayer2 < 10) {
-            setCreateBetError('Минимальная ставка на каждого игрока: 10 баллов');
+        if (initBetPlayer1 < 100 || initBetPlayer2 < 100) {
+            setCreateBetError('Минимальная ставка на каждого игрока: 100 баллов');
             return;
         }
 
-        // Проверка на максимальную сумму ставки (100 баллов)
+        // Проверка на максимальную сумму ставки (1000 баллов)
         const totalBetAmount = initBetPlayer1 + initBetPlayer2;
-        if (totalBetAmount > 100) {
-            setCreateBetError('Максимальная сумма ставок на обоих игроков: 100 баллов');
+        if (totalBetAmount > 1000) {
+            setCreateBetError('Максимальная сумма ставок на обоих игроков: 1000 баллов');
             return;
         }
 

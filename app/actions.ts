@@ -1138,14 +1138,18 @@ export async function chatUsersDelete(messageId: number) {
 }
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
-    const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2;
+    // Add a constant value to each player's total to stabilize the odds
+    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 1000;
+    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 1000;
+
+    const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2;
 
     // Calculate odds without margin
-    const oddsPlayer1 = totalWithInitPlayer1 === 0 ? 1 : totalWithInit / totalWithInitPlayer1;
-    const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : totalWithInit / totalWithInitPlayer2;
+    const oddsPlayer1 = adjustedTotalPlayer1 === 0 ? 1 : totalWithInit / adjustedTotalPlayer1;
+    const oddsPlayer2 = adjustedTotalPlayer2 === 0 ? 1 : totalWithInit / adjustedTotalPlayer2;
 
     return {
-        // Округляем до двух знаков после запятой
+        // Round to two decimal places
         oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
         oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
     };
@@ -1176,8 +1180,8 @@ export async function clientCreateBet(formData: any) {
 
         // Округляем до двух знаков после запятой
         const totalBetAmount = Math.floor((formData.initBetPlayer1 + formData.initBetPlayer2) * 100) / 100;
-        if (totalBetAmount > 100) {
-            throw new Error("Сумма начальных ставок не должна превышать 100 баллов");
+        if (totalBetAmount > 1000) {
+            throw new Error("Сумма начальных ставок не должна превышать 1000 баллов");
         }
 
         const {maxBetPlayer1, maxBetPlayer2} = calculateMaxBets(formData.initBetPlayer1, formData.initBetPlayer2);
@@ -1269,8 +1273,8 @@ export async function placeBet(formData: { betId: number; userId: number; amount
             .filter(p => p.player === PlayerChoice.PLAYER2)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalWithInitPlayer1 = totalPlayer1Profit + (totalPlayer1Profit > 50 ? 0 : (bet.initBetPlayer1 || 0));
-        const totalWithInitPlayer2 = totalPlayer2Profit + (totalPlayer2Profit > 50 ? 0 : (bet.initBetPlayer2 || 0));
+        const totalWithInitPlayer1 = totalPlayer1Profit + (bet.initBetPlayer1 || 0);
+        const totalWithInitPlayer2 = totalPlayer2Profit + (bet.initBetPlayer2 || 0);
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
         if (currentOdds <= 1.04) {
@@ -1689,13 +1693,19 @@ export async function closeBetDraw(betId: number) {
 
 
 function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number) {
-    const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2 + totalWithInitPlayer3;
+    // Add a constant value to each player's total to stabilize the odds
+    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 1000;
+    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 1000;
+    const adjustedTotalPlayer3 = totalWithInitPlayer3 + 1000;
 
-    const oddsPlayer1 = totalWithInitPlayer1 === 0 ? 1 : totalWithInit / totalWithInitPlayer1;
-    const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : totalWithInit / totalWithInitPlayer2;
-    const oddsPlayer3 = totalWithInitPlayer3 === 0 ? 1 : totalWithInit / totalWithInitPlayer3;
+    const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2 + adjustedTotalPlayer3;
+
+    const oddsPlayer1 = adjustedTotalPlayer1 === 0 ? 1 : totalWithInit / adjustedTotalPlayer1;
+    const oddsPlayer2 = adjustedTotalPlayer2 === 0 ? 1 : totalWithInit / adjustedTotalPlayer2;
+    const oddsPlayer3 = adjustedTotalPlayer3 === 0 ? 1 : totalWithInit / adjustedTotalPlayer3;
 
     return {
+        // Round to two decimal places
         oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
         oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
         oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
@@ -1727,8 +1737,8 @@ export async function clientCreateBet3(formData: any) {
         }
 
         const totalBetAmount = Math.floor((formData.initBetPlayer1 + formData.initBetPlayer2 + formData.initBetPlayer3) * 100) / 100;
-        if (totalBetAmount > 100) {
-            throw new Error("Сумма начальных ставок не должна превышать 100 баллов");
+        if (totalBetAmount > 1000) {
+            throw new Error("Сумма начальных ставок не должна превышать 1000 баллов");
         }
 
         const {
@@ -1840,9 +1850,9 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
             .filter(p => p.player === PlayerChoice.PLAYER3)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalWithInitPlayer1 = totalPlayer1Profit + (totalPlayer1Profit > 50 ? 0 : (bet.initBetPlayer1 || 0));
-        const totalWithInitPlayer2 = totalPlayer2Profit + (totalPlayer2Profit > 50 ? 0 : (bet.initBetPlayer2 || 0));
-        const totalWithInitPlayer3 = totalPlayer3Profit + (totalPlayer3Profit > 50 ? 0 : (bet.initBetPlayer3 || 0));
+        const totalWithInitPlayer1 = totalPlayer1Profit + (bet.initBetPlayer1 || 0);
+        const totalWithInitPlayer2 = totalPlayer2Profit + (bet.initBetPlayer2 || 0);
+        const totalWithInitPlayer3 = totalPlayer3Profit + (bet.initBetPlayer3 || 0);
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
         if (currentOdds <= 1.04) {
@@ -2284,6 +2294,28 @@ export async function closeBetDraw3(betId: number) {
     }
 }// ничья на 3 игрока
 
+function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number, totalWithInitPlayer4: number) {
+    // Add a constant value to each player's total to stabilize the odds
+    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 1000;
+    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 1000;
+    const adjustedTotalPlayer3 = totalWithInitPlayer3 + 1000;
+    const adjustedTotalPlayer4 = totalWithInitPlayer4 + 1000;
+
+    const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2 + adjustedTotalPlayer3 + adjustedTotalPlayer4;
+
+    const oddsPlayer1 = adjustedTotalPlayer1 === 0 ? 1 : totalWithInit / adjustedTotalPlayer1;
+    const oddsPlayer2 = adjustedTotalPlayer2 === 0 ? 1 : totalWithInit / adjustedTotalPlayer2;
+    const oddsPlayer3 = adjustedTotalPlayer3 === 0 ? 1 : totalWithInit / adjustedTotalPlayer3;
+    const oddsPlayer4 = adjustedTotalPlayer4 === 0 ? 1 : totalWithInit / adjustedTotalPlayer4;
+
+    return {
+        // Round to two decimal places
+        oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+        oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+        oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
+        oddsPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
+    };
+}// Функция для расчета коэффициентов на 4 игроков
 export async function clientCreateBet4(formData: any) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2300,8 +2332,8 @@ export async function clientCreateBet4(formData: any) {
         }
 
         const totalBetAmount = Math.floor((formData.initBetPlayer1 + formData.initBetPlayer2 + formData.initBetPlayer3 + formData.initBetPlayer4) * 100) / 100;
-        if (totalBetAmount > 100) {
-            throw new Error("Сумма начальных ставок не должна превышать 100 баллов");
+        if (totalBetAmount > 1000) {
+            throw new Error("Сумма начальных ставок не должна превышать 1000 баллов");
         }
 
         const {
@@ -2365,21 +2397,6 @@ export async function clientCreateBet4(formData: any) {
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }// создание ставок на 4 игрока
-function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number, totalWithInitPlayer4: number) {
-    const totalWithInit = totalWithInitPlayer1 + totalWithInitPlayer2 + totalWithInitPlayer3 + totalWithInitPlayer4;
-
-    const oddsPlayer1 = totalWithInitPlayer1 === 0 ? 1 : totalWithInit / totalWithInitPlayer1;
-    const oddsPlayer2 = totalWithInitPlayer2 === 0 ? 1 : totalWithInit / totalWithInitPlayer2;
-    const oddsPlayer3 = totalWithInitPlayer3 === 0 ? 1 : totalWithInit / totalWithInitPlayer3;
-    const oddsPlayer4 = totalWithInitPlayer4 === 0 ? 1 : totalWithInit / totalWithInitPlayer4;
-
-    return {
-        oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
-        oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
-        oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
-        oddsPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
-    };
-}// Функция для расчета коэффициентов на 4 игроков
 function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initBetPlayer3: number, initBetPlayer4: number): {
     maxBetPlayer1: number,
     maxBetPlayer2: number,
@@ -2457,10 +2474,10 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             .filter(p => p.player === PlayerChoice.PLAYER4)
             .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalWithInitPlayer1 = totalPlayer1Profit + (totalPlayer1Profit > 50 ? 0 : (bet.initBetPlayer1 || 0));
-        const totalWithInitPlayer2 = totalPlayer2Profit + (totalPlayer2Profit > 50 ? 0 : (bet.initBetPlayer2 || 0));
-        const totalWithInitPlayer3 = totalPlayer3Profit + (totalPlayer3Profit > 50 ? 0 : (bet.initBetPlayer3 || 0));
-        const totalWithInitPlayer4 = totalPlayer4Profit + (totalPlayer4Profit > 50 ? 0 : (bet.initBetPlayer4 || 0));
+        const totalWithInitPlayer1 = totalPlayer1Profit + (bet.initBetPlayer1 || 0);
+        const totalWithInitPlayer2 = totalPlayer2Profit + (bet.initBetPlayer2 || 0);
+        const totalWithInitPlayer3 = totalPlayer3Profit + (bet.initBetPlayer3 || 0);
+        const totalWithInitPlayer4 = totalPlayer4Profit + (bet.initBetPlayer4 || 0);
 
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 :
             player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 :
