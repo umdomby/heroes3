@@ -42,6 +42,7 @@ interface BetCLOSED {
     margin: number | null;
     winnerId: number | null;
     updatedAt: Date;
+    globalDataBetFund : number;
 }
 
 interface Props {
@@ -118,6 +119,7 @@ export const HEROES_CLIENT_CLOSED_2: React.FC<Props> = ({ user, closedBets }) =>
                                                 <TableCell className="w-[15%]">
                                                     <div>{Math.floor(bet.oddsBetPlayer1 * 100) / 100}</div>
                                                     <div>{Math.floor(bet.oddsBetPlayer2 * 100) / 100}</div>
+                                                    <div>Fund: {Math.floor(bet.globalDataBetFund * 100) / 100}</div>
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
