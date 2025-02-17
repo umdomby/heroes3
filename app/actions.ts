@@ -1413,8 +1413,8 @@ export async function closeBet(betId: number, winnerId: number) {
                     updatedAt: bet.updatedAt,
                     oddsBetPlayer1: bet.oddsBetPlayer1,
                     oddsBetPlayer2: bet.oddsBetPlayer2,
-                    overlapPlayer1: bet.overlapPlayer1,
-                    overlapPlayer2: bet.overlapPlayer2,
+                    overlapPlayer1: 0, // Инициализируем overlapPlayer1
+                    overlapPlayer2: 0, // Инициализируем overlapPlayer2
                     returnBetAmount: 0, // Инициализируем returnBetAmount
                     globalDataBetFund: 0, // Инициализируем globalDataBetFund
                 },
@@ -1430,6 +1430,8 @@ export async function closeBet(betId: number, winnerId: number) {
 
             let totalMargin = 0;
             let totalPointsToReturn = 0; // Сумма всех возвращаемых баллов
+            let overlapPlayer1Sum = 0;
+            let overlapPlayer2Sum = 0;
 
             // Сначала вычисляем общую прибыль победителей
             let totalProfit = 0;
@@ -1454,7 +1456,7 @@ export async function closeBet(betId: number, winnerId: number) {
             for (const participant of allParticipants) {
                 let pointsToReturn = 0;
                 let margin = 0;
-                let overlap = 0;
+                let overlap = participant.amount + participant.profit;
 
                 if (participant.player === winningPlayer) {
                     // Рассчитываем долю от общей суммы
@@ -1462,7 +1464,7 @@ export async function closeBet(betId: number, winnerId: number) {
                     pointsToReturn = bet.totalBetAmount * share;
 
                     // Вычитаем маржу
-                    margin = participant.profit;
+                    margin = participant.profit * MARGIN;
                     pointsToReturn = participant.amount + participant.profit - margin;
 
                     totalMargin += margin;
@@ -1483,6 +1485,13 @@ export async function closeBet(betId: number, winnerId: number) {
                 // Добавляем к общей сумме возвращаемых баллов
                 totalPointsToReturn += pointsToReturn;
 
+                // Суммируем overlap для каждого игрока
+                if (participant.player === PlayerChoice.PLAYER1) {
+                    overlapPlayer1Sum += overlap;
+                } else if (participant.player === PlayerChoice.PLAYER2) {
+                    overlapPlayer2Sum += overlap;
+                }
+
                 // Создаем запись в BetParticipantCLOSED
                 await prisma.betParticipantCLOSED.create({
                     data: {
@@ -1495,8 +1504,8 @@ export async function closeBet(betId: number, winnerId: number) {
                         isWinner: participant.player === winningPlayer,
                         margin: Math.floor(margin * 100) / 100,
                         createdAt: participant.createdAt,
-                        isCovered: participant.isCovered,
-                        overlap: overlap,
+                        isCovered: "CLOSED", // Устанавливаем isCovered в "CLOSED"
+                        overlap: Math.floor(overlap * 100) / 100,
                         return: Math.floor(pointsToReturn * 100) / 100,
                     },
                 });
@@ -1534,13 +1543,15 @@ export async function closeBet(betId: number, winnerId: number) {
                 });
             }
 
-            // Обновляем поле margin и globalDataBetFund в BetCLOSED
+            // Обновляем поле margin, globalDataBetFund, overlapPlayer1 и overlapPlayer2 в BetCLOSED
             await prisma.betCLOSED.update({
                 where: { id: betClosed.id },
                 data: {
                     margin: Math.floor(totalMargin * 100) / 100,
                     returnBetAmount: Math.floor(totalPointsToReturn * 100) / 100, // Записываем сумму возвращенных баллов
                     globalDataBetFund: Math.floor(betFundAdjustment * 100) / 100, // Записываем изменение фонда
+                    overlapPlayer1: Math.floor(overlapPlayer1Sum * 100) / 100,
+                    overlapPlayer2: Math.floor(overlapPlayer2Sum * 100) / 100,
                 },
             });
 
