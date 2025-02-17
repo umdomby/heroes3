@@ -493,7 +493,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                             </p>
                                             {/* Calculate and display the difference in coverage bets as points */}
                                             <p>
-                                                Разница ставок перекрытия для{" "}
+                                                Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
                 {bet.player1.name}
             </span>
@@ -503,7 +503,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
             </span>
                                             </p>
                                             <p>
-                                                Разница ставок перекрытия для{" "}
+                                                Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
                 {bet.player2.name}
             </span>
@@ -530,20 +530,20 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
 
                                                 // Определяем статус перекрытия
                                                 let overlapStatus = "";
-                                                switch (participant.isCovered) {
-                                                    case "OPEN":
-                                                        overlapStatus =
-                                                            "Ваша ставка не перекрыта (0 Points, 0%)";
-                                                        break;
-                                                    case "CLOSED":
-                                                        overlapStatus = `Ваша ставка полностью перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                        break;
-                                                    case "PENDING":
-                                                        overlapStatus = `Ваша ставка частично перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                        break;
-                                                    default:
-                                                        overlapStatus = "Неизвестный статус перекрытия.";
-                                                }
+                                                // switch (participant.isCovered) {
+                                                //     case "OPEN":
+                                                //         overlapStatus =
+                                                //             "Ваша ставка не перекрыта (0 Points, 0%)";
+                                                //         break;
+                                                //     case "CLOSED":
+                                                //         overlapStatus = `Ваша ставка полностью перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
+                                                //         break;
+                                                //     case "PENDING":
+                                                //         overlapStatus = `Ваша ставка частично перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
+                                                //         break;
+                                                //     default:
+                                                //         overlapStatus = "Неизвестный статус перекрытия.";
+                                                // }
 
                                                 return (
                                                     <div
@@ -563,27 +563,27 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                             </strong>
                                                             {", "} Коэффициент:{" "}
                                                             <span className={playerColors[participant.player]}>
-                            {Math.floor(participant.odds * 100) / 100}
-                        </span>
-                                                            {", "} Прибыль:{" "}
-                                                            <span className={playerColors[participant.player]}>
-                            {Math.floor(participant.profit * 100) / 100}
-                        </span>
-                                                            {", "} {new Date(participant.createdAt).toLocaleString()}
-                                                        </p>
-                                                        {/* Отображаем информацию о перекрытии */}
-                                                        <p>
-                        <span
-                            className={
-                                participant.isCovered === "OPEN"
-                                    ? "text-yellow-500"
-                                    : participant.isCovered === "CLOSED"
-                                        ? "text-green-500"
-                                        : "text-blue-500"
-                            }
-                        >
-                            {overlapStatus}
-                        </span>
+                                                                        {Math.floor(participant.odds * 100) / 100}
+                                                                    </span>
+                                                                                                        {", "} Прибыль:{" "}
+                                                                                                        <span className={playerColors[participant.player]}>
+                                                                        {Math.floor(participant.profit * 100) / 100}
+                                                                    </span>
+                                                                                                        {", "} {new Date(participant.createdAt).toLocaleString()}
+                                                                                                    </p>
+                                                                                                    {/* Отображаем информацию о перекрытии */}
+                                                                                                    <p>
+                                                                    {/*<span*/}
+                                                                    {/*    className={*/}
+                                                                    {/*        participant.isCovered === "OPEN"*/}
+                                                                    {/*            ? "text-yellow-500"*/}
+                                                                    {/*            : participant.isCovered === "CLOSED"*/}
+                                                                    {/*                ? "text-green-500"*/}
+                                                                    {/*                : "text-blue-500"*/}
+                                                                    {/*    }*/}
+                                                                    {/*>*/}
+                                                                    {/*    {overlapStatus}*/}
+                                                                    {/*</span>*/}
                                                         </p>
                                                     </div>
                                                 );

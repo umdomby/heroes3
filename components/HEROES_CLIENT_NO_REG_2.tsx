@@ -186,7 +186,7 @@ export const HEROES_CLIENT_NO_REG_2: React.FC<Props> = ({ className }) => {
                                         </span>
                                     </p>
                                     <p>
-                                        Разница ставок перекрытия для{" "}
+                                        Поставлено:{" "}
                                         <span className={playerColors[PlayerChoice.PLAYER1]}>
                                             {bet.player1.name}
                                         </span>
@@ -196,7 +196,7 @@ export const HEROES_CLIENT_NO_REG_2: React.FC<Props> = ({ className }) => {
                                         </span>
                                     </p>
                                     <p>
-                                        Разница ставок перекрытия для{" "}
+                                        Поставлено:{" "}
                                         <span className={playerColors[PlayerChoice.PLAYER2]}>
                                             {bet.player2.name}
                                         </span>

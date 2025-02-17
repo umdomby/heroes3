@@ -594,7 +594,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             </span>
                                             </p>
                                             <p>
-                                                Разница ставок перекрытия для{" "}
+                                                Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
                 {bet.player1.name}
             </span>
@@ -604,7 +604,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             </span>
                                             </p>
                                             <p>
-                                                Разница ставок перекрытия для{" "}
+                                                Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
                 {bet.player2.name}
             </span>
@@ -614,7 +614,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             </span>
                                             </p>
                                             <p>
-                                                Разница ставок перекрытия для{" "}
+                                                Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER3]}>
                 {bet.player3.name}
             </span>
@@ -624,7 +624,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             </span>
                                             </p>
                                             <p>
-                                                Разница ставок перекрытия для{" "}
+                                                Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER4]}>
                 {bet.player4.name}
             </span>
@@ -648,21 +648,21 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         ? Math.floor((participant.overlap / profitToCover) * 10000) / 100
                                                         : 0;
 
-                                                let overlapStatus = "";
-                                                switch (participant.isCovered) {
-                                                    case "OPEN":
-                                                        overlapStatus =
-                                                            "Ваша ставка не перекрыта (0 Points, 0%)";
-                                                        break;
-                                                    case "CLOSED":
-                                                        overlapStatus = `Ваша ставка полностью перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                        break;
-                                                    case "PENDING":
-                                                        overlapStatus = `Ваша ставка частично перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                        break;
-                                                    default:
-                                                        overlapStatus = "Неизвестный статус перекрытия.";
-                                                }
+                                                // let overlapStatus = "";
+                                                // switch (participant.isCovered) {
+                                                //     case "OPEN":
+                                                //         overlapStatus =
+                                                //             "Ваша ставка не перекрыта (0 Points, 0%)";
+                                                //         break;
+                                                //     case "CLOSED":
+                                                //         overlapStatus = `Ваша ставка полностью перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
+                                                //         break;
+                                                //     case "PENDING":
+                                                //         overlapStatus = `Ваша ставка частично перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
+                                                //         break;
+                                                //     default:
+                                                //         overlapStatus = "Неизвестный статус перекрытия.";
+                                                // }
 
                                                 return (
                                                     <div
@@ -704,7 +704,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                         : "text-blue-500"
                             }
                         >
-                            {overlapStatus}
+                            {/*{overlapStatus}*/}
                         </span>
                                                         </p>
                                                     </div>
