@@ -89,6 +89,11 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                                     ADMIN TRANSFER
                                                 </DropdownMenuRadioItem>
                                             </Link>
+                                            <Link href="/transfer-points-admin/bet-found">
+                                                <DropdownMenuRadioItem value="transfer-points-admin-bet-found" className="cursor-pointer">
+                                                    ADMIN BET FOUND
+                                                </DropdownMenuRadioItem>
+                                            </Link>
                                             <Link href="/statistics">
                                                 <DropdownMenuRadioItem value="statistics" className="cursor-pointer">
                                                     ADMIN STATISTICS

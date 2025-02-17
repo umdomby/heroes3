@@ -21,6 +21,7 @@ interface GlobalData {
     reg: number | null;
     usersPoints: number | null;
     openBetsPoints: number | null;
+    betFund: number | null;
 }
 
 async function fetchGlobalData(): Promise<GlobalData | null> {
@@ -51,6 +52,7 @@ export default async function GlobalDataComponent() {
         (globalData.ref ?? 0) +
         (globalData.openBetsPoints ?? 0) +
         (globalData.usersPoints ?? 0) +
+        (globalData.betFund ?? 0) +
         (globalData.margin ?? 0);
 
     return (
@@ -62,6 +64,7 @@ export default async function GlobalDataComponent() {
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Ref</TableHead>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Open</TableHead>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>User</TableHead>
+                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Found</TableHead>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Margin</TableHead>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Sum</TableHead>
                 </TableRow>
@@ -73,6 +76,7 @@ export default async function GlobalDataComponent() {
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#dc2626' }}>{globalData.ref ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#868788' }}>{globalData.openBetsPoints ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{globalData.betFund ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.margin ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>{totalSum}</TableCell>
                 </TableRow>

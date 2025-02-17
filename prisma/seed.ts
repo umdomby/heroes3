@@ -20,7 +20,7 @@ async function up() {
         email: 'umdom2@gmail.com',
         password: hashSync('123123', 10),
         role: 'ADMIN',
-        points: 996000,
+        points: 976000,
         cardId: generateCardId(),
         bankDetails: [
             {"name": "USTD - BSC (BEP20)", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)", "price": "1"},

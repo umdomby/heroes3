@@ -207,7 +207,7 @@ export async function referralGet() {
             },
         });
 
-        // Check if the user was found
+        // Check if the user was bet-found
         if (!findUser) {
             throw new Error('Пользователь не найден в базе данных');
         }
@@ -867,7 +867,7 @@ function areNumbersEqual(num1: number, num2: number): boolean {
     return Math.abs(num1 - num2) < Number.EPSILON;
 } //точное сравнение чисел
 
-//chat
+
 export async function globalDataPoints() {
     try {
         // Получаем текущие данные из GlobalData
@@ -955,6 +955,109 @@ export async function globalDataPoints() {
         console.log('Данные успешно обновлены.');
     } catch (error) {
         console.error('Ошибка при обновлении GlobalData:', error);
+    }
+}
+export async function transferPointsToFund(amount: number) {
+    try {
+        const session = await getUserSession();
+
+        if (!session) {
+            throw new Error('Пользователь не найден');
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: Number(session.id) },
+        });
+
+        if (!user || user.role !== 'ADMIN') {
+            throw new Error('У вас нет прав для выполнения этой операции');
+        }
+
+        // Проверка, что пользователь не может перевести больше баллов, чем у него есть
+        if (user.points < amount) {
+            throw new Error('Недостаточно баллов для перевода');
+        }
+
+        // Обновление betFund
+        await prisma.globalData.update({
+            where: { id: 1 },
+            data: {
+                betFund: {
+                    increment: amount,
+                },
+            },
+        });
+
+        // Обновление баллов пользователя
+        await prisma.user.update({
+            where: { id: Number(session.id) },
+            data: {
+                points: {
+                    decrement: amount,
+                },
+            },
+        });
+
+        return { success: true, message: 'Баллы успешно переведены в фонд' };
+    } catch (error) {
+        console.error('Ошибка при переводе баллов в фонд:', error);
+        throw new Error('Не удалось перевести баллы в фонд');
+    }
+}
+export async function withdrawPointsFromFund(amount: number) {
+    try {
+        const session = await getUserSession();
+
+        if (!session) {
+            throw new Error('Пользователь не найден');
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: Number(session.id) },
+        });
+
+        if (!user || user.role !== 'ADMIN') {
+            throw new Error('У вас нет прав для выполнения этой операции');
+        }
+
+        // Получаем текущий betFund
+        const globalData = await prisma.globalData.findUnique({
+            where: { id: 1 },
+        });
+
+        if (!globalData) {
+            throw new Error('Данные фонда ставок не найдены');
+        }
+
+        // Проверка, что пользователь не может снять больше баллов, чем есть в betFund
+        if (globalData.betFund < amount) {
+            throw new Error('Недостаточно баллов в фонде для снятия');
+        }
+
+        // Обновление betFund
+        await prisma.globalData.update({
+            where: { id: 1 },
+            data: {
+                betFund: {
+                    decrement: amount,
+                },
+            },
+        });
+
+        // Обновление баллов пользователя
+        await prisma.user.update({
+            where: { id: Number(session.id) },
+            data: {
+                points: {
+                    increment: amount,
+                },
+            },
+        });
+
+        return { success: true, message: 'Баллы успешно сняты из фонда' };
+    } catch (error) {
+        console.error('Ошибка при снятии баллов из фонда:', error);
+        throw new Error('Не удалось снять баллы из фонда');
     }
 }
 
@@ -2940,4 +3043,3 @@ export async function closeBetDraw4(betId: number) {
     }
 }// ничья на 4 игрока
 // Function to handle a draw for four players
-
