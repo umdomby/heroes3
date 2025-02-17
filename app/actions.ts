@@ -1030,7 +1030,7 @@ export async function withdrawPointsFromFund(amount: number) {
         }
 
         // Проверка, что пользователь не может снять больше баллов, чем есть в betFund
-        if (globalData.betFund < amount) {
+        if ((globalData.betFund ?? 0) < amount) {
             throw new Error('Недостаточно баллов в фонде для снятия');
         }
 
@@ -1790,31 +1790,6 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
         await prisma.bet3.update({
             where: {id: betId},
             data: updatedBetData,
-        }).then(async () => {
-            await balanceOverlaps3(betId);
-        }).then(async () => {
-            const participants = await prisma.betParticipant3.findMany({
-                where: {betId},
-                orderBy: {createdAt: 'asc'},
-            });
-            for (const participant of participants) {
-                let newIsCoveredStatus: IsCovered;
-
-                if (areNumbersEqual(participant.overlap, 0)) {
-                    newIsCoveredStatus = IsCovered.OPEN;
-                } else if (participant.overlap >= participant.profit) {
-                    newIsCoveredStatus = IsCovered.CLOSED;
-                } else {
-                    newIsCoveredStatus = IsCovered.PENDING;
-                }
-
-                if (participant.isCovered !== newIsCoveredStatus) {
-                    await prisma.betParticipant3.update({
-                        where: {id: participant.id},
-                        data: {isCovered: newIsCoveredStatus},
-                    });
-                }
-            }
         });
 
         revalidatePath('/');
@@ -1833,98 +1808,6 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }// ставки на 3 игрока
-async function balanceOverlaps3(betId: number) {
-    console.log(`Начало balanceOverlaps для betId: ${betId}`);
-
-    const participants = await prisma.betParticipant3.findMany({
-        where: { betId },
-        orderBy: { createdAt: 'asc' },
-    });
-
-    let bet = await prisma.bet3.findUnique({
-        where: { id: betId },
-    });
-
-    if (!bet) {
-        throw new Error('Ставка не найдена');
-    }
-
-    async function transferOverlap(
-        targetParticipants: BetParticipant3[],
-        overlapField: 'overlapPlayer1' | 'overlapPlayer2' | 'overlapPlayer3',
-        bet: Bet3
-    ) {
-        let processedParticipants = 0;
-        const totalParticipants = targetParticipants.length;
-
-        while (bet[overlapField] > 0) {
-            let allProfitEqualOverlap = true;
-
-            for (let i = 0; i < targetParticipants.length; i++) {
-                const target = targetParticipants[i];
-
-                // Проверяем, что profit не равен overlap и участник не перекрывает свою собственную ставку
-                if (Math.floor(target.profit * 100) / 100 !== Math.floor(target.overlap * 100) / 100 && target.userId !== bet.userId) {
-                    allProfitEqualOverlap = false;
-
-                    const neededOverlap = Math.floor((target.profit - target.overlap) * 100) / 100;
-                    const overlapToAdd = Math.min(neededOverlap, bet[overlapField]);
-
-                    if (overlapToAdd > 0) {
-                        const newOverlap = Math.floor((target.overlap + overlapToAdd) * 100) / 100;
-                        if (newOverlap > target.profit) {
-                            throw new Error('Ошибка: overlap не может быть больше profit');
-                        }
-
-                        await prisma.betParticipant3.update({
-                            where: { id: target.id },
-                            data: {
-                                overlap: newOverlap,
-                            },
-                        });
-
-                        await prisma.bet3.update({
-                            where: { id: betId },
-                            data: {
-                                [overlapField]: Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100,
-                            },
-                        });
-
-                        bet[overlapField] = Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100;
-
-                        targetParticipants[i].overlap = newOverlap;
-
-                        if (bet[overlapField] <= 0) break;
-                    }
-                }
-
-                processedParticipants++;
-
-                if (processedParticipants >= totalParticipants) break;
-            }
-
-            if (allProfitEqualOverlap || processedParticipants >= totalParticipants) break;
-        }
-    }
-
-    const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
-    const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
-    const participantsPlayer3 = participants.filter(p => p.player === PlayerChoice.PLAYER3);
-
-    console.log('Переносим перекрытия от участников PLAYER1');
-    await transferOverlap(participantsPlayer1, 'overlapPlayer2', bet);
-    await transferOverlap(participantsPlayer1, 'overlapPlayer3', bet);
-
-    console.log('Переносим перекрытия от участников PLAYER2');
-    await transferOverlap(participantsPlayer2, 'overlapPlayer1', bet);
-    await transferOverlap(participantsPlayer2, 'overlapPlayer3', bet);
-
-    console.log('Переносим перекрытия от участников PLAYER3');
-    await transferOverlap(participantsPlayer3, 'overlapPlayer1', bet);
-    await transferOverlap(participantsPlayer3, 'overlapPlayer2', bet);
-
-    console.log(`Завершение balanceOverlaps для betId: ${betId}`);
-} // Функция для балансировки перекрытий на 3 игроков
 export async function closeBet3(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2513,31 +2396,6 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
         await prisma.bet4.update({
             where: {id: betId},
             data: updatedBetData,
-        }).then(async () => {
-            await balanceOverlaps4(betId);
-        }).then(async () => {
-            const participants = await prisma.betParticipant4.findMany({
-                where: {betId},
-                orderBy: {createdAt: 'asc'},
-            });
-            for (const participant of participants) {
-                let newIsCoveredStatus: IsCovered;
-
-                if (areNumbersEqual(participant.overlap, 0)) {
-                    newIsCoveredStatus = IsCovered.OPEN;
-                } else if (participant.overlap >= participant.profit) {
-                    newIsCoveredStatus = IsCovered.CLOSED;
-                } else {
-                    newIsCoveredStatus = IsCovered.PENDING;
-                }
-
-                if (participant.isCovered !== newIsCoveredStatus) {
-                    await prisma.betParticipant4.update({
-                        where: {id: participant.id},
-                        data: {isCovered: newIsCoveredStatus},
-                    });
-                }
-            }
         });
 
         revalidatePath('/');
@@ -2556,107 +2414,6 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }
-async function balanceOverlaps4(betId: number) {
-    console.log(`Начало balanceOverlaps для betId: ${betId}`);
-
-    const participants = await prisma.betParticipant4.findMany({
-        where: { betId },
-        orderBy: { createdAt: 'asc' },
-    });
-
-    let bet = await prisma.bet4.findUnique({
-        where: { id: betId },
-    });
-
-    if (!bet) {
-        throw new Error('Ставка не найдена');
-    }
-
-    async function transferOverlap(
-        targetParticipants: BetParticipant4[],
-        overlapField: 'overlapPlayer1' | 'overlapPlayer2' | 'overlapPlayer3' | 'overlapPlayer4',
-        bet: Bet4
-    ) {
-        let processedParticipants = 0;
-        const totalParticipants = targetParticipants.length;
-
-        while (bet[overlapField] > 0) {
-            let allProfitEqualOverlap = true;
-
-            for (let i = 0; i < targetParticipants.length; i++) {
-                const target = targetParticipants[i];
-
-                // Проверяем, что profit не равен overlap и участник не перекрывает свою собственную ставку
-                if (Math.floor(target.profit * 100) / 100 !== Math.floor(target.overlap * 100) / 100 && target.userId !== bet.userId) {
-                    allProfitEqualOverlap = false;
-
-                    const neededOverlap = Math.floor((target.profit - target.overlap) * 100) / 100;
-                    const overlapToAdd = Math.min(neededOverlap, bet[overlapField]);
-
-                    if (overlapToAdd > 0) {
-                        const newOverlap = Math.floor((target.overlap + overlapToAdd) * 100) / 100;
-                        if (newOverlap > target.profit) {
-                            throw new Error('Ошибка: overlap не может быть больше profit');
-                        }
-
-                        await prisma.betParticipant4.update({
-                            where: { id: target.id },
-                            data: {
-                                overlap: newOverlap,
-                            },
-                        });
-
-                        await prisma.bet4.update({
-                            where: { id: betId },
-                            data: {
-                                [overlapField]: Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100,
-                            },
-                        });
-
-                        bet[overlapField] = Math.floor((bet[overlapField] - overlapToAdd) * 100) / 100;
-
-                        targetParticipants[i].overlap = newOverlap;
-
-                        if (bet[overlapField] <= 0) break;
-                    }
-                }
-
-                processedParticipants++;
-
-                if (processedParticipants >= totalParticipants) break;
-            }
-
-            if (allProfitEqualOverlap || processedParticipants >= totalParticipants) break;
-        }
-    }
-
-    const participantsPlayer1 = participants.filter(p => p.player === PlayerChoice.PLAYER1);
-    const participantsPlayer2 = participants.filter(p => p.player === PlayerChoice.PLAYER2);
-    const participantsPlayer3 = participants.filter(p => p.player === PlayerChoice.PLAYER3);
-    const participantsPlayer4 = participants.filter(p => p.player === PlayerChoice.PLAYER4);
-
-    console.log('Переносим перекрытия от участников PLAYER1');
-    await transferOverlap(participantsPlayer1, 'overlapPlayer2', bet);
-    await transferOverlap(participantsPlayer1, 'overlapPlayer3', bet);
-    await transferOverlap(participantsPlayer1, 'overlapPlayer4', bet);
-
-    console.log('Переносим перекрытия от участников PLAYER2');
-    await transferOverlap(participantsPlayer2, 'overlapPlayer1', bet);
-    await transferOverlap(participantsPlayer2, 'overlapPlayer3', bet);
-    await transferOverlap(participantsPlayer2, 'overlapPlayer4', bet);
-
-    console.log('Переносим перекрытия от участников PLAYER3');
-    await transferOverlap(participantsPlayer3, 'overlapPlayer1', bet);
-    await transferOverlap(participantsPlayer3, 'overlapPlayer2', bet);
-    await transferOverlap(participantsPlayer3, 'overlapPlayer4', bet);
-
-    console.log('Переносим перекрытия от участников PLAYER4');
-    await transferOverlap(participantsPlayer4, 'overlapPlayer1', bet);
-    await transferOverlap(participantsPlayer4, 'overlapPlayer2', bet);
-    await transferOverlap(participantsPlayer4, 'overlapPlayer3', bet);
-
-    console.log(`Завершение balanceOverlaps для betId: ${betId}`);
-} // Функция для балансировки перекрытий на 4 игроков
 export async function closeBet4(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
