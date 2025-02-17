@@ -248,6 +248,7 @@ model Bet {
   maxBetPlayer2   Float // Максимальная сумма ставок на игрока 2
   overlapPlayer1  Float // не используем
   overlapPlayer2  Float // не используем
+  margin          Float? // в placeBet = 0
   totalBetAmount  Float            @default(0) // сумма всех ставок.
   creator         User             @relation("BetsCreated", fields: [creatorId], references: [id]) // создатель события
   creatorId       Int
@@ -260,7 +261,6 @@ model Bet {
   productItemId   Int?
   productItem     ProductItem?     @relation(fields: [productItemId], references: [id])
   winnerId        Int? // кто победил PLAYER1 или PLAYER2
-  margin          Float? // в placeBet = 0
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -302,6 +302,7 @@ model BetCLOSED {
   maxBetPlayer2      Float // Максимальная сумма ставок на игрока 2
   overlapPlayer1     Float // не используем
   overlapPlayer2     Float // не используем
+  margin             Float? // вся маржа события
   creator            User                   @relation("BetsCLOSEDCreated", fields: [creatorId], references: [id])
   creatorId          Int
   status             BetStatus              @default(CLOSED) // Статус ставки
@@ -312,7 +313,6 @@ model BetCLOSED {
   productItemId      Int?
   productItem        ProductItem?           @relation(fields: [productItemId], references: [id])
   winnerId           Int? // ID победителя (без связи)
-  margin             Float? // вся маржа события
   createdAt          DateTime               @default(now()) // Дата создания
   updatedAt          DateTime               @updatedAt // Дата обновления
 }
@@ -359,6 +359,7 @@ model Bet3 {
   overlapPlayer1  Float // Перекрытие на игрока 1
   overlapPlayer2  Float // Перекрытие на игрока 2
   overlapPlayer3  Float // Перекрытие на игрока 3
+  margin          Float? // в placeBet = 0
   totalBetAmount  Float             @default(0) // сумма всех ставок.
   creator         User              @relation("BetsCreated3", fields: [creatorId], references: [id]) // создатель события
   creatorId       Int
@@ -371,7 +372,6 @@ model Bet3 {
   productItemId   Int?
   productItem     ProductItem?      @relation(fields: [productItemId], references: [id])
   winnerId        Int? // кто победил PLAYER1 или PLAYER2 или PLAYER3
-  margin          Float? // в placeBet = 0
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
@@ -420,6 +420,7 @@ model BetCLOSED3 {
   overlapPlayer1      Float // Перекрытие на игрока 1
   overlapPlayer2      Float // Перекрытие на игрока 2
   overlapPlayer3      Float // Перекрытие на игрока 3
+  margin              Float? // вся маржа события
   creator             User                    @relation("BetsCLOSEDCreated3", fields: [creatorId], references: [id])
   creatorId           Int
   status              BetStatus               @default(CLOSED) // Статус ставки
@@ -430,7 +431,6 @@ model BetCLOSED3 {
   productItemId       Int?
   productItem         ProductItem?            @relation(fields: [productItemId], references: [id])
   winnerId            Int? // ID победителя (без связи)
-  margin              Float? // вся маржа события
   createdAt           DateTime                @default(now()) // Дата создания
   updatedAt           DateTime                @updatedAt // Дата обновления
 }
@@ -484,6 +484,7 @@ model Bet4 {
   overlapPlayer2  Float // Перекрытие на игрока 2
   overlapPlayer3  Float // Перекрытие на игрока 3
   overlapPlayer4  Float // Перекрытие на игрока 4
+  margin          Float? // в placeBet = 0
   totalBetAmount  Float             @default(0) // сумма всех ставок.
   creator         User              @relation("BetsCreated4", fields: [creatorId], references: [id]) // создатель события
   creatorId       Int
@@ -496,7 +497,6 @@ model Bet4 {
   productItemId   Int?
   productItem     ProductItem?      @relation(fields: [productItemId], references: [id])
   winnerId        Int? // кто победил PLAYER1 или PLAYER2 или PLAYER3
-  margin          Float? // в placeBet = 0
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
@@ -552,6 +552,7 @@ model BetCLOSED4 {
   overlapPlayer2      Float // Перекрытие на игрока 2
   overlapPlayer3      Float // Перекрытие на игрока 3
   overlapPlayer4      Float // Перекрытие на игрока 4
+  margin              Float? // вся маржа события
   creator             User                    @relation("BetsCLOSEDCreated4", fields: [creatorId], references: [id])
   creatorId           Int
   status              BetStatus               @default(CLOSED) // Статус ставки
@@ -562,7 +563,6 @@ model BetCLOSED4 {
   productItemId       Int?
   productItem         ProductItem?            @relation(fields: [productItemId], references: [id])
   winnerId            Int? // ID победителя (без связи)
-  margin              Float? // вся маржа события
   createdAt           DateTime                @default(now()) // Дата создания
   updatedAt           DateTime                @updatedAt // Дата обновления
 }
