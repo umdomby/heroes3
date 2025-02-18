@@ -48,6 +48,9 @@ model User {
   transferUser1 Transfer[] @relation("TransferUser1") // Отношение для user1
   transferUser2 Transfer[] @relation("TransferUser2") // Отношение для user2
 
+  gameUserBet1 GameUserBet[] @relation("GameUser1Bet")
+  gameUserBet2 GameUserBet[] @relation("GameUser2Bet")
+
   player Player?
 
   chatUsers             ChatUsers[]
@@ -149,15 +152,16 @@ model Player {
 }
 
 model Category {
-  id          Int          @id @default(autoincrement())
-  name        String       @unique
-  products    Product[]
-  bets        Bet[]
-  betsCLOSED  BetCLOSED[]
-  bets3       Bet3[] // Обратная связь с Bet3
-  betsCLOSED3 BetCLOSED3[] // Обратная связь с BetCLOSED3
-  bets4       Bet4[] // Обратная связь с Bet3
-  betsCLOSED4 BetCLOSED4[] // Обратная связь с BetCLOSED3
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  products     Product[]
+  bets         Bet[]
+  betsCLOSED   BetCLOSED[]
+  bets3        Bet3[] // Обратная связь с Bet3
+  betsCLOSED3  BetCLOSED3[] // Обратная связь с BetCLOSED3
+  bets4        Bet4[] // Обратная связь с Bet3
+  betsCLOSED4  BetCLOSED4[] // Обратная связь с BetCLOSED3
+  gameUserBets GameUserBet[] // Добавлено обратное отношение
 }
 
 model Product {
@@ -172,19 +176,21 @@ model Product {
   betsCLOSED3  BetCLOSED3[] // Обратная связь с BetCLOSED3
   bets4        Bet4[] // Обратная связь с Bet3
   betsCLOSED4  BetCLOSED4[] // Обратная связь с BetCLOSED3
+  gameUserBets GameUserBet[]
 }
 
 model ProductItem {
-  id          Int          @id @default(autoincrement())
-  name        String       @unique
-  productId   Int
-  product     Product      @relation(fields: [productId], references: [id])
-  bets        Bet[]
-  betsCLOSED  BetCLOSED[]
-  bets3       Bet3[] // Обратная связь с Bet3
-  betsCLOSED3 BetCLOSED3[] // Обратная связь с BetCLOSED3
-  bets4       Bet4[] // Обратная связь с Bet3
-  betsCLOSED4 BetCLOSED4[] // Обратная связь с BetCLOSED3
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  productId    Int
+  product      Product       @relation(fields: [productId], references: [id])
+  bets         Bet[]
+  betsCLOSED   BetCLOSED[]
+  bets3        Bet3[] // Обратная связь с Bet3
+  betsCLOSED3  BetCLOSED3[] // Обратная связь с BetCLOSED3
+  bets4        Bet4[] // Обратная связь с Bet3
+  betsCLOSED4  BetCLOSED4[] // Обратная связь с BetCLOSED3
+  gameUserBets GameUserBet[]
 }
 
 enum BetStatus {
@@ -235,6 +241,29 @@ model GlobalData {
   openBetsPoints Float?   @default(0) // сумма ставок, которые еще не закрылись Bet-totalBetAmount, Bet3-totalBetAmount and Bet4 - totalBetAmount
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model GameUserBet {
+  id                   Int          @id @default(autoincrement())
+  gameUser1Bet         User         @relation("GameUser1Bet", fields: [gameUserBet1Id], references: [id])
+  gameUserBet1Id       Int
+  betUser1             Float
+  betUser2             Float?
+  gameUserBetDetails   String       @default("")
+  gameUserBetOpen      Boolean      @default(false)
+  checkWinUser1        Boolean      @default(false)
+  checkWinUser2        Boolean      @default(false)
+  gameUser2Bet         User?        @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id])
+  gameUserBet2Id       Int?
+  gameUserBetDataUser2 Json?
+  categoryId           Int?
+  category             Category?    @relation(fields: [categoryId], references: [id])
+  productId            Int?
+  product              Product?     @relation(fields: [productId], references: [id])
+  productItemId        Int?
+  productItem          ProductItem? @relation(fields: [productItemId], references: [id])
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 }
 
 // ------------------------------------------- 2 -------------------------------

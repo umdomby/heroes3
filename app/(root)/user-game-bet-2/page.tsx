@@ -7,10 +7,16 @@ import { getUserSession } from "@/components/lib/get-user-session";
 import TelegramNotification from '@/components/TelegramNotification';
 import BanedNotification from "@/components/BanedNotification";
 import Link from "next/link";
+import { HEROES_CLIENT_2 } from "@/components/HEROES_CLIENT_2";
+import { HEROES_CLIENT_NO_REG_2 } from "@/components/HEROES_CLIENT_NO_REG_2";
+import { HEROES_CLIENT_3 } from "@/components/HEROES_CLIENT_3";
+import { HEROES_CLIENT_NO_REG_3 } from "@/components/HEROES_CLIENT_NO_REG_3";
+import { HEROES_CLIENT_4 } from "@/components/HEROES_CLIENT_4";
+import { HEROES_CLIENT_NO_REG_4 } from "@/components/HEROES_CLIENT_NO_REG_4";
 import { User } from "@prisma/client";
 import GlobalDataComponent from "@/components/globalData";
 import {SheetChat} from "@/components/SheetChat";
-import {GAME_USERS_2} from "@/components/GAME_USERS_2";
+import {HEROES_CLIENT_2_USERS} from "@/components/HEROES_CLIENT_2_USERS";
 
 
 
@@ -38,7 +44,7 @@ const PointsUser: React.FC<PointsUserProps> = ({ user }) => (
 
 
 
-export default async function UserGame2Page() {
+export default async function UserGameBet2Page() {
     const session = await getUserSession();
     let user = null;
 
@@ -65,7 +71,7 @@ export default async function UserGame2Page() {
                     <FixedLink />
                     <Suspense fallback={<Loading />}>
                         <GlobalDataComponent/>
-                        <GAME_USERS_2 user={user} />
+                        <HEROES_CLIENT_2_USERS user={user} />
                     </Suspense>
                 </>
             )}
