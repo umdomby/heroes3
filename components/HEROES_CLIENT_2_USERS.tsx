@@ -60,14 +60,14 @@ const playerColors = {
     [PlayerChoice.PLAYER4]: "text-yellow-400", // Color for Player 4
 };
 
-export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
+export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
     const { data: session } = useSession();
     const {
         data: bets,
         error,
         isLoading,
         mutate,
-    } = useSWR<Bet[]>("/api/get-bets", fetcher, {
+    } = useSWR<Bet[]>("/api/get-bets-users", fetcher, {
         refreshInterval: 10000, // Опционально: периодическое обновление
         revalidateOnFocus: true, // Обновление при фокусе на вкладке
     });

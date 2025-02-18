@@ -1,65 +1,94 @@
 "use server";
-import { prisma } from '@/prisma/prisma-client';
-import { getUserSession } from '@/components/lib/get-user-session';
-import { redirect } from 'next/navigation';
-import { Suspense } from 'react';
-import Loading from "@/app/(root)/loading";
-import { clientCreateBet } from "@/app/actions";
 import { Container } from '@/components/container';
-import { UserGame2Comp } from "@/components/user-game-2-comp";
-import { Player } from '@prisma/client'; // Ensure this import is correct
+import { prisma } from '@/prisma/prisma-client';
+import React, { Suspense } from "react";
+import Loading from "@/app/(root)/loading";
+import { getUserSession } from "@/components/lib/get-user-session";
+import TelegramNotification from '@/components/TelegramNotification';
+import BanedNotification from "@/components/BanedNotification";
+import Link from "next/link";
+import { HEROES_CLIENT_2 } from "@/components/HEROES_CLIENT_2";
+import { HEROES_CLIENT_NO_REG_2 } from "@/components/HEROES_CLIENT_NO_REG_2";
+import { HEROES_CLIENT_3 } from "@/components/HEROES_CLIENT_3";
+import { HEROES_CLIENT_NO_REG_3 } from "@/components/HEROES_CLIENT_NO_REG_3";
+import { HEROES_CLIENT_4 } from "@/components/HEROES_CLIENT_4";
+import { HEROES_CLIENT_NO_REG_4 } from "@/components/HEROES_CLIENT_NO_REG_4";
+import { User } from "@prisma/client";
+import GlobalDataComponent from "@/components/globalData";
+import {SheetChat} from "@/components/SheetChat";
+import {HEROES_CLIENT_2_USERS} from "@/components/HEROES_CLIENT_2_USERS";
 
-async function fetchData() {
-    const session = await getUserSession();
 
-    if (!session) {
-        redirect('/not-auth');
-    }
 
-    try {
-        const [user, categories, products, productItems, players] = await prisma.$transaction([
-            prisma.user.findUnique({ where: { id: parseInt(session.id) } }),
-            prisma.category.findMany(),
-            prisma.product.findMany(),
-            prisma.productItem.findMany(),
-            prisma.player.findMany(),
-        ]);
+const FixedLink = () => (
+    <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
+        <p className="text-md text-blue-500 font-bold">
+            <Link className="text-blue-500 hover:text-green-300 font-bold text-xl" href={'https://t.me/navatar85'}
+                  target="_blank">@navatar85</Link>
+        </p>
+    </div>
+);
 
-        // Find the player associated with the user
-        const player = players.find((p: Player) => p.id === user?.id);
-        console.log("111111111111111 ");
-        console.log(player);
-        return { user, categories, products, productItems, player };
-
-    } catch (error) {
-        console.error("Error fetching data:", error);
-        return { user: null, categories: [], products: [], productItems: [], player: null };
-    }
+interface PointsUserProps {
+    user: User;
 }
 
-export default async function UserGamePage() {
-    const { user, categories, products, productItems, player } = await fetchData();
+const PointsUser: React.FC<PointsUserProps> = ({ user }) => (
+    <div className="absolute top-0 left-0 right-0 flex justify-center items-center py-2 z-50 transform -translate-y-9">
+        <p className="text-sm font-bold">
+            Points: <span className="text-red-500">{Math.floor((user.points ?? 0) * 100) / 100}</span>
+        </p>
+    </div>
+);
 
-    if (!user) {
-        redirect('/not-auth');
+
+
+
+export default async function UserGame2Page() {
+    const session = await getUserSession();
+    let user = null;
+
+    if (session) {
+        user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
     }
 
-    if (!player) {
-        return <div className="text-center">Вы не зарегистрированы как игрок.</div>;
-    }
+    const isTelegramEmpty = user && (!user.telegram || user.telegram.trim() === '');
 
     return (
-        <Container className="flex flex-col my-10 w-[96%]">
-            <Suspense fallback={<Loading />}>
-                <UserGame2Comp
-                    user={user}
-                    categories={categories}
-                    products={products}
-                    productItems={productItems}
-                    player={player} // Pass the single player
-                    createBet={clientCreateBet}
-                />
-            </Suspense>
+        <Container className="w-[100%] relative">
+            {user && (
+                <>
+                    <PointsUser user={user} />
+                    <SheetChat user={user}/>
+                </>
+
+            )}
+            {user && user.role !== 'BANED' && (
+                <>
+                    {isTelegramEmpty && (
+                        <TelegramNotification initialTelegram={user.telegram || ''} />
+                    )}
+                    <FixedLink />
+                    <Suspense fallback={<Loading />}>
+                        <GlobalDataComponent/>
+                        <HEROES_CLIENT_2_USERS user={user} />
+                    </Suspense>
+                </>
+            )}
+            {user && user.role === 'BANED' && (
+                <Suspense fallback={<Loading />}>
+                    <BanedNotification />
+                    <GlobalDataComponent/>
+                    {/*<HEROES_CLIENT_NO_REG_2 />*/}
+                </Suspense>
+            )}
+            {!user && (
+                <Suspense fallback={<Loading/>}>
+                    <FixedLink/>
+                    <GlobalDataComponent/>
+                    {/*<HEROES_CLIENT_NO_REG_2/>*/}
+                </Suspense>
+            )}
         </Container>
     );
 }

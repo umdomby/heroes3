@@ -813,7 +813,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name={`winner-${bet.id}-4`}
+                                                            name="player"
                                                             value={PlayerChoice.PLAYER1}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
@@ -837,7 +837,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name={`winner-${bet.id}-4`}
+                                                            name="player"
                                                             value={PlayerChoice.PLAYER2}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
@@ -861,7 +861,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name={`winner-${bet.id}-4`}
+                                                            name="player"
                                                             value={PlayerChoice.PLAYER3}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
@@ -885,7 +885,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name={`winner-${bet.id}-4`}
+                                                            name="player"
                                                             value={PlayerChoice.PLAYER4}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
@@ -922,7 +922,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name={`winner-${bet.id}`}
+                                                        name={`winner-${bet.id}-4`}
                                                         value={bet.player1Id}
                                                         onChange={() => setSelectedWinners((prev) => ({
                                                             ...prev,
@@ -936,7 +936,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name={`winner-${bet.id}`}
+                                                        name={`winner-${bet.id}-4`}
                                                         value={bet.player2Id}
                                                         onChange={() => setSelectedWinners((prev) => ({
                                                             ...prev,
@@ -950,7 +950,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name={`winner-${bet.id}`}
+                                                        name={`winner-${bet.id}-4`}
                                                         value={bet.player3Id}
                                                         onChange={() => setSelectedWinners((prev) => ({
                                                             ...prev,
@@ -964,7 +964,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name={`winner-${bet.id}`}
+                                                        name={`winner-${bet.id}-4`}
                                                         value={bet.player4Id}
                                                         onChange={() => setSelectedWinners((prev) => ({
                                                             ...prev,
@@ -978,7 +978,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name={`winner-${bet.id}`}
+                                                        name={`winner-${bet.id}-4`}
                                                         value="draw"
                                                         onChange={() => setSelectedWinners((prev) => ({
                                                             ...prev,
