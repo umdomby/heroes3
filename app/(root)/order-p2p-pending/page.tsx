@@ -9,7 +9,7 @@ import { getUserSession } from "@/components/lib/get-user-session";
 import { OrderP2PPending } from "@/components/OrderP2PPending";
 import { checkAndCloseExpiredDeals } from '@/app/actions';
 
-const PAGE_SIZE = 1; // Define the number of items per page
+
 
 export default async function OrderP2PPendingPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const resolvedSearchParams = await searchParams; // Await the searchParams if it's a Promise
@@ -33,7 +33,8 @@ export default async function OrderP2PPendingPage({ searchParams }: { searchPara
     }
 
     const page = parseInt(resolvedSearchParams.page ?? '1', 10);
-    const skip = (page - 100) * PAGE_SIZE;
+    const betsPerPage = 100;
+    const skip = (page - 1) * betsPerPage;
 
     const openOrders = await prisma.orderP2P.findMany({
         where: {
@@ -70,7 +71,7 @@ export default async function OrderP2PPendingPage({ searchParams }: { searchPara
             }
         },
         skip: skip,
-        take: PAGE_SIZE,
+        take: betsPerPage,
     });
 
     const totalOrders = await prisma.orderP2P.count({
@@ -88,7 +89,7 @@ export default async function OrderP2PPendingPage({ searchParams }: { searchPara
         }
     });
 
-    const totalPages = Math.ceil(totalOrders / PAGE_SIZE);
+    const totalPages = Math.ceil(totalOrders / betsPerPage);
 
     return (
         <Container className="w-[100%]">
