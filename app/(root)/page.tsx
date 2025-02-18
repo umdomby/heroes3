@@ -86,12 +86,12 @@ export default async function Home() {
                 </Suspense>
             )}
             {!user && (
-                <Suspense fallback={<Loading />}>
-                    <FixedLink />
+                <Suspense fallback={<Loading/>}>
+                    <FixedLink/>
                     <GlobalDataComponent/>
-                    <HEROES_CLIENT_NO_REG_2 />
-                    <HEROES_CLIENT_NO_REG_3 />
-                    <HEROES_CLIENT_NO_REG_4 />
+                    <HEROES_CLIENT_NO_REG_2/>
+                    <HEROES_CLIENT_NO_REG_3/>
+                    <HEROES_CLIENT_NO_REG_4/>
                 </Suspense>
             )}
         </Container>

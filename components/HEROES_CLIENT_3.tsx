@@ -15,7 +15,6 @@ import { redirect } from "next/navigation";
 import { placeBet3, closeBet3, closeBetDraw3 } from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
 import { useUser } from "@/hooks/useUser";
-
 import {
     Accordion,
     AccordionContent,
@@ -23,11 +22,11 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"; // Импортируйте компоненты Dialog
 
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
 
-// Константа для минимального допустимого коэффициента
 const MIN_ODDS = 1.05;
 
 interface Bet extends PrismaBet3 {
@@ -56,31 +55,20 @@ interface Props {
     className?: string;
 }
 
-// Цвета для игроков
 const playerColors = {
-    [PlayerChoice.PLAYER1]: "text-blue-400", // Color for Player 1
-    [PlayerChoice.PLAYER2]: "text-red-400",  // Color for Player 2
-    [PlayerChoice.PLAYER3]: "text-green-400", // Color for Player 3
-    [PlayerChoice.PLAYER4]: "text-yellow-400", // Color for Player 4
+    [PlayerChoice.PLAYER1]: "text-blue-400",
+    [PlayerChoice.PLAYER2]: "text-red-400",
+    [PlayerChoice.PLAYER3]: "text-green-400",
+    [PlayerChoice.PLAYER4]: "text-yellow-400",
 };
 
 export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
     const { data: session } = useSession();
-    const {
-        data: bets,
-        error,
-        isLoading,
-        mutate,
-    } = useSWR<Bet[]>("/api/get-bets3", fetcher, {
-        refreshInterval: 10000, // Опционально: периодическое обновление
-        revalidateOnFocus: true, // Обновление при фокусе на вкладке
+    const { data: bets, error, isLoading, mutate } = useSWR<Bet[]>("/api/get-bets3", fetcher, {
+        refreshInterval: 10000,
+        revalidateOnFocus: true,
     });
-    const {
-        user: userUp,
-        isLoading: isLoadingUser,
-        isError: isErrorUser,
-        mutate: mutateUser,
-    } = useUser(user ? user.id : null);
+    const { user: userUp, isLoading: isLoadingUser, isError: isErrorUser, mutate: mutateUser } = useUser(user ? user.id : null);
 
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
     const [selectedWinner, setSelectedWinner] = useState<number | "draw" | null>(null);
@@ -89,9 +77,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
     const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number; player3: number } }>({});
     const [betAmounts, setBetAmounts] = useState<{ [key: number]: string }>({});
-
-    // Состояние для управления модальным окном и ввода подтверждения
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false); // Состояние для диалога
     const [confirmationInput, setConfirmationInput] = useState("");
     const [currentBet, setCurrentBet] = useState<Bet | null>(null);
 
@@ -102,13 +88,9 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             const data = JSON.parse(event.data);
 
             unstable_batchedUpdates(() => {
-                if (
-                    data.type === "create" ||
-                    data.type === "update" ||
-                    data.type === "delete"
-                ) {
-                    mutate(); // Обновляем данные ставок
-                    mutateUser(); // Обновляем данные пользователя
+                if (data.type === "create" || data.type === "update" || data.type === "delete") {
+                    mutate();
+                    mutateUser();
                 }
             });
         };
@@ -126,25 +108,18 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
         };
     }, [mutate, mutateUser]);
 
-    // Условные операторы перенесены после всех хуков
     if (isLoadingUser) return <div>Загрузка данных пользователя...</div>;
     if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
 
-    // Фильтрация ставок по статусу OPEN
     const filteredBets = bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
 
     const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
         const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2 + bet.totalBetPlayer3;
-        const totalBetOnPlayer =
-            player === PlayerChoice.PLAYER1 ? bet.totalBetPlayer1 :
-                player === PlayerChoice.PLAYER2 ? bet.totalBetPlayer2 : bet.totalBetPlayer3;
+        const totalBetOnPlayer = player === PlayerChoice.PLAYER1 ? bet.totalBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.totalBetPlayer2 : bet.totalBetPlayer3;
 
-        // Рассчитываем новый коэффициент после добавления ставки
         const newOdds = totalBets / totalBetOnPlayer;
 
-        // Проверка на минимальный допустимый коэффициент
-        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 :
-            player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
+        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
         if (currentOdds < MIN_ODDS) {
             setOddsErrors((prev) => ({
                 ...prev,
@@ -157,10 +132,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             return;
         }
 
-        // Проверка на максимальную допустимую ставку
-        const maxAllowedBet =
-            player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 :
-                player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer3;
+        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer3;
 
         if (amount > maxAllowedBet) {
             setPlaceBetErrors((prev) => ({
@@ -174,7 +146,6 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             return;
         }
 
-        // Если проверка пройдена, очищаем ошибки и разблокируем кнопку
         setOddsErrors((prev) => ({
             ...prev,
             [bet.id]: null,
@@ -202,7 +173,6 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
         if (!isNaN(numericValue) && numericValue > 0 && selectedPlayer) {
             handleValidation(bet, numericValue, selectedPlayer);
 
-            // Рассчитываем потенциальную прибыль для каждого игрока
             const potentialProfitPlayer1 = Math.floor((numericValue * bet.oddsBetPlayer1) * 100) / 100;
             const potentialProfitPlayer2 = Math.floor((numericValue * bet.oddsBetPlayer2) * 100) / 100;
             const potentialProfitPlayer3 = Math.floor((numericValue * bet.oddsBetPlayer3) * 100) / 100;
@@ -226,7 +196,6 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
         if (!isNaN(amount) && amount > 0) {
             handleValidation(bet, amount, selectedPlayer);
 
-            // Рассчитываем потенциальную прибыль для каждого игрока
             const potentialProfitPlayer1 = Math.floor((amount * bet.oddsBetPlayer1) * 100) / 100;
             const potentialProfitPlayer2 = Math.floor((amount * bet.oddsBetPlayer2) * 100) / 100;
             const potentialProfitPlayer3 = Math.floor((amount * bet.oddsBetPlayer3) * 100) / 100;
@@ -262,10 +231,9 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             }));
             setPlaceBetErrors((prev) => ({
                 ...prev,
-                [bet.id]: null, // Очищаем ошибку при успешной ставке
+                [bet.id]: null,
             }));
 
-            // Очистка поля ввода после успешной ставки
             setBetAmounts((prev) => ({
                 ...prev,
                 [bet.id]: "",
@@ -274,12 +242,12 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             if (err instanceof Error) {
                 setPlaceBetErrors((prev) => ({
                     ...prev,
-                    [bet.id]: err.message, // Устанавливаем ошибку для конкретной ставки
+                    [bet.id]: err.message,
                 }));
             } else {
                 setPlaceBetErrors((prev) => ({
                     ...prev,
-                    [bet.id]: "Неизвестная ошибка", // Устанавливаем общую ошибку
+                    [bet.id]: "Неизвестная ошибка",
                 }));
             }
             console.error("Error placing bet:", err);
@@ -324,30 +292,24 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
         handlePlaceBet(bet, amount, player);
     };
 
-    // Функция для открытия модального окна
-    const openConfirmationModal = (bet: Bet) => {
+    const openConfirmationDialog = (bet: Bet) => {
         setCurrentBet(bet);
-        setIsModalOpen(true);
+        setIsDialogOpen(true);
     };
 
-    // Функция для закрытия модального окна
-    const closeConfirmationModal = () => {
-        setIsModalOpen(false);
+    const closeConfirmationDialog = () => {
+        setIsDialogOpen(false);
         setConfirmationInput("");
         setCurrentBet(null);
     };
 
-    // Функция для обработки подтверждения
     const handleConfirmation = async () => {
         if (!currentBet || selectedWinner === null) {
             setCloseBetError("Выберите победителя!");
             return;
         }
 
-        const expectedInput = selectedWinner === "draw" ? "ничья" :
-            selectedWinner === currentBet.player1Id ? currentBet.player1.name :
-                selectedWinner === currentBet.player2Id ? currentBet.player2.name :
-                    currentBet.player3.name;
+        const expectedInput = selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet.player1Id ? currentBet.player1.name : selectedWinner === currentBet.player2Id ? currentBet.player2.name : currentBet.player3.name;
 
         if (confirmationInput.toLowerCase() !== expectedInput.toLowerCase()) {
             setCloseBetError(`Введите правильное подтверждение: ${expectedInput}`);
@@ -365,7 +327,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             mutateUser();
             setSelectedWinner(null);
             setCloseBetError(null);
-            closeConfirmationModal();
+            closeConfirmationDialog();
         } catch (error) {
             if (error instanceof Error) {
                 setCloseBetError(error.message);
@@ -394,11 +356,9 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
 
     return (
         <div>
-            {/* Отображение отфильтрованных ставок */}
             {filteredBets.map((bet: Bet) => {
                 const userBets = bet.participants.filter((p) => p.userId === user?.id);
 
-                // Рассчитываем прибыль и убытки для каждого исхода
                 const totalBetOnPlayer1 = userBets
                     .filter((p) => p.player === PlayerChoice.PLAYER1)
                     .reduce((sum, p) => sum + p.amount, 0);
@@ -434,92 +394,42 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                     <Table>
                                         <TableBody>
                                             <TableRow>
-                                                {/* Игрок 1 */}
-                                                <TableCell
-                                                    className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%] `}
-                                                >
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%]`}>
+                                                    <div>{bet.player1.name}</div>
                                                     <div>
-                                                        {bet.player1.name}
-
+                                                        <span className={profitIfPlayer1Wins >= 0 ? "text-green-600" : "text-red-600"}>
+                                                            {profitIfPlayer1Wins >= 0 ? `+${Math.floor(profitIfPlayer1Wins * 100) / 100}` : Math.floor(profitIfPlayer1Wins * 100) / 100}
+                                                        </span>
                                                     </div>
-                                                    <div>  <span
-                                                        className={
-                                                            profitIfPlayer1Wins >= 0
-                                                                ? "text-green-600"
-                                                                : "text-red-600"
-                                                        }
-                                                    >
-                              {profitIfPlayer1Wins >= 0
-                                  ? `+${Math.floor(profitIfPlayer1Wins * 100) / 100}`
-                                  : Math.floor(profitIfPlayer1Wins * 100) / 100}
-                            </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                                 </TableCell>
-
-                                                {/* Игрок 2 */}
-                                                <TableCell
-                                                    className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%] `}
-                                                >
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%]`}>
+                                                    <div>{bet.player2.name}</div>
                                                     <div>
-                                                        {bet.player2.name}
-
+                                                        <span className={profitIfPlayer2Wins >= 0 ? "text-green-600" : "text-red-600"}>
+                                                            {profitIfPlayer2Wins >= 0 ? `+${Math.floor(profitIfPlayer2Wins * 100) / 100}` : Math.floor(profitIfPlayer2Wins * 100) / 100}
+                                                        </span>
                                                     </div>
-                                                    <div> <span
-                                                        className={
-                                                            profitIfPlayer2Wins >= 0
-                                                                ? "text-green-600"
-                                                                : "text-red-600"
-                                                        }
-                                                    >
-                              {profitIfPlayer2Wins >= 0
-                                  ? `+${Math.floor(profitIfPlayer2Wins * 100) / 100}`
-                                  : Math.floor(profitIfPlayer2Wins * 100) / 100}
-                            </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                                 </TableCell>
-
-                                                {/* Игрок 3 */}
-                                                <TableCell
-                                                    className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%] `}
-                                                >
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%]`}>
+                                                    <div>{bet.player3.name}</div>
                                                     <div>
-                                                        {bet.player3.name}
-
+                                                        <span className={profitIfPlayer3Wins >= 0 ? "text-green-600" : "text-red-600"}>
+                                                            {profitIfPlayer3Wins >= 0 ? `+${Math.floor(profitIfPlayer3Wins * 100) / 100}` : Math.floor(profitIfPlayer3Wins * 100) / 100}
+                                                        </span>
                                                     </div>
-                                                    <div> <span
-                                                        className={
-                                                            profitIfPlayer3Wins >= 0
-                                                                ? "text-green-600"
-                                                                : "text-red-600"
-                                                        }
-                                                    >
-                              {profitIfPlayer3Wins >= 0
-                                  ? `+${Math.floor(profitIfPlayer3Wins * 100) / 100}`
-                                  : Math.floor(profitIfPlayer3Wins * 100) / 100}
-                            </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer3 * 100) / 100}</div>
                                                 </TableCell>
-
-                                                <TableCell
-                                                    className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
-                                                >
-                                                </TableCell>
-
-                                                {/* Коэффициент для игроков */}
+                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%]`}></TableCell>
                                                 <TableCell className="w-20">
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
+                                                    <div className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                         {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
                                                     </div>
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
+                                                    <div className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                         {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
                                                     </div>
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
+                                                    <div className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                         {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
                                                     </div>
                                                 </TableCell>
@@ -528,149 +438,28 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                     </Table>
                                 </AccordionTrigger>
                                 <AccordionContent>
-
                                     {bet.status === "OPEN" && (
                                         <div className="m-4">
-                                            <p>
-                                                Общая сумма ставок на это событие:
-                                                <span className="text-green-400"> {Math.floor(bet.totalBetAmount * 100) / 100}</span>
-                                            </p>
-                                            <p>
-                                                Максимальная ставка на{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {bet.player1.name}
-            </span>
-                                                :{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {Math.floor(bet.maxBetPlayer1 * 100) / 100}
-            </span>
-                                            </p>
-                                            <p>
-                                                Максимальная ставка на{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER2]}>
-                {bet.player2.name}
-            </span>
-                                                :{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER2]}>
-                {Math.floor(bet.maxBetPlayer2 * 100) / 100}
-            </span>
-                                            </p>
-                                            <p>
-                                                Максимальная ставка на{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER3]}>
-                {bet.player3.name}
-            </span>
-                                                :{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER3]}>
-                {Math.floor(bet.maxBetPlayer3 * 100) / 100}
-            </span>
-                                            </p>
-                                            {/* Calculate and display the difference in coverage bets as points */}
-                                            <p>
-                                                Поставлено:{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {bet.player1.name}
-            </span>
-                                                :{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {Math.floor(bet.overlapPlayer1 * 100) / 100} Points
-            </span>
-                                            </p>
-                                            <p>
-                                                Поставлено:{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER2]}>
-                {bet.player2.name}
-            </span>
-                                                :{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER2]}>
-                 {Math.floor(bet.overlapPlayer2 * 100) / 100} Points
-            </span>
-                                            </p>
-                                            <p>
-                                                Поставлено:{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER3]}>
-                {bet.player3.name}
-            </span>
-                                                :{" "}
-                                                <span className={playerColors[PlayerChoice.PLAYER3]}>
-                 {Math.floor(bet.overlapPlayer3 * 100) / 100} Points
-            </span>
-                                            </p>
+                                            <p>Общая сумма ставок на это событие: <span className="text-green-400">{Math.floor(bet.totalBetAmount * 100) / 100}</span></p>
+                                            <p>Максимальная ставка на <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>: <span className={playerColors[PlayerChoice.PLAYER1]}>{Math.floor(bet.maxBetPlayer1 * 100) / 100}</span></p>
+                                            <p>Максимальная ставка на <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>: <span className={playerColors[PlayerChoice.PLAYER2]}>{Math.floor(bet.maxBetPlayer2 * 100) / 100}</span></p>
+                                            <p>Максимальная ставка на <span className={playerColors[PlayerChoice.PLAYER3]}>{bet.player3.name}</span>: <span className={playerColors[PlayerChoice.PLAYER3]}>{Math.floor(bet.maxBetPlayer3 * 100) / 100}</span></p>
+                                            <p>Поставлено: <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>: <span className={playerColors[PlayerChoice.PLAYER1]}>{Math.floor(bet.overlapPlayer1 * 100) / 100} Points</span></p>
+                                            <p>Поставлено: <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>: <span className={playerColors[PlayerChoice.PLAYER2]}>{Math.floor(bet.overlapPlayer2 * 100) / 100} Points</span></p>
+                                            <p>Поставлено: <span className={playerColors[PlayerChoice.PLAYER3]}>{bet.player3.name}</span>: <span className={playerColors[PlayerChoice.PLAYER3]}>{Math.floor(bet.overlapPlayer3 * 100) / 100} Points</span></p>
                                         </div>
                                     )}
 
                                     {userBets.length > 0 && (
                                         <div className="m-1 p-4 rounded-lg">
-                                            <h4 className="text-md font-semibold mb-2">
-                                                Ваши ставки на этот матч:
-                                            </h4>
+                                            <h4 className="text-md font-semibold mb-2">Ваши ставки на этот матч:</h4>
                                             {userBets.map((participant) => {
-                                                // Рассчитываем процент перекрытия на основе прибыли
                                                 const profitToCover = participant.amount * (participant.odds - 1);
-                                                const overlapPercentage =
-                                                    participant.overlap > 0
-                                                        ? Math.floor((participant.overlap / profitToCover) * 10000) / 100
-                                                        : 0;
-
-                                                // Определяем статус перекрытия
-                                                // let overlapStatus = "";
-                                                // switch (participant.isCovered) {
-                                                //     case "OPEN":
-                                                //         overlapStatus =
-                                                //             "Ваша ставка не перекрыта (0 Points, 0%)";
-                                                //         break;
-                                                //     case "CLOSED":
-                                                //         overlapStatus = `Ваша ставка полностью перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                //         break;
-                                                //     case "PENDING":
-                                                //         overlapStatus = `Ваша ставка частично перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                //         break;
-                                                //     default:
-                                                //         overlapStatus = "Неизвестный статус перекрытия.";
-                                                // }
+                                                const overlapPercentage = participant.overlap > 0 ? Math.floor((participant.overlap / profitToCover) * 10000) / 100 : 0;
 
                                                 return (
-                                                    <div
-                                                        key={participant.id}
-                                                        className="border border-gray-200 p-1 mb-1 rounded-md"
-                                                    >
-                                                        <p>
-                                                            Ставка:{" "}
-                                                            <strong className={playerColors[participant.player]}>
-                                                                {participant.amount}
-                                                            </strong>{" "}
-                                                            на{" "}
-                                                            <strong className={playerColors[participant.player]}>
-                                                                {participant.player === PlayerChoice.PLAYER1
-                                                                    ? bet.player1.name
-                                                                    : participant.player === PlayerChoice.PLAYER2
-                                                                        ? bet.player2.name
-                                                                        : bet.player3.name}
-                                                            </strong>
-                                                            {", "} Коэффициент:{" "}
-                                                            <span className={playerColors[participant.player]}>
-                            {Math.floor(participant.odds * 100) / 100}
-                        </span>
-                                                            {", "} Прибыль:{" "}
-                                                            <span className={playerColors[participant.player]}>
-                            {Math.floor(participant.profit * 100) / 100}
-                        </span>
-                                                            {", "} {new Date(participant.createdAt).toLocaleString()}
-                                                        </p>
-                                                        {/* Отображаем информацию о перекрытии */}
-                                                        <p>
-                        <span
-                            className={
-                                participant.isCovered === "OPEN"
-                                    ? "text-yellow-500"
-                                    : participant.isCovered === "CLOSED"
-                                        ? "text-green-500"
-                                        : "text-blue-500"
-                            }
-                        >
-                            {/*{overlapStatus}*/}
-                        </span>
-                                                        </p>
+                                                    <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
+                                                        <p>Ставка: <strong className={playerColors[participant.player]}>{participant.amount}</strong> на <strong className={playerColors[participant.player]}>{participant.player === PlayerChoice.PLAYER1 ? bet.player1.name : participant.player === PlayerChoice.PLAYER2 ? bet.player2.name : bet.player3.name}</strong>, Коэффициент: <span className={playerColors[participant.player]}>{Math.floor(participant.odds * 100) / 100}</span>, Прибыль: <span className={playerColors[participant.player]}>{Math.floor(participant.profit * 100) / 100}</span>, {new Date(participant.createdAt).toLocaleString()}</p>
                                                     </div>
                                                 );
                                             })}
@@ -681,106 +470,35 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                                 <div className="flex gap-2 m-2">
-                                                    <input
-                                                        className="border p-2 rounded w-[20%]"
-                                                        type="number"
-                                                        name="amount"
-                                                        placeholder="BET"
-                                                        min="1"
-                                                        step="1"
-                                                        required
-                                                        value={betAmounts[bet.id] || ""}
-                                                        onChange={(e) => handleAmountChange(e, bet)}
-                                                    />
+                                                    <input className="border p-2 rounded w-[20%]" type="number" name="amount" placeholder="BET" min="1" step="1" required value={betAmounts[bet.id] || ""} onChange={(e) => handleAmountChange(e, bet)} />
                                                     <label className="border p-2 rounded w-[20%] text-center">
-                                                        <div
-                                                            className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                        >
-                                                            {"("}
-                                                            {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
-                                                            {") "}
-                                                            {potentialProfit[bet.id]?.player1
-                                                                ? `+${Math.floor(potentialProfit[bet.id].player1 * 100) / 100}`
-                                                                : ""}
+                                                        <div className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}>
+                                                            {"("}{Math.floor(bet.oddsBetPlayer1 * 100) / 100}{") "}{potentialProfit[bet.id]?.player1 ? `+${Math.floor(potentialProfit[bet.id].player1 * 100) / 100}` : ""}
                                                         </div>
-                                                        <input
-                                                            className="mt-1"
-                                                            type="radio"
-                                                            name="player"
-                                                            value={PlayerChoice.PLAYER1}
-                                                            required
-                                                            onChange={(e) => handlePlayerChange(e, bet)}
-                                                        />
-                                                        <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {bet.player1.name}
-            </span>
+                                                        <input className="mt-1" type="radio" name="player" value={PlayerChoice.PLAYER1} required onChange={(e) => handlePlayerChange(e, bet)} />
+                                                        <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>
                                                     </label>
 
                                                     <label className="border p-2 rounded w-[20%] text-center">
-                                                        <div
-                                                            className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                        >
-                                                            {"("}
-                                                            {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
-                                                            {") "}
-                                                            {potentialProfit[bet.id]?.player2
-                                                                ? `+${Math.floor(potentialProfit[bet.id].player2 * 100) / 100}`
-                                                                : ""}
+                                                        <div className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}>
+                                                            {"("}{Math.floor(bet.oddsBetPlayer2 * 100) / 100}{") "}{potentialProfit[bet.id]?.player2 ? `+${Math.floor(potentialProfit[bet.id].player2 * 100) / 100}` : ""}
                                                         </div>
-                                                        <input
-                                                            className="mt-1"
-                                                            type="radio"
-                                                            name="player"
-                                                            value={PlayerChoice.PLAYER2}
-                                                            required
-                                                            onChange={(e) => handlePlayerChange(e, bet)}
-                                                        />
-                                                        <span className={playerColors[PlayerChoice.PLAYER2]}>
-                {bet.player2.name}
-            </span>
+                                                        <input className="mt-1" type="radio" name="player" value={PlayerChoice.PLAYER2} required onChange={(e) => handlePlayerChange(e, bet)} />
+                                                        <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>
                                                     </label>
 
                                                     <label className="border p-2 rounded w-[20%] text-center">
-                                                        <div
-                                                            className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                        >
-                                                            {"("}
-                                                            {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
-                                                            {") "}
-                                                            {potentialProfit[bet.id]?.player3
-                                                                ? `+${Math.floor(potentialProfit[bet.id].player3 * 100) / 100}`
-                                                                : ""}
+                                                        <div className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}>
+                                                            {"("}{Math.floor(bet.oddsBetPlayer3 * 100) / 100}{") "}{potentialProfit[bet.id]?.player3 ? `+${Math.floor(potentialProfit[bet.id].player3 * 100) / 100}` : ""}
                                                         </div>
-                                                        <input
-                                                            className="mt-1"
-                                                            type="radio"
-                                                            name="player"
-                                                            value={PlayerChoice.PLAYER3}
-                                                            required
-                                                            onChange={(e) => handlePlayerChange(e, bet)}
-                                                        />
-                                                        <span className={playerColors[PlayerChoice.PLAYER3]}>
-                {bet.player3.name}
-            </span>
+                                                        <input className="mt-1" type="radio" name="player" value={PlayerChoice.PLAYER3} required onChange={(e) => handlePlayerChange(e, bet)} />
+                                                        <span className={playerColors[PlayerChoice.PLAYER3]}>{bet.player3.name}</span>
                                                     </label>
-                                                    <Button
-                                                        className={`mt-2 w-[20%] ${
-                                                            isBetDisabled[bet.id] ? "bg-gray-400 cursor-not-allowed" : ""
-                                                        }`}
-                                                        type="submit"
-                                                        disabled={isBetDisabled[bet.id] || !user}
-                                                    >
-                                                        BET
-                                                    </Button>
+                                                    <Button className={`mt-2 w-[20%] ${isBetDisabled[bet.id] ? "bg-gray-400 cursor-not-allowed" : ""}`} type="submit" disabled={isBetDisabled[bet.id] || !user}>BET</Button>
                                                 </div>
-                                                {oddsErrors[bet.id] && (
-                                                    <p className="text-red-500">{oddsErrors[bet.id]}</p>
-                                                )}
-                                                {placeBetErrors[bet.id] && (
-                                                    <p className="text-red-500">{placeBetErrors[bet.id]}</p>
-                                                )}
+                                                {oddsErrors[bet.id] && <p className="text-red-500">{oddsErrors[bet.id]}</p>}
+                                                {placeBetErrors[bet.id] && <p className="text-red-500">{placeBetErrors[bet.id]}</p>}
                                             </form>
-
                                         </div>
                                     )}
 
@@ -789,58 +507,24 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                             <h4 className="text-lg font-semibold">Закрыть ставку</h4>
                                             <div className="flex gap-2 mt-2">
                                                 <label>
-                                                    <input
-                                                        type="radio"
-                                                        name="winner"
-                                                        value={bet.player1Id}
-                                                        onChange={() => setSelectedWinner(bet.player1Id)}
-                                                    />
-                                                    <span className={playerColors[PlayerChoice.PLAYER1]}>
-                       {bet.player1.name}
-                   </span>{" "}
+                                                    <input type="radio" name="winner" value={bet.player1Id} onChange={() => setSelectedWinner(bet.player1Id)} />
+                                                    <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>{" "}
                                                 </label>
                                                 <label>
-                                                    <input
-                                                        type="radio"
-                                                        name="winner"
-                                                        value={bet.player2Id}
-                                                        onChange={() => setSelectedWinner(bet.player2Id)}
-                                                    />
-                                                    <span className={playerColors[PlayerChoice.PLAYER2]}>
-                       {bet.player2.name}
-                   </span>{" "}
+                                                    <input type="radio" name="winner" value={bet.player2Id} onChange={() => setSelectedWinner(bet.player2Id)} />
+                                                    <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>{" "}
                                                 </label>
                                                 <label>
-                                                    <input
-                                                        type="radio"
-                                                        name="winner"
-                                                        value={bet.player3Id} // Убедитесь, что player3Id существует в интерфейсе Bet
-                                                        onChange={() => setSelectedWinner(bet.player3Id)}
-                                                    />
-                                                    <span className={playerColors[PlayerChoice.PLAYER3]}>
-        {bet.player3.name}
-    </span>{" "}
+                                                    <input type="radio" name="winner" value={bet.player3Id} onChange={() => setSelectedWinner(bet.player3Id)} />
+                                                    <span className={playerColors[PlayerChoice.PLAYER3]}>{bet.player3.name}</span>{" "}
                                                 </label>
                                                 <label>
-                                                    <input
-                                                        type="radio"
-                                                        name="winner"
-                                                        value="draw"
-                                                        onChange={() => setSelectedWinner("draw")}
-                                                    />
+                                                    <input type="radio" name="winner" value="draw" onChange={() => setSelectedWinner("draw")} />
                                                     <span>Ничья</span>
                                                 </label>
                                             </div>
-                                            <Button
-                                                type="button"
-                                                onClick={() => openConfirmationModal(bet)}
-                                                className="mt-2 w-full"
-                                            >
-                                                Закрыть ставку
-                                            </Button>
-                                            {closeBetError && (
-                                                <p className="text-red-500">{closeBetError}</p>
-                                            )}
+                                            <Button type="button" onClick={() => openConfirmationDialog(bet)} className="mt-2 w-full">Закрыть ставку</Button>
+                                            {closeBetError && <p className="text-red-500">{closeBetError}</p>}
                                         </div>
                                     )}
                                 </AccordionContent>
@@ -850,26 +534,20 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                 );
             })}
 
-            {/* Модальное окно для подтверждения закрытия ставки */}
-            {isModalOpen && currentBet && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <h4>Подтверждение закрытия ставки</h4>
-                        <p>Введите {selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet.player1Id ? currentBet.player1.name : selectedWinner === currentBet.player2Id ? currentBet.player2.name : currentBet.player3.name} для подтверждения:</p>
-                        <input
-                            type="text"
-                            value={confirmationInput}
-                            onChange={(e) => setConfirmationInput(e.target.value)}
-                            className="border p-2 rounded w-full"
-                        />
-                        <div className="flex justify-end mt-4">
-                            <Button onClick={closeConfirmationModal} className="mr-2">Отмена</Button>
-                            <Button onClick={handleConfirmation}>Подтвердить</Button>
-                        </div>
-                        {closeBetError && <p className="text-red-500">{closeBetError}</p>}
-                    </div>
-                </div>
-            )}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Подтверждение закрытия ставки</DialogTitle>
+                    </DialogHeader>
+                    <p>Введите {selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet?.player1Id ? currentBet?.player1.name : selectedWinner === currentBet?.player2Id ? currentBet?.player2.name : currentBet?.player3.name} для подтверждения:</p>
+                    <input type="text" value={confirmationInput} onChange={(e) => setConfirmationInput(e.target.value)} className="border p-2 rounded w-full" />
+                    <DialogFooter>
+                        <Button onClick={closeConfirmationDialog} className="mr-2">Отмена</Button>
+                        <Button onClick={handleConfirmation}>Подтвердить</Button>
+                    </DialogFooter>
+                    {closeBetError && <p className="text-red-500">{closeBetError}</p>}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

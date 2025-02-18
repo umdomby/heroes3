@@ -31,7 +31,7 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                     <DialogTitle></DialogTitle>
                 </VisuallyHidden>
                 <div className="text-center">
-                    Регистрация одной кнопкой
+                    Регистрация и вход одной кнопкой
                 </div>
                 <Button
                         variant="secondary"

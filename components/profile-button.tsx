@@ -17,7 +17,7 @@ export const ProfileButton: React.FC<Props> = ({ className, onClickSignIn }) => 
       {!session ? (
         <Button onClick={onClickSignIn} variant="outline" className="flex items-center gap-1 h-5">
           <User size={16} />
-          Войти
+          Войти в 1 клик
         </Button>
       ) : (
         <Link href="/profile">
