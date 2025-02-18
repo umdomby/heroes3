@@ -399,11 +399,6 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                     </div>
                                                     <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                                 </TableCell>
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%]`}></TableCell>
-                                                <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%]`}></TableCell>
-                                                <TableCell className="w-20">
-                                                    <div>ID: {bet.id}</div>
-                                                </TableCell>
                                                 <TableCell className="w-20">
                                                     <div className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                         {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
@@ -411,6 +406,9 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                     <div className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                         {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
                                                     </div>
+                                                </TableCell>
+                                                <TableCell className="w-20">
+                                                    <div>ID: {bet.id}</div>
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
@@ -488,7 +486,14 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                     <span>Ничья</span>
                                                 </label>
                                             </div>
-                                            <Button type="button" onClick={() => openConfirmationDialog(bet)} className="mt-2 w-full">Закрыть ставку</Button>
+                                            <Button
+                                                type="button"
+                                                onClick={() => openConfirmationDialog(bet)}
+                                                className="mt-2 w-full"
+                                                disabled={selectedWinner === null}
+                                            >
+                                                Закрыть ставку
+                                            </Button>
                                             {closeBetError && <p className="text-red-500">{closeBetError}</p>}
                                         </div>
                                     )}
