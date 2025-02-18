@@ -3,9 +3,9 @@ import { Container } from '@/components/container';
 import { prisma } from '@/prisma/prisma-client';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
-import { BET_ALL_CLOSED_2 } from "@/components/BET_ALL_CLOSED_2";
-import {BET_ALL_CLOSED_3} from "@/components/BET_ALL_CLOSED_3";
-import {BET_ALL_CLOSED_4} from "@/components/BET_ALL_CLOSED_4";
+import {USERS_ALL_CLOSED_2} from "@/components/USERS_ALL_CLOSED_2";
+import {USERS_ALL_CLOSED_3} from "@/components/USERS_ALL_CLOSED_3";
+import {USERS_ALL_CLOSED_4} from "@/components/USERS_ALL_CLOSED_4";
 
 export default async function BetAllClosedPage() {
     // Получаем все закрытые ставки, в которых участвовал пользователь
@@ -60,9 +60,9 @@ export default async function BetAllClosedPage() {
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <BET_ALL_CLOSED_2 closedBets={closedBets2} />
-                <BET_ALL_CLOSED_3 closedBets={closedBets3} />
-                <BET_ALL_CLOSED_4 closedBets={closedBets4} />
+                <USERS_ALL_CLOSED_2 closedBets={closedBets2} />
+                <USERS_ALL_CLOSED_3 closedBets={closedBets3} />
+                <USERS_ALL_CLOSED_4 closedBets={closedBets4} />
             </Suspense>
         </Container>
     );

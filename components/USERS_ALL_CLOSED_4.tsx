@@ -30,7 +30,7 @@ interface Props {
     closedBets: BetCLOSED[];
 }
 
-export const BET_ALL_CLOSED_4: React.FC<Props> = ({ closedBets }) => {
+export const USERS_ALL_CLOSED_4: React.FC<Props> = ({ closedBets }) => {
     return (
         <div>
             {closedBets.map((bet) => {
