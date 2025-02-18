@@ -1,17 +1,10 @@
 "use client";
+
 import React from 'react';
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableRow,
-} from "@/components/ui/table";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface BetParticipantCLOSED {
     id: number;
@@ -42,16 +35,17 @@ interface BetCLOSED {
     margin: number | null;
     winnerId: number | null;
     updatedAt: Date;
-    globalDataBetFund : number;
+    globalDataBetFund: number;
 }
 
 interface Props {
     user: any;
     closedBets: BetCLOSED[];
+    currentPage: number;
+    totalPages: number;
 }
 
-export const HEROES_CLIENT_CLOSED_2: React.FC<Props> = ({ user, closedBets }) => {
-    // Подсчитываем общую прибыль/потерю
+export const HEROES_CLIENT_CLOSED_2: React.FC<Props> = ({ user, closedBets, currentPage, totalPages }) => {
     const totalProfitLoss = closedBets.reduce((total, bet) => {
         const userBets = bet.participantsCLOSED.filter((p) => p.userId === user.id);
         return total + userBets.reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0);
@@ -80,74 +74,30 @@ export const HEROES_CLIENT_CLOSED_2: React.FC<Props> = ({ user, closedBets }) =>
                                     <Table>
                                         <TableBody>
                                             <TableRow>
-                                                <TableCell
-                                                    className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
-                                                    <div
-                                                        className={
-                                                            bet.winnerId === bet.player1.id
-                                                                ? 'text-green-500' // Победитель
-                                                                : bet.winnerId === bet.player2.id
-                                                                    ? 'text-red-500' // Проигравший
-                                                                    : 'text-white' // Ничья
-                                                        }
-                                                    >
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
+                                                    <div className={bet.winnerId === bet.player1.id ? 'text-green-500' : bet.winnerId === bet.player2.id ? 'text-red-500' : 'text-white'}>
                                                         {bet.player1.name}
                                                     </div>
                                                     <div>
-                        <span
-                            className={
-                                userBets
-                                    .filter((p) => p.player === 'PLAYER1')
-                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
-                                    ? 'text-green-500'
-                                    : 'text-red-500'
-                            }
-                        >
-                            {Math.floor(
-                                userBets
-                                    .filter((p) => p.player === 'PLAYER1')
-                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100
-                            ) / 100}
-                        </span>
+                                                        <span className={userBets.filter((p) => p.player === 'PLAYER1').reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0 ? 'text-green-500' : 'text-red-500'}>
+                                                            {Math.floor(userBets.filter((p) => p.player === 'PLAYER1').reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
+                                                        </span>
                                                     </div>
                                                     <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                                 </TableCell>
-                                                <TableCell
-                                                    className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
-                                                    <div
-                                                        className={
-                                                            bet.winnerId === bet.player2.id
-                                                                ? 'text-green-500' // Победитель
-                                                                : bet.winnerId === bet.player1.id
-                                                                    ? 'text-red-500' // Проигравший
-                                                                    : 'text-white' // Ничья
-                                                        }
-                                                    >
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
+                                                    <div className={bet.winnerId === bet.player2.id ? 'text-green-500' : bet.winnerId === bet.player1.id ? 'text-red-500' : 'text-white'}>
                                                         {bet.player2.name}
                                                     </div>
                                                     <div>
-                        <span
-                            className={
-                                userBets
-                                    .filter((p) => p.player === 'PLAYER2')
-                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
-                                    ? 'text-green-500'
-                                    : 'text-red-500'
-                            }
-                        >
-                            {Math.floor(
-                                userBets
-                                    .filter((p) => p.player === 'PLAYER2')
-                                    .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100
-                            ) / 100}
-                        </span>
+                                                        <span className={userBets.filter((p) => p.player === 'PLAYER2').reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0 ? 'text-green-500' : 'text-red-500'}>
+                                                            {Math.floor(userBets.filter((p) => p.player === 'PLAYER2').reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
+                                                        </span>
                                                     </div>
                                                     <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                                 </TableCell>
-                                                <TableCell
-                                                    className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]"></TableCell>
-                                                <TableCell
-                                                    className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]"></TableCell>
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]"></TableCell>
+                                                <TableCell className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]"></TableCell>
                                                 <TableCell className="w-[15%]">
                                                     <div>{Math.floor(bet.oddsBetPlayer1 * 100) / 100}</div>
                                                     <div>{Math.floor(bet.oddsBetPlayer2 * 100) / 100}</div>
@@ -160,9 +110,6 @@ export const HEROES_CLIENT_CLOSED_2: React.FC<Props> = ({ user, closedBets }) =>
                                 <AccordionContent>
                                     <div className="m-1 p-4 rounded-lg">
                                         <h4 className="text-md font-semibold mb-2">Дата и время закрытия ставок: {new Date(bet.updatedAt).toLocaleString()}</h4>
-                                        <p>
-                                            {/* Победитель: <strong>{winnerName}</strong> */}
-                                        </p>
                                     </div>
 
                                     {userBets.map((participant) => {
@@ -190,30 +137,41 @@ export const HEROES_CLIENT_CLOSED_2: React.FC<Props> = ({ user, closedBets }) =>
                                                 <p>
                                                     {participant.isWinner ? (
                                                         <span className="text-green-500">
-                        Возврат: {Math.floor(participant.return * 100) / 100} Points
-                    </span>
+                                                            Возврат: {Math.floor(participant.return * 100) / 100} Points
+                                                        </span>
                                                     ) : (
-                                                        <span
-                                                            className={
-                                                                Math.floor((participant.return - participant.amount) * 100) / 100 === 0
-                                                                    ? 'text-purple-500'
-                                                                    : 'text-red-500'
-                                                            }
-                                                        >
-                        Потеря: {Math.floor((participant.return - participant.amount) * 100) / 100} Points
-                    </span>
+                                                        <span className={Math.floor((participant.return - participant.amount) * 100) / 100 === 0 ? 'text-purple-500' : 'text-red-500'}>
+                                                            Потеря: {Math.floor((participant.return - participant.amount) * 100) / 100} Points
+                                                        </span>
                                                     )}
                                                 </p>
                                             </div>
                                         );
                                     })}
-
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
                     </div>
                 );
             })}
+
+            <div className="pagination-buttons flex justify-center mt-6">
+                <Link href={`/bet-closed-2?page=${currentPage - 1}`}>
+                    <Button className="btn btn-primary mx-2 w-[100px] h-7" disabled={currentPage === 1}>
+                        Previous
+                    </Button>
+                </Link>
+                <span className="mx-3 text-lg font-semibold">
+                    Page {currentPage} of {totalPages}
+                </span>
+                {currentPage < totalPages && (
+                    <Link href={`/bet-closed-2?page=${currentPage + 1}`}>
+                        <Button className="btn btn-primary mx-2 w-[100px] h-7">
+                            Next
+                        </Button>
+                    </Link>
+                )}
+            </div>
         </div>
     );
 };

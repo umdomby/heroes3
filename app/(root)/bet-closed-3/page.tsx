@@ -1,4 +1,5 @@
 "use server";
+
 import { Container } from '@/components/container';
 import { prisma } from '@/prisma/prisma-client';
 import { redirect } from 'next/navigation';
@@ -7,7 +8,7 @@ import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { HEROES_CLIENT_CLOSED_3 } from "@/components/HEROES_CLIENT_CLOSED_3";
 
-export default async function BetClosedPage() {
+export default async function BetClosedPage({ searchParams }: { searchParams: { page?: string } }) {
     const session = await getUserSession();
 
     if (!session) {
@@ -24,7 +25,11 @@ export default async function BetClosedPage() {
         return redirect('/');
     }
 
-    // Получаем все закрытые ставки на трех игроков, в которых участвовал пользователь
+    const page = parseInt(searchParams.page ?? '1', 10);
+    const betsPerPage = 5;
+    const skip = (page - 1) * betsPerPage;
+
+    // Fetch closed bets with pagination
     const closedBets = await prisma.betCLOSED3.findMany({
         where: {
             participantsCLOSED3: {
@@ -41,13 +46,27 @@ export default async function BetClosedPage() {
         },
         orderBy: {
             updatedAt: 'desc'
+        },
+        skip: skip,
+        take: betsPerPage,
+    });
+
+    const totalBets = await prisma.betCLOSED3.count({
+        where: {
+            participantsCLOSED3: {
+                some: {
+                    userId: user.id
+                }
+            }
         }
     });
+
+    const totalPages = Math.ceil(totalBets / betsPerPage);
 
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <HEROES_CLIENT_CLOSED_3 user={user} closedBets={closedBets} />
+                <HEROES_CLIENT_CLOSED_3 user={user} closedBets={closedBets} currentPage={page} totalPages={totalPages} />
             </Suspense>
         </Container>
     );

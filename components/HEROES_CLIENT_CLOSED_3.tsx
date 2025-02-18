@@ -1,4 +1,5 @@
 "use client";
+
 import React from 'react';
 import {
     Accordion,
@@ -12,6 +13,8 @@ import {
     TableCell,
     TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface BetParticipantCLOSED3 {
     id: number;
@@ -51,9 +54,11 @@ interface BetCLOSED3 {
 interface Props {
     user: any;
     closedBets: BetCLOSED3[];
+    currentPage: number;
+    totalPages: number;
 }
 
-export const HEROES_CLIENT_CLOSED_3: React.FC<Props> = ({ user, closedBets }) => {
+export const HEROES_CLIENT_CLOSED_3: React.FC<Props> = ({ user, closedBets, currentPage, totalPages }) => {
     const totalProfitLoss = closedBets.reduce((total, bet) => {
         const userBets = bet.participantsCLOSED3.filter((p) => p.userId === user.id);
         return total + userBets.reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0);
@@ -251,6 +256,24 @@ export const HEROES_CLIENT_CLOSED_3: React.FC<Props> = ({ user, closedBets }) =>
                     </div>
                 );
             })}
+
+            <div className="pagination-buttons flex justify-center mt-6">
+                <Link href={`/bet-closed-3?page=${currentPage - 1}`}>
+                    <Button className="btn btn-primary mx-2 w-[100px] h-7" disabled={currentPage === 1}>
+                        Previous
+                    </Button>
+                </Link>
+                <span className="mx-3 text-lg font-semibold">
+                    Page {currentPage} of {totalPages}
+                </span>
+                {currentPage < totalPages && (
+                    <Link href={`/bet-closed-3?page=${currentPage + 1}`}>
+                        <Button className="btn btn-primary mx-2 w-[100px] h-7">
+                            Next
+                        </Button>
+                    </Link>
+                )}
+            </div>
         </div>
     );
 };
