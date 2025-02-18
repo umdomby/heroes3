@@ -122,7 +122,7 @@ model ReferralUserIpAddress {
 
 model Player {
   id                Int         @id @default(autoincrement())
-  name              String
+  name              String      @unique
   twitch            String?
   user              User?       @relation(fields: [userId], references: [id])
   userId            Int?        @unique

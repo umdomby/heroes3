@@ -33,16 +33,16 @@ interface Props {
     categories: Category[];
     products: Product[];
     productItems: ProductItem[];
-    players: Player;
+    player: Player;
     createBet: typeof clientCreateBet;
 }
 
-export const UserGame2: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
+export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, productItems, player, createBet }) => {
     const form = useForm<z.infer<typeof createBetSchema>>({
         resolver: zodResolver(createBetSchema),
         defaultValues: {
-            player1Id: players.id,
-            player2Id: players.id,
+            player1Id: player.id, // Используем id переданного игрока
+            player2Id: player.id, // Или другой способ инициализации, если требуется
             initBetPlayer1: 500,
             initBetPlayer2: 500,
             categoryId: categories[0]?.id,
@@ -105,42 +105,42 @@ export const UserGame2: React.FC<Props> = ({ user, categories, products, product
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     {/* Поле выбора Player 1 */}
-                    <FormField
-                        control={form.control}
-                        name="player1Id"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Player 1</FormLabel>
-                                <FormControl>
-                                    <select {...field}>
-                                        {players.map((player) => (
-                                            <option key={player.id} value={player.id}>{player.name}</option>
-                                        ))}
-                                    </select>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {/*<FormField*/}
+                    {/*    control={form.control}*/}
+                    {/*    name="player1Id"*/}
+                    {/*    render={({ field }) => (*/}
+                    {/*        <FormItem>*/}
+                    {/*            <FormLabel>Player 1</FormLabel>*/}
+                    {/*            <FormControl>*/}
+                    {/*                <select {...field}>*/}
+                    {/*                    {players.map((player) => (*/}
+                    {/*                        <option key={player.id} value={player.id}>{player.name}</option>*/}
+                    {/*                    ))}*/}
+                    {/*                </select>*/}
+                    {/*            </FormControl>*/}
+                    {/*            <FormMessage />*/}
+                    {/*        </FormItem>*/}
+                    {/*    )}*/}
+                    {/*/>*/}
 
                     {/* Поле выбора Player 2 */}
-                    <FormField
-                        control={form.control}
-                        name="player2Id"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Player 2</FormLabel>
-                                <FormControl>
-                                    <select {...field}>
-                                        {players.map((player) => (
-                                            <option key={player.id} value={player.id}>{player.name}</option>
-                                        ))}
-                                    </select>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {/*<FormField*/}
+                    {/*    control={form.control}*/}
+                    {/*    name="player2Id"*/}
+                    {/*    render={({ field }) => (*/}
+                    {/*        <FormItem>*/}
+                    {/*            <FormLabel>Player 2</FormLabel>*/}
+                    {/*            <FormControl>*/}
+                    {/*                <select {...field}>*/}
+                    {/*                    {players.map((player) => (*/}
+                    {/*                        <option key={player.id} value={player.id}>{player.name}</option>*/}
+                    {/*                    ))}*/}
+                    {/*                </select>*/}
+                    {/*            </FormControl>*/}
+                    {/*            <FormMessage />*/}
+                    {/*        </FormItem>*/}
+                    {/*    )}*/}
+                    {/*/>*/}
 
                     {/* Поле для ставки на Player 1 */}
                     <FormField

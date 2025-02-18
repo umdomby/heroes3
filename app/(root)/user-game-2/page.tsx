@@ -6,7 +6,8 @@ import { Suspense } from 'react';
 import Loading from "@/app/(root)/loading";
 import { clientCreateBet } from "@/app/actions";
 import { Container } from '@/components/container';
-import { UserGame2 } from "@/components/user-game-2";
+import { UserGame2Comp } from "@/components/user-game-2-comp";
+import { Player } from '@prisma/client'; // Ensure this import is correct
 
 async function fetchData() {
     const session = await getUserSession();
@@ -24,40 +25,38 @@ async function fetchData() {
             prisma.player.findMany(),
         ]);
 
-        // Check if the user is a player
-        const player = players.find(p => p.id === user?.id);
+        // Find the player associated with the user
+        const player = players.find((p: Player) => p.id === user?.id);
+        console.log("111111111111111 ");
+        console.log(player);
+        return { user, categories, products, productItems, player };
 
-        return { user, categories, products, productItems, players, player };
     } catch (error) {
         console.error("Error fetching data:", error);
-        return { user: null, categories: [], products: [], productItems: [], players: [], player: null };
+        return { user: null, categories: [], products: [], productItems: [], player: null };
     }
 }
 
 export default async function UserGamePage() {
-    const { user, categories, products, productItems, players, player } = await fetchData();
+    const { user, categories, products, productItems, player } = await fetchData();
 
     if (!user) {
         redirect('/not-auth');
     }
 
     if (!player) {
-        return <div>Вы не зарегистрированы как игрок.</div>;
-    }
-
-    if (!user) {
-        redirect('/not-auth');
+        return <div className="text-center">Вы не зарегистрированы как игрок.</div>;
     }
 
     return (
         <Container className="flex flex-col my-10 w-[96%]">
             <Suspense fallback={<Loading />}>
-                <UserGame2
+                <UserGame2Comp
                     user={user}
                     categories={categories}
                     products={products}
                     productItems={productItems}
-                    players={players}
+                    player={player} // Pass the single player
                     createBet={clientCreateBet}
                 />
             </Suspense>
