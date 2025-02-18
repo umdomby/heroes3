@@ -12,37 +12,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@prisma/client";
 import { getEmailByCardId, transferPoints } from "@/app/actions";
+import Link from "next/link";
 
 interface Transfer {
     transferUser1Id: number;
-    transferUser2Id: number | null; // Allow null
+    transferUser2Id: number | null;
     transferPoints: number;
     createdAt: Date;
     transferUser1: { cardId: string };
-    transferUser2: { cardId: string } | null; // Allow null
+    transferUser2: { cardId: string } | null;
 }
 
 interface Props {
     user: User;
     transferHistory: Transfer[];
+    currentPage: number;
+    totalPages: number;
     className?: string;
 }
 
-export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, className }) => {
+export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, currentPage, totalPages, className }) => {
     const [cardId, setCardId] = useState('');
     const [points, setPoints] = useState(50);
     const [recipientEmail, setRecipientEmail] = useState('');
     const [showDialog, setShowDialog] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const [errorMessage, setErrorMessage] = useState(''); // State for error message
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleTransfer = async () => {
-        // Check if the recipient's cardId is the same as the current user's cardId
         if (cardId === user.cardId) {
-            setErrorMessage('Вы не можете передать баллы самому себе.'); // Set error message
+            setErrorMessage('Вы не можете передать баллы самому себе.');
             return;
         } else {
-            setErrorMessage(''); // Clear error message if valid
+            setErrorMessage('');
         }
 
         if (points < 30 || points > user.points) {
@@ -66,7 +68,7 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
         if (result) {
             setSuccessMessage('Баллы успешно переданы');
             setShowDialog(false);
-            setTimeout(() => setSuccessMessage(''), 3000); // Убираем сообщение через 3 секунды
+            setTimeout(() => setSuccessMessage(''), 3000);
         } else {
             alert('Передача не удалась');
         }
@@ -95,7 +97,7 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
                     value={points}
                     onChange={(e) => {
                         const value = e.target.value;
-                        setPoints(value === '' ? 0 : Number(value)); // Set to 0 if empty
+                        setPoints(value === '' ? 0 : Number(value));
                     }}
                     required
                     className="w-full"
@@ -104,7 +106,7 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
             </form>
 
             {errorMessage && (
-                <p className="text-red-500 mt-2">{errorMessage}</p> // Display error message in red
+                <p className="text-red-500 mt-2">{errorMessage}</p>
             )}
 
             {showDialog && (
@@ -145,6 +147,24 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, classN
                     ))}
                 </TableBody>
             </Table>
+
+            <div className="pagination-buttons flex justify-center mt-6">
+                <Link href={`/transfer-points?page=${currentPage - 1}`}>
+                    <Button className="btn btn-primary mx-2 w-[100px] h-7" disabled={currentPage === 1}>
+                        Previous
+                    </Button>
+                </Link>
+                <span className="mx-3 text-lg font-semibold">
+                    Page {currentPage} of {totalPages}
+                </span>
+                {currentPage < totalPages && (
+                    <Link href={`/transfer-points?page=${currentPage + 1}`}>
+                        <Button className="btn btn-primary mx-2 w-[100px] h-7">
+                            Next
+                        </Button>
+                    </Link>
+                )}
+            </div>
         </div>
     );
 };
