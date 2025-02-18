@@ -325,11 +325,6 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
         handlePlaceBet(bet, amount, player);
     };
 
-    // Функция для открытия модального окна
-    const openConfirmationModal = (bet: Bet) => {
-        setCurrentBet(bet);
-        setIsModalOpen(true);
-    };
 
     // Функция для закрытия модального окна
     const closeConfirmationModal = () => {
@@ -359,7 +354,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
         try {
             if (winner === "draw") {
                 await closeBetDraw3(currentBet.id);
-            } else {
+            } else if (typeof winner === "number") { // Ensure winner is a number
                 await closeBet3(currentBet.id, winner);
             }
 
@@ -377,6 +372,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             console.error("Error closing bet:", error);
         }
     };
+
 
     const openConfirmationDialog = (bet: Bet) => {
         const winner = selectedWinners[bet.id];
