@@ -66,7 +66,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
     const { user: userUp, isLoading: isLoadingUser, isError: isErrorUser, mutate: mutateUser } = useUser(user ? user.id : null);
 
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
-    const [selectedWinner, setSelectedWinner] = useState<number | "draw" | null>(null);
+    const [selectedWinner, setSelectedWinner] = useState<{ [key: number]: number | "draw" | null }>({});
     const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>({});
     const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
@@ -477,15 +477,29 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                             <h4 className="text-lg font-semibold">Закрыть ставку</h4>
                                             <div className="flex gap-2 mt-2">
                                                 <label>
-                                                    <input type="radio" name={`winner-${bet.id}`} value={bet.player1Id} onChange={() => setSelectedWinner(bet.player1Id)} />
-                                                    <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>{" "}
+                                                    <input type="radio" name={`winner-${bet.id}`} value={bet.player1Id}
+                                                           onChange={() => setSelectedWinner((prev) => ({
+                                                               ...prev,
+                                                               [bet.id]: bet.player1Id
+                                                           }))}/>
+                                                    <span
+                                                        className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>{" "}
                                                 </label>
                                                 <label>
-                                                    <input type="radio" name={`winner-${bet.id}`} value={bet.player2Id} onChange={() => setSelectedWinner(bet.player2Id)} />
-                                                    <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>{" "}
+                                                    <input type="radio" name={`winner-${bet.id}`} value={bet.player2Id}
+                                                           onChange={() => setSelectedWinner((prev) => ({
+                                                               ...prev,
+                                                               [bet.id]: bet.player2Id
+                                                           }))}/>
+                                                    <span
+                                                        className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>{" "}
                                                 </label>
                                                 <label>
-                                                    <input type="radio" name={`winner-${bet.id}`} value="draw" onChange={() => setSelectedWinner("draw")} />
+                                                    <input type="radio" name={`winner-${bet.id}`} value="draw"
+                                                           onChange={() => setSelectedWinner((prev) => ({
+                                                               ...prev,
+                                                               [bet.id]: "draw"
+                                                           }))}/>
                                                     <span>Ничья</span>
                                                 </label>
                                             </div>
@@ -493,7 +507,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                 type="button"
                                                 onClick={() => openConfirmationDialog(bet)}
                                                 className="mt-2 w-full"
-                                                disabled={selectedWinner === null}
+                                                disabled={selectedWinner[bet.id] === null || selectedWinner[bet.id] === undefined}
                                             >
                                                 Закрыть ставку
                                             </Button>
