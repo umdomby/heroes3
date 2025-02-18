@@ -19,6 +19,7 @@ import {
 } from '@/app/actions';
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
+import Link from "next/link";
 
 interface OrderP2PWithUser extends OrderP2P {
     orderP2PUser1: {
@@ -49,11 +50,12 @@ interface orderBankDetail {
 interface Props {
     user: User;
     openOrders: OrderP2P[]; // Ensure this is an array
+    pendingOrdersCount: number;
     className?: string;
 }
 
 // Компонент для работы с P2P заказами
-export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}) => {
+export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrdersCount, className}) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
     const [buyOrderSuccess, setBuyOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
     const [sellOrderSuccess, setSellOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
@@ -267,7 +269,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
         }
     };
 
-   // Обработчик заключения сделки покупки
+    // Обработчик заключения сделки покупки
     const handleConcludeDealBuy = async (order: OrderP2P) => {
         if (order.orderP2PUser1Id === user.id) {
             alert('Вы не можете заключать сделку с самим собой');
@@ -486,26 +488,36 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
 
     // Обработчик выбора банковских реквизитов для взаимодействия
     const handleSelectBankDetailForInteraction = (selectedValue: string, order: OrderP2P) => {
-        setSelectedBankDetails((prev) => ({ ...prev, [order.id]: selectedValue })); // Сохраняем выбранное значение
+        setSelectedBankDetails((prev) => ({...prev, [order.id]: selectedValue})); // Сохраняем выбранное значение
         if (!selectedValue) {
-            setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
+            setCalculatedValues((prev) => ({...prev, [order.id]: null}));
             return;
         }
         const detail = JSON.parse(selectedValue);
         if (detail && typeof detail.price === 'string') {
             const price = parseFloat(detail.price.replace(',', '.'));
             if (!isNaN(price) && order.orderP2PPoints !== null && order.orderP2PPoints !== undefined) {
-                setCalculatedValues((prev) => ({ ...prev, [order.id]: order.orderP2PPoints! * price }));
+                setCalculatedValues((prev) => ({...prev, [order.id]: order.orderP2PPoints! * price}));
             } else {
-                setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
+                setCalculatedValues((prev) => ({...prev, [order.id]: null}));
             }
         } else {
-            setCalculatedValues((prev) => ({ ...prev, [order.id]: null }));
+            setCalculatedValues((prev) => ({...prev, [order.id]: null}));
         }
     };
 
     return (
         <div className={className}>
+            <div className={className}>
+                <div className="flex justify-between items-center">
+                    <h1>P2P Order</h1>
+                    <Link href="/order-p2p-pending">
+                    <span className="text-blue-500 hover:underline">
+                         Open order : {pendingOrdersCount}
+                    </span>
+                    </Link>
+                </div>
+            </div>
             {successMessage && (
                 <div className="relative">
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4">
@@ -677,7 +689,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                     >
                         <AccordionTrigger>
                             <Table>
-                                <TableBody >
+                                <TableBody>
                                     <TableRow className="no-hover-bg">
                                         <TableCell className="w-1/4">
                                             {order.orderP2PUser1.cardId}
@@ -792,8 +804,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, className}
                             )}
                             {order.orderP2PBuySell === 'SELL' && order.orderP2PUser1Id !== user.id && (
                                 <Button className="ml-3 h-6"
-                                    onClick={() => handleConcludeDealSell(order)}
-                                    disabled={calculatedValues[order.id] === undefined || calculatedValues[order.id] === null}
+                                        onClick={() => handleConcludeDealSell(order)}
+                                        disabled={calculatedValues[order.id] === undefined || calculatedValues[order.id] === null}
                                 >
                                     Заключить сделку
                                 </Button>

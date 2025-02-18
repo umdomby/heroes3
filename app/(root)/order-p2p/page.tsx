@@ -1,10 +1,12 @@
+// /app/(root)/order-p2p/page.tsx
+
 import { Container } from '@/components/container';
 import { prisma } from '@/prisma/prisma-client';
 import { redirect } from 'next/navigation';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
-import { OrderP2PComponent } from "@/components/OrderP2PComponent"; // Ensure this import matches your OrderP2P component
+import { OrderP2PComponent } from "@/components/OrderP2PComponent";
 
 export default async function OrderP2PPage() {
     const session = await getUserSession();
@@ -24,7 +26,7 @@ export default async function OrderP2PPage() {
         return redirect('/');
     }
 
-    // Запрос к базе данных
+    // Fetch open orders
     const openOrders = await prisma.orderP2P.findMany({
         where: { orderP2PStatus: 'OPEN' },
         orderBy: {
@@ -35,24 +37,32 @@ export default async function OrderP2PPage() {
                 select: {
                     id: true,
                     cardId: true,
-                    // Добавьте другие необходимые поля
                 }
             },
             orderP2PUser2: {
                 select: {
                     id: true,
                     cardId: true,
-                    // Добавьте другие необходимые поля
                 }
             }
         }
     });
 
+    // Count pending orders
+    const pendingOrdersCount = await prisma.orderP2P.count({
+        where: {
+            orderP2PStatus: 'PENDING',
+            OR: [
+                { orderP2PCheckUser1: null },
+                { orderP2PCheckUser2: null }
+            ]
+        }
+    });
 
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <OrderP2PComponent user={user} openOrders={openOrders} />
+                <OrderP2PComponent user={user} openOrders={openOrders} pendingOrdersCount={pendingOrdersCount} />
             </Suspense>
         </Container>
     );

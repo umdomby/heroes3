@@ -153,6 +153,14 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
     return (
         <div className={className}>
             Points: {Math.floor(user.points * 100) / 100}
+            <div className="flex justify-between items-center">
+                <h1>Open Orders</h1>
+                <Link href="/order-p2p">
+                    <span className="text-blue-500 hover:underline">
+                        P2P Order
+                    </span>
+                </Link>
+            </div>
             <Accordion className="border border-gray-300 mt-4" type="multiple">
                 {orders.map((order) => (
                     <AccordionItem key={order.id} value={order.id.toString()}>
@@ -165,7 +173,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
                                                 {order.orderP2PUser1.cardId}
                                             </p>
                                         </TableCell>
-                                        <TableCell className="w-1/4">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} {order.orderP2PPoints} Points</TableCell>
+                                        <TableCell
+                                            className="w-1/4">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} {order.orderP2PPoints} Points</TableCell>
                                         <TableCell className="w-1/4">
                                             {order.orderP2PStatus === "PENDING" && (
                                                 <>
@@ -192,7 +201,9 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
                                 <div className="flex justify-center space-x-4 min-w-[800px]">
                                     <div className="flex flex-col items-center border p-4" style={{flex: '0 0 23%'}}>
                                         <p>User 1: {order.orderP2PUser1.fullName}</p>
-                                        <p>Telegram: <Link className="text-blue-500 hover:text-green-300 font-bold" href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')} target="_blank">{order.orderP2PUser1.telegram}</Link></p>
+                                        <p>Telegram: <Link className="text-blue-500 hover:text-green-300 font-bold"
+                                                           href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')}
+                                                           target="_blank">{order.orderP2PUser1.telegram}</Link></p>
                                         <p>Card ID: {order.orderP2PUser1.cardId}</p>
                                         <p>Points: {order.orderP2PPoints}</p>
                                         <p>Price: {order.orderP2PPrice}</p>
