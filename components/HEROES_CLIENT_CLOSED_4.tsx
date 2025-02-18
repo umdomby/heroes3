@@ -48,6 +48,7 @@ interface BetCLOSED4 {
     margin: number | null;
     winnerId: number | null;
     updatedAt: Date;
+    globalDataBetFund: number;
 }
 
 interface Props {
@@ -76,6 +77,13 @@ export const HEROES_CLIENT_CLOSED_4: React.FC<Props> = ({ user, closedBets }) =>
 
                 if (userBets.length === 0) return null;
 
+                const totalBets = [
+                    bet.totalBetPlayer1,
+                    bet.totalBetPlayer2,
+                    bet.totalBetPlayer3,
+                    bet.totalBetPlayer4,
+                ];
+
                 return (
                     <div key={bet.id} className="border border-gray-700 mt-1">
                         <Accordion type="single" collapsible>
@@ -84,41 +92,46 @@ export const HEROES_CLIENT_CLOSED_4: React.FC<Props> = ({ user, closedBets }) =>
                                     <Table>
                                         <TableBody>
                                             <TableRow>
-                                                {[bet.player1, bet.player2, bet.player3, bet.player4].map((player, index) => {
-                                                    const playerKey = `PLAYER${index + 1}`;
-                                                    const totalBet = bet[`totalBetPlayer${index + 1}`];
-                                                    const oddsBet = bet[`oddsBetPlayer${index + 1}`];
-                                                    const isWinner = bet.winnerId === player.id;
-                                                    const isDraw = bet.winnerId === null;
-
-                                                    return (
-                                                        <TableCell key={player.id} className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
-                                                            <div className={isDraw ? 'text-white' : isWinner ? 'text-green-500' : 'text-red-500'}>
-                                                                {player.name}
-                                                            </div>
-                                                            <div>
-                                                                <span
-                                                                    className={
-                                                                        userBets
-                                                                            .filter((p) => p.player === playerKey)
-                                                                            .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
-                                                                            ? 'text-green-500'
-                                                                            : 'text-red-500'
-                                                                    }
-                                                                >
-                                                                    {Math.floor(userBets
-                                                                        .filter((p) => p.player === playerKey)
-                                                                        .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100) / 100}
-                                                                </span>
-                                                            </div>
-                                                            <div>{Math.floor(totalBet * 100) / 100}</div>
-                                                        </TableCell>
-                                                    );
-                                                })}
+                                                {[bet.player1, bet.player2, bet.player3, bet.player4].map((player, index) => (
+                                                    <TableCell
+                                                        key={player.id}
+                                                        className="text-ellipsis overflow-hidden whitespace-nowrap w-[20%]">
+                                                        <div
+                                                            className={
+                                                                bet.winnerId === null
+                                                                    ? 'text-white'
+                                                                    : bet.winnerId === player.id
+                                                                        ? 'text-green-500'
+                                                                        : 'text-red-500'
+                                                            }
+                                                        >
+                                                            {player.name}
+                                                        </div>
+                                                        <div>
+                                                            <span
+                                                                className={
+                                                                    userBets
+                                                                        .filter((p) => p.player === `PLAYER${index + 1}`)
+                                                                        .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) >= 0
+                                                                        ? 'text-green-500'
+                                                                        : 'text-red-500'
+                                                                }
+                                                            >
+                                                                {Math.floor(
+                                                                    userBets
+                                                                        .filter((p) => p.player === `PLAYER${index + 1}`)
+                                                                        .reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0) * 100
+                                                                ) / 100}
+                                                            </span>
+                                                        </div>
+                                                        <div>{Math.floor(totalBets[index] * 100) / 100}</div>
+                                                    </TableCell>
+                                                ))}
                                                 <TableCell className="w-[15%]">
                                                     {[bet.oddsBetPlayer1, bet.oddsBetPlayer2, bet.oddsBetPlayer3, bet.oddsBetPlayer4].map((odds, index) => (
                                                         <div key={index}>{Math.floor(odds * 100) / 100}</div>
                                                     ))}
+                                                    <div>Fund: {Math.floor(bet.globalDataBetFund * 100) / 100}</div>
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
@@ -126,52 +139,60 @@ export const HEROES_CLIENT_CLOSED_4: React.FC<Props> = ({ user, closedBets }) =>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="m-1 p-4 rounded-lg">
-                                        <h4 className="text-md font-semibold mb-2">Дата и время закрытия ставок: {new Date(bet.updatedAt).toLocaleString()}</h4>
+                                        <h4 className="text-md font-semibold mb-2">
+                                            Дата и время закрытия ставок: {new Date(bet.updatedAt).toLocaleString()}
+                                        </h4>
                                         {bet.winnerId === null && <p className="text-blue-500">Ничья</p>}
                                     </div>
 
-                                    {userBets.map((participant) => (
-                                        <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
-                                            <p>
-                                                Ставка: <strong>{participant.amount}</strong> на{' '}
-                                                <strong>
-                                                    {participant.player === 'PLAYER1' ? bet.player1.name :
-                                                        participant.player === 'PLAYER2' ? bet.player2.name :
-                                                            participant.player === 'PLAYER3' ? bet.player3.name : bet.player4.name}
-                                                </strong>
-                                                {','} Коэффициент: <span>{Math.floor(participant.odds * 100) / 100}</span>
-                                                {','} Прибыль: <span>{Math.floor(participant.profit * 100) / 100}</span>
-                                                {','} Маржа: <span>{participant.margin !== null ? Math.floor(participant.margin * 100) / 100 : '0.00'}</span>
-                                                {','} {new Date(participant.createdAt).toLocaleString()}
-                                            </p>
-                                            <p>
-                                                {bet.winnerId === null ? (
-                                                    <span className="text-blue-500">Ничья</span>
-                                                ) : participant.isWinner ? (
-                                                    <span className="text-green-500">Ставка выиграла</span>
-                                                ) : (
-                                                    <span className="text-red-500">Ставка проиграла</span>
-                                                )}
-                                            </p>
-                                            <p>
-                                                {participant.isWinner ? (
-                                                    <span className="text-green-500">
-                                                        Возврат: {Math.floor(participant.return * 100) / 100} Points
-                                                    </span>
-                                                ) : (
-                                                    <span
-                                                        className={
-                                                            Math.floor((participant.return - participant.amount) * 100) / 100 === 0
-                                                                ? 'text-purple-500'
-                                                                : 'text-red-500'
-                                                        }
-                                                    >
-                                                        Потеря: {Math.floor((participant.return - participant.amount) * 100) / 100} Points
-                                                    </span>
-                                                )}
-                                            </p>
-                                        </div>
-                                    ))}
+                                    {userBets.map((participant) => {
+                                        return (
+                                            <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
+                                                <p>
+                                                    Ставка: <strong>{participant.amount}</strong> на{' '}
+                                                    <strong>
+                                                        {participant.player === 'PLAYER1'
+                                                            ? bet.player1.name
+                                                            : participant.player === 'PLAYER2'
+                                                                ? bet.player2.name
+                                                                : participant.player === 'PLAYER3'
+                                                                    ? bet.player3.name
+                                                                    : bet.player4.name}
+                                                    </strong>
+                                                    {','} Коэффициент: <span>{Math.floor(participant.odds * 100) / 100}</span>
+                                                    {','} Прибыль: <span>{Math.floor(participant.profit * 100) / 100}</span>
+                                                    {','} Маржа: <span>{participant.margin !== null ? Math.floor(participant.margin * 100) / 100 : '0.00'}</span>
+                                                    {','} {new Date(participant.createdAt).toLocaleString()}
+                                                </p>
+                                                <p>
+                                                    {bet.winnerId === null ? (
+                                                        <span className="text-blue-500">Ничья</span>
+                                                    ) : participant.isWinner ? (
+                                                        <span className="text-green-500">Ставка выиграла</span>
+                                                    ) : (
+                                                        <span className="text-red-500">Ставка проиграла</span>
+                                                    )}
+                                                </p>
+                                                <p>
+                                                    {participant.isWinner ? (
+                                                        <span className="text-green-500">
+                                                            Возврат: {Math.floor(participant.return * 100) / 100} Points
+                                                        </span>
+                                                    ) : (
+                                                        <span
+                                                            className={
+                                                                Math.floor((participant.return - participant.amount) * 100) / 100 === 0
+                                                                    ? 'text-purple-500'
+                                                                    : 'text-red-500'
+                                                            }
+                                                        >
+                                                            Потеря: {Math.floor((participant.return - participant.amount) * 100) / 100} Points
+                                                        </span>
+                                                    )}
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>

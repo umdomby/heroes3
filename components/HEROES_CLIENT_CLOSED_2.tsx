@@ -166,13 +166,6 @@ export const HEROES_CLIENT_CLOSED_2: React.FC<Props> = ({ user, closedBets }) =>
                                     </div>
 
                                     {userBets.map((participant) => {
-                                        const profitToCover =
-                                            participant.amount * (participant.odds - 1);
-                                        const overlapPercentage =
-                                            participant.overlap > 0
-                                                ? Math.floor((participant.overlap / profitToCover) * 10000) / 100
-                                                : 0;
-
                                         return (
                                             <div key={participant.id} className="border border-gray-200 p-1 mb-1 rounded-md">
                                                 <p>
