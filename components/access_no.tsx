@@ -37,9 +37,19 @@ export const Access_no: React.FC<Props> = ({className}) => {
                                         CONTACTS
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <Link href="/bet-all-closed">
-                                    <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
-                                        WINN/LOSE PLAYERS
+                                <Link href="/bet-winn-lose-closed-2">
+                                    <DropdownMenuRadioItem value="bet-winn-lose-closed-2" className="cursor-pointer">
+                                        WINN/LOSE PLAYERS 2
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/bet-winn-lose-closed-3">
+                                    <DropdownMenuRadioItem value="bet-winn-lose-closed-3" className="cursor-pointer">
+                                        WINN/LOSE PLAYERS 3
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/bet-winn-lose-closed-4">
+                                    <DropdownMenuRadioItem value="bet-winn-lose-closed-4" className="cursor-pointer">
+                                        WINN/LOSE PLAYERS 4
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/rating">

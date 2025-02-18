@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from 'react';
 import {
     Table,
@@ -6,6 +6,8 @@ import {
     TableCell,
     TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface BetCLOSED {
     id: number;
@@ -22,9 +24,11 @@ interface BetCLOSED {
 
 interface Props {
     closedBets: BetCLOSED[];
+    currentPage: number;
+    totalPages: number;
 }
 
-export const USERS_ALL_CLOSED_2: React.FC<Props> = ({ closedBets }) => {
+export const USERS_ALL_CLOSED_2: React.FC<Props> = ({ closedBets, currentPage, totalPages }) => {
     return (
         <div>
             {closedBets.map((bet) => {
@@ -32,7 +36,6 @@ export const USERS_ALL_CLOSED_2: React.FC<Props> = ({ closedBets }) => {
                 const isDraw = bet.winnerId === null;
                 const isPlayer1Winner = bet.winnerId === bet.player1.id;
 
-                // Set player colors based on the outcome
                 const player1Class = isDraw ? 'text-green-500' : (isPlayer1Winner ? 'text-green-500' : 'text-red-500');
                 const player2Class = isDraw ? 'text-green-500' : (isPlayer1Winner ? 'text-red-500' : 'text-green-500');
 
@@ -47,22 +50,14 @@ export const USERS_ALL_CLOSED_2: React.FC<Props> = ({ closedBets }) => {
                                     <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[15%] ${player2Class}`}>
                                         <div>{bet.player2.name}</div>
                                     </TableCell>
-                                    <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[15%] `}>
-                                    </TableCell>
-                                    <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[15%] `}>
-                                    </TableCell>
                                     <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[10%] ${player1Class}`}>
                                         <div>{Math.floor(bet.totalBetPlayer1 * 100) / 100}</div>
                                     </TableCell>
                                     <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[10%] ${player2Class}`}>
                                         <div>{Math.floor(bet.totalBetPlayer2 * 100) / 100}</div>
                                     </TableCell>
-                                    <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[10%]`}>
-                                    </TableCell>
-                                    <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[10%]`}>
-                                    </TableCell>
                                     <TableCell className="text-right overflow-hidden whitespace-nowrap w-[15%]">
-                                        <div> {formattedDate}</div>
+                                        <div>{formattedDate}</div>
                                     </TableCell>
                                 </TableRow>
                             </TableBody>
@@ -70,6 +65,24 @@ export const USERS_ALL_CLOSED_2: React.FC<Props> = ({ closedBets }) => {
                     </div>
                 );
             })}
+
+            <div className="pagination-buttons flex justify-center mt-6">
+                <Link href={`/bet-winn-lose-closed-2?page=${currentPage - 1}`}>
+                    <Button className="btn btn-primary mx-2 w-[100px] h-7" disabled={currentPage === 1}>
+                        Previous
+                    </Button>
+                </Link>
+                <span className="mx-3 text-lg font-semibold">
+                    Page {currentPage} of {totalPages}
+                </span>
+                {currentPage < totalPages && (
+                    <Link href={`/bet-winn-lose-closed-2?page=${currentPage + 1}`}>
+                        <Button className="btn btn-primary mx-2 w-[100px] h-7">
+                            Next
+                        </Button>
+                    </Link>
+                )}
+            </div>
         </div>
     );
 };

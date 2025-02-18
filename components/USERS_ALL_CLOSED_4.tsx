@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from 'react';
 import {
     Table,
@@ -6,21 +6,23 @@ import {
     TableCell,
     TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface BetCLOSED {
     id: number;
     player1: { id: number; name: string };
     player2: { id: number; name: string };
-    player3: { id: number; name: string }; // Third player
-    player4: { id: number; name: string }; // Fourth player
+    player3: { id: number; name: string };
+    player4: { id: number; name: string };
     totalBetPlayer1: number;
     totalBetPlayer2: number;
-    totalBetPlayer3: number; // Total bet for third player
-    totalBetPlayer4: number; // Total bet for fourth player
+    totalBetPlayer3: number;
+    totalBetPlayer4: number;
     oddsBetPlayer1: number;
     oddsBetPlayer2: number;
-    oddsBetPlayer3: number; // Odds for third player
-    oddsBetPlayer4: number; // Odds for fourth player
+    oddsBetPlayer3: number;
+    oddsBetPlayer4: number;
     createdAt: Date;
     margin: number | null;
     winnerId: number | null;
@@ -28,9 +30,11 @@ interface BetCLOSED {
 
 interface Props {
     closedBets: BetCLOSED[];
+    currentPage: number;
+    totalPages: number;
 }
 
-export const USERS_ALL_CLOSED_4: React.FC<Props> = ({ closedBets }) => {
+export const USERS_ALL_CLOSED_4: React.FC<Props> = ({ closedBets, currentPage, totalPages }) => {
     return (
         <div>
             {closedBets.map((bet) => {
@@ -40,7 +44,6 @@ export const USERS_ALL_CLOSED_4: React.FC<Props> = ({ closedBets }) => {
                 const isPlayer2Winner = bet.winnerId === bet.player2.id;
                 const isPlayer3Winner = bet.winnerId === bet.player3.id;
 
-                // Set player colors based on the outcome
                 const player1Class = isDraw ? 'text-green-500' : (isPlayer1Winner ? 'text-green-500' : 'text-red-500');
                 const player2Class = isDraw ? 'text-green-500' : (isPlayer2Winner ? 'text-green-500' : 'text-red-500');
                 const player3Class = isDraw ? 'text-green-500' : (isPlayer3Winner ? 'text-green-500' : 'text-red-500');
@@ -84,6 +87,24 @@ export const USERS_ALL_CLOSED_4: React.FC<Props> = ({ closedBets }) => {
                     </div>
                 );
             })}
+
+            <div className="pagination-buttons flex justify-center mt-6">
+                <Link href={`/bet-winn-lose-closed-4?page=${currentPage - 1}`}>
+                    <Button className="btn btn-primary mx-2 w-[100px] h-7" disabled={currentPage === 1}>
+                        Previous
+                    </Button>
+                </Link>
+                <span className="mx-3 text-lg font-semibold">
+                    Page {currentPage} of {totalPages}
+                </span>
+                {currentPage < totalPages && (
+                    <Link href={`/bet-winn-lose-closed-4?page=${currentPage + 1}`}>
+                        <Button className="btn btn-primary mx-2 w-[100px] h-7">
+                            Next
+                        </Button>
+                    </Link>
+                )}
+            </div>
         </div>
     );
 };
