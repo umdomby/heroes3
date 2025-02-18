@@ -344,12 +344,15 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
 
     // Функция для обработки подтверждения
     const handleConfirmation = async () => {
-        if (!currentBet || selectedWinners[currentBet.id] === null) {
+        if (!currentBet || selectedWinners[currentBet.id] === null || selectedWinners[currentBet.id] === undefined) {
             setCloseBetError("Выберите победителя!");
             return;
         }
 
-        const expectedInput = selectedWinners[currentBet.id] === "draw" ? "ничья" : selectedWinners[currentBet.id] === currentBet.player1Id ? currentBet.player1.name : currentBet.player2.name;
+        const winner = selectedWinners[currentBet.id];
+        const expectedInput = winner === "draw" ? "ничья" :
+            winner === currentBet.player1Id ? currentBet.player1.name :
+                currentBet.player2.name;
 
         if (confirmationInput.toLowerCase() !== expectedInput.toLowerCase()) {
             setCloseBetError(`Введите правильное подтверждение: ${expectedInput}`);
@@ -357,10 +360,10 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
         }
 
         try {
-            if (selectedWinners[currentBet.id] === "draw") {
+            if (winner === "draw") {
                 await closeBetDraw(currentBet.id);
             } else {
-                await closeBet(currentBet.id, selectedWinners[currentBet.id]);
+                await closeBet(currentBet.id, winner);
             }
 
             mutate();
@@ -377,6 +380,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
             console.error("Error closing bet:", error);
         }
     };
+
 
     if (!session) {
         return redirect("/not-auth");
@@ -720,7 +724,10 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                         type="radio"
                                                         name={`winner-${bet.id}`}
                                                         value={bet.player1Id}
-                                                        onChange={() => setSelectedWinners((prev) => ({ ...prev, [bet.id]: bet.player1Id }))}
+                                                        onChange={() => setSelectedWinners((prev) => ({
+                                                            ...prev,
+                                                            [bet.id]: bet.player1Id
+                                                        }))}
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER1]}>
                                                 {bet.player1.name}
@@ -730,19 +737,39 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                     <input
                                                         type="radio"
                                                         name={`winner-${bet.id}`}
+                                                        value={bet.player1Id}
+                                                        onChange={() => setSelectedWinners((prev) => ({
+                                                            ...prev,
+                                                            [bet.id]: bet.player1Id
+                                                        }))}
+                                                    />
+                                                    <span className={playerColors[PlayerChoice.PLAYER1]}>
+        {bet.player1.name}
+    </span>{" "}
+                                                </label>
+                                                <label>
+                                                    <input
+                                                        type="radio"
+                                                        name={`winner-${bet.id}`}
                                                         value={bet.player2Id}
-                                                        onChange={() => setSelectedWinners((prev) => ({ ...prev, [bet.id]: bet.player2Id }))}
+                                                        onChange={() => setSelectedWinners((prev) => ({
+                                                            ...prev,
+                                                            [bet.id]: bet.player2Id
+                                                        }))}
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER2]}>
-                                                {bet.player2.name}
-                                            </span>{" "}
+        {bet.player2.name}
+    </span>{" "}
                                                 </label>
                                                 <label>
                                                     <input
                                                         type="radio"
                                                         name={`winner-${bet.id}`}
                                                         value="draw"
-                                                        onChange={() => setSelectedWinners((prev) => ({ ...prev, [bet.id]: "draw" }))}
+                                                        onChange={() => setSelectedWinners((prev) => ({
+                                                            ...prev,
+                                                            [bet.id]: "draw"
+                                                        }))}
                                                     />
                                                     <span>Ничья</span>
                                                 </label>
@@ -751,7 +778,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                 type="button"
                                                 onClick={() => openConfirmationDialog(bet)}
                                                 className="mt-2 w-full"
-                                                disabled={selectedWinners[bet.id] === null} // Кнопка неактивна, если победитель не выбран
+                                                disabled={selectedWinners[bet.id] === null || selectedWinners[bet.id] === undefined} // Кнопка неактивна, если победитель не выбран
                                             >
                                                 Закрыть ставку
                                             </Button>

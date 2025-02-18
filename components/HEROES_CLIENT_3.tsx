@@ -15,6 +15,7 @@ import { redirect } from "next/navigation";
 import { placeBet3, closeBet3, closeBetDraw3 } from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
 import { useUser } from "@/hooks/useUser";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 import {
     Accordion,
@@ -83,7 +84,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
     } = useUser(user ? user.id : null);
 
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
-    const [selectedWinner, setSelectedWinner] = useState<number | "draw" | null>(null);
+    const [selectedWinners, setSelectedWinners] = useState<{ [key: number]: number | "draw" | null }>({});
     const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>({});
     const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
@@ -339,14 +340,15 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
 
     // Функция для обработки подтверждения
     const handleConfirmation = async () => {
-        if (!currentBet || selectedWinner === null) {
+        if (!currentBet || selectedWinners[currentBet.id] === null || selectedWinners[currentBet.id] === undefined) {
             setCloseBetError("Выберите победителя!");
             return;
         }
 
-        const expectedInput = selectedWinner === "draw" ? "ничья" :
-            selectedWinner === currentBet.player1Id ? currentBet.player1.name :
-                selectedWinner === currentBet.player2Id ? currentBet.player2.name :
+        const winner = selectedWinners[currentBet.id];
+        const expectedInput = winner === "draw" ? "ничья" :
+            winner === currentBet.player1Id ? currentBet.player1.name :
+                winner === currentBet.player2Id ? currentBet.player2.name :
                     currentBet.player3.name;
 
         if (confirmationInput.toLowerCase() !== expectedInput.toLowerCase()) {
@@ -355,15 +357,15 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
         }
 
         try {
-            if (selectedWinner === "draw") {
+            if (winner === "draw") {
                 await closeBetDraw3(currentBet.id);
             } else {
-                await closeBet3(currentBet.id, selectedWinner);
+                await closeBet3(currentBet.id, winner);
             }
 
             mutate();
             mutateUser();
-            setSelectedWinner(null);
+            setSelectedWinners((prev) => ({ ...prev, [currentBet.id]: null }));
             setCloseBetError(null);
             closeConfirmationModal();
         } catch (error) {
@@ -374,6 +376,17 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             }
             console.error("Error closing bet:", error);
         }
+    };
+
+    const openConfirmationDialog = (bet: Bet) => {
+        const winner = selectedWinners[bet.id];
+        if (winner === null || winner === undefined) {
+            setCloseBetError("Пожалуйста, выберите победителя перед закрытием ставки.");
+            return;
+        }
+
+        setCurrentBet(bet);
+        setIsModalOpen(true);
     };
 
     if (!session) {
@@ -795,31 +808,40 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name="winner"
+                                                        name={`winner-${bet.id}`}
                                                         value={bet.player1Id}
-                                                        onChange={() => setSelectedWinner(bet.player1Id)}
+                                                        onChange={() => setSelectedWinners((prev) => ({
+                                                            ...prev,
+                                                            [bet.id]: bet.player1Id
+                                                        }))}
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER1]}>
-                       {bet.player1.name}
-                   </span>{" "}
+        {bet.player1.name}
+    </span>{" "}
                                                 </label>
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name="winner"
+                                                        name={`winner-${bet.id}`}
                                                         value={bet.player2Id}
-                                                        onChange={() => setSelectedWinner(bet.player2Id)}
+                                                        onChange={() => setSelectedWinners((prev) => ({
+                                                            ...prev,
+                                                            [bet.id]: bet.player2Id
+                                                        }))}
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER2]}>
-                       {bet.player2.name}
-                   </span>{" "}
+        {bet.player2.name}
+    </span>{" "}
                                                 </label>
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name="winner"
-                                                        value={bet.player3Id} // Убедитесь, что player3Id существует в интерфейсе Bet
-                                                        onChange={() => setSelectedWinner(bet.player3Id)}
+                                                        name={`winner-${bet.id}`}
+                                                        value={bet.player3Id}
+                                                        onChange={() => setSelectedWinners((prev) => ({
+                                                            ...prev,
+                                                            [bet.id]: bet.player3Id
+                                                        }))}
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER3]}>
         {bet.player3.name}
@@ -828,23 +850,24 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name="winner"
+                                                        name={`winner-${bet.id}`}
                                                         value="draw"
-                                                        onChange={() => setSelectedWinner("draw")}
+                                                        onChange={() => setSelectedWinners((prev) => ({
+                                                            ...prev,
+                                                            [bet.id]: "draw"
+                                                        }))}
                                                     />
                                                     <span>Ничья</span>
                                                 </label>
                                             </div>
                                             <Button
                                                 type="button"
-                                                onClick={() => openConfirmationModal(bet)}
+                                                onClick={() => openConfirmationDialog(bet)}
                                                 className="mt-2 w-full"
+                                                disabled={selectedWinners[bet.id] === null || selectedWinners[bet.id] === undefined} // Кнопка неактивна, если победитель не выбран
                                             >
                                                 Закрыть ставку
                                             </Button>
-                                            {closeBetError && (
-                                                <p className="text-red-500">{closeBetError}</p>
-                                            )}
                                         </div>
                                     )}
                                 </AccordionContent>
@@ -856,23 +879,25 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
 
             {/* Модальное окно для подтверждения закрытия ставки */}
             {isModalOpen && currentBet && (
-                <div className="modal">
-                    <div className="modal-content">
-                        <h4>Подтверждение закрытия ставки</h4>
-                        <p>Введите {selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet.player1Id ? currentBet.player1.name : selectedWinner === currentBet.player2Id ? currentBet.player2.name : currentBet.player3.name} для подтверждения:</p>
+                <Dialog open={isModalOpen} onOpenChange={closeConfirmationModal}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Подтверждение закрытия ставки</DialogTitle>
+                        </DialogHeader>
+                        <p>Введите {selectedWinners[currentBet.id] === "draw" ? "ничья" : selectedWinners[currentBet.id] === currentBet.player1Id ? currentBet.player1.name : selectedWinners[currentBet.id] === currentBet.player2Id ? currentBet.player2.name : currentBet.player3.name} для подтверждения:</p>
                         <input
                             type="text"
                             value={confirmationInput}
                             onChange={(e) => setConfirmationInput(e.target.value)}
                             className="border p-2 rounded w-full"
                         />
-                        <div className="flex justify-end mt-4">
+                        <DialogFooter>
                             <Button onClick={closeConfirmationModal} className="mr-2">Отмена</Button>
                             <Button onClick={handleConfirmation}>Подтвердить</Button>
-                        </div>
+                        </DialogFooter>
                         {closeBetError && <p className="text-red-500">{closeBetError}</p>}
-                    </div>
-                </div>
+                    </DialogContent>
+                </Dialog>
             )}
         </div>
     );
