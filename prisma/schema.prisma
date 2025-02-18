@@ -48,6 +48,8 @@ model User {
   transferUser1 Transfer[] @relation("TransferUser1") // Отношение для user1
   transferUser2 Transfer[] @relation("TransferUser2") // Отношение для user2
 
+  player Player?
+
   chatUsers             ChatUsers[]
   regPoints             regPoints[]
   bankDetails           Json?
@@ -120,8 +122,10 @@ model ReferralUserIpAddress {
 
 model Player {
   id                Int         @id @default(autoincrement())
-  name              String      @unique
+  name              String
   twitch            String?
+  user              User?       @relation(fields: [userId], references: [id])
+  userId            Int?        @unique
   player1Bets       Bet[]       @relation(name: "Player1Bets") // Relation for bets as player 1
   player2Bets       Bet[]       @relation(name: "Player2Bets") // Relation for bets as player 2
   player1BetsCLOSED BetCLOSED[] @relation(name: "Player1BetsCLOSED") // Relation for bets as player 1
@@ -185,6 +189,7 @@ model ProductItem {
 
 enum BetStatus {
   OPEN
+  OPEN_USER
   CLOSED
   PENDING
 }
