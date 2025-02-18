@@ -23,6 +23,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import Link from "next/link";
 
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
@@ -592,6 +593,16 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
                 {Math.floor(bet.maxBetPlayer1 * 100) / 100}
             </span>
+                                                {" "}
+                                                {bet.player1.twitch !== "" && bet.player1.twitch !== null && bet.player1.twitch !== undefined &&
+                                                    <Link
+                                                        className={`${playerColors[PlayerChoice.PLAYER1]} hover:underline`}
+                                                        href={bet.player1.twitch}
+                                                        target="_blank"
+                                                    >
+                                                        Twitch
+                                                    </Link>
+                                                }
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
@@ -602,6 +613,16 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
                 {Math.floor(bet.maxBetPlayer2 * 100) / 100}
             </span>
+                                                {" "}
+                                                {bet.player2.twitch !== "" && bet.player2.twitch !== null && bet.player2.twitch !== undefined &&
+                                                    <Link
+                                                        className={`${playerColors[PlayerChoice.PLAYER2]} hover:underline`}
+                                                        href={bet.player2.twitch}
+                                                        target="_blank"
+                                                    >
+                                                        Twitch
+                                                    </Link>
+                                                }
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
@@ -612,6 +633,16 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 <span className={playerColors[PlayerChoice.PLAYER3]}>
                 {Math.floor(bet.maxBetPlayer3 * 100) / 100}
             </span>
+                                                {" "}
+                                                {bet.player3.twitch !== "" && bet.player3.twitch !== null && bet.player3.twitch !== undefined &&
+                                                    <Link
+                                                        className={`${playerColors[PlayerChoice.PLAYER3]} hover:underline`}
+                                                        href={bet.player3.twitch}
+                                                        target="_blank"
+                                                    >
+                                                        Twitch
+                                                    </Link>
+                                                }
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
@@ -622,6 +653,16 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                 <span className={playerColors[PlayerChoice.PLAYER4]}>
                 {Math.floor(bet.maxBetPlayer4 * 100) / 100}
             </span>
+                                                {" "}
+                                                {bet.player4.twitch !== "" && bet.player4.twitch !== null && bet.player4.twitch !== undefined &&
+                                                    <Link
+                                                        className={`${playerColors[PlayerChoice.PLAYER4]} hover:underline`}
+                                                        href={bet.player4.twitch}
+                                                        target="_blank"
+                                                    >
+                                                        Twitch
+                                                    </Link>
+                                                }
                                             </p>
                                             <p>
                                                 Поставлено:{" "}
