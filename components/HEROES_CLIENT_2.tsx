@@ -22,7 +22,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"; // Import Dialog components
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
@@ -72,7 +72,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
     const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number } }>({});
     const [betAmounts, setBetAmounts] = useState<{ [key: number]: string }>({});
-    const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [confirmationInput, setConfirmationInput] = useState("");
     const [currentBet, setCurrentBet] = useState<Bet | null>(null);
 
@@ -300,6 +300,11 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
             return;
         }
 
+        if (selectedWinner !== currentBet.player1Id && selectedWinner !== currentBet.player2Id && selectedWinner !== "draw") {
+            setCloseBetError("Выбранный победитель не соответствует текущей ставке.");
+            return;
+        }
+
         const expectedInput = selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet.player1Id ? currentBet.player1.name : currentBet.player2.name;
 
         if (confirmationInput.toLowerCase() !== expectedInput.toLowerCase()) {
@@ -397,6 +402,9 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                 <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%]`}></TableCell>
                                                 <TableCell className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%]`}></TableCell>
                                                 <TableCell className="w-20">
+                                                    <div>ID: {bet.id}</div>
+                                                </TableCell>
+                                                <TableCell className="w-20">
                                                     <div className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                         {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
                                                     </div>
@@ -444,7 +452,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                         <div className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                             {"("}{Math.floor(bet.oddsBetPlayer1 * 100) / 100}{") "}{potentialProfit[bet.id]?.player1 ? `+${Math.floor(potentialProfit[bet.id].player1 * 100) / 100}` : ""}
                                                         </div>
-                                                        <input className="mt-1" type="radio" name="player" value={PlayerChoice.PLAYER1} required onChange={(e) => handlePlayerChange(e, bet)} />
+                                                        <input className="mt-1" type="radio" name={`player-${bet.id}`} value={PlayerChoice.PLAYER1} required onChange={(e) => handlePlayerChange(e, bet)} />
                                                         <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>
                                                     </label>
 
@@ -452,7 +460,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                         <div className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}>
                                                             {"("}{Math.floor(bet.oddsBetPlayer2 * 100) / 100}{") "}{potentialProfit[bet.id]?.player2 ? `+${Math.floor(potentialProfit[bet.id].player2 * 100) / 100}` : ""}
                                                         </div>
-                                                        <input className="mt-1" type="radio" name="player" value={PlayerChoice.PLAYER2} required onChange={(e) => handlePlayerChange(e, bet)} />
+                                                        <input className="mt-1" type="radio" name={`player-${bet.id}`} value={PlayerChoice.PLAYER2} required onChange={(e) => handlePlayerChange(e, bet)} />
                                                         <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>
                                                     </label>
                                                     <Button className={`mt-2 w-[20%] ${isBetDisabled[bet.id] ? "bg-gray-400 cursor-not-allowed" : ""}`} type="submit" disabled={isBetDisabled[bet.id] || !user}>BET</Button>
@@ -468,15 +476,15 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                             <h4 className="text-lg font-semibold">Закрыть ставку</h4>
                                             <div className="flex gap-2 mt-2">
                                                 <label>
-                                                    <input type="radio" name="winner" value={bet.player1Id} onChange={() => setSelectedWinner(bet.player1Id)} />
+                                                    <input type="radio" name={`winner-${bet.id}`} value={bet.player1Id} onChange={() => setSelectedWinner(bet.player1Id)} />
                                                     <span className={playerColors[PlayerChoice.PLAYER1]}>{bet.player1.name}</span>{" "}
                                                 </label>
                                                 <label>
-                                                    <input type="radio" name="winner" value={bet.player2Id} onChange={() => setSelectedWinner(bet.player2Id)} />
+                                                    <input type="radio" name={`winner-${bet.id}`} value={bet.player2Id} onChange={() => setSelectedWinner(bet.player2Id)} />
                                                     <span className={playerColors[PlayerChoice.PLAYER2]}>{bet.player2.name}</span>{" "}
                                                 </label>
                                                 <label>
-                                                    <input type="radio" name="winner" value="draw" onChange={() => setSelectedWinner("draw")} />
+                                                    <input type="radio" name={`winner-${bet.id}`} value="draw" onChange={() => setSelectedWinner("draw")} />
                                                     <span>Ничья</span>
                                                 </label>
                                             </div>
@@ -496,6 +504,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                     <DialogHeader>
                         <DialogTitle>Подтверждение закрытия ставки</DialogTitle>
                     </DialogHeader>
+                    <p>Ставка ID: {currentBet?.id}</p>
                     <p>Введите {selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet?.player1Id ? currentBet?.player1.name : currentBet?.player2.name} для подтверждения:</p>
                     <input type="text" value={confirmationInput} onChange={(e) => setConfirmationInput(e.target.value)} className="border p-2 rounded w-full" />
                     <DialogFooter>
