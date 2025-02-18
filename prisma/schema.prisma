@@ -121,6 +121,7 @@ model ReferralUserIpAddress {
 model Player {
   id                Int         @id @default(autoincrement())
   name              String      @unique
+  twitch            String?
   player1Bets       Bet[]       @relation(name: "Player1Bets") // Relation for bets as player 1
   player2Bets       Bet[]       @relation(name: "Player2Bets") // Relation for bets as player 2
   player1BetsCLOSED BetCLOSED[] @relation(name: "Player1BetsCLOSED") // Relation for bets as player 1
