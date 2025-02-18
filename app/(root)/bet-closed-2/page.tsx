@@ -8,7 +8,9 @@ import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { HEROES_CLIENT_CLOSED_2 } from "@/components/HEROES_CLIENT_CLOSED_2";
 
-export default async function BetClosedPage({ searchParams }: { searchParams: { page?: string } }) {
+export default async function BetClosedPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+    const resolvedSearchParams = await searchParams; // Await the searchParams if it's a Promise
+
     const session = await getUserSession();
 
     if (!session) {
@@ -25,7 +27,7 @@ export default async function BetClosedPage({ searchParams }: { searchParams: { 
         return redirect('/');
     }
 
-    const page = parseInt(searchParams.page ?? '1', 10);
+    const page = parseInt(resolvedSearchParams.page ?? '1', 10);
     const betsPerPage = 5;
     const skip = (page - 1) * betsPerPage;
 
