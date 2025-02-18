@@ -15,6 +15,7 @@ import { redirect } from "next/navigation";
 import { placeBet4, closeBet4, closeBetDraw4 } from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
 import { useUser } from "@/hooks/useUser";
+
 import {
     Accordion,
     AccordionContent,
@@ -22,7 +23,6 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"; // Импортируйте компоненты Dialog
 
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
@@ -92,7 +92,9 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
     const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number; player3: number; player4: number } }>({});
     const [betAmounts, setBetAmounts] = useState<{ [key: number]: string }>({});
-    const [isDialogOpen, setIsDialogOpen] = useState(false); // Состояние для диалога
+
+    // Состояние для управления модальным окном и ввода подтверждения
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [confirmationInput, setConfirmationInput] = useState("");
     const [currentBet, setCurrentBet] = useState<Bet | null>(null);
 
@@ -326,15 +328,15 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         handlePlaceBet(bet, amount, player);
     };
 
-    // Функция для открытия диалогового окна
-    const openConfirmationDialog = (bet: Bet) => {
+    // Функция для открытия модального окна
+    const openConfirmationModal = (bet: Bet) => {
         setCurrentBet(bet);
-        setIsDialogOpen(true);
+        setIsModalOpen(true);
     };
 
-    // Функция для закрытия диалогового окна
-    const closeConfirmationDialog = () => {
-        setIsDialogOpen(false);
+    // Функция для закрытия модального окна
+    const closeConfirmationModal = () => {
+        setIsModalOpen(false);
         setConfirmationInput("");
         setCurrentBet(null);
     };
@@ -368,7 +370,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             mutateUser();
             setSelectedWinner(null);
             setCloseBetError(null);
-            closeConfirmationDialog();
+            closeConfirmationModal();
         } catch (error) {
             if (error instanceof Error) {
                 setCloseBetError(error.message);
@@ -397,6 +399,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
 
     return (
         <div>
+
             {filteredBets.map((bet: Bet) => {
                 const userBets = bet.participants.filter((p) => p.userId === user?.id);
 
@@ -658,6 +661,22 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         ? Math.floor((participant.overlap / profitToCover) * 10000) / 100
                                                         : 0;
 
+                                                // let overlapStatus = "";
+                                                // switch (participant.isCovered) {
+                                                //     case "OPEN":
+                                                //         overlapStatus =
+                                                //             "Ваша ставка не перекрыта (0 Points, 0%)";
+                                                //         break;
+                                                //     case "CLOSED":
+                                                //         overlapStatus = `Ваша ставка полностью перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
+                                                //         break;
+                                                //     case "PENDING":
+                                                //         overlapStatus = `Ваша ставка частично перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
+                                                //         break;
+                                                //     default:
+                                                //         overlapStatus = "Неизвестный статус перекрытия.";
+                                                // }
+
                                                 return (
                                                     <div
                                                         key={participant.id}
@@ -687,6 +706,19 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                             {Math.floor(participant.profit * 100) / 100}
                         </span>
                                                             {", "} {new Date(participant.createdAt).toLocaleString()}
+                                                        </p>
+                                                        <p>
+                        <span
+                            className={
+                                participant.isCovered === "OPEN"
+                                    ? "text-yellow-500"
+                                    : participant.isCovered === "CLOSED"
+                                        ? "text-green-500"
+                                        : "text-blue-500"
+                            }
+                        >
+                            {/*{overlapStatus}*/}
+                        </span>
                                                         </p>
                                                     </div>
                                                 );
@@ -885,7 +917,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                             </div>
                                             <Button
                                                 type="button"
-                                                onClick={() => openConfirmationDialog(bet)}
+                                                onClick={() => openConfirmationModal(bet)}
                                                 className="mt-2 w-full"
                                             >
                                                 Закрыть ставку
@@ -902,20 +934,26 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                 );
             })}
 
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Подтверждение закрытия ставки</DialogTitle>
-                    </DialogHeader>
-                    <p>Введите {selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet?.player1Id ? currentBet?.player1.name : selectedWinner === currentBet?.player2Id ? currentBet?.player2.name : selectedWinner === currentBet?.player3Id ? currentBet?.player3.name : currentBet?.player4.name} для подтверждения:</p>
-                    <input type="text" value={confirmationInput} onChange={(e) => setConfirmationInput(e.target.value)} className="border p-2 rounded w-full" />
-                    <DialogFooter>
-                        <Button onClick={closeConfirmationDialog} className="mr-2">Отмена</Button>
-                        <Button onClick={handleConfirmation}>Подтвердить</Button>
-                    </DialogFooter>
-                    {closeBetError && <p className="text-red-500">{closeBetError}</p>}
-                </DialogContent>
-            </Dialog>
+            {/* Модальное окно для подтверждения закрытия ставки */}
+            {isModalOpen && currentBet && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h4>Подтверждение закрытия ставки</h4>
+                        <p>Введите {selectedWinner === "draw" ? "ничья" : selectedWinner === currentBet.player1Id ? currentBet.player1.name : selectedWinner === currentBet.player2Id ? currentBet.player2.name : selectedWinner === currentBet.player3Id ? currentBet.player3.name : currentBet.player4.name} для подтверждения:</p>
+                        <input
+                            type="text"
+                            value={confirmationInput}
+                            onChange={(e) => setConfirmationInput(e.target.value)}
+                            className="border p-2 rounded w-full"
+                        />
+                        <div className="flex justify-end mt-4">
+                            <Button onClick={closeConfirmationModal} className="mr-2">Отмена</Button>
+                            <Button onClick={handleConfirmation}>Подтвердить</Button>
+                        </div>
+                        {closeBetError && <p className="text-red-500">{closeBetError}</p>}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
