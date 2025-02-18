@@ -738,20 +738,6 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                         }))}
                                                     />
                                                     <span className={playerColors[PlayerChoice.PLAYER1]}>
-                                                {bet.player1.name}
-                                            </span>{" "}
-                                                </label>
-                                                <label>
-                                                    <input
-                                                        type="radio"
-                                                        name={`winner-${bet.id}`}
-                                                        value={bet.player1Id}
-                                                        onChange={() => setSelectedWinners((prev) => ({
-                                                            ...prev,
-                                                            [bet.id]: bet.player1Id
-                                                        }))}
-                                                    />
-                                                    <span className={playerColors[PlayerChoice.PLAYER1]}>
         {bet.player1.name}
     </span>{" "}
                                                 </label>
