@@ -813,7 +813,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name="player"
+                                                            name={`winner-${bet.id}-4`}
                                                             value={PlayerChoice.PLAYER1}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
@@ -837,7 +837,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name="player"
+                                                            name={`winner-${bet.id}-4`}
                                                             value={PlayerChoice.PLAYER2}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
@@ -861,7 +861,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name="player"
+                                                            name={`winner-${bet.id}-4`}
                                                             value={PlayerChoice.PLAYER3}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
@@ -885,7 +885,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name="player"
+                                                            name={`winner-${bet.id}-4`}
                                                             value={PlayerChoice.PLAYER4}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}

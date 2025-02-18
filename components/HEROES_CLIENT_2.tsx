@@ -669,7 +669,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name="player"
+                                                            name={`winner-${bet.id}-2`}
                                                             value={PlayerChoice.PLAYER1}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
@@ -693,7 +693,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                         <input
                                                             className="mt-1"
                                                             type="radio"
-                                                            name="player"
+                                                            name={`winner-${bet.id}-2`}
                                                             value={PlayerChoice.PLAYER2}
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
