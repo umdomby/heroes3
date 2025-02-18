@@ -730,7 +730,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name={`winner-${bet.id}`}
+                                                        name={`winner-${bet.id}-2`}
                                                         value={bet.player1Id}
                                                         onChange={() => setSelectedWinners((prev) => ({
                                                             ...prev,
@@ -744,7 +744,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name={`winner-${bet.id}`}
+                                                        name={`winner-${bet.id}-2`}
                                                         value={bet.player2Id}
                                                         onChange={() => setSelectedWinners((prev) => ({
                                                             ...prev,
@@ -758,7 +758,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                 <label>
                                                     <input
                                                         type="radio"
-                                                        name={`winner-${bet.id}`}
+                                                        name={`winner-${bet.id}-2`}
                                                         value="draw"
                                                         onChange={() => setSelectedWinners((prev) => ({
                                                             ...prev,
