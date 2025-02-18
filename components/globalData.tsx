@@ -71,7 +71,7 @@ export default async function GlobalDataComponent() {
             </TableHeader>
             <TableBody>
                 <TableRow style={{ transition: 'background-color 0.3s', cursor: 'pointer' }}>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#db2777' }}>1000000</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#db2777' }}>11000000</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#9333ea' }}>{globalData.reg ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#dc2626' }}>{globalData.ref ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#868788' }}>{globalData.openBetsPoints ?? 'N/A'}</TableCell>
