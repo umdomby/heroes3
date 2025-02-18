@@ -1,4 +1,4 @@
-"use client"; // Ensure this is at the top of your file
+"use client";
 import React, { useState } from 'react';
 import {
     Table,
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from 'next/navigation'; // Use this import for Next.js 13+
 
 interface User {
     id: number;
@@ -18,7 +17,7 @@ interface User {
     points: number;
     cardId: string;
     email: string;
-    telegram: string | null; // Allow telegram to be null
+    telegram: string | null;
     telegramView: boolean;
     createdAt: Date;
 }
@@ -33,24 +32,16 @@ interface Props {
 export const Rating: React.FC<Props> = ({ className, users, currentPage, totalPages }) => {
     const [showCopyMessage, setShowCopyMessage] = useState(false);
     const [copiedUserName, setCopiedUserName] = useState('');
-    const router = useRouter();
 
     const handleCopy = (cardId: string, fullName: string) => {
         navigator.clipboard.writeText(cardId);
         setCopiedUserName(fullName);
         setShowCopyMessage(true);
-        setTimeout(() => setShowCopyMessage(false), 1000); // Убираем сообщение через 1 секунду
+        setTimeout(() => setShowCopyMessage(false), 1000);
     };
 
-    // Find the system user with id = 1
     const systemUser = users.find(user => user.id === 1);
-
-    // Filter out the system user from the main list
     const filteredUsers = users.filter(user => user.id !== 1);
-
-    const handlePageChange = (newPage: number) => {
-        router.push(`?page=${newPage}`);
-    };
 
     return (
         <div className={`p-4 ${className}`}>
@@ -115,27 +106,8 @@ export const Rating: React.FC<Props> = ({ className, users, currentPage, totalPa
                 </TableBody>
             </Table>
 
-            <div className="flex justify-center mt-4">
-                <Button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="mx-2 h-6 w-24" // Set a fixed width
-                >
-                    Previous
-                </Button>
-                <span className="mx-2">Page {currentPage} of {totalPages}</span>
-                <Button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="mx-2 h-6 w-24" // Set the same fixed width
-                >
-                    Next
-                </Button>
-            </div>
-
             {showCopyMessage && (
-                <div
-                    className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-2 rounded shadow-lg">
+                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-2 rounded shadow-lg">
                     Card ID {copiedUserName} скопирован!
                 </div>
             )}

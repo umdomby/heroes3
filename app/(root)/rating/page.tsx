@@ -1,16 +1,27 @@
-"use server";
 import { prisma } from '@/prisma/prisma-client';
 import { Rating } from '@/components/rating';
 import { Container } from "@/components/container";
+import React, { Suspense } from "react";
+import Loading from "@/app/(root)/loading";
+import Link from "next/link";
+import {Button} from "@/components/ui";
+export const dynamic = 'force-dynamic'
 
-export default async function RatingPage({ searchParams }) {
-    const page = parseInt(searchParams.page) || 1;
+export default async function RatingPage({
+                                             params,
+                                             searchParams,
+                                         }: {
+    params: Promise<{}>;
+    searchParams: Promise<{ page?: string | undefined }>;
+}) {
+    const resolvedSearchParams = await searchParams;
+    const page = parseInt(resolvedSearchParams.page ?? '1', 10);
     const usersPerPage = 100;
     const skip = (page - 1) * usersPerPage;
 
     const users = await prisma.user.findMany({
         orderBy: {
-            points: 'desc', // Sort by points in descending order
+            points: 'desc',
         },
         skip: skip,
         take: usersPerPage,
@@ -21,7 +32,29 @@ export default async function RatingPage({ searchParams }) {
 
     return (
         <Container className="flex flex-col my-10">
-            <Rating users={users} currentPage={page} totalPages={totalPages} />
+            <Suspense fallback={<Loading />}>
+                <Rating users={users} currentPage={page} totalPages={totalPages} />
+                <div className="pagination-buttons flex justify-center mt-6">
+                    <Link href={`/rating?page=${page - 1}`}>
+                        <Button
+                            className="btn btn-primary mx-2 w-[100px] h-7"
+                            disabled={page === 1}
+                        >
+                            Previous
+                        </Button>
+                    </Link>
+                    <span className="mx-3 text-lg font-semibold">
+                        Page {page} of {totalPages}
+                    </span>
+                    {page < totalPages && (
+                        <Link href={`/rating?page=${page + 1}`}>
+                            <Button className="btn btn-primary mx-2 w-[100px] h-7">
+                                Next
+                            </Button>
+                        </Link>
+                    )}
+                </div>
+            </Suspense>
         </Container>
     );
 }
