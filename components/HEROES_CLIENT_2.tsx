@@ -325,6 +325,12 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
 
     // Функция для открытия диалогового окна
     const openConfirmationDialog = (bet: Bet) => {
+        // Проверяем, выбран ли победитель
+        if (selectedWinners[bet.id] === null || selectedWinners[bet.id] === undefined) {
+            setCloseBetError("Пожалуйста, выберите победителя перед закрытием ставки.");
+            return;
+        }
+
         setCurrentBet(bet);
         setIsModalOpen(true);
     };
