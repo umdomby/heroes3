@@ -1,19 +1,20 @@
+// /components/OrderP2PPending.tsx
+
 "use client"
 import React, { useEffect, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import {OrderP2P, User, BuySell, OrderP2PStatus, Prisma} from "@prisma/client";
+import { OrderP2P, User, BuySell, OrderP2PStatus, Prisma } from "@prisma/client";
 import { Button } from "@/components/ui/button";
-
 import {
     confirmBuyOrderUser2,
     confirmBuyOrderCreator,
     confirmSellOrderUser2,
     confirmSellOrderCreator,
-    closeDealTime, getOpenOrders, getPendingOrders
+    closeDealTime
 } from '@/app/actions';
-import { DateTime } from "next-auth/providers/kakao";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 interface OrderBankDetail {
     name: string;
@@ -53,32 +54,19 @@ interface Props {
     openOrders: OrderP2P[];
     className?: string;
     user: User;
+    currentPage: number;
+    totalPages: number;
 }
 
-export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }) => {
+export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, currentPage, totalPages }) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
     const [countdowns, setCountdowns] = useState<{ [key: number]: number }>({});
     const [closedOrders, setClosedOrders] = useState<Set<number>>(new Set());
+    const router = useRouter();
 
     useEffect(() => {
         setOpenOrders(openOrders as OrderP2PWithUser[]);
     }, [openOrders]);
-
-
-    useEffect(() => {
-        const fetchOpenOrders = async () => {
-            try {
-                const orders = await getPendingOrders(user.id); // Вызов серверной функции
-                setOpenOrders(orders as OrderP2PWithUser[]);
-            } catch (error) {
-                console.error('Error fetching open orders:', error);
-            }
-        };
-        fetchOpenOrders(); // Initial fetch
-        const intervalId = setInterval(fetchOpenOrders, 5000); // Set interval to fetch every 5 seconds
-        return () => clearInterval(intervalId); // Clear interval on component unmount
-    }, [user.id]);
-
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -89,7 +77,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                         const updatedAt = new Date(order.updatedAt);
                         const now = new Date();
                         const timeDiff = now.getTime() - updatedAt.getTime();
-                        const timeLeft = 3600000 - timeDiff; // 60 minutes in milliseconds 3600000
+                        const timeLeft = 3600000 - timeDiff;
                         newCountdowns[order.id] = Math.max(0, timeLeft);
                     }
                 });
@@ -103,10 +91,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
     useEffect(() => {
         Object.entries(countdowns).forEach(([orderId, timeLeft]) => {
             if (timeLeft <= 0) {
-                console.log("client 2222222222222222222");
                 const order = orders.find(o => o.id === parseInt(orderId));
                 if (order && !closedOrders.has(order.id)) {
-                    console.log("client 33333333333333333333");
                     timeCloseDeal(order);
                 }
             }
@@ -141,7 +127,6 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
     };
 
     const timeCloseDeal = async (order: OrderP2PWithUser) => {
-        console.log("client 222222222222222222222");
         await closeDealTime(order.id);
         setClosedOrders(prev => new Set(prev).add(order.id));
     };
@@ -151,6 +136,18 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            router.push(`/order-p2p-pending?page=${currentPage + 1}`);
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            router.push(`/order-p2p-pending?page=${currentPage - 1}`);
+        }
     };
 
     return (
@@ -244,15 +241,15 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                                         <p>User 2: {order.orderP2PUser2?.fullName}</p>
                                         <p>
                                             Telegram: {order.orderP2PUser2?.telegram ? (
-                                                <Link className="text-blue-500 hover:text-green-300 font-bold"
-                                                    href={order.orderP2PUser2.telegram.replace(/^@/, 'https://t.me/')}
-                                                    target="_blank"
-                                                >
-                                                    {order.orderP2PUser2.telegram}
-                                                </Link>
-                                            ) : (
-                                                'No Telegram'
-                                            )}
+                                            <Link className="text-blue-500 hover:text-green-300 font-bold"
+                                                  href={order.orderP2PUser2.telegram.replace(/^@/, 'https://t.me/')}
+                                                  target="_blank"
+                                            >
+                                                {order.orderP2PUser2.telegram}
+                                            </Link>
+                                        ) : (
+                                            'No Telegram'
+                                        )}
                                         </p>
                                         <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
                                         <p>Points: {order.orderP2PPoints}</p>
@@ -282,6 +279,17 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className }
                     </AccordionItem>
                 ))}
             </Accordion>
+            <div className="pagination-buttons flex justify-center mt-6">
+                <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
+                    Previous
+                </Button>
+                <span className="mx-3 text-lg font-semibold">
+                    Page {currentPage} of {totalPages}
+                </span>
+                <Button onClick={handleNextPage} disabled={currentPage >= totalPages}>
+                    Next
+                </Button>
+            </div>
         </div>
     );
 };
