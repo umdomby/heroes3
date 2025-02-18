@@ -67,7 +67,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
         error,
         isLoading,
         mutate,
-    } = useSWR<Bet[]>("/api/get-bets-users", fetcher, {
+    } = useSWR<Bet[]>("/api/get-bets", fetcher, {
         refreshInterval: 10000, // Опционально: периодическое обновление
         revalidateOnFocus: true, // Обновление при фокусе на вкладке
     });
@@ -92,7 +92,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
     const [currentBet, setCurrentBet] = useState<Bet | null>(null); // Состояние для текущей ставки
 
     useEffect(() => {
-        let source = new EventSource("/api/sse");
+        let source = new EventSource("/api/sse/?status=OPEN_USER");
 
         source.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -127,7 +127,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
     if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
 
     // Фильтрация ставок по статусу OPEN
-    const filteredBets = bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
+    const filteredBets = bets?.filter((bet) => bet.status === BetStatus.OPEN_USER) || [];
 
     const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
         const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2;

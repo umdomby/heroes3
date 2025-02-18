@@ -2,11 +2,19 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/prisma/prisma-client';
 import { BetStatus } from '@prisma/client'; // Импортируйте тип BetStatus
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        const url = new URL(request.url);
+        const statusParam = url.searchParams.get('status'); // Получаем параметр статуса
+
+        // Приводим statusParam к типу BetStatus
+        const status = statusParam as BetStatus;
+
+        // Базовый запрос с фильтрацией по статусу (если передан)
+        const whereClause = status ? { status } : {};
 
         const bets = await prisma.bet.findMany({
-            where: { status: 'OPEN' }, // Применяем фильтр по статусу
+            where: whereClause, // Применяем фильтр по статусу
             orderBy: { createdAt: 'asc' }, // Сортировка по дате создания
             include: {
                 player1: true,

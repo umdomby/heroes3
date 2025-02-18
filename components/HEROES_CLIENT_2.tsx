@@ -92,7 +92,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
     const [currentBet, setCurrentBet] = useState<Bet | null>(null); // Состояние для текущей ставки
 
     useEffect(() => {
-        let source = new EventSource("/api/sse");
+        let source = new EventSource("/api/sse?status=OPEN");
 
         source.onmessage = (event) => {
             const data = JSON.parse(event.data);
