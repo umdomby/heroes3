@@ -530,8 +530,12 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer4 * 100) / 100}</div>
                                                 </TableCell>
-
-                                                <TableCell className="w-20">
+                                                <TableCell
+                                                    className="text-ellipsis  overflow-hidden whitespace-nowrap w-10"
+                                                >
+                                                    № {bet.id}
+                                                </TableCell>
+                                                <TableCell className="w-10">
                                                     <div
                                                         className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                     >

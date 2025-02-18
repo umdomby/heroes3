@@ -504,9 +504,13 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                                     className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
                                                 </TableCell>
-
+                                                <TableCell
+                                                    className="text-ellipsis  overflow-hidden whitespace-nowrap w-10"
+                                                >
+                                                    № {bet.id}
+                                                </TableCell>
                                                 {/* Коэффициент для игроков */}
-                                                <TableCell className="w-20">
+                                                <TableCell className="w-10">
                                                     <div
                                                         className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                     >
