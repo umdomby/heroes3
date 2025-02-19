@@ -48,8 +48,6 @@ export default async function GlobalDataComponent() {
     }
 
     const totalSum =
-        (globalData.reg ?? 0) +
-        (globalData.ref ?? 0) +
         (globalData.openBetsPoints ?? 0) +
         (globalData.usersPoints ?? 0) +
         (globalData.betFund ?? 0) +

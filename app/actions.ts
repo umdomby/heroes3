@@ -879,7 +879,13 @@ export async function globalDataPoints() {
 
         // Если прошло больше 10 секунд, выполняем обновление
         const usersCount = await prisma.user.count();
-        const regCount = await prisma.regPoints.count() * 15;
+
+        // Изменяем regCount, чтобы он равнялся сумме поля regPointsPoints
+        const regPointsResult = await prisma.regPoints.aggregate({
+            _sum: { regPointsPoints: true },
+        });
+        const regCount = regPointsResult._sum.regPointsPoints || 0;
+
         const refCount = await prisma.referralUserIpAddress.count({
             where: { referralStatus: true }
         }) * 10;
