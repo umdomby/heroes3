@@ -15,12 +15,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import React, { useState } from 'react';
 import { Category, Product, ProductItem, User, Player } from '@prisma/client';
-import {clientCreateBet, gameUserBetCreate} from "@/app/actions";
-
+import { clientCreateBet, gameUserBetCreate } from "@/app/actions";
 
 const createBetSchema = z.object({
-
+    initBetPlayer1: z.number().min(1, "Ставка должна быть больше 0"),
+    categoryId: z.number(),
+    productId: z.number(),
+    productItemId: z.number(),
+    gameUserBetDetails: z.string().min(1, "Описание не может быть пустым"),
 });
+
 
 interface Props {
     user: User;
@@ -32,124 +36,147 @@ interface Props {
 }
 
 export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, productItems, player, createBet }) => {
-    // const form = useForm<z.infer<typeof createBetSchema>>({
-    //     resolver: zodResolver(createBetSchema),
-    //     defaultValues: {
-    //
-    //     },
-    // });
+    const form = useForm<z.infer<typeof createBetSchema>>({
+        resolver: zodResolver(createBetSchema),
+        defaultValues: {
+            initBetPlayer1: 0, // Provide a default value
+            categoryId: categories[0]?.id || 0, // Default to the first category
+            productId: products[0]?.id || 0, // Default to the first product
+            productItemId: productItems[0]?.id || 0, // Default to the first product item
+            gameUserBetDetails: '', // Default to an empty string
+        },
+    });
 
-    // const [createBetError, setCreateBetError] = useState<string | null>(null);
-    //
-    // const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
-    //
-    //     try {
-    //         // await gameUserBetCreate(gameData);
-    //         form.reset();
-    //
-    //     } catch (error) {
-    //         if (error instanceof Error) {
-    //             setCreateBetError(error.message);
-    //         } else {
-    //             setCreateBetError("Произошла неизвестная ошибка");
-    //         }
-    //     }
-    // };
+    const [createBetError, setCreateBetError] = useState<string | null>(null);
+
+    const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
+        if (values.initBetPlayer1 > user.points) {
+            setCreateBetError("Вы не можете поставить больше Points, чем у вас есть.");
+            return;
+        }
+
+        try {
+            await gameUserBetCreate({
+                ...values,
+                userId: user.id,
+            });
+            form.reset();
+        } catch (error) {
+            if (error instanceof Error) {
+                setCreateBetError(error.message);
+            } else {
+                setCreateBetError("Произошла неизвестная ошибка");
+            }
+        }
+    };
 
     return (
         <div>
             <div>Ваши баллы: {user?.points}</div>
-            {/*<Form {...form}>*/}
-            {/*    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">*/}
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <FormField
+                        control={form.control}
+                        name="initBetPlayer1"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Ставка</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Сумма ставки"
+                                        type="number"
+                                        {...field}
+                                        value={field.value === undefined ? '' : field.value}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            // Allow empty string to handle deletions
+                                            if (value === '' || Number.isInteger(Number(value))) {
+                                                field.onChange(value === '' ? '' : Number(value));
+                                            }
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-            {/*        /!*ставку который устанавливает создатель User1*!/*/}
-            {/*        <FormField*/}
-            {/*            control={form.control}*/}
-            {/*            name="initBetPlayer1"*/}
-            {/*            render={({ field }) => (*/}
-            {/*                <FormItem>*/}
-            {/*                    <FormLabel>Ставка:</FormLabel>*/}
-            {/*                    <FormControl>*/}
-            {/*                        <Input*/}
-            {/*                            placeholder="0"*/}
-            {/*                            type="number"*/}
-            {/*                            {...field}*/}
-            {/*                            value={field.value === undefined ? '' : field.value}*/}
-            {/*                            onChange={(e) => {*/}
-            {/*                                const value = e.target.valueAsNumber;*/}
-            {/*                                if (Number.isInteger(value)) { // Проверка на целое число*/}
-            {/*                                    field.onChange(value);*/}
-            {/*                                }*/}
-            {/*                            }}*/}
-            {/*                        />*/}
-            {/*                    </FormControl>*/}
-            {/*                    <FormMessage />*/}
-            {/*                </FormItem>*/}
-            {/*            )}*/}
-            {/*        />*/}
+                    <FormField
+                        control={form.control}
+                        name="gameUserBetDetails"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Описание события</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Описание события"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-            {/*        /!* Поле выбора категории *!/*/}
-            {/*        <FormField*/}
-            {/*            control={form.control}*/}
-            {/*            name="categoryId"*/}
-            {/*            render={({ field }) => (*/}
-            {/*                <FormItem>*/}
-            {/*                    <FormLabel>Map</FormLabel>*/}
-            {/*                    <FormControl>*/}
-            {/*                        <select {...field}>*/}
-            {/*                            {categories.map((category) => (*/}
-            {/*                                <option key={category.id} value={category.id}>{category.name}</option>*/}
-            {/*                            ))}*/}
-            {/*                        </select>*/}
-            {/*                    </FormControl>*/}
-            {/*                    <FormMessage />*/}
-            {/*                </FormItem>*/}
-            {/*            )}*/}
-            {/*        />*/}
+                    <FormField
+                        control={form.control}
+                        name="categoryId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Map</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id}>{category.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-            {/*        /!* Поле выбора продукта *!/*/}
-            {/*        <FormField*/}
-            {/*            control={form.control}*/}
-            {/*            name="productId"*/}
-            {/*            render={({ field }) => (*/}
-            {/*                <FormItem>*/}
-            {/*                    <FormLabel>Size</FormLabel>*/}
-            {/*                    <FormControl>*/}
-            {/*                        <select {...field}>*/}
-            {/*                            {products.map((product) => (*/}
-            {/*                                <option key={product.id} value={product.id}>{product.name}</option>*/}
-            {/*                            ))}*/}
-            {/*                        </select>*/}
-            {/*                    </FormControl>*/}
-            {/*                    <FormMessage />*/}
-            {/*                </FormItem>*/}
-            {/*            )}*/}
-            {/*        />*/}
+                    <FormField
+                        control={form.control}
+                        name="productId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Size</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {products.map((product) => (
+                                            <option key={product.id} value={product.id}>{product.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-            {/*        <FormField*/}
-            {/*            control={form.control}*/}
-            {/*            name="productItemId"*/}
-            {/*            render={({ field }) => (*/}
-            {/*                <FormItem>*/}
-            {/*                    <FormLabel>Product Item</FormLabel>*/}
-            {/*                    <FormControl>*/}
-            {/*                        <select {...field}>*/}
-            {/*                            {productItems.map((productItem) => (*/}
-            {/*                                <option key={productItem.id} value={productItem.id}>{productItem.name}</option>*/}
-            {/*                            ))}*/}
-            {/*                        </select>*/}
-            {/*                    </FormControl>*/}
-            {/*                    <FormMessage />*/}
-            {/*                </FormItem>*/}
-            {/*            )}*/}
-            {/*        />*/}
-            {/*        /!* Кнопка отправки формы *!/*/}
-            {/*        <Button type="submit">Create Bet</Button>*/}
+                    <FormField
+                        control={form.control}
+                        name="productItemId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Product Item</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {productItems.map((productItem) => (
+                                            <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-            {/*        /!* Отображение ошибки *!/*/}
-            {/*        {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}*/}
-            {/*    </form>*/}
-            {/*</Form>*/}
+                    <Button type="submit">Create Bet</Button>
+
+                    {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
+                </form>
+            </Form>
         </div>
     );
 };

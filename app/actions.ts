@@ -1277,8 +1277,31 @@ export async function updatePlayerName(name: string) {
     }
 }
 
-export async function gameUserBetCreate(){
-
+export async function gameUserBetCreate(gameData: {
+    initBetPlayer1: number;
+    categoryId: number;
+    productId: number;
+    productItemId: number;
+    gameUserBetDetails: string;
+    userId: number;
+}) {
+    try {
+        const newBet = await prisma.gameUserBet.create({
+            data: {
+                gameUserBet1Id: gameData.userId,
+                betUser1: gameData.initBetPlayer1,
+                gameUserBetDetails: gameData.gameUserBetDetails,
+                categoryId: gameData.categoryId,
+                productId: gameData.productId,
+                productItemId: gameData.productItemId,
+                statusUserBet: 'REGISTRATION',
+            },
+        });
+        return newBet;
+    } catch (error) {
+        console.error("Ошибка при создании ставки:", error);
+        throw new Error("Не удалось создать ставку");
+    }
 }
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
