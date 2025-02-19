@@ -17,6 +17,7 @@ import React, { useState, useEffect } from 'react';
 import { Category, Product, ProductItem, User, Player } from '@prisma/client';
 import { gameUserBetCreate } from "@/app/actions";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import Link from "next/link";
 
 const createBetSchema = z.object({
     initBetPlayer1: z.number().min(30, "Ставка должна быть не менее 30"),
@@ -117,7 +118,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, pro
                         name="gameUserBetDetails"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Описание события</FormLabel>
+                                <FormLabel>Описание события, введите ОХ</FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Описание события"
@@ -191,6 +192,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, pro
                                 <FormLabel>Создать событие для ставок</FormLabel>
                                 <FormControl>
                                     <input
+                                        className="ml-3"
                                         type="checkbox"
                                         {...field}
                                         checked={field.value}
@@ -202,7 +204,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, pro
                         )}
                     />
 
-                    <Button type="submit" disabled={!!createBetError}>Create Bet</Button>
+                    <Button type="submit" disabled={!form.watch('gameUserBetDetails')|| !!createBetError}>Create Bet</Button>
 
                     {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
                 </form>
@@ -210,7 +212,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, pro
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
-                    <DialogTitle>Ставка успешно создана!</DialogTitle>
+                    <DialogTitle>Игра успешно создана! Переходите: <Link className="text-blue-500" href="/user-game-2">поиск игрока</Link> </DialogTitle>
                 </DialogContent>
             </Dialog>
         </div>
