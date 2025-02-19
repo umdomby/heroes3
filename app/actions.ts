@@ -105,16 +105,16 @@ export async function addEditPlayer(playerId: number | null, playerName: string)
     if (!playerName) {
         throw new Error('Имя игрока обязательно');
     }
-
+    console.log("333333333333333")
     try {
-        const existingPlayer = await prisma.player.findUnique({
+        const existingPlayer = await prisma.player.findFirst({
             where: {name: playerName},
         });
-
+        console.log("44444444444")
         if (existingPlayer) {
             return {success: false, message: 'Игрок с таким именем уже существует'};
         }
-
+        console.log("55555555555")
         if (playerId) {
             await prisma.player.update({
                 where: {id: playerId},
@@ -122,14 +122,25 @@ export async function addEditPlayer(playerId: number | null, playerName: string)
             });
         } else {
             await prisma.player.create({
-                data: {name: playerName},
+                data: {
+                    name: playerName,
+                    userId: Number(session.id),
+                },
             });
         }
         revalidatePath('/add-player');
         return {success: true, message: 'Игрок успешно сохранен'};
     } catch (error) {
-        console.error('Ошибка:', error);
-        throw new Error('Не удалось обновить игрока');
+        if (error === null || error === undefined) {
+            console.error('Ошибка при регистрации игрока: Неизвестная ошибка (error is null или undefined)');
+        } else if (error instanceof Error) {
+            console.error('Ошибка при регистрации игрока:', error.message);
+            console.error('Стек ошибки:', error.stack);
+        } else {
+            console.error('Ошибка при регистрации игрока:', error);
+        }
+
+        throw new Error('Не удалось зарегистрироваться как игрок');
     }
 } // Функция для добавления и редактирование имен игроков, админом
 export async function deletePlayer(playerId: number) {
