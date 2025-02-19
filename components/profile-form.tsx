@@ -16,7 +16,7 @@ import {
     addBankDetails,
     deleteBankDetail,
     updateBankDetails,
-    updateUserInfoTelegram
+    updateUserInfoTelegram, registrationPlayer, isUserPlayer, updateTwitch
 } from '@/app/actions';
 import {
     Accordion,
@@ -48,6 +48,10 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', price: '' });
     const [telegram, setTelegram] = useState<string>(data.telegram || '');
     const [telegramView, setTelegramView] = useState<boolean>(data.telegramView || false);
+    const [twitch, setTwitch] = useState<string>(''); // Состояние для хранения Twitch
+    const [twitchError, setTwitchError] = useState<string | null>(null);
+    const [isPlayer, setIsPlayer] = useState<boolean>(false);
+
 
     useEffect(() => {
         const fetchReferrals = async () => {
@@ -60,6 +64,25 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         };
 
         fetchReferrals();
+    }, []);
+
+
+
+
+    useEffect(() => {
+        const checkIfUserIsPlayer = async () => {
+            try {
+                const result = await isUserPlayer();
+                setIsPlayer(result.isPlayer);
+                if (result.twitch) {
+                    setTwitch(result.twitch); // Устанавливаем twitch, если он есть
+                }
+            } catch (error) {
+                console.error('Ошибка при проверке статуса игрока:', error);
+            }
+        };
+
+        checkIfUserIsPlayer();
     }, []);
 
     const handleUpdateTelegram = async () => {
@@ -155,6 +178,50 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         navigator.clipboard.writeText(referralLink);
         toast.success('Referral link скопирован в буфер обмена');
     };
+
+    const handleRegisterPlayer = async () => {
+        try {
+            if (!twitch) {
+                throw new Error('Поле Twitch не должно быть пустым');
+            }
+            await registrationPlayer(twitch);
+            toast.success('Вы успешно зарегистрировались как игрок');
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.error(error.message);
+            } else {
+                toast.error('Ошибка при регистрации как игрок');
+            }
+        }
+    };
+    const handleTwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setTwitch(value);
+
+        // Проверяем, содержит ли введенное значение "twitch.tv/"
+        if (!value.includes('twitch.tv/')) {
+            setTwitchError('Введите корректные данные Twitch');
+        } else {
+            setTwitchError(null);
+        }
+    };
+
+    const handleUpdateTwitch = async () => {
+        try {
+            if (!twitch.includes('twitch.tv/')) {
+                throw new Error('Введите корректные данные Twitch');
+            }
+            await updateTwitch(twitch);
+            toast.success('Twitch успешно обновлен');
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.error(error.message);
+            } else {
+                toast.error('Ошибка при обновлении Twitch');
+            }
+        }
+    };
+
 
     return (
         <Container className="w-[98%]">
@@ -510,6 +577,43 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                         <Button onClick={handleUpdateTelegram}
                                                 className="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
                                             Обновить Telegram
+                                        </Button>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="registerPlayer">
+                                <AccordionTrigger>Зарегистрироваться как игрок</AccordionTrigger>
+                                <AccordionContent>
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium mb-2">Twitch</label>
+                                        <Input
+                                            type="text"
+                                            value={twitch}
+                                            onChange={handleTwitchChange}
+                                            className={`mb-2 p-2 border ${twitchError ? 'border-red-500' : 'border-gray-300'} rounded`}
+                                        />
+                                        {twitchError && <p className="text-red-500 text-sm">{twitchError}</p>}
+                                        {!telegram && (
+                                            <p className="text-red-500 text-sm">
+                                                Чтобы стать игроком, вам нужно еще заполнить поле Telegram в Настройках Telegram
+                                            </p>
+                                        )}
+                                        {!isPlayer && (
+                                            <Button
+                                                onClick={handleRegisterPlayer}
+                                                className="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                                                disabled={!!twitchError || !telegram} // Отключаем кнопку, если есть ошибка или Telegram пуст
+                                            >
+                                                Зарегистрироваться
+                                            </Button>
+                                        )}
+                                        <Button
+                                            onClick={handleUpdateTwitch}
+                                            className="mt-2 ml-3 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                                            disabled={!!twitchError || !isPlayer} // Отключаем кнопку, если есть ошибка или пользователь не игрок
+                                        >
+                                            Обновить Twitch
                                         </Button>
                                     </div>
                                 </AccordionContent>

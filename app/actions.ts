@@ -1137,6 +1137,103 @@ export async function chatUsersDelete(messageId: number) {
     }
 }
 
+export async function registrationPlayer(twitch: string) {
+    try {
+        const currentUser = await getUserSession();
+
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+        const findUser = await prisma.user.findFirst({
+            where: {
+                id: Number(currentUser.id),
+            },
+        });
+
+        // Проверяем, существует ли уже игрок с таким userId
+        const existingPlayer = await prisma.player.findUnique({
+            where: { userId: Number(currentUser.id) },
+        });
+
+        if (existingPlayer) {
+            throw new Error('Вы уже зарегистрированы как игрок');
+        }
+
+        // Убедитесь, что fullName не пустой
+        if (!findUser.fullName) {
+            throw new Error('Полное имя пользователя не найдено');
+        }
+
+        // Создаем нового игрока
+        const newPlayer = await prisma.player.create({
+            data: {
+                name: findUser.fullName, // Используем fullName как name
+                userId: Number(currentUser.id),
+                twitch: twitch,
+            },
+        });
+
+        return newPlayer;
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error('Ошибка при регистрации игрока:', error.message);
+        } else {
+            console.error('Ошибка при регистрации игрока:', error);
+        }
+        throw new Error('Не удалось зарегистрироваться как игрок');
+    }
+}
+export async function isUserPlayer() {
+    const currentUser = await getUserSession();
+
+    if (!currentUser) {
+        throw new Error('Пользователь не найден');
+    }
+
+    const player = await prisma.player.findUnique({
+        where: { userId: Number(currentUser.id) },
+    });
+
+    return {
+        isPlayer: !!player, // Возвращает true, если пользователь зарегистрирован как игрок
+        twitch: player ? player.twitch : null, // Возвращает twitch, если пользователь игрок
+    };
+}
+
+export async function updateTwitch(twitch: string) {
+    try {
+        const currentUser = await getUserSession();
+
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        // Проверяем, существует ли игрок с таким userId
+        const existingPlayer = await prisma.player.findUnique({
+            where: { userId: Number(currentUser.id) },
+        });
+
+        if (!existingPlayer) {
+            throw new Error('Вы не зарегистрированы как игрок');
+        }
+
+        // Обновляем Twitch
+        await prisma.player.update({
+            where: { userId: Number(currentUser.id) },
+            data: { twitch: twitch },
+        });
+
+        return { success: true, message: 'Twitch успешно обновлен' };
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error('Ошибка при обновлении Twitch:', error.message);
+        } else {
+            console.error('Ошибка при обновлении Twitch:', error);
+        }
+        throw new Error('Не удалось обновить Twitch');
+    }
+}
+
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     // Add a constant value to each player's total to stabilize the odds
     const adjustedTotalPlayer1 = totalWithInitPlayer1 + 2000;
