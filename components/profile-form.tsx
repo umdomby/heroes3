@@ -51,7 +51,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
     const [twitch, setTwitch] = useState<string>('');
     const [twitchError, setTwitchError] = useState<string | null>(null);
     const [isPlayer, setIsPlayer] = useState<boolean>(false);
-    const [playerName, setPlayerName] = useState<string>(data.name || '');
+    const [playerName, setPlayerName] = useState<string>('');
 
 
     useEffect(() => {
@@ -73,7 +73,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
             try {
                 const result = await isUserPlayer();
                 setIsPlayer(result.isPlayer); // Устанавливаем начальное значение isPlayer
-                setTwitch(result.twitch); // Устанавливаем начальное значение Twitch
+                setTwitch(result.twitch ?? ''); // Provide a default empty string if twitch is null
                 setPlayerName(result.playerName); // Устанавливаем начальное значение имени игрока
             } catch (error) {
                 console.error('Ошибка при проверке статуса игрока:', error);
@@ -193,7 +193,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
             // Update the state to reflect the new player status
             setIsPlayer(true);
             setPlayerName(newPlayer.name); // Assuming the server returns the new player object with a name
-            setTwitch(newPlayer.twitch); // Update the Twitch URL
+            setTwitch(newPlayer.twitch ?? ''); // Provide a default empty string if twitch is null
 
             toast.success('Вы успешно зарегистрировались как игрок');
         } catch (error) {

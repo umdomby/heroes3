@@ -59,7 +59,7 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
 
     const handleEditClick = (player: Player) => {
         setPlayerName(player.name);
-        setPlayerTwitch(player.twitch); // Assuming the Player model has a twitch field
+        setPlayerTwitch(player.twitch ?? ''); // Provide a default empty string if twitch is null
         setSelectedPlayerId(player.id);
     };
 
