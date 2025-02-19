@@ -48,7 +48,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', price: '' });
     const [telegram, setTelegram] = useState<string>(data.telegram || '');
     const [telegramView, setTelegramView] = useState<boolean>(data.telegramView || false);
-    const [twitch, setTwitch] = useState<string>(''); // Состояние для хранения Twitch
+    const [twitch, setTwitch] = useState<string>('');
     const [twitchError, setTwitchError] = useState<string | null>(null);
     const [isPlayer, setIsPlayer] = useState<boolean>(false);
 
@@ -603,7 +603,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                             <Button
                                                 onClick={handleRegisterPlayer}
                                                 className="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                                                disabled={!!twitchError || !telegram} // Отключаем кнопку, если есть ошибка или Telegram пуст
+                                                disabled={!!twitchError || !telegram || !twitch } // Disable if there's an error or Telegram is empty
                                             >
                                                 Зарегистрироваться
                                             </Button>

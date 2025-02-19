@@ -7,7 +7,8 @@ import Loading from "@/app/(root)/loading";
 import { clientCreateBet } from "@/app/actions";
 import { Container } from '@/components/container';
 import { UserGame2Comp } from "@/components/user-game-2-comp";
-import { Player } from '@prisma/client'; // Ensure this import is correct
+import { Player } from '@prisma/client';
+import Link from "next/link"; // Ensure this import is correct
 
 async function fetchData() {
     const session = await getUserSession();
@@ -45,7 +46,20 @@ export default async function UserGamePage() {
     }
 
     if (!player) {
-        return <div className="text-center">Вы не зарегистрированы как игрок.</div>;
+        return <div className="text-center">
+            <p className="text-green-500">Вы не зарегистрированы как игрок</p>
+            <p>
+                1. Заполните: Настройки Telegram
+            </p>
+            <p>
+                2. Зарегистрируйтесь как игрок
+            </p>
+            <p>
+                <Link href="/profile" className="text-blue-500">Profile</Link>
+            </p>
+
+
+        </div>;
     }
 
     return (
