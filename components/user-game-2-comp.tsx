@@ -6,31 +6,25 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
 interface Props {
     user: User;
-    gameUserBets: (GameUserBet & {
-        gameUser1Bet: User;
-        gameUser2Bet: User | null;
-        category: Category;
-        product: Product;
-        productItem: ProductItem;
-    })[];
+    gameUserBets: GameUserBet[]
 }
 
 export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
     return (
         <div>
-            <div>Ваши баллы: {user?.points}</div>
+            <div>Ваши баллы: {user.points}</div>
             <Table>
                 <TableBody>
                     {gameUserBets.map((bet) => (
                         <TableRow key={bet.id}>
-                            <TableCell>{bet.gameUser1Bet.fullName}</TableCell>
-                            <TableCell>{bet.betUser1}</TableCell>
-                            <TableCell>{bet.gameUserBetDetails}</TableCell>
-                            <TableCell>{bet.category.name}</TableCell>
-                            <TableCell>{bet.product.name}</TableCell>
-                            <TableCell>{bet.productItem.name}</TableCell>
-                            <TableCell>{bet.gameUserBetOpen ? "Open" : "Closed"}</TableCell>
-                            <TableCell>{bet.statusUserBet}</TableCell>
+                            <TableCell className="text-center">{bet.gameUser1Bet?.fullName}</TableCell>
+                            <TableCell className="text-center">{bet?.betUser1}</TableCell>
+                            <TableCell className="text-center">{bet?.gameUserBetDetails}</TableCell>
+                            <TableCell className="text-center">{bet.category?.name}</TableCell>
+                            <TableCell className="text-center">{bet.product?.name}</TableCell>
+                            <TableCell className="text-center">{bet.productItem?.name}</TableCell>
+                            <TableCell className="text-center">{bet.gameUserBetOpen ? "Open" : "Closed"}</TableCell>
+                            <TableCell className="text-center">{bet.statusUserBet}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

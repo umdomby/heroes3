@@ -5,25 +5,22 @@ import React from "react";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { UserGame2Comp } from "@/components/user-game-2-comp";
 import {Container} from '@/components/container';
+import {redirect} from "next/navigation";
 
 export default async function UserGame2Page() {
     const session = await getUserSession();
-    let user = null;
 
-    if (session) {
-        user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
+    if (!session) {
+        redirect('/not-auth');
     }
 
+    const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
 
-    let gameUserBets = await prisma.gameUserBet.findMany({
-            include: {
-                gameUser1Bet: true,
-                gameUser2Bet: true,
-                category: true,
-                product: true,
-                productItem: true,
-            },
-    });
+    if (!user) {
+        return redirect('/not-auth');
+    }
+
+    let gameUserBets = await prisma.gameUserBet.findMany();
 
 
     return (
