@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 import Loading from "@/app/(root)/loading";
 import { clientCreateBet } from "@/app/actions";
 import { Container } from '@/components/container';
-import { UserGame2Comp } from "@/components/user-game-2-comp";
+import { UserGame2CreateComp } from "@/components/user-game-2-create-comp";
 import { Player } from '@prisma/client';
 import Link from "next/link"; // Ensure this import is correct
 
@@ -65,7 +65,7 @@ export default async function UserGamePage() {
     return (
         <Container className="flex flex-col my-10 w-[96%]">
             <Suspense fallback={<Loading />}>
-                <UserGame2Comp
+                <UserGame2CreateComp
                     user={user}
                     categories={categories}
                     products={products}

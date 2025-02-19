@@ -1,27 +1,35 @@
 "use server";
 
 import { prisma } from '@/prisma/prisma-client';
-import React, { Suspense } from "react";
-
+import React from "react";
 import { getUserSession } from "@/components/lib/get-user-session";
-
-
-
-
+import { UserGame2Comp } from "@/components/user-game-2-comp";
+import {Container} from '@/components/container';
 
 export default async function UserGame2Page() {
     const session = await getUserSession();
     let user = null;
+    let gameUserBets = [];
 
     if (session) {
-        user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
+        user = await prisma.user.findFirst({ where: { id: Number(session.id) } });
+        gameUserBets = await prisma.gameUserBet.findMany({
+            include: {
+                gameUser1Bet: true,
+                gameUser2Bet: true,
+                category: true,
+                product: true,
+                productItem: true,
+            },
+        });
     }
 
-    const isTelegramEmpty = user && (!user.telegram || user.telegram.trim() === '');
-
     return (
-        <div>
-
-        </div>
+        <Container className="flex flex-col my-10 w-[96%]">
+            <UserGame2Comp
+                user={user}
+                gameUserBets={gameUserBets}
+            />
+        </Container>
     );
 }
