@@ -9,11 +9,13 @@ import {Container} from '@/components/container';
 export default async function UserGame2Page() {
     const session = await getUserSession();
     let user = null;
-    let gameUserBets = [];
 
     if (session) {
-        user = await prisma.user.findFirst({ where: { id: Number(session.id) } });
-        gameUserBets = await prisma.gameUserBet.findMany({
+        user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
+    }
+
+
+    let gameUserBets = await prisma.gameUserBet.findMany({
             include: {
                 gameUser1Bet: true,
                 gameUser2Bet: true,
@@ -21,8 +23,8 @@ export default async function UserGame2Page() {
                 product: true,
                 productItem: true,
             },
-        });
-    }
+    });
+
 
     return (
         <Container className="flex flex-col my-10 w-[96%]">
