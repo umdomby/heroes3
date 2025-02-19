@@ -1284,6 +1284,7 @@ export async function gameUserBetCreate(gameData: {
     productItemId: number;
     gameUserBetDetails: string;
     userId: number;
+    gameUserBetOpen: boolean; // Добавляем новое поле
 }) {
     try {
         const newBet = await prisma.gameUserBet.create({
@@ -1294,6 +1295,7 @@ export async function gameUserBetCreate(gameData: {
                 categoryId: gameData.categoryId,
                 productId: gameData.productId,
                 productItemId: gameData.productItemId,
+                gameUserBetOpen: gameData.gameUserBetOpen, // Используем значение из параметров
                 statusUserBet: 'REGISTRATION',
             },
         });

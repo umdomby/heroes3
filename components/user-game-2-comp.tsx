@@ -13,18 +13,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Category, Product, ProductItem, User, Player } from '@prisma/client';
-import { clientCreateBet, gameUserBetCreate } from "@/app/actions";
+import { gameUserBetCreate } from "@/app/actions";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const createBetSchema = z.object({
-    initBetPlayer1: z.number().min(1, "Ставка должна быть больше 0"),
+    initBetPlayer1: z.number().min(30, "Ставка должна быть не менее 30"),
     categoryId: z.number(),
     productId: z.number(),
     productItemId: z.number(),
     gameUserBetDetails: z.string().min(1, "Описание не может быть пустым"),
+    gameUserBetOpen: z.boolean(),
 });
-
 
 interface Props {
     user: User;
@@ -32,35 +33,46 @@ interface Props {
     products: Product[];
     productItems: ProductItem[];
     player: Player;
-    createBet: typeof clientCreateBet;
 }
 
-export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, productItems, player, createBet }) => {
+export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, productItems, player }) => {
     const form = useForm<z.infer<typeof createBetSchema>>({
         resolver: zodResolver(createBetSchema),
         defaultValues: {
-            initBetPlayer1: 0, // Provide a default value
-            categoryId: categories[0]?.id || 0, // Default to the first category
-            productId: products[0]?.id || 0, // Default to the first product
-            productItemId: productItems[0]?.id || 0, // Default to the first product item
-            gameUserBetDetails: '', // Default to an empty string
+            initBetPlayer1: 0,
+            categoryId: categories[0]?.id || 0,
+            productId: products[0]?.id || 0,
+            productItemId: productItems[0]?.id || 0,
+            gameUserBetDetails: '',
+            gameUserBetOpen: false,
         },
     });
 
     const [createBetError, setCreateBetError] = useState<string | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    useEffect(() => {
+        const subscription = form.watch((value) => {
+            if (value.initBetPlayer1 > user.points) {
+                setCreateBetError("Вы не можете поставить больше Points, чем у вас есть.");
+            } else if (value.initBetPlayer1 < 30) {
+                setCreateBetError("Ставка должна быть не менее 30.");
+            } else {
+                setCreateBetError(null);
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [form, user.points]);
 
     const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
-        if (values.initBetPlayer1 > user.points) {
-            setCreateBetError("Вы не можете поставить больше Points, чем у вас есть.");
-            return;
-        }
-
         try {
             await gameUserBetCreate({
                 ...values,
                 userId: user.id,
             });
             form.reset();
+            setIsDialogOpen(true);
         } catch (error) {
             if (error instanceof Error) {
                 setCreateBetError(error.message);
@@ -89,8 +101,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, pro
                                         value={field.value === undefined ? '' : field.value}
                                         onChange={(e) => {
                                             const value = e.target.value;
-                                            // Allow empty string to handle deletions
-                                            if (value === '' || Number.isInteger(Number(value))) {
+                                            if (value === '' || (Number.isInteger(Number(value)) && !/^0/.test(value))) {
                                                 field.onChange(value === '' ? '' : Number(value));
                                             }
                                         }}
@@ -172,11 +183,36 @@ export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, pro
                         )}
                     />
 
-                    <Button type="submit">Create Bet</Button>
+                    <FormField
+                        control={form.control}
+                        name="gameUserBetOpen"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Создать событие для ставок</FormLabel>
+                                <FormControl>
+                                    <input
+                                        type="checkbox"
+                                        {...field}
+                                        checked={field.value}
+                                        onChange={(e) => field.onChange(e.target.checked)}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <Button type="submit" disabled={!form.formState.isValid || !!createBetError}>Create Bet</Button>
 
                     {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
                 </form>
             </Form>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent>
+                    <DialogTitle>Ставка успешно создана!</DialogTitle>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
