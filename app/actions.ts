@@ -1231,9 +1231,8 @@ export async function updateTwitch(twitch: string) {
             throw new Error('Вы не зарегистрированы как игрок');
         }
 
-        // Обновляем Twitch
         await prisma.player.update({
-            where: { userId: Number(currentUser.id) },
+            where: { id: existingPlayer.id },
             data: { twitch: twitch },
         });
 
@@ -1266,7 +1265,7 @@ export async function updatePlayerName(name: string) {
 
         // Обновляем имя игрока
         await prisma.player.update({
-            where: { userId: Number(currentUser.id) },
+            where: { id: existingPlayer.id },
             data: { name: name },
         });
 
