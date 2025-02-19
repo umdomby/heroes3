@@ -39,7 +39,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, pro
     const form = useForm<z.infer<typeof createBetSchema>>({
         resolver: zodResolver(createBetSchema),
         defaultValues: {
-            initBetPlayer1: 0,
+            initBetPlayer1: 30,
             categoryId: categories[0]?.id || 0,
             productId: products[0]?.id || 0,
             productItemId: productItems[0]?.id || 0,
@@ -202,7 +202,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, categories, products, pro
                         )}
                     />
 
-                    <Button type="submit" disabled={!form.formState.isValid || !!createBetError}>Create Bet</Button>
+                    <Button type="submit" disabled={!!createBetError}>Create Bet</Button>
 
                     {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
                 </form>
