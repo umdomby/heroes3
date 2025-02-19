@@ -109,17 +109,17 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 </DropdownMenu>
                                 <Link href="/user-game-2">
                                     <DropdownMenuRadioItem value="user-game-2" className="cursor-pointer">
-                                        USER GAME 2
+                                        GAME USER 2
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/user-game-create-2">
                                     <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
-                                        CREATE GAME 2
+                                        GAME USER 2 CREATE
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/user-game-bet-2">
                                     <DropdownMenuRadioItem value="user-game-bet-2" className="cursor-pointer">
-                                        GAME USER BET 2
+                                        BET USER 2
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/bet-closed-2-3-4">
