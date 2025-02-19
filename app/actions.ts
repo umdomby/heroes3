@@ -1162,18 +1162,15 @@ export async function registrationPlayer(twitch: string) {
             throw new Error('Полное имя пользователя не найдено');
         }
 
-
         // Проверяем, существует ли уже игрок с таким userId
         const existingPlayer = await prisma.player.findFirst({
             where: { userId: Number(currentUser.id) },
         });
 
-
         if (existingPlayer) {
             throw new Error('Вы уже зарегистрированы как игрок');
         }
 
-        console.log("2222222222222222222")
         // Создаем нового игрока
         const newPlayer = await prisma.player.create({
             data: {
@@ -1182,7 +1179,6 @@ export async function registrationPlayer(twitch: string) {
                 twitch: twitch,
             },
         });
-        console.log("666666")
         return newPlayer;
     } catch (error) {
         if (error === null || error === undefined) {

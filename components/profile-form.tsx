@@ -182,13 +182,19 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                 throw new Error('Поле Twitch не должно быть пустым');
             }
 
-            // Добавляем "https://" в начало, если его нет
+            // Add "https://" to the beginning if it's not present
             let formattedTwitch = twitch;
             if (!formattedTwitch.startsWith('http://') && !formattedTwitch.startsWith('https://')) {
                 formattedTwitch = 'https://' + formattedTwitch;
             }
 
-            await registrationPlayer(formattedTwitch);
+            const newPlayer = await registrationPlayer(formattedTwitch);
+
+            // Update the state to reflect the new player status
+            setIsPlayer(true);
+            setPlayerName(newPlayer.name); // Assuming the server returns the new player object with a name
+            setTwitch(newPlayer.twitch); // Update the Twitch URL
+
             toast.success('Вы успешно зарегистрировались как игрок');
         } catch (error) {
             if (error instanceof Error) {
