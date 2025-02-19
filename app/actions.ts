@@ -1144,11 +1144,16 @@ export async function registrationPlayer(twitch: string) {
         if (!currentUser) {
             throw new Error('Пользователь не найден');
         }
+
+        // Найдите пользователя в базе данных
         const findUser = await prisma.user.findFirst({
-            where: {
-                id: Number(currentUser.id),
-            },
+            where: { id: Number(currentUser.id) },
         });
+
+        // Убедитесь, что пользователь найден и fullName не пустой
+        if (!findUser || !findUser.fullName) {
+            throw new Error('Полное имя пользователя не найдено');
+        }
 
         // Проверяем, существует ли уже игрок с таким userId
         const existingPlayer = await prisma.player.findUnique({
@@ -1157,11 +1162,6 @@ export async function registrationPlayer(twitch: string) {
 
         if (existingPlayer) {
             throw new Error('Вы уже зарегистрированы как игрок');
-        }
-
-        // Убедитесь, что fullName не пустой
-        if (!findUser.fullName) {
-            throw new Error('Полное имя пользователя не найдено');
         }
 
         // Создаем нового игрока

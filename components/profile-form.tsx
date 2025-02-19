@@ -278,7 +278,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                     onClick={onClickSignOut}
                                     variant="secondary"
                                     disabled={form.formState.isSubmitting}
-                                    className="text-base"
+                                    className="text-base ml-3"
                                     type="button"
                                 >
                                     Выйти
