@@ -27,6 +27,7 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
     const [confirmName, setConfirmName] = useState('');
+    const [playerTwitch, setPlayerTwitch] = useState('');
 
     useEffect(() => {
         setPlayer(players);
@@ -34,16 +35,21 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        console.log('Отправка:', { selectedPlayerId, playerName }); // Логирование значений
-        if (!playerName.trim()) {
-            setMessage('Имя игрока не может быть пустым');
+        if (!playerName.trim() || !playerTwitch.trim()) {
+            setMessage('Имя игрока и Twitch URL не могут быть пустыми');
             setMessageType('error');
             return;
         }
         try {
-            const response = await addEditPlayer(selectedPlayerId, playerName);
+            const response = await addEditPlayer(selectedPlayerId, playerName, playerTwitch);
             setMessage(response.message);
             setMessageType(response.success ? 'success' : 'error');
+            if (response.success) {
+                // Reset form fields
+                setPlayerName('');
+                setPlayerTwitch('');
+                setSelectedPlayerId(null);
+            }
         } catch (error) {
             console.error('Не удалось сохранить игрока:', error);
             setMessage('Не удалось сохранить игрока');
@@ -53,6 +59,7 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
 
     const handleEditClick = (player: Player) => {
         setPlayerName(player.name);
+        setPlayerTwitch(player.twitch); // Assuming the Player model has a twitch field
         setSelectedPlayerId(player.id);
     };
 
@@ -92,6 +99,14 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
                     required
                     className="mb-4"
                 />
+                <Input
+                    type="text"
+                    value={playerTwitch}
+                    onChange={(e) => setPlayerTwitch(e.target.value)}
+                    placeholder="Enter Twitch URL"
+                    required
+                    className="mb-4"
+                />
                 <Button type="submit" className="bg-blue-500 text-white">
                     {selectedPlayerId ? 'Edit Player' : 'Add Player'}
                 </Button>
@@ -107,6 +122,7 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
                 <TableHeader>
                     <TableRow>
                         <TableHead>Player Name</TableHead>
+                        <TableHead>Twitch URL</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -114,6 +130,7 @@ export const AddEditPlayer: React.FC<Props> = ({ user, players, className }) => 
                     {player.map((player) => (
                         <TableRow key={player.id}>
                             <TableCell>{player.name}</TableCell>
+                            <TableCell>{player.twitch}</TableCell>
                             <TableCell>
                                 <Button onClick={() => handleEditClick(player)} className="bg-green-500 text-white">
                                     Edit

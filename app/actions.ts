@@ -97,52 +97,42 @@ export async function updateUserInfoTelegram(telegram: string, telegramView: boo
         throw err;
     }
 } // Функция для обновления информации о пользователе
-export async function addEditPlayer(playerId: number | null, playerName: string) {
+export async function addEditPlayer(playerId: number | null, playerName: string, playerTwitch: string) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
         throw new Error('У вас нет прав для выполнения этой операции');
     }
-    if (!playerName) {
-        throw new Error('Имя игрока обязательно');
+    if (!playerName || !playerTwitch) {
+        throw new Error('Имя игрока и Twitch URL обязательны');
     }
-    console.log("333333333333333")
     try {
         const existingPlayer = await prisma.player.findFirst({
-            where: {name: playerName},
+            where: { name: playerName },
         });
-        console.log("44444444444")
-        if (existingPlayer) {
-            return {success: false, message: 'Игрок с таким именем уже существует'};
+        if (existingPlayer && existingPlayer.id !== playerId) {
+            return { success: false, message: 'Игрок с таким именем уже существует' };
         }
-        console.log("55555555555")
         if (playerId) {
             await prisma.player.update({
-                where: {id: playerId},
-                data: {name: playerName},
+                where: { id: playerId },
+                data: { name: playerName, twitch: playerTwitch },
             });
         } else {
             await prisma.player.create({
                 data: {
                     name: playerName,
+                    twitch: playerTwitch,
                     userId: Number(session.id),
                 },
             });
         }
         revalidatePath('/add-player');
-        return {success: true, message: 'Игрок успешно сохранен'};
+        return { success: true, message: 'Игрок успешно сохранен' };
     } catch (error) {
-        if (error === null || error === undefined) {
-            console.error('Ошибка при регистрации игрока: Неизвестная ошибка (error is null или undefined)');
-        } else if (error instanceof Error) {
-            console.error('Ошибка при регистрации игрока:', error.message);
-            console.error('Стек ошибки:', error.stack);
-        } else {
-            console.error('Ошибка при регистрации игрока:', error);
-        }
-
+        console.error('Ошибка при регистрации игрока:', error);
         throw new Error('Не удалось зарегистрироваться как игрок');
     }
-} // Функция для добавления и редактирование имен игроков, админом
+}// Функция для добавления и редактирование имен игроков, админом
 export async function deletePlayer(playerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {

@@ -21,7 +21,7 @@ async function fetchData() {
             prisma.category.findMany(),
             prisma.product.findMany(),
             prisma.productItem.findMany(),
-            prisma.player.findMany(),
+            prisma.player.findMany({where: {userId: parseInt(session.id)}}),
         ]);
         return { user, categories, products, productItems, players };
     } catch (error) {
