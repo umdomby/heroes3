@@ -1,6 +1,39 @@
 export const categories = [
     {
+        "id": 1,
         name: 'Jebus Cross',
+    },
+    {
+        "id": 2,
+        name: '2sm4c',
+    },
+    {
+        "id": 3,
+        name: '2sm4d',
+    },
+    {
+        "id": 4,
+        name: 'Clash of Dragons',
+    },
+    {
+        "id": 5,
+        name: 'Diamond',
+    },
+    {
+        "id": 6,
+        name: 'Jebus Cross Outcast',
+    },
+    {
+        "id": 7,
+        name: 'Firewalk',
+    },
+    {
+        "id": 8,
+        name: 'Nostalgia',
+    },
+    {
+        "id": 9,
+        name: 'Skirmish',
     },
 ];
 
@@ -8,7 +41,58 @@ export const products = [
     {
         "id": 1,
         "name": "XL",
-        "categoryId": 1,
+    },
+    {
+        "id": 2,
+        "name": "S",
+    },
+    {
+        "id": 3,
+        "name": "M",
+    },
+    {
+        "id": 4,
+        "name": "L",
+    },
+    {
+        "id": 5,
+        "name": "H",
+    },
+    {
+        "id": 6,
+        "name": "XH",
+    },
+    {
+        "id": 7,
+        "name": "G",
+    },
+    {
+        "id": 8,
+        "name": "XL + Dungeon",
+    },
+    {
+        "id": 9,
+        "name": "S + Dungeon",
+    },
+    {
+        "id": 10,
+        "name": "M + Dungeon",
+    },
+    {
+        "id": 11,
+        "name": "L + Dungeon",
+    },
+    {
+        "id": 12,
+        "name": "H + Dungeon",
+    },
+    {
+        "id": 13,
+        "name": "XH + Dungeon",
+    },
+    {
+        "id": 14,
+        "name": "G + Dungeon",
     },
 
 ];
@@ -16,8 +100,27 @@ export const products = [
 export const productsItem =[
     {
         "id": 1,
-        "productId": 1,
-        "name": "XL",
+        "name": "16-8-2",
+    },
+    {
+        "id": 2,
+        "name": "14-8-2",
+    },
+    {
+        "id": 3,
+        "name": "12-8-2",
+    },
+    {
+        "id": 4,
+        "name": "12-7-2",
+    },
+    {
+        "id": 5,
+        "name": "12-6-2",
+    },
+    {
+        "id": 6,
+        "name": "12-5-2",
     },
 ];
 

@@ -26,7 +26,7 @@ async function fetchData() {
         ]);
 
         // Find the player associated with the user
-        const player = players.find((p: Player) => p.id === user?.id);
+        const player = players.find((p: Player) => p.userId === user?.id);
         console.log("111111111111111 ");
         console.log(player);
         return { user, categories, products, productItems, player };
