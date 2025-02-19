@@ -1145,6 +1145,7 @@ export async function chatUsersDelete(messageId: number) {
 
 export async function registrationPlayer(twitch: string) {
     try {
+        console.log(twitch)
         const currentUser = await getUserSession();
 
         if (!currentUser) {
@@ -1161,15 +1162,18 @@ export async function registrationPlayer(twitch: string) {
             throw new Error('Полное имя пользователя не найдено');
         }
 
+
         // Проверяем, существует ли уже игрок с таким userId
-        const existingPlayer = await prisma.player.findUnique({
+        const existingPlayer = await prisma.player.findFirst({
             where: { userId: Number(currentUser.id) },
         });
+
 
         if (existingPlayer) {
             throw new Error('Вы уже зарегистрированы как игрок');
         }
 
+        console.log("2222222222222222222")
         // Создаем нового игрока
         const newPlayer = await prisma.player.create({
             data: {
@@ -1178,14 +1182,18 @@ export async function registrationPlayer(twitch: string) {
                 twitch: twitch,
             },
         });
-
+        console.log("666666")
         return newPlayer;
     } catch (error) {
-        if (error instanceof Error) {
+        if (error === null || error === undefined) {
+            console.error('Ошибка при регистрации игрока: Неизвестная ошибка (error is null или undefined)');
+        } else if (error instanceof Error) {
             console.error('Ошибка при регистрации игрока:', error.message);
+            console.error('Стек ошибки:', error.stack);
         } else {
             console.error('Ошибка при регистрации игрока:', error);
         }
+
         throw new Error('Не удалось зарегистрироваться как игрок');
     }
 }
@@ -1196,7 +1204,7 @@ export async function isUserPlayer() {
         throw new Error('Пользователь не найден');
     }
 
-    const player = await prisma.player.findUnique({
+    const player = await prisma.player.findFirst({
         where: { userId: Number(currentUser.id) },
     });
 
@@ -1206,7 +1214,6 @@ export async function isUserPlayer() {
         playerName: player ? player.name : '', // Возвращает имя игрока для редактирования
     };
 }
-
 export async function updateTwitch(twitch: string) {
     try {
         const currentUser = await getUserSession();
@@ -1216,7 +1223,7 @@ export async function updateTwitch(twitch: string) {
         }
 
         // Проверяем, существует ли игрок с таким userId
-        const existingPlayer = await prisma.player.findUnique({
+        const existingPlayer = await prisma.player.findFirst({
             where: { userId: Number(currentUser.id) },
         });
 
@@ -1240,7 +1247,6 @@ export async function updateTwitch(twitch: string) {
         throw new Error('Не удалось обновить Twitch');
     }
 }
-
 export async function updatePlayerName(name: string) {
     try {
         const currentUser = await getUserSession();
@@ -1250,7 +1256,7 @@ export async function updatePlayerName(name: string) {
         }
 
         // Проверяем, существует ли игрок с таким userId
-        const existingPlayer = await prisma.player.findUnique({
+        const existingPlayer = await prisma.player.findFirst({
             where: { userId: Number(currentUser.id) },
         });
 

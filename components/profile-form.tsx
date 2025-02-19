@@ -181,7 +181,14 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
             if (!twitch) {
                 throw new Error('Поле Twitch не должно быть пустым');
             }
-            await registrationPlayer(twitch);
+
+            // Добавляем "https://" в начало, если его нет
+            let formattedTwitch = twitch;
+            if (!formattedTwitch.startsWith('http://') && !formattedTwitch.startsWith('https://')) {
+                formattedTwitch = 'https://' + formattedTwitch;
+            }
+
+            await registrationPlayer(formattedTwitch);
             toast.success('Вы успешно зарегистрировались как игрок');
         } catch (error) {
             if (error instanceof Error) {
@@ -192,7 +199,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
         }
     };
     const handleTwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
+        let value = e.target.value;
         setTwitch(value);
 
         // Проверяем, содержит ли введенное значение "twitch.tv/"
@@ -205,10 +212,11 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
 
     const handleUpdateTwitch = async () => {
         try {
-            if (!twitch.includes('twitch.tv/')) {
-                throw new Error('Введите корректные данные Twitch');
+            let formattedTwitch = twitch;
+            if (!formattedTwitch.startsWith('http://') && !formattedTwitch.startsWith('https://')) {
+                formattedTwitch = 'https://' + formattedTwitch;
             }
-            await updateTwitch(twitch);
+            await updateTwitch(formattedTwitch);
             toast.success('Twitch успешно обновлен');
         } catch (error) {
             if (error instanceof Error) {
@@ -631,22 +639,25 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                             Обновить Twitch
                                         </Button>
 
-                                        <label className="block text-sm font-medium mb-2">Имя игрока</label>
+
                                         {isPlayer && (
                                             <div>
-                                                <Input
-                                                    type="text"
-                                                    value={playerName}
-                                                    onChange={(e) => setPlayerName(e.target.value)}
-                                                    className="mb-2 p-2 border border-gray-300 rounded"
-                                                />
-                                                <Button
-                                                    onClick={handleUpdatePlayerName}
-                                                    className="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                                                    disabled={!playerName} // Отключаем кнопку, если имя пустое
-                                                >
-                                                    Обновить имя
-                                                </Button>
+                                                <label className="block text-sm font-medium mb-2">Имя игрока</label>
+                                                <div>
+                                                    <Input
+                                                        type="text"
+                                                        value={playerName}
+                                                        onChange={(e) => setPlayerName(e.target.value)}
+                                                        className="mb-2 p-2 border border-gray-300 rounded"
+                                                    />
+                                                    <Button
+                                                        onClick={handleUpdatePlayerName}
+                                                        className="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                                                        disabled={!playerName} // Отключаем кнопку, если имя пустое
+                                                    >
+                                                        Обновить имя
+                                                    </Button>
+                                                </div>
                                             </div>)}
                                     </div>
                                 </AccordionContent>

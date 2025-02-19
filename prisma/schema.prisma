@@ -51,7 +51,7 @@ model User {
   gameUserBet1 GameUserBet[] @relation("GameUser1Bet")
   gameUserBet2 GameUserBet[] @relation("GameUser2Bet")
 
-  player Player?
+  player Player[]
 
   chatUsers             ChatUsers[]
   regPoints             regPoints[]
@@ -125,10 +125,10 @@ model ReferralUserIpAddress {
 
 model Player {
   id                Int         @id @default(autoincrement())
-  name              String      @unique
+  name              String
   twitch            String?
   user              User?       @relation(fields: [userId], references: [id])
-  userId            Int?        @unique
+  userId            Int?
   player1Bets       Bet[]       @relation(name: "Player1Bets") // Relation for bets as player 1
   player2Bets       Bet[]       @relation(name: "Player2Bets") // Relation for bets as player 2
   player1BetsCLOSED BetCLOSED[] @relation(name: "Player1BetsCLOSED") // Relation for bets as player 1
@@ -238,27 +238,28 @@ model GlobalData {
 }
 
 model GameUserBet {
-  id                   Int               @id @default(autoincrement())
-  gameUser1Bet         User              @relation("GameUser1Bet", fields: [gameUserBet1Id], references: [id])
-  gameUserBet1Id       Int
-  betUser1             Float
-  betUser2             Float?
-  gameUserBetDetails   String            @default("")
-  gameUserBetOpen      Boolean           @default(false)
-  checkWinUser1        Boolean           @default(false)
-  checkWinUser2        Boolean           @default(false)
-  gameUser2Bet         User?             @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id])
-  gameUserBet2Id       Int?
-  gameUserBetDataUser2 Json?
-  categoryId           Int?
-  category             Category?         @relation(fields: [categoryId], references: [id])
-  productId            Int?
-  product              Product?          @relation(fields: [productId], references: [id])
-  productItemId        Int?
-  statusUserBet        GameUserBetStatus @default(REGISTRATION)
-  productItem          ProductItem?      @relation(fields: [productItemId], references: [id])
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  id                    Int      @id @default(autoincrement())
+  gameUser1Bet          User     @relation("GameUser1Bet", fields: [gameUserBet1Id], references: [id])
+  gameUserBet1Id        Int // записываеся User кто создает
+  betUser1              Float // Ставка User1
+  betUser2              Float? // при создании ставка User2 не ставится
+  gameUserBetDetails    String   @default("") // детали которые пишет User1
+  gameUserBetOpen       Boolean  @default(false) // кстанавливается хочет ли он создать событие для ставок
+  checkWinUser1         Boolean? // подтверждение победы User1
+  checkWinUser2         Boolean? // подтверждение победы User2
+  gameUser2Bet          User?    @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id]) // сюда User1 выбирает с кем будет играть
+  gameUserBet2Id        Int? // User2.id
+  gameUserBetDataUsers2 Json? // сюда будут дабавляться другие users из которых user1 выберет с кем будет играть
+
+  category      Category          @relation(fields: [categoryId], references: [id]) // выбирает User1
+  categoryId    Int // выбирает User1
+  product       Product           @relation(fields: [productId], references: [id])
+  productId     Int // выбирает User1
+  productItem   ProductItem       @relation(fields: [productItemId], references: [id])
+  productItemId Int // выбирает User1
+  statusUserBet GameUserBetStatus @default(REGISTRATION)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 }
 
 enum GameUserBetStatus {

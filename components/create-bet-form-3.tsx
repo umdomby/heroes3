@@ -284,8 +284,7 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
                     />
 
                     {/* Product Item Selection */}
-                    {/* Uncomment if needed */}
-                    {/* <FormField
+                    <FormField
                         control={form.control}
                         name="productItemId"
                         render={({ field }) => (
@@ -301,7 +300,7 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
                                 <FormMessage />
                             </FormItem>
                         )}
-                    /> */}
+                    />
 
                     {/* Submit Button */}
                     <Button type="submit">Create Bet</Button>

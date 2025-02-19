@@ -232,23 +232,23 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
                     />
 
                     {/* Поле выбора элемента продукта */}
-                    {/*<FormField*/}
-                    {/*    control={form.control}*/}
-                    {/*    name="productItemId"*/}
-                    {/*    render={({ field }) => (*/}
-                    {/*        <FormItem>*/}
-                    {/*            <FormLabel>Product Item</FormLabel>*/}
-                    {/*            <FormControl>*/}
-                    {/*                <select {...field}>*/}
-                    {/*                    {productItems.map((productItem) => (*/}
-                    {/*                        <option key={productItem.id} value={productItem.id}>{productItem.name}</option>*/}
-                    {/*                    ))}*/}
-                    {/*                </select>*/}
-                    {/*            </FormControl>*/}
-                    {/*            <FormMessage />*/}
-                    {/*        </FormItem>*/}
-                    {/*    )}*/}
-                    {/*/>*/}
+                    <FormField
+                        control={form.control}
+                        name="productItemId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Product Item</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        {productItems.map((productItem) => (
+                                            <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     {/* Кнопка отправки формы */}
                     <Button type="submit">Create Bet</Button>
