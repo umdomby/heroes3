@@ -37,8 +37,6 @@ async function up() {
             {"name": "Банк Дабрабыт EРИП", "details": "IBAN - BY29MMBN30140116007150001246", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246", "price": "1"},
         ],
         telegram: "@navatar85",
-        twitch: "https://www.twitch.tv/heroes3_site",
-
       },
       {
         fullName: 'Pi33',
@@ -71,7 +69,6 @@ async function up() {
         points: 1000,
         cardId: generateCardId(),
         telegram: "@Pi555",
-        twitch: "https://www.twitch.tv/heroes3_site_2",
         bankDetails: [
           {"name": "USTD - BSC (BEP20)", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)", "price": "1"},
           {"name": "BTC", "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow", "description": "Биткойн", "price": "1"},

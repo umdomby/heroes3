@@ -125,6 +125,13 @@ export const productsItem =[
 ];
 
 export const players = [
+
+    {
+        "id": 1,
+        "name": "Pi33",
+        "twitch": 'https://www.twitch.tv/heroes3_site',
+        "userId": 1,
+    },
     {
         "id": 1000001,
         "name": "pup_ok_",

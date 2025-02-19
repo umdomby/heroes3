@@ -1202,7 +1202,8 @@ export async function isUserPlayer() {
 
     return {
         isPlayer: !!player, // Возвращает true, если пользователь зарегистрирован как игрок
-        twitch: player ? player.twitch : null, // Возвращает twitch, если пользователь игрок
+        twitch: player ? player.twitch : '', // Возвращает twitch для редактирования
+        playerName: player ? player.name : '', // Возвращает имя игрока для редактирования
     };
 }
 
@@ -1238,6 +1239,44 @@ export async function updateTwitch(twitch: string) {
         }
         throw new Error('Не удалось обновить Twitch');
     }
+}
+
+export async function updatePlayerName(name: string) {
+    try {
+        const currentUser = await getUserSession();
+
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        // Проверяем, существует ли игрок с таким userId
+        const existingPlayer = await prisma.player.findUnique({
+            where: { userId: Number(currentUser.id) },
+        });
+
+        if (!existingPlayer) {
+            throw new Error('Вы не зарегистрированы как игрок');
+        }
+
+        // Обновляем имя игрока
+        await prisma.player.update({
+            where: { userId: Number(currentUser.id) },
+            data: { name: name },
+        });
+
+        return { success: true, message: 'Имя игрока успешно обновлено' };
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error('Ошибка при обновлении имени игрока:', error.message);
+        } else {
+            console.error('Ошибка при обновлении имени игрока:', error);
+        }
+        throw new Error('Не удалось обновить имя игрока');
+    }
+}
+
+export async function gameUserBetCreate(){
+
 }
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {

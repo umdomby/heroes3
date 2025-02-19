@@ -238,28 +238,34 @@ model GlobalData {
 }
 
 model GameUserBet {
-  id                   Int          @id @default(autoincrement())
-  gameUser1Bet         User         @relation("GameUser1Bet", fields: [gameUserBet1Id], references: [id])
+  id                   Int               @id @default(autoincrement())
+  gameUser1Bet         User              @relation("GameUser1Bet", fields: [gameUserBet1Id], references: [id])
   gameUserBet1Id       Int
   betUser1             Float
   betUser2             Float?
-  gameUserBetDetails   String       @default("")
-  gameUserBetOpen      Boolean      @default(false)
-  checkWinUser1        Boolean      @default(false)
-  checkWinUser2        Boolean      @default(false)
-  gameUser2Bet         User?        @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id])
+  gameUserBetDetails   String            @default("")
+  gameUserBetOpen      Boolean           @default(false)
+  checkWinUser1        Boolean           @default(false)
+  checkWinUser2        Boolean           @default(false)
+  gameUser2Bet         User?             @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id])
   gameUserBet2Id       Int?
   gameUserBetDataUser2 Json?
   categoryId           Int?
-  category             Category?    @relation(fields: [categoryId], references: [id])
+  category             Category?         @relation(fields: [categoryId], references: [id])
   productId            Int?
-  product              Product?     @relation(fields: [productId], references: [id])
+  product              Product?          @relation(fields: [productId], references: [id])
   productItemId        Int?
-  productItem          ProductItem? @relation(fields: [productItemId], references: [id])
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
+  statusUserBet        GameUserBetStatus @default(REGISTRATION)
+  productItem          ProductItem?      @relation(fields: [productItemId], references: [id])
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
 }
 
+enum GameUserBetStatus {
+  REGISTRATION
+  OPEN
+  CLOSED
+}
 // ------------------------------------------- 2 -------------------------------
 model Bet {
   id              Int              @id @default(autoincrement())

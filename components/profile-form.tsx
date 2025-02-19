@@ -1,22 +1,22 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { TFormRegisterValues, formRegisterSchema } from './modals/auth-modal/forms/schemas';
-import { User } from '@prisma/client';
+import React, {useEffect, useState} from 'react';
+import {FormProvider, useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {TFormRegisterValues, formRegisterSchema} from './modals/auth-modal/forms/schemas';
+import {User} from '@prisma/client';
 import toast from 'react-hot-toast';
-import { signOut } from 'next-auth/react';
-import { Container } from './container';
-import { Title } from './title';
-import { FormInput } from './form';
-import { Button, Input } from '@/components/ui';
+import {signOut} from 'next-auth/react';
+import {Container} from './container';
+import {Title} from './title';
+import {FormInput} from './form';
+import {Button, Input} from '@/components/ui';
 import {
     referralGet,
     updateUserInfo,
     addBankDetails,
     deleteBankDetail,
     updateBankDetails,
-    updateUserInfoTelegram, registrationPlayer, isUserPlayer, updateTwitch
+    updateUserInfoTelegram, registrationPlayer, isUserPlayer, updateTwitch, updatePlayerName
 } from '@/app/actions';
 import {
     Accordion,
@@ -30,7 +30,7 @@ interface Props {
     data: User;
 }
 
-export const ProfileForm: React.FC<Props> = ({ data }) => {
+export const ProfileForm: React.FC<Props> = ({data}) => {
     const form = useForm({
         resolver: zodResolver(formRegisterSchema),
         defaultValues: {
@@ -44,13 +44,14 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     const [referrals, setReferrals] = useState<any[]>([]);
     const [bankDetails, setBankDetails] = useState<any[]>(Array.isArray(data.bankDetails) ? data.bankDetails : []);
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '', price: '' });
-    const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', price: '' });
+    const [newBankDetail, setNewBankDetail] = useState({name: '', details: '', description: '', price: ''});
+    const [editedDetail, setEditedDetail] = useState({name: '', details: '', description: '', price: ''});
     const [telegram, setTelegram] = useState<string>(data.telegram || '');
     const [telegramView, setTelegramView] = useState<boolean>(data.telegramView || false);
     const [twitch, setTwitch] = useState<string>('');
     const [twitchError, setTwitchError] = useState<string | null>(null);
     const [isPlayer, setIsPlayer] = useState<boolean>(false);
+    const [playerName, setPlayerName] = useState<string>(data.name || '');
 
 
     useEffect(() => {
@@ -67,21 +68,17 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
     }, []);
 
 
-
-
     useEffect(() => {
         const checkIfUserIsPlayer = async () => {
             try {
                 const result = await isUserPlayer();
-                setIsPlayer(result.isPlayer);
-                if (result.twitch) {
-                    setTwitch(result.twitch); // Устанавливаем twitch, если он есть
-                }
+                setIsPlayer(result.isPlayer); // Устанавливаем начальное значение isPlayer
+                setTwitch(result.twitch); // Устанавливаем начальное значение Twitch
+                setPlayerName(result.playerName); // Устанавливаем начальное значение имени игрока
             } catch (error) {
                 console.error('Ошибка при проверке статуса игрока:', error);
             }
         };
-
         checkIfUserIsPlayer();
     }, []);
 
@@ -128,7 +125,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
             }
             const updatedBankDetails = await addBankDetails(newBankDetail);
             setBankDetails(updatedBankDetails);
-            setNewBankDetail({ name: '', details: '', description: '', price: '' });
+            setNewBankDetail({name: '', details: '', description: '', price: ''});
             toast.success('Банковский реквизит добавлен');
         } catch (error) {
             toast.error('Ошибка при добавлении банковского реквизита');
@@ -222,13 +219,29 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         }
     };
 
+    const handleUpdatePlayerName = async () => {
+        try {
+            if (!playerName) {
+                throw new Error('Имя игрока не должно быть пустым');
+            }
+            await updatePlayerName(playerName);
+            toast.success('Имя игрока успешно обновлено');
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.error(error.message);
+            } else {
+                toast.error('Ошибка при обновлении имени игрока');
+            }
+        }
+    };
+
 
     return (
         <Container className="w-[98%]">
             <div className="flex flex-col gap-3 w-full mt-10">
                 <div className="flex flex-col md:flex-row gap-3 w-full">
                     <div className="w-full md:w-1/3 p-4 rounded-lg">
-                        <Title text={`Личные данные | #${data.id}`} size="md" className="font-bold" />
+                        <Title text={`Личные данные | #${data.id}`} size="md" className="font-bold"/>
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-blue-500">Email: {data.email}</label>
@@ -266,11 +279,12 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
                         <FormProvider {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
-                                <FormInput name="fullName" label="Полное имя" required />
-                                <FormInput type="password" name="password" label="Новый пароль" required />
-                                <FormInput type="password" name="confirmPassword" label="Повторите пароль" required />
+                                <FormInput name="fullName" label="Полное имя" required/>
+                                <FormInput type="password" name="password" label="Новый пароль" required/>
+                                <FormInput type="password" name="confirmPassword" label="Повторите пароль" required/>
 
-                                <Button disabled={form.formState.isSubmitting} className="text-base mt-10" type="submit">
+                                <Button disabled={form.formState.isSubmitting} className="text-base mt-10"
+                                        type="submit">
                                     Сохранить
                                 </Button>
 
@@ -374,7 +388,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                     if (regex.test(value)) {
                                                         // Если значение пустое, сбрасываем цену
                                                         if (value === '') {
-                                                            setEditedDetail({ ...editedDetail, price: '' });
+                                                            setEditedDetail({...editedDetail, price: ''});
                                                             return;
                                                         }
                                                         // Если значение начинается с запятой или точки, добавляем "0," в начало
@@ -412,7 +426,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                         // Преобразуем строку в число с плавающей точкой и проверяем, является ли оно числом
                                                         const floatValue = parseFloat(value.replace(',', '.'));
                                                         if (!isNaN(floatValue)) {
-                                                            setNewBankDetail({ ...newBankDetail, price: value });
+                                                            setNewBankDetail({...newBankDetail, price: value});
                                                         }
                                                     }
                                                 }}
@@ -470,7 +484,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                                                 if (regex.test(value)) {
                                                                     // Если значение пустое, сбрасываем цену
                                                                     if (value === '') {
-                                                                        setEditedDetail({ ...editedDetail, price: '' });
+                                                                        setEditedDetail({...editedDetail, price: ''});
                                                                         return;
                                                                     }
                                                                     // Если значение начинается с запятой или точки, добавляем "0," в начало
@@ -596,25 +610,44 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
                                         {twitchError && <p className="text-red-500 text-sm">{twitchError}</p>}
                                         {!telegram && (
                                             <p className="text-red-500 text-sm">
-                                                Чтобы стать игроком, вам нужно еще заполнить поле Telegram в Настройках Telegram
+                                                Чтобы стать игроком, вам нужно еще заполнить поле Telegram в Настройках
+                                                Telegram
                                             </p>
                                         )}
                                         {!isPlayer && (
                                             <Button
                                                 onClick={handleRegisterPlayer}
-                                                className="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                                                disabled={!!twitchError || !telegram || !twitch } // Disable if there's an error or Telegram is empty
+                                                className="mt-2 mr-3 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                                                disabled={!!twitchError || !telegram || !twitch} // Disable if there's an error or Telegram is empty
                                             >
                                                 Зарегистрироваться
                                             </Button>
                                         )}
                                         <Button
                                             onClick={handleUpdateTwitch}
-                                            className="mt-2 ml-3 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                                            className="mt-2 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
                                             disabled={!!twitchError || !isPlayer} // Отключаем кнопку, если есть ошибка или пользователь не игрок
                                         >
                                             Обновить Twitch
                                         </Button>
+
+                                        <label className="block text-sm font-medium mb-2">Имя игрока</label>
+                                        {isPlayer && (
+                                            <div>
+                                                <Input
+                                                    type="text"
+                                                    value={playerName}
+                                                    onChange={(e) => setPlayerName(e.target.value)}
+                                                    className="mb-2 p-2 border border-gray-300 rounded"
+                                                />
+                                                <Button
+                                                    onClick={handleUpdatePlayerName}
+                                                    className="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                                                    disabled={!playerName} // Отключаем кнопку, если имя пустое
+                                                >
+                                                    Обновить имя
+                                                </Button>
+                                            </div>)}
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
