@@ -6,6 +6,7 @@ import { getUserSession } from "@/components/lib/get-user-session";
 import { UserGame2Comp } from "@/components/user-game-2-comp";
 import {Container} from '@/components/container';
 import {redirect} from "next/navigation";
+import {Category, GameUserBet, Product, ProductItem, User} from "@prisma/client";
 
 export default async function UserGame2Page() {
     const session = await getUserSession();
@@ -20,7 +21,21 @@ export default async function UserGame2Page() {
         return redirect('/not-auth');
     }
 
-    let gameUserBets = await prisma.gameUserBet.findMany();
+    const gameUserBets: (GameUserBet & {
+        gameUser1Bet: User;
+        gameUser2Bet: User | null;
+        category: Category;
+        product: Product;
+        productItem: ProductItem;
+    })[] = await prisma.gameUserBet.findMany({
+        include: {
+            gameUser1Bet: true, // Include the related User for gameUser1Bet
+            gameUser2Bet: true, // Include the related User for gameUser2Bet
+            category: true,
+            product: true,
+            productItem: true,
+        },
+    });
 
 
     return (

@@ -34,9 +34,10 @@ interface Props {
     products: Product[];
     productItems: ProductItem[];
     player: Player;
+    createBet: (formData: any) => Promise<any>; // Add createBet to Props
 }
 
-export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, products, productItems, player }) => {
+export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, products, productItems, player, createBet }) => {
     const form = useForm<z.infer<typeof createBetSchema>>({
         resolver: zodResolver(createBetSchema),
         defaultValues: {
@@ -68,7 +69,7 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
 
     const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
         try {
-            await gameUserBetCreate({
+            await createBet({
                 ...values,
                 userId: user.id,
             });
@@ -204,7 +205,7 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                         )}
                     />
 
-                    <Button type="submit" disabled={!form.watch('gameUserBetDetails')|| !!createBetError}>Create Bet</Button>
+                    <Button type="submit" disabled={!form.watch('gameUserBetDetails') || !!createBetError}>Create Bet</Button>
 
                     {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
                 </form>
