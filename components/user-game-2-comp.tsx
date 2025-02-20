@@ -7,6 +7,23 @@ import Link from "next/link";
 import { gameUserBetRegistrations } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
 
+// Компонент уведомления
+const Notification: React.FC<{ message: string; duration: number; onClose: () => void }> = ({ message, duration, onClose }) => {
+    React.useEffect(() => {
+        const timer = setTimeout(onClose, duration);
+        return () => clearTimeout(timer);
+    }, [duration, onClose]);
+
+    return (
+        <div
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 m-4 bg-green-800 text-white rounded p-4"
+            style={{ fontSize: '24px' }} // Adjust the font size as needed
+        >
+            {message}
+        </div>
+    );
+};
+
 interface Props {
     user: User;
     gameUserBets: (GameUserBet & {
@@ -23,8 +40,17 @@ interface Props {
 }
 
 export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
+    const [showNotification, setShowNotification] = useState(false);
+
     return (
         <div>
+            {showNotification && (
+                <Notification
+                    message="Вы успешно добавлены в игру"
+                    duration={2000}
+                    onClose={() => setShowNotification(false)}
+                />
+            )}
             <div className="flex justify-between items-center">
                 <div>Points: {user?.points}</div>
                 <Link className="text-blue-500" href="/user-game-create-2">Create game</Link>
@@ -68,7 +94,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                             gameUserBetDetails: descriptionInput,
                             gameUserBetId: gameUserBetId
                         });
-                        alert("Вы успешно добавлены в игру");
+                        setShowNotification(true); // Показать уведомление
                     } catch (error) {
                         console.error("Ошибка при добавлении в игру:", error);
                     }
