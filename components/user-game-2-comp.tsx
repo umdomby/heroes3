@@ -59,20 +59,34 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                 <div>Points: {user?.points}</div>
                 <Link className="text-blue-500" href="/user-game-create-2">Create game</Link>
             </div>
+            <Table>
+                <TableBody>
+                    <TableRow>
+                        <TableHead className="text-center  overflow-hidden whitespace-nowrap w-[10%]">Name</TableHead>
+                        <TableHead className="text-center  overflow-hidden whitespace-nowrap w-[10%]">Bet</TableHead>
+                        <TableHead className="text-center  overflow-hidden whitespace-nowrap w-[10%]">Map</TableHead>
+                        <TableHead className="text-center  overflow-hidden whitespace-nowrap w-[10%]">Size</TableHead>
+                        <TableHead className="text-center  overflow-hidden whitespace-nowrap w-[10%]">Timer</TableHead>
+                        <TableHead className="text-center  overflow-hidden whitespace-nowrap w-[10%]">State</TableHead>
+                        <TableHead className="text-center  overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
+                    </TableRow>
+                </TableBody>
+            </Table>
             {gameUserBets.map((bet) => (
                 <div key={bet.id} className="border border-gray-700 mt-1">
                     <Accordion type="single" collapsible>
                         <AccordionItem value={`item-${bet.id}`}>
-                            <AccordionTrigger asChild>
+                            <AccordionTrigger>
                                 <Table>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell className="text-center">{bet.betUser1}</TableCell>
-                                            <TableCell className="text-center">{bet.category.name}</TableCell>
-                                            <TableCell className="text-center">{bet.product.name}</TableCell>
-                                            <TableCell className="text-center">{bet.productItem.name}</TableCell>
-                                            <TableCell className="text-center">{bet.statusUserBet}</TableCell>
-                                            <TableCell className="text-center">
+                                            <TableCell className="text-center  overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
+                                            <TableCell className="text-center  overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
+                                            <TableCell className="text-center  overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
+                                            <TableCell className="text-center  overflow-hidden whitespace-nowrap w-[10%]">{bet.product.name}</TableCell>
+                                            <TableCell className="text-center  overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
+                                            <TableCell className="text-center  overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
+                                            <TableCell className="text-center  overflow-hidden whitespace-nowrap w-[10%]">
                                                 {bet.gameUser1Bet.telegram ? (
                                                     <Link
                                                         className="text-center text-blue-500 hover:text-green-300 font-bold"
@@ -84,9 +98,6 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                                                 ) : (
                                                     "No Telegram"
                                                 )}
-                                                <button className="w-full text-left">
-                                                    {bet.gameUser1Bet.fullName}
-                                                </button>
                                             </TableCell>
                                         </TableRow>
                                     </TableBody>

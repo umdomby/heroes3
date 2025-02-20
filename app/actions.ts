@@ -1320,7 +1320,7 @@ export async function gameUserBetRegistrations(gameData: {
 
         // Добавляем новые данные в gameUserBetDataUsers2
         const updatedData = [
-            ...(currentBet?.gameUserBetDataUsers2 || []),
+            ...(Array.isArray(currentBet?.gameUserBetDataUsers2) ? currentBet.gameUserBetDataUsers2 : []),
             {
                 userId: gameData.userId,
                 betUser2: gameData.betUser2,
