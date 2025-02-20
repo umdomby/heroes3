@@ -1296,7 +1296,7 @@ export async function gameUserBetCreate(gameData: {
                 productId: gameData.productId,
                 productItemId: gameData.productItemId,
                 gameUserBetOpen: gameData.gameUserBetOpen, // Используем значение из параметров
-                statusUserBet: 'REGISTRATION',
+                statusUserBet: 'OPEN',
             },
         });
         return newBet;

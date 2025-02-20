@@ -24,7 +24,7 @@ const createBetSchema = z.object({
     categoryId: z.number(),
     productId: z.number(),
     productItemId: z.number(),
-    gameUserBetDetails: z.string().min(1, "Описание не может быть пустым"),
+    gameUserBetDetails: z.string().min(1, "Описание не может быть пустым").max(30, "Описание не может превышать 70 символов"),
     gameUserBetOpen: z.boolean(),
 });
 
@@ -118,11 +118,12 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                         name="gameUserBetDetails"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Описание события, введите ОХ</FormLabel>
+                                <FormLabel>Описание события (максимум 30 символов)</FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Описание события"
                                         {...field}
+                                        maxLength={30} // Ограничение на уровне HTML
                                     />
                                 </FormControl>
                                 <FormMessage />

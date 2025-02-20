@@ -256,14 +256,14 @@ model GameUserBet {
   productId             Int // выбирает User1
   productItem           ProductItem       @relation(fields: [productItemId], references: [id])
   productItemId         Int // выбирает User1
-  statusUserBet         GameUserBetStatus @default(REGISTRATION)
+  statusUserBet         GameUserBetStatus @default(OPEN)
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 }
 
 enum GameUserBetStatus {
-  REGISTRATION
   OPEN
+  START
   CLOSED
 }
 // ------------------------------------------- 2 -------------------------------

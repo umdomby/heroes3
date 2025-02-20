@@ -1,8 +1,6 @@
-'use client';
-
 import React from 'react';
-import {GameUserBet, User, Category, Product, ProductItem, $Enums} from '@prisma/client';
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { GameUserBet, User, Category, Product, ProductItem, $Enums } from '@prisma/client';
+import { Table, TableBody, TableCell, TableRow, TableHeader, TableHead } from "@/components/ui/table";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
 
 interface Props {
@@ -13,9 +11,9 @@ interface Props {
         category: Category;
         product: Product;
         productItem: ProductItem;
-        gameUserBetDetails : string;
-        betUser1 : number;
-        gameUserBetOpen : boolean;
+        gameUserBetDetails: string;
+        betUser1: number;
+        gameUserBetOpen: boolean;
         statusUserBet: GameUserBetStatus;
     })[];
 }
@@ -25,11 +23,23 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
         <div>
             <div>Ваши баллы: {user.points}</div>
             <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="text-center">Name</TableHead>
+                        <TableHead className="text-center">Bet</TableHead>
+                        <TableHead className="text-center">Map</TableHead>
+                        <TableHead className="text-center">Size</TableHead>
+                        <TableHead className="text-center">Timer</TableHead>
+                        <TableHead className="text-center">Description</TableHead>
+                        <TableHead className="text-center">Open Bet</TableHead>
+                        <TableHead className="text-center">State</TableHead>
+                    </TableRow>
+                </TableHeader>
                 <TableBody>
                     {gameUserBets.map((bet) => (
                         <TableRow key={bet.id}>
                             <TableCell className="text-center">{bet.gameUser1Bet.fullName}</TableCell>
-                            <TableCell className="text-center">{bet?.betUser1}</TableCell>
+                            <TableCell className="text-center">{bet.betUser1}</TableCell>
                             <TableCell className="text-center">{bet.category.name}</TableCell>
                             <TableCell className="text-center">{bet.product.name}</TableCell>
                             <TableCell className="text-center">{bet.productItem.name}</TableCell>
