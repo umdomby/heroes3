@@ -78,7 +78,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                     <div key={bet.id} className="border border-gray-700 mt-1">
                         <Accordion type="single" collapsible>
                             <AccordionItem value={`item-${bet.id}`}>
-                                <AccordionTrigger>
+                                <AccordionTrigger className={user.id === bet.gameUser1Bet.id ? 'bg-gray-500' : ''}>
                                     <Table>
                                         <TableBody>
                                             <TableRow>
@@ -136,12 +136,16 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                                                 placeholder="Description (max 150 chars)"
                                                 className="mb-2 p-2 border"
                                             />
-                                            <button
-                                                onClick={() => handleAddBet(bet.id, bet.betUser1)}
-                                                className="p-2 bg-blue-500 text-white"
-                                            >
-                                                Add to Game
-                                            </button>
+                                            {user.id === bet.gameUser1Bet.id ? (
+                                                <div className="text-gray-500">Вы создатель этого события</div>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleAddBet(bet.id, bet.betUser1)}
+                                                    className="p-2 bg-blue-500 text-white"
+                                                >
+                                                    Add to Game
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </AccordionContent>
