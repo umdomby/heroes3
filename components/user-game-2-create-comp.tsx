@@ -86,13 +86,16 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
 
     return (
         <div>
-            <div>Ваши баллы: {user?.points}</div>
+            <div className="flex justify-between items-center">
+                <div>Points: {user?.points}</div>
+                <Link className="text-blue-500" href="/user-game-2">Open games</Link>
+            </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <FormField
                         control={form.control}
                         name="initBetPlayer1"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Ставка</FormLabel>
                                 <FormControl>
@@ -109,7 +112,7 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                                         }}
                                     />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -117,7 +120,7 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                     <FormField
                         control={form.control}
                         name="gameUserBetDetails"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Описание события (максимум 150 символов)</FormLabel>
                                 <FormControl>
@@ -127,7 +130,7 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                                         maxLength={150} // Ограничение на уровне HTML
                                     />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -135,17 +138,18 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                     <FormField
                         control={form.control}
                         name="categoryId"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Map</FormLabel>
                                 <FormControl>
-                                    <select {...field} value={field.value || 0} onChange={(e) => field.onChange(Number(e.target.value))}>
+                                    <select {...field} value={field.value || 0}
+                                            onChange={(e) => field.onChange(Number(e.target.value))}>
                                         {categories.map((category) => (
                                             <option key={category.id} value={category.id}>{category.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -153,17 +157,18 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                     <FormField
                         control={form.control}
                         name="productId"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Size</FormLabel>
                                 <FormControl>
-                                    <select {...field} value={field.value || 0} onChange={(e) => field.onChange(Number(e.target.value))}>
+                                    <select {...field} value={field.value || 0}
+                                            onChange={(e) => field.onChange(Number(e.target.value))}>
                                         {products.map((product) => (
                                             <option key={product.id} value={product.id}>{product.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -171,24 +176,26 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                     <FormField
                         control={form.control}
                         name="productItemId"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Product Item</FormLabel>
                                 <FormControl>
-                                    <select {...field} value={field.value || 0} onChange={(e) => field.onChange(Number(e.target.value))}>
+                                    <select {...field} value={field.value || 0}
+                                            onChange={(e) => field.onChange(Number(e.target.value))}>
                                         {productItems.map((productItem) => (
-                                            <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
+                                            <option key={productItem.id}
+                                                    value={productItem.id}>{productItem.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
                     <FormField
                         control={form.control}
                         name="gameUserBetOpen"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Создать событие для ставок</FormLabel>
                                 <FormControl>
@@ -201,14 +208,15 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                                         ref={field.ref}
                                     />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
 
-                    <Button type="submit" disabled={!form.watch('gameUserBetDetails')|| !!createBetError}>Create Bet</Button>
+                    <Button type="submit" disabled={!form.watch('gameUserBetDetails') || !!createBetError}>Create
+                        Bet</Button>
 
-                    {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
+                    {createBetError && <p style={{color: 'red'}}>{createBetError}</p>}
                 </form>
             </Form>
 

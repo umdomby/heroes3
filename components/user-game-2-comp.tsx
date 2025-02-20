@@ -22,7 +22,10 @@ interface Props {
 export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
     return (
         <div>
-            <div>Points: {user.points}</div>
+            <div className="flex justify-between items-center">
+                <div>Points: {user?.points}</div>
+                <Link className="text-blue-500" href="/user-game-create-2">Create game</Link>
+            </div>
             <Table>
                 <TableHeader>
                     <TableRow>
