@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import {UserRole} from "@prisma/client";
 
 interface User {
     id: number;
@@ -20,6 +21,7 @@ interface User {
     telegram: string | null;
     telegramView: boolean;
     createdAt: Date;
+    role: UserRole;
 }
 
 interface Props {
@@ -41,7 +43,7 @@ export const Rating: React.FC<Props> = ({ className, users, currentPage, totalPa
     };
 
     // const systemUser = users.find(user => user.id === 1);
-    const filteredUsers = users.filter(user => user.id !== 1);
+    const filteredUsers = users.filter(user => user.role !== "ADMIN");
 
     return (
         <div className={`p-4 ${className}`}>
