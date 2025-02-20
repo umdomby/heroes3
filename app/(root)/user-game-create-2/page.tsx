@@ -69,7 +69,6 @@ export default async function UserGamePage() {
                     products={products}
                     productItems={productItems}
                     player={player} // Pass the single player
-                    createBet={clientCreateBet}
                 />
             </Suspense>
         </Container>

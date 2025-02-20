@@ -49,6 +49,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                             <TableCell className="text-center">{bet.gameUserBetOpen ? "Open" : "Closed"}</TableCell>
                             <TableCell className="text-center">{bet.statusUserBet}</TableCell>
                             <TableCell className="text-center">
+                                {bet.gameUser1Bet.telegram ? (
                                     <Link
                                         className="text-center text-blue-500 hover:text-green-300 font-bold"
                                         href={bet.gameUser1Bet.telegram.replace(/^@/, 'https://t.me/')}
@@ -56,6 +57,9 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                                     >
                                         {bet.gameUser1Bet.telegram}
                                     </Link>
+                                ) : (
+                                    "No Telegram"
+                                )}
                             </TableCell>
                         </TableRow>
                     ))}

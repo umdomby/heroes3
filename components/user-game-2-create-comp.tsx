@@ -54,9 +54,10 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
 
     useEffect(() => {
         const subscription = form.watch((value) => {
-            if (value.initBetPlayer1 > user.points) {
+            const initBetPlayer1 = value.initBetPlayer1 ?? 0; // Используем 0, если значение undefined
+            if (initBetPlayer1 > user.points) {
                 setCreateBetError("Вы не можете поставить больше Points, чем у вас есть.");
-            } else if (value.initBetPlayer1 < 30) {
+            } else if (initBetPlayer1 < 30) {
                 setCreateBetError("Ставка должна быть не менее 30.");
             } else {
                 setCreateBetError(null);
@@ -194,9 +195,10 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                                     <input
                                         className="ml-3"
                                         type="checkbox"
-                                        {...field}
-                                        checked={field.value}
+                                        checked={field.value} // Используем только checked
                                         onChange={(e) => field.onChange(e.target.checked)}
+                                        name={field.name}
+                                        ref={field.ref}
                                     />
                                 </FormControl>
                                 <FormMessage />
