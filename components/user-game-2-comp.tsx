@@ -2,6 +2,7 @@ import React from 'react';
 import { GameUserBet, User, Category, Product, ProductItem, $Enums } from '@prisma/client';
 import { Table, TableBody, TableCell, TableRow, TableHeader, TableHead } from "@/components/ui/table";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
+import Link from "next/link";
 
 interface Props {
     user: User;
@@ -21,7 +22,7 @@ interface Props {
 export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
     return (
         <div>
-            <div>Ваши баллы: {user.points}</div>
+            <div>Points: {user.points}</div>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -33,6 +34,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                         <TableHead className="text-center">Description</TableHead>
                         <TableHead className="text-center">Open Bet</TableHead>
                         <TableHead className="text-center">State</TableHead>
+                        <TableHead className="text-center">Telegram</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -46,6 +48,15 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                             <TableCell className="text-center">{bet.gameUserBetDetails}</TableCell>
                             <TableCell className="text-center">{bet.gameUserBetOpen ? "Open" : "Closed"}</TableCell>
                             <TableCell className="text-center">{bet.statusUserBet}</TableCell>
+                            <TableCell className="text-center">
+                                    <Link
+                                        className="text-center text-blue-500 hover:text-green-300 font-bold"
+                                        href={bet.gameUser1Bet.telegram.replace(/^@/, 'https://t.me/')}
+                                        target="_blank"
+                                    >
+                                        {bet.gameUser1Bet.telegram}
+                                    </Link>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
