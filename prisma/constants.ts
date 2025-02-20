@@ -5,35 +5,59 @@ export const categories = [
     },
     {
         "id": 2,
-        name: '2sm4c',
+        name: 'MT Jebus Cross',
     },
     {
         "id": 3,
-        name: '2sm4d',
+        name: 'MT Team Jebus',
     },
     {
         "id": 4,
-        name: 'Clash of Dragons',
+        name: 'MT Diamond',
     },
     {
         "id": 5,
-        name: 'Diamond',
+        name: '1deal',
     },
     {
         "id": 6,
-        name: 'Jebus Cross Outcast',
+        name: '2sm4c',
     },
     {
         "id": 7,
-        name: 'Firewalk',
+        name: '2sm4d',
     },
     {
         "id": 8,
-        name: 'Nostalgia',
+        name: 'Clash of Dragons',
     },
     {
         "id": 9,
+        name: 'Diamond',
+    },
+    {
+        "id": 10,
+        name: 'Jebus Cross Outcast',
+    },
+    {
+        "id": 11,
+        name: 'Duel',
+    },
+    {
+        "id": 12,
+        name: 'Firewalk',
+    },
+    {
+        "id": 13,
+        name: 'Nostalgia',
+    },
+    {
+        "id": 14,
         name: 'Skirmish',
+    },
+    {
+        "id": 15,
+        name: 'Nine-day Wonder',
     },
 ];
 
@@ -121,6 +145,54 @@ export const productsItem =[
     {
         "id": 6,
         "name": "12-5-2",
+    },
+    {
+        "id": 7,
+        "name": "10-5-2",
+    },
+    {
+        "id": 8,
+        "name": "8-5-2",
+    },
+    {
+        "id": 9,
+        "name": "6-5-2",
+    },
+    {
+        "id": 10,
+        "name": "16-8-1",
+    },
+    {
+        "id": 11,
+        "name": "14-8-1",
+    },
+    {
+        "id": 12,
+        "name": "12-8-1",
+    },
+    {
+        "id": 13,
+        "name": "12-7-1",
+    },
+    {
+        "id": 14,
+        "name": "12-6-1",
+    },
+    {
+        "id": 15,
+        "name": "12-5-1",
+    },
+    {
+        "id": 16,
+        "name": "10-5-1",
+    },
+    {
+        "id": 17,
+        "name": "8-5-1",
+    },
+    {
+        "id": 18,
+        "name": "6-5-1",
     },
 ];
 
