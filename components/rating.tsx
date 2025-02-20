@@ -40,7 +40,7 @@ export const Rating: React.FC<Props> = ({ className, users, currentPage, totalPa
         setTimeout(() => setShowCopyMessage(false), 1000);
     };
 
-    const systemUser = users.find(user => user.id === 1);
+    // const systemUser = users.find(user => user.id === 1);
     const filteredUsers = users.filter(user => user.id !== 1);
 
     return (
@@ -49,13 +49,13 @@ export const Rating: React.FC<Props> = ({ className, users, currentPage, totalPa
                 Rating
             </h1>
 
-            {systemUser && (
-                <div className="mb-4 p-4 rounded-lg">
-                    <h2 className="text-xl font-bold">System</h2>
-                    <p>Points: {Math.floor(systemUser.points * 100) / 100}</p>
-                    <p>Card ID: {systemUser.cardId}</p>
-                </div>
-            )}
+            {/*{systemUser && (*/}
+            {/*    <div className="mb-4 p-4 rounded-lg">*/}
+            {/*        <h2 className="text-xl font-bold">System</h2>*/}
+            {/*        <p>Points: {Math.floor(systemUser.points * 100) / 100}</p>*/}
+            {/*        <p>Card ID: {systemUser.cardId}</p>*/}
+            {/*    </div>*/}
+            {/*)}*/}
 
             <Table className="w-full">
                 <TableHeader>
