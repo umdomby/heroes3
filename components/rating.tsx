@@ -42,22 +42,11 @@ export const Rating: React.FC<Props> = ({ className, users, currentPage, totalPa
         setTimeout(() => setShowCopyMessage(false), 1000);
     };
 
-    // const systemUser = users.find(user => user.id === 1);
-    const filteredUsers = users.filter(user => user.role !== "ADMIN");
-
     return (
         <div className={`p-4 ${className}`}>
             <h1 className="text-2xl font-bold text-center mb-2 p-2 rounded-lg">
                 Rating
             </h1>
-
-            {/*{systemUser && (*/}
-            {/*    <div className="mb-4 p-4 rounded-lg">*/}
-            {/*        <h2 className="text-xl font-bold">System</h2>*/}
-            {/*        <p>Points: {Math.floor(systemUser.points * 100) / 100}</p>*/}
-            {/*        <p>Card ID: {systemUser.cardId}</p>*/}
-            {/*    </div>*/}
-            {/*)}*/}
 
             <Table className="w-full">
                 <TableHeader>
@@ -72,7 +61,7 @@ export const Rating: React.FC<Props> = ({ className, users, currentPage, totalPa
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredUsers.map((user, index) => (
+                    {users.map((user, index) => (
                         <TableRow key={user.id} className="hover:bg-gray-400">
                             <TableCell className="text-center">{(currentPage - 1) * 100 + index + 1}</TableCell>
                             <TableCell className="text-center">{Math.floor(user.points * 100) / 100}</TableCell>

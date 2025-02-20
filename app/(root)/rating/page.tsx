@@ -20,6 +20,11 @@ export default async function RatingPage({
     const skip = (page - 1) * usersPerPage;
 
     const users = await prisma.user.findMany({
+        where: {
+            role: {
+                not: 'ADMIN', // Исключаем пользователей с ролью "ADMIN"
+            },
+        },
         orderBy: {
             points: 'desc',
         },
