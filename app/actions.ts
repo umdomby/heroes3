@@ -1305,6 +1305,41 @@ export async function gameUserBetCreate(gameData: {
         throw new Error("Не удалось создать ставку");
     }
 }
+export async function gameUserBetRegistrations(gameData: {
+    userId: number;
+    betUser2: number;
+    gameUserBetDetails: string;
+    gameUserBetId: number;
+}) {
+    try {
+        // Получаем текущие данные из gameUserBetDataUsers2
+        const currentBet = await prisma.gameUserBet.findUnique({
+            where: { id: gameData.gameUserBetId },
+            select: { gameUserBetDataUsers2: true }
+        });
+
+        // Добавляем новые данные в gameUserBetDataUsers2
+        const updatedData = [
+            ...(currentBet?.gameUserBetDataUsers2 || []),
+            {
+                userId: gameData.userId,
+                betUser2: gameData.betUser2,
+                gameUserBetDetails: gameData.gameUserBetDetails,
+            }
+        ];
+
+        // Обновляем запись в базе данных
+        const updatedBet = await prisma.gameUserBet.update({
+            where: { id: gameData.gameUserBetId },
+            data: { gameUserBetDataUsers2: updatedData }
+        });
+
+        return updatedBet;
+    } catch (error) {
+        console.error("Ошибка при обновлении ставки:", error);
+        throw new Error("Не удалось обновить ставку");
+    }
+}
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     // Add a constant value to each player's total to stabilize the odds
