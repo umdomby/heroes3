@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import React, { useState, useEffect } from 'react';
 import { Category, Product, ProductItem, User, Player } from '@prisma/client';
 import { gameUserBetCreate } from "@/app/actions";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import Link from "next/link";
 
 const createBetSchema = z.object({
@@ -137,7 +137,7 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                             <FormItem>
                                 <FormLabel>Map</FormLabel>
                                 <FormControl>
-                                    <select {...field}>
+                                    <select {...field} value={field.value || 0} onChange={(e) => field.onChange(Number(e.target.value))}>
                                         {categories.map((category) => (
                                             <option key={category.id} value={category.id}>{category.name}</option>
                                         ))}
@@ -155,7 +155,7 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                             <FormItem>
                                 <FormLabel>Size</FormLabel>
                                 <FormControl>
-                                    <select {...field}>
+                                    <select {...field} value={field.value || 0} onChange={(e) => field.onChange(Number(e.target.value))}>
                                         {products.map((product) => (
                                             <option key={product.id} value={product.id}>{product.name}</option>
                                         ))}
@@ -173,31 +173,11 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                             <FormItem>
                                 <FormLabel>Product Item</FormLabel>
                                 <FormControl>
-                                    <select {...field}>
+                                    <select {...field} value={field.value || 0} onChange={(e) => field.onChange(Number(e.target.value))}>
                                         {productItems.map((productItem) => (
                                             <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
                                         ))}
                                     </select>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="gameUserBetOpen"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Создать событие для ставок</FormLabel>
-                                <FormControl>
-                                    <input
-                                        className="ml-3"
-                                        type="checkbox"
-                                        {...field}
-                                        checked={field.value}
-                                        onChange={(e) => field.onChange(e.target.checked)}
-                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -209,10 +189,17 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                     {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
                 </form>
             </Form>
-
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
-                    <DialogTitle>Игра успешно создана! Переходите: <Link className="text-blue-500" href="/user-game-2">поиск игрока</Link> </DialogTitle>
+                    <DialogHeader>
+                        <DialogTitle>Игра успешно создана!</DialogTitle>
+
+                        <DialogDescription>
+                            Переходите: <Link className="text-blue-500 text-xl" href="/user-game-2">поиск игрока</Link>
+                        </DialogDescription>
+
+                    </DialogHeader>
+
                 </DialogContent>
             </Dialog>
         </div>
