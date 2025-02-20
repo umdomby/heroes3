@@ -183,12 +183,33 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                             </FormItem>
                         )}
                     />
+                    <FormField
+                        control={form.control}
+                        name="gameUserBetOpen"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Создать событие для ставок</FormLabel>
+                                <FormControl>
+                                    <input
+                                        className="ml-3"
+                                        type="checkbox"
+                                        {...field}
+                                        checked={field.value}
+                                        onChange={(e) => field.onChange(e.target.checked)}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     <Button type="submit" disabled={!form.watch('gameUserBetDetails')|| !!createBetError}>Create Bet</Button>
 
                     {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
                 </form>
             </Form>
+
+
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
