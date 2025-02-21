@@ -109,15 +109,15 @@ export async function addEditPlayer(playerId: number | null, playerName: string,
     }
     try {
         const existingPlayer = await prisma.player.findFirst({
-            where: { name: playerName },
+            where: {name: playerName},
         });
         if (existingPlayer && existingPlayer.id !== playerId) {
-            return { success: false, message: 'Игрок с таким именем уже существует' };
+            return {success: false, message: 'Игрок с таким именем уже существует'};
         }
         if (playerId) {
             await prisma.player.update({
-                where: { id: playerId },
-                data: { name: playerName, twitch: playerTwitch },
+                where: {id: playerId},
+                data: {name: playerName, twitch: playerTwitch},
             });
         } else {
             await prisma.player.create({
@@ -129,7 +129,7 @@ export async function addEditPlayer(playerId: number | null, playerName: string,
             });
         }
         revalidatePath('/add-player');
-        return { success: true, message: 'Игрок успешно сохранен' };
+        return {success: true, message: 'Игрок успешно сохранен'};
     } catch (error) {
         console.error('Ошибка при регистрации игрока:', error);
         throw new Error('Не удалось зарегистрироваться как игрок');
@@ -871,7 +871,7 @@ export async function globalDataPoints() {
     try {
         // Получаем текущие данные из GlobalData
         const currentGlobalData = await prisma.globalData.findUnique({
-            where: { id: 1 },
+            where: {id: 1},
         });
 
         // Проверяем, прошло ли 10 секунд с момента последнего обновления
@@ -885,30 +885,30 @@ export async function globalDataPoints() {
 
         // Изменяем regCount, чтобы он равнялся сумме поля regPointsPoints
         const regPointsResult = await prisma.regPoints.aggregate({
-            _sum: { regPointsPoints: true },
+            _sum: {regPointsPoints: true},
         });
         const regCount = regPointsResult._sum.regPointsPoints || 0;
 
         const refCount = await prisma.referralUserIpAddress.count({
-            where: { referralStatus: true }
+            where: {referralStatus: true}
         }) * 10;
         const usersPointsResult = await prisma.user.aggregate({
-            _sum: { points: true }
+            _sum: {points: true}
         });
 
         const usersPointsSum = Math.floor((usersPointsResult._sum?.points || 0) * 100) / 100;
 
         // Получаем сумму поля margin из таблиц BetCLOSED, BetCLOSED3 и BetCLOSED4
         const marginResult = await prisma.betCLOSED.aggregate({
-            _sum: { margin: true }
+            _sum: {margin: true}
         });
 
         const marginResult3 = await prisma.betCLOSED3.aggregate({
-            _sum: { margin: true }
+            _sum: {margin: true}
         });
 
         const marginResult4 = await prisma.betCLOSED4.aggregate({
-            _sum: { margin: true }
+            _sum: {margin: true}
         });
 
         // Суммируем все полученные значения margin из трех таблиц
@@ -918,18 +918,18 @@ export async function globalDataPoints() {
 
         // Получаем сумму поля totalBetAmount из таблиц bet, bet3 и bet4, где статус 'OPEN'
         const openBetsPointsResult = await prisma.bet.aggregate({
-            _sum: { totalBetAmount: true },
-            where: { status: 'OPEN' }
+            _sum: {totalBetAmount: true},
+            where: {status: 'OPEN'}
         });
 
         const openBetsPointsResult3 = await prisma.bet3.aggregate({
-            _sum: { totalBetAmount: true },
-            where: { status: 'OPEN' }
+            _sum: {totalBetAmount: true},
+            where: {status: 'OPEN'}
         });
 
         const openBetsPointsResult4 = await prisma.bet4.aggregate({
-            _sum: { totalBetAmount: true },
-            where: { status: 'OPEN' }
+            _sum: {totalBetAmount: true},
+            where: {status: 'OPEN'}
         });
 
         // Суммируем все полученные значения totalBetAmount из трех таблиц
@@ -939,7 +939,7 @@ export async function globalDataPoints() {
 
         // Обновляем или создаем запись в GlobalData
         await prisma.globalData.upsert({
-            where: { id: 1 },
+            where: {id: 1},
             update: {
                 users: usersCount,
                 reg: regCount,
@@ -962,6 +962,7 @@ export async function globalDataPoints() {
         console.error('Ошибка при обновлении GlobalData:', error);
     }
 }
+
 export async function transferPointsToFund(amount: number) {
     try {
         const session = await getUserSession();
@@ -971,7 +972,7 @@ export async function transferPointsToFund(amount: number) {
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: Number(session.id) },
+            where: {id: Number(session.id)},
         });
 
         if (!user || user.role !== 'ADMIN') {
@@ -985,7 +986,7 @@ export async function transferPointsToFund(amount: number) {
 
         // Обновление betFund
         await prisma.globalData.update({
-            where: { id: 1 },
+            where: {id: 1},
             data: {
                 betFund: {
                     increment: amount,
@@ -995,7 +996,7 @@ export async function transferPointsToFund(amount: number) {
 
         // Обновление баллов пользователя
         await prisma.user.update({
-            where: { id: Number(session.id) },
+            where: {id: Number(session.id)},
             data: {
                 points: {
                     decrement: amount,
@@ -1003,12 +1004,13 @@ export async function transferPointsToFund(amount: number) {
             },
         });
 
-        return { success: true, message: 'Баллы успешно переведены в фонд' };
+        return {success: true, message: 'Баллы успешно переведены в фонд'};
     } catch (error) {
         console.error('Ошибка при переводе баллов в фонд:', error);
         throw new Error('Не удалось перевести баллы в фонд');
     }
 }
+
 export async function withdrawPointsFromFund(amount: number) {
     try {
         const session = await getUserSession();
@@ -1018,7 +1020,7 @@ export async function withdrawPointsFromFund(amount: number) {
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: Number(session.id) },
+            where: {id: Number(session.id)},
         });
 
         if (!user || user.role !== 'ADMIN') {
@@ -1027,7 +1029,7 @@ export async function withdrawPointsFromFund(amount: number) {
 
         // Получаем текущий betFund
         const globalData = await prisma.globalData.findUnique({
-            where: { id: 1 },
+            where: {id: 1},
         });
 
         if (!globalData) {
@@ -1041,7 +1043,7 @@ export async function withdrawPointsFromFund(amount: number) {
 
         // Обновление betFund
         await prisma.globalData.update({
-            where: { id: 1 },
+            where: {id: 1},
             data: {
                 betFund: {
                     decrement: amount,
@@ -1051,7 +1053,7 @@ export async function withdrawPointsFromFund(amount: number) {
 
         // Обновление баллов пользователя
         await prisma.user.update({
-            where: { id: Number(session.id) },
+            where: {id: Number(session.id)},
             data: {
                 points: {
                     increment: amount,
@@ -1059,7 +1061,7 @@ export async function withdrawPointsFromFund(amount: number) {
             },
         });
 
-        return { success: true, message: 'Баллы успешно сняты из фонда' };
+        return {success: true, message: 'Баллы успешно сняты из фонда'};
     } catch (error) {
         console.error('Ошибка при снятии баллов из фонда:', error);
         throw new Error('Не удалось снять баллы из фонда');
@@ -1079,20 +1081,20 @@ export async function chatUsers(userId?: number, chatText?: string) {
 
             // Удаляем старые сообщения, если их больше 300
             const allMessages = await prisma.chatUsers.findMany({
-                orderBy: { createdAt: 'asc' },
+                orderBy: {createdAt: 'asc'},
             });
 
             if (allMessages.length > 300) {
                 const messagesToDelete = allMessages.slice(0, allMessages.length - 300);
                 for (const message of messagesToDelete) {
-                    await prisma.chatUsers.delete({ where: { id: message.id } });
+                    await prisma.chatUsers.delete({where: {id: message.id}});
                 }
             }
         }
 
         // Возвращаем последние 300 сообщений
         const recentMessages = await prisma.chatUsers.findMany({
-            orderBy: { createdAt: 'desc' },
+            orderBy: {createdAt: 'desc'},
             take: 300,
             include: {
                 chatUser: true, // Включаем информацию о пользователе
@@ -1113,11 +1115,12 @@ export async function chatUsers(userId?: number, chatText?: string) {
         throw new Error('Не удалось обработать запрос чата. Пожалуйста, попробуйте еще раз.');
     }
 }
+
 export async function chatUsersGet() {
     try {
         // Fetch the latest 300 messages
         const recentMessages = await prisma.chatUsers.findMany({
-            orderBy: { createdAt: 'desc' },
+            orderBy: {createdAt: 'desc'},
             take: 300,
             include: {
                 chatUser: true, // Include user information
@@ -1135,10 +1138,11 @@ export async function chatUsersGet() {
         throw new Error('Failed to fetch chat messages. Please try again.');
     }
 }
+
 export async function chatUsersDelete(messageId: number) {
     try {
         await prisma.chatUsers.delete({
-            where: { id: messageId },
+            where: {id: messageId},
         });
     } catch (error) {
         console.error('Error deleting chat message:', error);
@@ -1157,7 +1161,7 @@ export async function registrationPlayer(twitch: string) {
 
         // Найдите пользователя в базе данных
         const findUser = await prisma.user.findFirst({
-            where: { id: Number(currentUser.id) },
+            where: {id: Number(currentUser.id)},
         });
 
         // Убедитесь, что пользователь найден и fullName не пустой
@@ -1167,7 +1171,7 @@ export async function registrationPlayer(twitch: string) {
 
         // Проверяем, существует ли уже игрок с таким userId
         const existingPlayer = await prisma.player.findFirst({
-            where: { userId: Number(currentUser.id) },
+            where: {userId: Number(currentUser.id)},
         });
 
         if (existingPlayer) {
@@ -1196,6 +1200,7 @@ export async function registrationPlayer(twitch: string) {
         throw new Error('Не удалось зарегистрироваться как игрок');
     }
 }
+
 export async function isUserPlayer() {
     const currentUser = await getUserSession();
 
@@ -1204,7 +1209,7 @@ export async function isUserPlayer() {
     }
 
     const player = await prisma.player.findFirst({
-        where: { userId: Number(currentUser.id) },
+        where: {userId: Number(currentUser.id)},
     });
 
     return {
@@ -1213,6 +1218,7 @@ export async function isUserPlayer() {
         playerName: player ? player.name : '', // Возвращает имя игрока для редактирования
     };
 }
+
 export async function updateTwitch(twitch: string) {
     try {
         const currentUser = await getUserSession();
@@ -1223,7 +1229,7 @@ export async function updateTwitch(twitch: string) {
 
         // Проверяем, существует ли игрок с таким userId
         const existingPlayer = await prisma.player.findFirst({
-            where: { userId: Number(currentUser.id) },
+            where: {userId: Number(currentUser.id)},
         });
 
         if (!existingPlayer) {
@@ -1231,11 +1237,11 @@ export async function updateTwitch(twitch: string) {
         }
 
         await prisma.player.update({
-            where: { id: existingPlayer.id },
-            data: { twitch: twitch },
+            where: {id: existingPlayer.id},
+            data: {twitch: twitch},
         });
 
-        return { success: true, message: 'Twitch успешно обновлен' };
+        return {success: true, message: 'Twitch успешно обновлен'};
     } catch (error) {
         if (error instanceof Error) {
             console.error('Ошибка при обновлении Twitch:', error.message);
@@ -1245,6 +1251,7 @@ export async function updateTwitch(twitch: string) {
         throw new Error('Не удалось обновить Twitch');
     }
 }
+
 export async function updatePlayerName(name: string) {
     try {
         const currentUser = await getUserSession();
@@ -1255,7 +1262,7 @@ export async function updatePlayerName(name: string) {
 
         // Проверяем, существует ли игрок с таким userId
         const existingPlayer = await prisma.player.findFirst({
-            where: { userId: Number(currentUser.id) },
+            where: {userId: Number(currentUser.id)},
         });
 
         if (!existingPlayer) {
@@ -1264,11 +1271,11 @@ export async function updatePlayerName(name: string) {
 
         // Обновляем имя игрока
         await prisma.player.update({
-            where: { id: existingPlayer.id },
-            data: { name: name },
+            where: {id: existingPlayer.id},
+            data: {name: name},
         });
 
-        return { success: true, message: 'Имя игрока успешно обновлено' };
+        return {success: true, message: 'Имя игрока успешно обновлено'};
     } catch (error) {
         if (error instanceof Error) {
             console.error('Ошибка при обновлении имени игрока:', error.message);
@@ -1286,14 +1293,15 @@ type GameUserBetDataUser = {
     gameUserBetDetails: string; // Замените `any` на конкретный тип, если он известен
     userTelegram: string;
 };
+
 export async function removeGameUserBetRegistration(gameData: {
     userId: number;
     gameUserBetId: number;
 }) {
     try {
         const currentBet = await prisma.gameUserBet.findUnique({
-            where: { id: gameData.gameUserBetId },
-            select: { gameUserBetDataUsers2: true }
+            where: {id: gameData.gameUserBetId},
+            select: {gameUserBetDataUsers2: true}
         });
 
         if (!currentBet) {
@@ -1318,8 +1326,8 @@ export async function removeGameUserBetRegistration(gameData: {
         );
 
         const updatedBet = await prisma.gameUserBet.update({
-            where: { id: gameData.gameUserBetId },
-            data: { gameUserBetDataUsers2: updatedData }
+            where: {id: gameData.gameUserBetId},
+            data: {gameUserBetDataUsers2: updatedData}
         });
 
         return updatedBet;
@@ -1381,6 +1389,7 @@ export async function gameUserBetCreate(gameData: {
         }
     }
 }
+
 export async function gameUserBetRegistrations(gameData: {
     userId: number;
     betUser2: number;
@@ -1390,8 +1399,8 @@ export async function gameUserBetRegistrations(gameData: {
 }) {
     try {
         const currentBet = await prisma.gameUserBet.findUnique({
-            where: { id: gameData.gameUserBetId },
-            select: { gameUserBetDataUsers2: true }
+            where: {id: gameData.gameUserBetId},
+            select: {gameUserBetDataUsers2: true}
         });
 
         const gameUserBetDataUsers2 = currentBet?.gameUserBetDataUsers2 as GameUserBetDataUser[] | undefined;
@@ -1411,8 +1420,8 @@ export async function gameUserBetRegistrations(gameData: {
         ];
 
         const updatedBet = await prisma.gameUserBet.update({
-            where: { id: gameData.gameUserBetId },
-            data: { gameUserBetDataUsers2: updatedData }
+            where: {id: gameData.gameUserBetId},
+            data: {gameUserBetDataUsers2: updatedData}
         });
 
         return updatedBet;
@@ -1426,6 +1435,7 @@ export async function gameUserBetRegistrations(gameData: {
         }
     }
 }
+
 export async function gameUserBetStart(gameData: {
     gameUserBetId: number;
     gameUserBet2Id: number;
@@ -1434,7 +1444,7 @@ export async function gameUserBetStart(gameData: {
     try {
         await prisma.$transaction(async (prisma) => {
             const gameUserBet = await prisma.gameUserBet.update({
-                where: { id: gameData.gameUserBetId },
+                where: {id: gameData.gameUserBetId},
                 data: {
                     gameUserBet2Id: gameData.gameUserBet2Id,
                     betUser2: gameData.betUser2,
@@ -1443,13 +1453,13 @@ export async function gameUserBetStart(gameData: {
             });
 
             await prisma.user.update({
-                where: { id: gameUserBet.gameUserBet1Id },
-                data: { points: { decrement: gameUserBet.betUser1 } },
+                where: {id: gameUserBet.gameUserBet1Id},
+                data: {points: {decrement: gameUserBet.betUser1}},
             });
 
             await prisma.user.update({
-                where: { id: gameData.gameUserBet2Id },
-                data: { points: { decrement: gameData.betUser2 } },
+                where: {id: gameData.gameUserBet2Id},
+                data: {points: {decrement: gameData.betUser2}},
             });
 
             return gameUserBet;
@@ -1459,6 +1469,7 @@ export async function gameUserBetStart(gameData: {
         throw new Error("Не удалось запустить игру");
     }
 }
+
 export async function gameUserBetClosed(gameData: {
     gameUserBetId: number;
     checkWinUser1: WinGameUserBet | null;
@@ -1467,7 +1478,7 @@ export async function gameUserBetClosed(gameData: {
     try {
         await prisma.$transaction(async (prisma) => {
             const gameUserBet = await prisma.gameUserBet.findUnique({
-                where: { id: gameData.gameUserBetId },
+                where: {id: gameData.gameUserBetId},
             });
 
             if (!gameUserBet) {
@@ -1484,7 +1495,7 @@ export async function gameUserBetClosed(gameData: {
             }
 
             await prisma.gameUserBet.update({
-                where: { id: gameData.gameUserBetId },
+                where: {id: gameData.gameUserBetId},
                 data: updateData,
             });
 
@@ -1494,46 +1505,58 @@ export async function gameUserBetClosed(gameData: {
 
             // Проверяем, если оба пользователя подтвердили результат
             const updatedGameUserBet = await prisma.gameUserBet.findUnique({
-                where: { id: gameData.gameUserBetId },
+                where: {id: gameData.gameUserBetId},
             });
 
-            // Проверяем, если оба пользователя подтвердили результат
-            if (updatedGameUserBet?.checkWinUser1 !== null && updatedGameUserBet?.checkWinUser2 !== null) {
-                console.log("Оба пользователя подтвердили результат");
+            // Проверяем, если оба пользователя подтвердили результат и они не равны друг другу и не равны DRAW
+            if (
+                updatedGameUserBet?.checkWinUser1 !== null &&
+                updatedGameUserBet?.checkWinUser2 !== null
+            ) {
+                if (updatedGameUserBet.checkWinUser1 !== updatedGameUserBet.checkWinUser2 &&
+                    updatedGameUserBet.checkWinUser1 !== WinGameUserBet.DRAW &&
+                    updatedGameUserBet.checkWinUser2 !== WinGameUserBet.DRAW) {
 
-                if (gameData.checkWinUser1 === WinGameUserBet.WIN && gameData.checkWinUser2 === WinGameUserBet.LOSS) {
-                    // User1 победил
-                    await prisma.user.update({
-                        where: { id: gameUserBet.gameUserBet1Id },
-                        data: { points: { increment: gameUserBet.betUser1 + (gameUserBet.betUser2 ?? 0) } },
-                    });
-                } else if (gameData.checkWinUser1 === WinGameUserBet.LOSS && gameData.checkWinUser2 === WinGameUserBet.WIN) {
-                    // User2 победил
-                    if (gameUserBet.gameUserBet2Id !== null) {
-                        await prisma.user.update({
-                            where: { id: gameUserBet.gameUserBet2Id },
-                            data: { points: { increment: gameUserBet.betUser1 + (gameUserBet.betUser2 ?? 0) } },
-                        });
+                    console.log("Оба пользователя выбрали не одинаковый результат и не равен ничье");
+
+                    if (updatedGameUserBet.checkWinUser1 === WinGameUserBet.DRAW) {
+                        console.log("Оба пользователя выбрали ничью");
+
+                        if (gameData.checkWinUser1 === WinGameUserBet.WIN && gameData.checkWinUser2 === WinGameUserBet.LOSS) {
+                            // User1 победил
+                            await prisma.user.update({
+                                where: {id: gameUserBet.gameUserBet1Id},
+                                data: {points: {increment: gameUserBet.betUser1 + (gameUserBet.betUser2 ?? 0)}},
+                            });
+                        } else if (gameData.checkWinUser1 === WinGameUserBet.LOSS && gameData.checkWinUser2 === WinGameUserBet.WIN) {
+                            // User2 победил
+                            if (gameUserBet.gameUserBet2Id !== null) {
+                                await prisma.user.update({
+                                    where: {id: gameUserBet.gameUserBet2Id},
+                                    data: {points: {increment: gameUserBet.betUser1 + (gameUserBet.betUser2 ?? 0)}},
+                                });
+                            }
+                        } else if (gameData.checkWinUser1 === WinGameUserBet.DRAW || gameData.checkWinUser2 === WinGameUserBet.DRAW) {
+                            // Ничья
+                            await prisma.user.update({
+                                where: {id: gameUserBet.gameUserBet1Id},
+                                data: {points: {increment: gameUserBet.betUser1}},
+                            });
+                            if (gameUserBet.gameUserBet2Id !== null) {
+                                await prisma.user.update({
+                                    where: {id: gameUserBet.gameUserBet2Id},
+                                    data: {points: {increment: gameUserBet.betUser2 ?? 0}},
+                                });
+                            }
+                        }
                     }
-                } else if (gameData.checkWinUser1 === WinGameUserBet.DRAW || gameData.checkWinUser2 === WinGameUserBet.DRAW) {
-                    // Ничья
-                    await prisma.user.update({
-                        where: { id: gameUserBet.gameUserBet1Id },
-                        data: { points: { increment: gameUserBet.betUser1 } },
+
+                    // Обновляем статус игры на CLOSED только если оба подтвердили
+                    await prisma.gameUserBet.update({
+                        where: {id: gameData.gameUserBetId},
+                        data: {statusUserBet: 'CLOSED'},
                     });
-                    if (gameUserBet.gameUserBet2Id !== null) {
-                        await prisma.user.update({
-                            where: { id: gameUserBet.gameUserBet2Id },
-                            data: { points: { increment: gameUserBet.betUser2 ?? 0 } },
-                        });
-                    }
                 }
-
-                // Обновляем статус игры на CLOSED только если оба подтвердили
-                await prisma.gameUserBet.update({
-                    where: { id: gameData.gameUserBetId },
-                    data: { statusUserBet: 'CLOSED' },
-                });
             }
         });
     } catch (error) {
@@ -1542,7 +1565,7 @@ export async function gameUserBetClosed(gameData: {
     }
 }
 
-export async function gameUserBetDelete(){
+export async function gameUserBetDelete() {
 
 }
 
@@ -1784,7 +1807,7 @@ export async function closeBet(betId: number, winnerId: number) {
         await prisma.$transaction(async (prisma) => {
             // Обновляем статус ставки и получаем данные
             const bet = await prisma.bet.update({
-                where: { id: betId },
+                where: {id: betId},
                 data: {
                     status: 'CLOSED',
                     winnerId: winnerId,
@@ -1835,7 +1858,7 @@ export async function closeBet(betId: number, winnerId: number) {
 
             // Перераспределяем баллы
             const allParticipants = await prisma.betParticipant.findMany({
-                where: { betId: betId },
+                where: {betId: betId},
             });
 
             let totalMargin = 0;
@@ -1853,7 +1876,7 @@ export async function closeBet(betId: number, winnerId: number) {
 
             // Получаем текущий betFund
             const globalData = await prisma.globalData.findUnique({
-                where: { id: 1 },
+                where: {id: 1},
             });
 
             if (!globalData || globalData.betFund === null) {
@@ -1883,7 +1906,7 @@ export async function closeBet(betId: number, winnerId: number) {
                 // Обновляем баллы пользователя
                 if (pointsToReturn > 0) {
                     await prisma.user.update({
-                        where: { id: participant.userId },
+                        where: {id: participant.userId},
                         data: {
                             points: {
                                 increment: Math.floor(pointsToReturn * 100) / 100,
@@ -1932,7 +1955,7 @@ export async function closeBet(betId: number, winnerId: number) {
                 }
                 betFundAdjustment = -deficit;
                 await prisma.globalData.update({
-                    where: { id: 1 },
+                    where: {id: 1},
                     data: {
                         betFund: {
                             decrement: deficit,
@@ -1944,7 +1967,7 @@ export async function closeBet(betId: number, winnerId: number) {
                 const surplus = bet.totalBetAmount - totalPointsToReturn;
                 betFundAdjustment = surplus;
                 await prisma.globalData.update({
-                    where: { id: 1 },
+                    where: {id: 1},
                     data: {
                         betFund: {
                             increment: surplus,
@@ -1955,7 +1978,7 @@ export async function closeBet(betId: number, winnerId: number) {
 
             // Обновляем поле margin, globalDataBetFund, overlapPlayer1 и overlapPlayer2 в BetCLOSED
             await prisma.betCLOSED.update({
-                where: { id: betClosed.id },
+                where: {id: betClosed.id},
                 data: {
                     margin: Math.floor(totalMargin * 100) / 100,
                     returnBetAmount: Math.floor(totalPointsToReturn * 100) / 100, // Записываем сумму возвращенных баллов
@@ -1967,11 +1990,11 @@ export async function closeBet(betId: number, winnerId: number) {
 
             // Удаляем участников и ставку
             await prisma.betParticipant.deleteMany({
-                where: { betId: betId },
+                where: {betId: betId},
             });
 
             await prisma.bet.delete({
-                where: { id: betId },
+                where: {id: betId},
             });
         });
 
@@ -1980,7 +2003,7 @@ export async function closeBet(betId: number, winnerId: number) {
         revalidateTag('bets');
         revalidateTag('user');
 
-        return { success: true, message: 'Ставка успешно закрыта' };
+        return {success: true, message: 'Ставка успешно закрыта'};
     } catch (error) {
         console.error("Ошибка при закрытии ставки:", error);
 
@@ -1991,6 +2014,7 @@ export async function closeBet(betId: number, winnerId: number) {
         }
     }
 }
+
 export async function closeBetDraw(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -2368,7 +2392,7 @@ export async function closeBet3(betId: number, winnerId: number) {
         await prisma.$transaction(async (prisma) => {
             // Обновляем статус ставки и получаем данные
             const bet = await prisma.bet3.update({
-                where: { id: betId },
+                where: {id: betId},
                 data: {
                     status: 'CLOSED',
                     winnerId: winnerId,
@@ -2428,7 +2452,7 @@ export async function closeBet3(betId: number, winnerId: number) {
 
             // Перераспределяем баллы
             const allParticipants = await prisma.betParticipant3.findMany({
-                where: { betId: betId },
+                where: {betId: betId},
             });
 
             let totalMargin = 0;
@@ -2447,7 +2471,7 @@ export async function closeBet3(betId: number, winnerId: number) {
 
             // Получаем текущий betFund
             const globalData = await prisma.globalData.findUnique({
-                where: { id: 1 },
+                where: {id: 1},
             });
 
             if (!globalData || globalData.betFund === null) {
@@ -2477,7 +2501,7 @@ export async function closeBet3(betId: number, winnerId: number) {
                 // Обновляем баллы пользователя
                 if (pointsToReturn > 0) {
                     await prisma.user.update({
-                        where: { id: participant.userId },
+                        where: {id: participant.userId},
                         data: {
                             points: {
                                 increment: Math.floor(pointsToReturn * 100) / 100,
@@ -2528,7 +2552,7 @@ export async function closeBet3(betId: number, winnerId: number) {
                 }
                 betFundAdjustment = -deficit;
                 await prisma.globalData.update({
-                    where: { id: 1 },
+                    where: {id: 1},
                     data: {
                         betFund: {
                             decrement: deficit,
@@ -2540,7 +2564,7 @@ export async function closeBet3(betId: number, winnerId: number) {
                 const surplus = bet.totalBetAmount - totalPointsToReturn;
                 betFundAdjustment = surplus;
                 await prisma.globalData.update({
-                    where: { id: 1 },
+                    where: {id: 1},
                     data: {
                         betFund: {
                             increment: surplus,
@@ -2551,7 +2575,7 @@ export async function closeBet3(betId: number, winnerId: number) {
 
             // Обновляем поле margin, globalDataBetFund, overlapPlayer1, overlapPlayer2 и overlapPlayer3 в BetCLOSED3
             await prisma.betCLOSED3.update({
-                where: { id: betClosed.id },
+                where: {id: betClosed.id},
                 data: {
                     margin: Math.floor(totalMargin * 100) / 100,
                     returnBetAmount: Math.floor(totalPointsToReturn * 100) / 100, // Записываем сумму возвращенных баллов
@@ -2564,11 +2588,11 @@ export async function closeBet3(betId: number, winnerId: number) {
 
             // Удаляем участников и ставку
             await prisma.betParticipant3.deleteMany({
-                where: { betId: betId },
+                where: {betId: betId},
             });
 
             await prisma.bet3.delete({
-                where: { id: betId },
+                where: {id: betId},
             });
         });
 
@@ -2577,7 +2601,7 @@ export async function closeBet3(betId: number, winnerId: number) {
         revalidateTag('bets');
         revalidateTag('user');
 
-        return { success: true, message: 'Ставка успешно закрыта' };
+        return {success: true, message: 'Ставка успешно закрыта'};
     } catch (error) {
         console.error("Ошибка при закрытии ставки:", error);
 
@@ -2991,6 +3015,7 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }
+
 export async function closeBet4(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -3005,7 +3030,7 @@ export async function closeBet4(betId: number, winnerId: number) {
         await prisma.$transaction(async (prisma) => {
             // Обновляем статус ставки и получаем данные
             const bet = await prisma.bet4.update({
-                where: { id: betId },
+                where: {id: betId},
                 data: {
                     status: 'CLOSED',
                     winnerId: winnerId,
@@ -3073,7 +3098,7 @@ export async function closeBet4(betId: number, winnerId: number) {
 
             // Перераспределяем баллы
             const allParticipants = await prisma.betParticipant4.findMany({
-                where: { betId: betId },
+                where: {betId: betId},
             });
 
             let totalMargin = 0;
@@ -3093,7 +3118,7 @@ export async function closeBet4(betId: number, winnerId: number) {
 
             // Получаем текущий betFund
             const globalData = await prisma.globalData.findUnique({
-                where: { id: 1 },
+                where: {id: 1},
             });
 
             if (!globalData || globalData.betFund === null) {
@@ -3123,7 +3148,7 @@ export async function closeBet4(betId: number, winnerId: number) {
                 // Обновляем баллы пользователя
                 if (pointsToReturn > 0) {
                     await prisma.user.update({
-                        where: { id: participant.userId },
+                        where: {id: participant.userId},
                         data: {
                             points: {
                                 increment: Math.floor(pointsToReturn * 100) / 100,
@@ -3176,7 +3201,7 @@ export async function closeBet4(betId: number, winnerId: number) {
                 }
                 betFundAdjustment = -deficit;
                 await prisma.globalData.update({
-                    where: { id: 1 },
+                    where: {id: 1},
                     data: {
                         betFund: {
                             decrement: deficit,
@@ -3188,7 +3213,7 @@ export async function closeBet4(betId: number, winnerId: number) {
                 const surplus = bet.totalBetAmount - totalPointsToReturn;
                 betFundAdjustment = surplus;
                 await prisma.globalData.update({
-                    where: { id: 1 },
+                    where: {id: 1},
                     data: {
                         betFund: {
                             increment: surplus,
@@ -3199,7 +3224,7 @@ export async function closeBet4(betId: number, winnerId: number) {
 
             // Обновляем поле margin, globalDataBetFund, overlapPlayer1, overlapPlayer2, overlapPlayer3 и overlapPlayer4 в BetCLOSED4
             await prisma.betCLOSED4.update({
-                where: { id: betClosed.id },
+                where: {id: betClosed.id},
                 data: {
                     margin: Math.floor(totalMargin * 100) / 100,
                     returnBetAmount: Math.floor(totalPointsToReturn * 100) / 100, // Записываем сумму возвращенных баллов
@@ -3213,11 +3238,11 @@ export async function closeBet4(betId: number, winnerId: number) {
 
             // Удаляем участников и ставку
             await prisma.betParticipant4.deleteMany({
-                where: { betId: betId },
+                where: {betId: betId},
             });
 
             await prisma.bet4.delete({
-                where: { id: betId },
+                where: {id: betId},
             });
         });
 
@@ -3226,7 +3251,7 @@ export async function closeBet4(betId: number, winnerId: number) {
         revalidateTag('bets');
         revalidateTag('user');
 
-        return { success: true, message: 'Ставка успешно закрыта' };
+        return {success: true, message: 'Ставка успешно закрыта'};
     } catch (error) {
         console.error("Ошибка при закрытии ставки:", error);
 
