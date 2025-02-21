@@ -130,8 +130,8 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
             <Table>
                 <TableBody>
                     <TableRow>
-                        <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Name</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Bet</TableHead>
+                        <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Name</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Map</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Size</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Timer</TableHead>
@@ -150,9 +150,9 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                     <TableBody>
                                         <TableRow>
                                             <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
-                                            <TableCell
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
                                             <TableCell
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
                                             <TableCell
@@ -203,7 +203,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                     <li key={index} className="flex justify-between items-center">
                     <span>
 
-                        {participant.betUser2}{" "}
+                        Bet: {participant.betUser2}{" "}
                         {participant.userTelegram ? (
                             <Link
                                 className="text-blue-500 hover:text-green-300 font-bold"
