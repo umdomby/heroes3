@@ -47,10 +47,14 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
         fetchData();
 
         // Set up SSE
-        const eventSource = new EventSource('/api/sse-game-user/route');
+        const eventSource = new EventSource('/api/sse-game-user');
         eventSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setGameUserBets(data);
+            try {
+                const data = JSON.parse(event.data);
+                setGameUserBets(data);
+            } catch (error) {
+                console.error("Failed to parse SSE data:", error);
+            }
         };
 
         return () => {
@@ -60,14 +64,14 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
 
     const handleRemoveBet = async (gameUserBetId: number) => {
         try {
-            const result = await removeGameUserBetRegistration({
-                userId: user.id,
-                gameUserBetId: gameUserBetId
-            });
-
-            if (result) {
-                console.log("Регистрация успешно удалена");
-            }
+            // const result = await removeGameUserBetRegistration({
+            //     userId: user.id,
+            //     gameUserBetId: gameUserBetId
+            // });
+            //
+            // if (result) {
+            //     console.log("Регистрация успешно удалена");
+            // }
         } catch (error) {
             console.error("Ошибка при удалении регистрации:", error);
         }

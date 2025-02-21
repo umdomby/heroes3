@@ -1342,34 +1342,11 @@ export async function gameUserBetRegistrations(gameData: {
         throw new Error("Не удалось обновить ставку");
     }
 }
-export async function removeGameUserBetRegistration(gameData: {
-    userId: number;
-    gameUserBetId: number;
-}) {
-    try {
-        // Получаем текущие данные из gameUserBetDataUsers2
-        const currentBet = await prisma.gameUserBet.findUnique({
-            where: { id: gameData.gameUserBetId },
-            select: { gameUserBetDataUsers2: true }
-        });
 
-        // Фильтруем данные, удаляя запись пользователя
-        const updatedData = (Array.isArray(currentBet?.gameUserBetDataUsers2) ? currentBet.gameUserBetDataUsers2 : []).filter(
-            (entry) => entry.userId !== gameData.userId
-        );
+export async function removeGameUserBetRegistration(){
 
-        // Обновляем запись в базе данных
-        const updatedBet = await prisma.gameUserBet.update({
-            where: { id: gameData.gameUserBetId },
-            data: { gameUserBetDataUsers2: updatedData }
-        });
-
-        return updatedBet;
-    } catch (error) {
-        console.error("Ошибка при удалении регистрации:", error);
-        throw new Error("Не удалось удалить регистрацию");
-    }
 }
+
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     // Add a constant value to each player's total to stabilize the odds

@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/prisma/prisma-client'; // Ensure the path to prisma-client is correct
+import { prisma } from '@/prisma/prisma-client';
 
 export async function GET(request: Request) {
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
-
-    writer.write(encoder.encode('data: Initializing SSE...\n\n'));
 
     const sendUpdate = async () => {
         try {
@@ -23,7 +21,7 @@ export async function GET(request: Request) {
             writer.write(encoder.encode(`data: ${JSON.stringify(gameUserBets)}\n\n`));
         } catch (error) {
             console.error('Failed to fetch data:', error);
-            writer.write(encoder.encode('data: Error fetching data\n\n'));
+            writer.write(encoder.encode('data: {"error": "Failed to fetch data"}\n\n'));
         }
     };
 

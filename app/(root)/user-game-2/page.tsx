@@ -21,30 +21,11 @@ export default async function UserGame2Page() {
         return redirect('/not-auth');
     }
 
-    const gameUserBets: (GameUserBet & {
-        gameUser1Bet: User;
-        gameUser2Bet: User | null;
-        category: Category;
-        product: Product;
-        productItem: ProductItem;
-        gameUserBetDataUsers2: JSON;
-    })[] = await prisma.gameUserBet.findMany({
-        include: {
-            gameUser1Bet: true, // Include the related User for gameUser1Bet
-            gameUser2Bet: true, // Include the related User for gameUser2Bet
-            category: true,
-            product: true,
-            productItem: true,
-            gameUserBetDataUsers2: true,
-        },
-    });
-
 
     return (
         <Container className="flex flex-col my-10 w-[96%]">
             <UserGame2Comp
                 user={user}
-                gameUserBets={gameUserBets}
             />
         </Container>
     );
