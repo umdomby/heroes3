@@ -27,6 +27,7 @@ export default async function UserGame2Page() {
         category: Category;
         product: Product;
         productItem: ProductItem;
+        gameUserBetDataUsers2: JSON;
     })[] = await prisma.gameUserBet.findMany({
         include: {
             gameUser1Bet: true, // Include the related User for gameUser1Bet
@@ -34,6 +35,7 @@ export default async function UserGame2Page() {
             category: true,
             product: true,
             productItem: true,
+            gameUserBetDataUsers2: true,
         },
     });
 

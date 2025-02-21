@@ -1,30 +1,44 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '@/prisma/prisma-client';
+import { NextResponse } from 'next/server';
+import { prisma } from '@/prisma/prisma-client'; // Ensure the path to prisma-client is correct
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
+export async function GET(request: Request) {
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    const encoder = new TextEncoder();
+
+    writer.write(encoder.encode('data: Initializing SSE...\n\n'));
 
     const sendUpdate = async () => {
-        const gameUserBets = await prisma.gameUserBet.findMany({
-            include: {
-                gameUser1Bet: true,
-                gameUser2Bet: true,
-                category: true,
-                product: true,
-                productItem: true,
-            },
-        });
+        try {
+            const gameUserBets = await prisma.gameUserBet.findMany({
+                include: {
+                    gameUser1Bet: true,
+                    gameUser2Bet: true,
+                    category: true,
+                    product: true,
+                    productItem: true,
+                },
+            });
 
-        res.write(`data: ${JSON.stringify(gameUserBets)}\n\n`);
+            writer.write(encoder.encode(`data: ${JSON.stringify(gameUserBets)}\n\n`));
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+            writer.write(encoder.encode('data: Error fetching data\n\n'));
+        }
     };
 
-    // Simulate database change listener
-    const interval = setInterval(sendUpdate, 5000); // Adjust the interval as needed
+    const interval = setInterval(sendUpdate, 5000);
 
-    req.on('close', () => {
+    request.signal.addEventListener('abort', () => {
         clearInterval(interval);
-        res.end();
+        writer.close();
+    });
+
+    return new NextResponse(readable, {
+        headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+        },
     });
 }

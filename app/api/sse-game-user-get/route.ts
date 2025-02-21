@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '@/prisma/prisma-client';
+import { NextResponse } from 'next/server';
+import { prisma } from '@/prisma/prisma-client'; // Ensure the path to prisma-client is correct
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function GET() {
     try {
         const gameUserBets = await prisma.gameUserBet.findMany({
             include: {
@@ -12,8 +12,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 productItem: true,
             },
         });
-        res.status(200).json(gameUserBets);
+        return NextResponse.json(gameUserBets);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch data' });
+        console.error('Failed to fetch data:', error);
+        return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
     }
 }
