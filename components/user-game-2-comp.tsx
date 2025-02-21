@@ -1,19 +1,17 @@
 "use client"
-import React, { useState, useEffect } from 'react';
-import { GameUserBet, User, Category, Product, ProductItem, $Enums } from '@prisma/client';
-import { Table, TableBody, TableCell, TableRow, TableHeader, TableHead } from "@/components/ui/table";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import React, {useState, useEffect} from 'react';
+import {GameUserBet, User, Category, Product, ProductItem, $Enums} from '@prisma/client';
+import {Table, TableBody, TableCell, TableRow, TableHeader, TableHead} from "@/components/ui/table";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 import Link from "next/link";
-import { gameUserBetRegistrations, gameUserBetStart, gameUserBetClosed, removeGameUserBetRegistration } from "@/app/actions";
-import GameUserBetStatus = $Enums.GameUserBetStatus;
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger
-} from "@/components/ui/dialog";
+    gameUserBetRegistrations,
+    gameUserBetStart,
+    gameUserBetClosed,
+    removeGameUserBetRegistration
+} from "@/app/actions";
+import GameUserBetStatus = $Enums.GameUserBetStatus;
+import {Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {Button, Input} from "@/components/ui";
 
 interface Props {
@@ -27,7 +25,7 @@ interface GameUserBetDataUser {
     userTelegram: string;
 }
 
-export const UserGame2Comp: React.FC<Props> = ({ user }) => {
+export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
         gameUser1Bet: User;
         gameUser2Bet: User | null;
@@ -46,6 +44,9 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
     const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>({});
     const [selectedUser, setSelectedUser] = useState<number | null>(null);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [statusUserBetState, setStatusUserBetState] = useState<GameUserBetStatus>();
+    const [checkWinUser1, setCheckWinUser1] = useState<boolean | null>(null);
+    const [checkWinUser2, setCheckWinUser2] = useState<boolean | null>(null);
 
     useEffect(() => {
         // Fetch initial data
@@ -154,6 +155,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
 
             if (result) {
                 setDialogOpen(false);
+                setStatusUserBetState(GameUserBetStatus.START);
                 console.log("Игра успешно начата");
             }
         } catch (error) {
@@ -161,7 +163,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
         }
     };
 
-    const handleGameEnd = async (gameUserBetId: number, checkWinUser1: boolean, checkWinUser2: boolean) => {
+    const handleGameEnd = async (gameUserBetId: number) => {
         try {
             const result = await gameUserBetClosed({
                 gameUserBetId: gameUserBetId,
@@ -170,6 +172,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
             });
 
             if (result) {
+                setStatusUserBetState(GameUserBetStatus.CLOSED);
                 console.log("Игра успешно завершена");
             }
         } catch (error) {
@@ -192,7 +195,8 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Size</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Timer</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">State</TableHead>
-                        <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
+                        <TableHead
+                            className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
                     </TableRow>
                 </TableBody>
             </Table>
@@ -204,13 +208,20 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                 <Table>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.product.name}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.product.name}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">
                                                 {bet.gameUser1Bet.telegram ? (
                                                     <Link
                                                         className="text-center text-blue-500 hover:text-green-300 font-bold"
@@ -229,8 +240,11 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className="p-4">
-                                    <div className="mb-2"><span className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
-                                    <div className="mb-2"><span className="text-green-500">Open Bet: </span> {bet.gameUserBetOpen ? "Open" : "Closed"}</div>
+                                    <div className="mb-2"><span
+                                        className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
+                                    <div className="mb-2"><span
+                                        className="text-green-500">Open Bet: </span> {bet.gameUserBetOpen ? "Open" : "Closed"}
+                                    </div>
                                     <ul>
                                         {Array.isArray(bet.gameUserBetDataUsers2) && bet.gameUserBetDataUsers2.map((participant, index) => {
                                             const isValidParticipant = (participant: any): participant is GameUserBetDataUser => {
@@ -245,22 +259,24 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                             if (isValidParticipant(participant)) {
                                                 return (
                                                     <li key={index} className="flex justify-between items-center">
-                            <span>
-                              Bet: {participant.betUser2}{" "}
-                                {participant.userTelegram ? (
-                                    <Link
-                                        className="text-blue-500 hover:text-green-300 font-bold"
-                                        href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
-                                        target="_blank"
-                                    >
-                                        {participant.userTelegram}
-                                    </Link>
-                                ) : (
-                                    <span className="text-gray-500">Скрыто</span>
-                                )}{" "}
-                                Details: {participant.gameUserBetDetails}
-                            </span>
-                                                        {participant.userId === user.id && (
+                                                        {statusUserBetState === GameUserBetStatus.OPEN && (
+                                                            <span>
+                                                                Bet: {participant.betUser2}{" "}
+                                                                {participant.userTelegram ? (
+                                                                    <Link
+                                                                        className="text-blue-500 hover:text-green-300 font-bold"
+                                                                        href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
+                                                                        target="_blank"
+                                                                    >
+                                                                        {participant.userTelegram}
+                                                                    </Link>
+                                                                ) : (
+                                                                    <span className="text-gray-500">Скрыто</span>
+                                                                )}{" "}
+                                                                Details: {participant.gameUserBetDetails}
+                                                        </span>
+                                                        )}
+                                                        {participant.userId === user.id && statusUserBetState === GameUserBetStatus.OPEN && (
                                                             <Button
                                                                 onClick={() => handleRemoveBet(bet.id)}
                                                                 className="text-red-500 hover:text-blue-300 bg-grey-500 hover:bg-grey-500 font-bold h-5"
@@ -268,7 +284,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                                 Удалить
                                                             </Button>
                                                         )}
-                                                        {user.id === bet.gameUser1Bet.id && (
+                                                        {user.id === bet.gameUser1Bet.id && statusUserBetState === GameUserBetStatus.OPEN && (
                                                             <Button
                                                                 onClick={() => setSelectedUser(participant.userId)}
                                                                 className={`ml-2 ${selectedUser === participant.userId ? 'bg-green-500' : 'bg-gray-500'} h-5`}
@@ -298,11 +314,14 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                     <DialogContent>
                                                         <DialogTitle>Confirm Game Start</DialogTitle>
                                                         <DialogDescription> {/* Add this line */}
-                                                            You are about to start the game with the selected player. {/* Add this line */}
+                                                            You are about to start the game with the selected
+                                                            player. {/* Add this line */}
                                                         </DialogDescription> {/* Add this line */}
                                                         <div className="p-4">
-                                                            <h2 className="text-lg font-bold">Подтвердите запуск игры</h2>
-                                                            <p>Вы уверены, что хотите начать игру с выбранным игроком?</p>
+                                                            <h2 className="text-lg font-bold">Подтвердите запуск
+                                                                игры</h2>
+                                                            <p>Вы уверены, что хотите начать игру с выбранным
+                                                                игроком?</p>
                                                             <Button
                                                                 onClick={() => handleStartGame(bet.id)}
                                                                 className="mt-4 bg-green-500 text-white"
@@ -320,7 +339,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                     value={betInputs[bet.id] || bet.betUser1}
                                                     onChange={(e) => {
                                                         const value = Number(e.target.value);
-                                                        setBetInputs((prev) => ({ ...prev, [bet.id]: value }));
+                                                        setBetInputs((prev) => ({...prev, [bet.id]: value}));
 
                                                         if (value > user.points) {
                                                             setErrorMessages((prev) => ({
@@ -333,7 +352,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                                 [bet.id]: `Минимальное значение: ${bet.betUser1}`
                                                             }));
                                                         } else {
-                                                            setErrorMessages((prev) => ({ ...prev, [bet.id]: "" }));
+                                                            setErrorMessages((prev) => ({...prev, [bet.id]: ""}));
                                                         }
                                                     }}
                                                     placeholder="Your Bet"

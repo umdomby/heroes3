@@ -1432,45 +1432,41 @@ export async function gameUserBetClosed(gameData: {
 }) {
     try {
         await prisma.$transaction(async (prisma) => {
-            const gameUserBet = await prisma.gameUserBet.findUnique({
+            const gameUserBet = await prisma.gameUserBet.update({
                 where: { id: gameData.gameUserBetId },
+                data: {
+                    statusUserBet: 'CLOSED',
+                    checkWinUser1: gameData.checkWinUser1,
+                    checkWinUser2: gameData.checkWinUser2,
+                },
             });
 
-            if (!gameUserBet) {
-                throw new Error("GameUserBet not found");
-            }
-
-            let pointsUser1 = gameUserBet.betUser1;
-            let pointsUser2 = gameUserBet.betUser2 || 0;
-
+            // Логика распределения Points
             if (gameData.checkWinUser1 && !gameData.checkWinUser2) {
-                // User1 wins
+                // User1 победил
                 await prisma.user.update({
                     where: { id: gameUserBet.gameUserBet1Id },
-                    data: { points: { increment: pointsUser1 + pointsUser2 } },
+                    data: { points: { increment: gameUserBet.betUser1 + gameUserBet.betUser2 } },
                 });
             } else if (!gameData.checkWinUser1 && gameData.checkWinUser2) {
-                // User2 wins
+                // User2 победил
                 await prisma.user.update({
                     where: { id: gameUserBet.gameUserBet2Id },
-                    data: { points: { increment: pointsUser1 + pointsUser2 } },
+                    data: { points: { increment: gameUserBet.betUser1 + gameUserBet.betUser2 } },
                 });
             } else {
-                // Draw
+                // Ничья
                 await prisma.user.update({
                     where: { id: gameUserBet.gameUserBet1Id },
-                    data: { points: { increment: pointsUser1 } },
+                    data: { points: { increment: gameUserBet.betUser1 } },
                 });
                 await prisma.user.update({
                     where: { id: gameUserBet.gameUserBet2Id },
-                    data: { points: { increment: pointsUser2 } },
+                    data: { points: { increment: gameUserBet.betUser2 } },
                 });
             }
 
-            await prisma.gameUserBet.update({
-                where: { id: gameData.gameUserBetId },
-                data: { statusUserBet: 'CLOSED' },
-            });
+            return gameUserBet;
         });
     } catch (error) {
         console.error("Ошибка при завершении игры:", error);
