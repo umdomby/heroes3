@@ -274,24 +274,22 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
 
                                                     if (isValidParticipant(participant)) {
                                                         return (
-                                                            <li key={index}
-                                                                className="flex justify-between items-center">
-
-                                                                <span>
-                                                                    Bet: {participant.betUser2}{" "}
-                                                                    {participant.userTelegram ? (
-                                                                        <Link
-                                                                            className="text-blue-500 hover:text-green-300 font-bold"
-                                                                            href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
-                                                                            target="_blank"
-                                                                        >
-                                                                            {participant.userTelegram}
-                                                                        </Link>
-                                                                    ) : (
-                                                                        <span className="text-gray-500">Скрыто</span>
-                                                                    )}{" "}
-                                                                    Details: {participant.gameUserBetDetails}
-                                                                </span>
+                                                            <li key={index} className="flex justify-between items-center">
+                            <span>
+                                Bet: {participant.betUser2}{" "}
+                                {participant.userTelegram ? (
+                                    <Link
+                                        className="text-blue-500 hover:text-green-300 font-bold"
+                                        href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
+                                        target="_blank"
+                                    >
+                                        {participant.userTelegram}
+                                    </Link>
+                                ) : (
+                                    <span className="text-gray-500">Скрыто</span>
+                                )}{" "}
+                                Details: {participant.gameUserBetDetails}
+                            </span>
 
                                                                 {participant.userId === user.id && (
                                                                     <Button
@@ -332,14 +330,11 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                             <DialogContent>
                                                                 <DialogTitle>Confirm Game Start</DialogTitle>
                                                                 <DialogDescription>
-                                                                    You are about to start the game with the selected
-                                                                    player.
+                                                                    You are about to start the game with the selected player.
                                                                 </DialogDescription>
                                                                 <div className="p-4">
-                                                                    <h2 className="text-lg font-bold">Подтвердите запуск
-                                                                        игры</h2>
-                                                                    <p>Вы уверены, что хотите начать игру с выбранным
-                                                                        игроком?</p>
+                                                                    <h2 className="text-lg font-bold">Подтвердите запуск игры</h2>
+                                                                    <p>Вы уверены, что хотите начать игру с выбранным игроком?</p>
                                                                     <Button
                                                                         onClick={() => handleStartGame(bet.id)}
                                                                         className="mt-4 bg-green-500 text-white"
@@ -351,56 +346,59 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                         </Dialog>
                                                     </div>
                                                 ) : (
-                                                    <div className="flex flex-col">
-                                                        <Input
-                                                            type="number"
-                                                            value={betInputs[bet.id] || bet.betUser1}
-                                                            onChange={(e) => {
-                                                                const value = Number(e.target.value);
-                                                                setBetInputs((prev) => ({ ...prev, [bet.id]: value }));
+                                                    // Check if the user is already registered
+                                                    !bet.gameUserBetDataUsers2.some((participant: any) => participant.userId === user.id) && (
+                                                        <div className="flex flex-col">
+                                                            <Input
+                                                                type="number"
+                                                                value={betInputs[bet.id] || bet.betUser1}
+                                                                onChange={(e) => {
+                                                                    const value = Number(e.target.value);
+                                                                    setBetInputs((prev) => ({ ...prev, [bet.id]: value }));
 
-                                                                if (value > user.points) {
-                                                                    setErrorMessages((prev) => ({
-                                                                        ...prev,
-                                                                        [bet.id]: "У вас недостаточно Points"
-                                                                    }));
-                                                                } else if (value < bet.betUser1) {
-                                                                    setErrorMessages((prev) => ({
-                                                                        ...prev,
-                                                                        [bet.id]: `Минимальное значение: ${bet.betUser1}`
-                                                                    }));
-                                                                } else {
-                                                                    setErrorMessages((prev) => ({
-                                                                        ...prev,
-                                                                        [bet.id]: ""
-                                                                    }));
-                                                                }
-                                                            }}
-                                                            placeholder="Your Bet"
-                                                            className="mb-2 p-2 border"
-                                                        />
-                                                        {errorMessages[bet.id] &&
-                                                            <div className="text-red-500">{errorMessages[bet.id]}</div>}
-                                                        <Input
-                                                            type="text"
-                                                            value={descriptionInputs[bet.id] || ""}
-                                                            onChange={(e) => setDescriptionInputs((prev) => ({
-                                                                ...prev,
-                                                                [bet.id]: e.target.value
-                                                            }))}
-                                                            placeholder="Description (max 150 chars)"
-                                                            className="mb-2 p-2 border"
-                                                        />
+                                                                    if (value > user.points) {
+                                                                        setErrorMessages((prev) => ({
+                                                                            ...prev,
+                                                                            [bet.id]: "У вас недостаточно Points"
+                                                                        }));
+                                                                    } else if (value < bet.betUser1) {
+                                                                        setErrorMessages((prev) => ({
+                                                                            ...prev,
+                                                                            [bet.id]: `Минимальное значение: ${bet.betUser1}`
+                                                                        }));
+                                                                    } else {
+                                                                        setErrorMessages((prev) => ({
+                                                                            ...prev,
+                                                                            [bet.id]: ""
+                                                                        }));
+                                                                    }
+                                                                }}
+                                                                placeholder="Your Bet"
+                                                                className="mb-2 p-2 border"
+                                                            />
+                                                            {errorMessages[bet.id] &&
+                                                                <div className="text-red-500">{errorMessages[bet.id]}</div>}
+                                                            <Input
+                                                                type="text"
+                                                                value={descriptionInputs[bet.id] || ""}
+                                                                onChange={(e) => setDescriptionInputs((prev) => ({
+                                                                    ...prev,
+                                                                    [bet.id]: e.target.value
+                                                                }))}
+                                                                placeholder="Description (max 150 chars)"
+                                                                className="mb-2 p-2 border"
+                                                            />
 
-                                                        <Button
-                                                            onClick={() => handleAddBet(bet.id, bet.betUser1)}
-                                                            className={`p-2 text-white transition-colors duration-300 ${
-                                                                successButton === bet.id ? 'bg-green-500' : 'bg-blue-500'
-                                                            }`}
-                                                        >
-                                                            {successButton === bet.id ? 'Added!' : 'Add to Game'}
-                                                        </Button>
-                                                    </div>
+                                                            <Button
+                                                                onClick={() => handleAddBet(bet.id, bet.betUser1)}
+                                                                className={`p-2 text-white transition-colors duration-300 ${
+                                                                    successButton === bet.id ? 'bg-green-500' : 'bg-blue-500'
+                                                                }`}
+                                                            >
+                                                                {successButton === bet.id ? 'Added!' : 'Add to Game'}
+                                                            </Button>
+                                                        </div>
+                                                    )
                                                 )}
                                             </div>
                                         </div>
