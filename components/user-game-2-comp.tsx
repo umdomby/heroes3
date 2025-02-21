@@ -11,6 +11,12 @@ import {Button} from "@/components/ui";
 interface Props {
     user: User;
 }
+interface GameUserBetDataUser {
+    userId: number;
+    betUser2: number;
+    gameUserBetDetails: string;
+    userTelegram: string;
+}
 
 export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
@@ -175,35 +181,55 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className="p-4">
-                                    <div className="mb-2"><span className="text-green-500">Description: </span>  {bet.gameUserBetDetails}</div>
-                                    <div className="mb-2"><span className="text-green-500">Open Bet: </span>  {bet.gameUserBetOpen ? "Open" : "Closed"}</div>
+                                    <div className="mb-2"><span
+                                        className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
+                                    <div className="mb-2"><span
+                                        className="text-green-500">Open Bet: </span> {bet.gameUserBetOpen ? "Open" : "Closed"}
+                                    </div>
                                     <ul>
-                                        {Array.isArray(bet.gameUserBetDataUsers2) && bet.gameUserBetDataUsers2.map((participant, index) => (
-                                            <li key={index} className="flex justify-between items-center">
-                                                <span>
-                                                    Ставка: {participant.betUser2}, Details: {participant.gameUserBetDetails}, {" "}
-                                                    {participant.userTelegram && participant.userTelegram ? (
-                                                        <Link
-                                                            className="text-blue-500 hover:text-green-300 font-bold"
-                                                            href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
-                                                            target="_blank"
-                                                        >
-                                                            {participant.userTelegram}
-                                                        </Link>
-                                                    ) : (
-                                                        <span className="text-gray-500">Скрыто</span>
-                                                    )}
-                                                </span>
-                                                {participant.userId === user.id && (
-                                                    <Button
-                                                        onClick={() => handleRemoveBet(bet.id)}
-                                                        className="text-red-500 hover:text-blue-300 bg-grey-500 hover:bg-grey-500 font-bold h-5"
-                                                    >
-                                                        Удалить
-                                                    </Button>
-                                                )}
-                                            </li>
-                                        ))}
+                                        {Array.isArray(bet.gameUserBetDataUsers2) && bet.gameUserBetDataUsers2.map((participant, index) => {
+                                            // Проверяем, что participant соответствует структуре GameUserBetDataUser
+                                            const isValidParticipant = (participant: any): participant is GameUserBetDataUser => {
+                                                return typeof participant === 'object' &&
+                                                    participant !== null &&
+                                                    'userId' in participant &&
+                                                    'betUser2' in participant &&
+                                                    'gameUserBetDetails' in participant &&
+                                                    'userTelegram' in participant;
+                                            };
+
+                                            if (isValidParticipant(participant)) {
+                                                return (
+                                                    <li key={index} className="flex justify-between items-center">
+                    <span>
+
+                        {participant.betUser2}{" "}
+                        {participant.userTelegram ? (
+                            <Link
+                                className="text-blue-500 hover:text-green-300 font-bold"
+                                href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
+                                target="_blank"
+                            >
+                                {participant.userTelegram}
+                            </Link>
+                        ) : (
+                            <span className="text-gray-500">Скрыто</span>
+                        )}{" "}
+                        Details: {participant.gameUserBetDetails}
+                    </span>
+                                                        {participant.userId === user.id && (
+                                                            <Button
+                                                                onClick={() => handleRemoveBet(bet.id)}
+                                                                className="text-red-500 hover:text-blue-300 bg-grey-500 hover:bg-grey-500 font-bold h-5"
+                                                            >
+                                                                Удалить
+                                                            </Button>
+                                                        )}
+                                                    </li>
+                                                );
+                                            }
+                                            return null;
+                                        })}
                                     </ul>
                                     <div>
                                         {user.id === bet.gameUser1Bet.id ? (

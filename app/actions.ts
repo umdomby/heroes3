@@ -1343,19 +1343,18 @@ export async function gameUserBetRegistrations(gameData: {
     }
 }
 
-interface GameUserBetDataUser {
+type GameUserBetDataUser = {
     userId: number;
-    betUser2: number;
-    gameUserBetDetails: string;
+    betUser2: number; // Замените `any` на конкретный тип, если он известен
+    gameUserBetDetails: string; // Замените `any` на конкретный тип, если он известен
     userTelegram: string;
-}
+};
 
 export async function removeGameUserBetRegistration(gameData: {
     userId: number;
     gameUserBetId: number;
 }) {
     try {
-        // Получаем текущие данные из gameUserBetDataUsers2
         const currentBet = await prisma.gameUserBet.findUnique({
             where: { id: gameData.gameUserBetId },
             select: { gameUserBetDataUsers2: true }
@@ -1365,24 +1364,23 @@ export async function removeGameUserBetRegistration(gameData: {
             throw new Error("Ставка не найдена");
         }
 
-        // Преобразуем JSON в массив объектов с известной структурой
         const gameUserBetDataUsers2: GameUserBetDataUser[] = Array.isArray(currentBet.gameUserBetDataUsers2)
-            ? currentBet.gameUserBetDataUsers2.filter((entry): entry is GameUserBetDataUser => {
-                return typeof entry === 'object' &&
-                    entry !== null &&
-                    'userId' in entry &&
-                    'betUser2' in entry &&
-                    'gameUserBetDetails' in entry &&
-                    'userTelegram' in entry;
-            })
+            ? currentBet.gameUserBetDataUsers2
+                .filter((entry): entry is GameUserBetDataUser => {
+                    return typeof entry === 'object' &&
+                        entry !== null &&
+                        'userId' in entry &&
+                        'betUser2' in entry &&
+                        'gameUserBetDetails' in entry &&
+                        'userTelegram' in entry;
+                })
+                .map(entry => entry as GameUserBetDataUser) // Преобразуем к нужному типу
             : [];
 
-        // Фильтруем данные, удаляя запись пользователя
         const updatedData = gameUserBetDataUsers2.filter(
             (entry) => entry.userId !== gameData.userId
         );
 
-        // Обновляем запись в базе данных
         const updatedBet = await prisma.gameUserBet.update({
             where: { id: gameData.gameUserBetId },
             data: { gameUserBetDataUsers2: updatedData }
