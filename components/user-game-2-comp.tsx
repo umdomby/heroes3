@@ -213,6 +213,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Size</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Timer</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">State</TableHead>
+                        <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Bet</TableHead>
                         <TableHead
                             className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
                     </TableRow>
@@ -239,6 +240,8 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             <TableCell
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
                                             <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUserBetOpen ? "Open" : "Closed"}</TableCell>
+                                            <TableCell
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">
                                                 {bet.gameUser1Bet.telegram ? (
                                                     <Link
@@ -258,25 +261,24 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className="p-4">
-                                    <div className="mb-2"><span
-                                        className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
-                                    <div className="mb-2"><span
-                                        className="text-green-500">Open Bet: </span> {bet.gameUserBetOpen ? "Open" : "Closed"}
-                                    </div>
-                                    <ul>
-                                        {Array.isArray(bet.gameUserBetDataUsers2) && bet.gameUserBetDataUsers2.map((participant, index) => {
-                                            const isValidParticipant = (participant: any): participant is GameUserBetDataUser => {
-                                                return typeof participant === 'object' &&
-                                                    participant !== null &&
-                                                    'userId' in participant &&
-                                                    'betUser2' in participant &&
-                                                    'gameUserBetDetails' in participant &&
-                                                    'userTelegram' in participant;
-                                            };
+                                    <div className="mb-2"><span className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
+                                    {bet.statusUserBet === "OPEN" && (
+                                        <div>
+                                            <ul>
+                                                {Array.isArray(bet.gameUserBetDataUsers2) && bet.gameUserBetDataUsers2.map((participant, index) => {
+                                                    const isValidParticipant = (participant: any): participant is GameUserBetDataUser => {
+                                                        return typeof participant === 'object' &&
+                                                            participant !== null &&
+                                                            'userId' in participant &&
+                                                            'betUser2' in participant &&
+                                                            'gameUserBetDetails' in participant &&
+                                                            'userTelegram' in participant;
+                                                    };
 
-                                            if (isValidParticipant(participant)) {
-                                                return (
-                                                    <li key={index} className="flex justify-between items-center">
+                                                    if (isValidParticipant(participant)) {
+                                                        return (
+                                                            <li key={index}
+                                                                className="flex justify-between items-center">
 
                                                             <span>
                                                                 Bet: {participant.betUser2}{" "}
@@ -294,113 +296,122 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 Details: {participant.gameUserBetDetails}
                                                         </span>
 
-                                                        {participant.userId === user.id && (
-                                                            <Button
-                                                                onClick={() => handleRemoveBet(bet.id)}
-                                                                className="text-red-500 hover:text-blue-300 bg-grey-500 hover:bg-grey-500 font-bold h-5"
-                                                            >
-                                                                Удалить
-                                                            </Button>
-                                                        )}
+                                                                {participant.userId === user.id && (
+                                                                    <Button
+                                                                        onClick={() => handleRemoveBet(bet.id)}
+                                                                        className="text-red-500 hover:text-blue-300 bg-grey-500 hover:bg-grey-500 font-bold h-5"
+                                                                    >
+                                                                        Удалить
+                                                                    </Button>
+                                                                )}
 
-                                                        {user.id === bet.gameUser1Bet.id && (
-                                                            <Button
-                                                                onClick={() => setSelectedUser(participant.userId)}
-                                                                className={`ml-2 ${selectedUser === participant.userId ? 'bg-green-500' : 'bg-gray-500'} h-5`}
-                                                            >
-                                                                Выбрать
-                                                            </Button>
-                                                        )}
-                                                    </li>
-                                                );
-                                            }
-                                            return null;
-                                        })}
-                                    </ul>
-                                    <div>
-                                        {user.id === bet.gameUser1Bet.id ? (
-                                            <div className="flex flex-col">
-                                                <div className="text-gray-500">Вы создатель этого события</div>
-                                                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                                                    <DialogTrigger asChild>
+                                                                {user.id === bet.gameUser1Bet.id && (
+                                                                    <Button
+                                                                        onClick={() => setSelectedUser(participant.userId)}
+                                                                        className={`ml-2 ${selectedUser === participant.userId ? 'bg-green-500' : 'bg-gray-500'} h-5`}
+                                                                    >
+                                                                        Выбрать
+                                                                    </Button>
+                                                                )}
+                                                            </li>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })}
+                                            </ul>
+                                            <div>
+                                                {user.id === bet.gameUser1Bet.id ? (
+                                                    <div className="flex flex-col">
+                                                        <div className="text-gray-500">Вы создатель этого события</div>
+                                                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                            <DialogTrigger asChild>
+                                                                <Button
+                                                                    disabled={selectedUser === null}
+                                                                    className="mt-2 bg-blue-500 text-white"
+                                                                >
+                                                                    START
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                            <DialogContent>
+                                                                <DialogTitle>Confirm Game Start</DialogTitle>
+                                                                <DialogDescription> {/* Add this line */}
+                                                                    You are about to start the game with the selected
+                                                                    player. {/* Add this line */}
+                                                                </DialogDescription> {/* Add this line */}
+                                                                <div className="p-4">
+                                                                    <h2 className="text-lg font-bold">Подтвердите запуск
+                                                                        игры</h2>
+                                                                    <p>Вы уверены, что хотите начать игру с выбранным
+                                                                        игроком?</p>
+                                                                    <Button
+                                                                        onClick={() => handleStartGame(bet.id)}
+                                                                        className="mt-4 bg-green-500 text-white"
+                                                                    >
+                                                                        Подтвердить
+                                                                    </Button>
+                                                                </div>
+                                                            </DialogContent>
+                                                        </Dialog>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col">
+                                                        <Input
+                                                            type="number"
+                                                            value={betInputs[bet.id] || bet.betUser1}
+                                                            onChange={(e) => {
+                                                                const value = Number(e.target.value);
+                                                                setBetInputs((prev) => ({...prev, [bet.id]: value}));
+
+                                                                if (value > user.points) {
+                                                                    setErrorMessages((prev) => ({
+                                                                        ...prev,
+                                                                        [bet.id]: "У вас недостаточно Points"
+                                                                    }));
+                                                                } else if (value < bet.betUser1) {
+                                                                    setErrorMessages((prev) => ({
+                                                                        ...prev,
+                                                                        [bet.id]: `Минимальное значение: ${bet.betUser1}`
+                                                                    }));
+                                                                } else {
+                                                                    setErrorMessages((prev) => ({
+                                                                        ...prev,
+                                                                        [bet.id]: ""
+                                                                    }));
+                                                                }
+                                                            }}
+                                                            placeholder="Your Bet"
+                                                            className="mb-2 p-2 border"
+                                                        />
+                                                        {errorMessages[bet.id] &&
+                                                            <div className="text-red-500">{errorMessages[bet.id]}</div>}
+                                                        <Input
+                                                            type="text"
+                                                            value={descriptionInputs[bet.id] || ""}
+                                                            onChange={(e) => setDescriptionInputs((prev) => ({
+                                                                ...prev,
+                                                                [bet.id]: e.target.value
+                                                            }))}
+                                                            placeholder="Description (max 150 chars)"
+                                                            className="mb-2 p-2 border"
+                                                        />
+
                                                         <Button
-                                                            disabled={selectedUser === null}
-                                                            className="mt-2 bg-blue-500 text-white"
+                                                            onClick={() => handleAddBet(bet.id, bet.betUser1)}
+                                                            className={`p-2 text-white transition-colors duration-300 ${
+                                                                successButton === bet.id ? 'bg-green-500' : 'bg-blue-500'
+                                                            }`}
                                                         >
-                                                            START
+                                                            {successButton === bet.id ? 'Added!' : 'Add to Game'}
                                                         </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent>
-                                                        <DialogTitle>Confirm Game Start</DialogTitle>
-                                                        <DialogDescription> {/* Add this line */}
-                                                            You are about to start the game with the selected
-                                                            player. {/* Add this line */}
-                                                        </DialogDescription> {/* Add this line */}
-                                                        <div className="p-4">
-                                                            <h2 className="text-lg font-bold">Подтвердите запуск
-                                                                игры</h2>
-                                                            <p>Вы уверены, что хотите начать игру с выбранным
-                                                                игроком?</p>
-                                                            <Button
-                                                                onClick={() => handleStartGame(bet.id)}
-                                                                className="mt-4 bg-green-500 text-white"
-                                                            >
-                                                                Подтвердить
-                                                            </Button>
-                                                        </div>
-                                                    </DialogContent>
-                                                </Dialog>
+                                                    </div>
+                                                )}
                                             </div>
-                                        ) : (
-                                            <div className="flex flex-col">
-                                                <Input
-                                                    type="number"
-                                                    value={betInputs[bet.id] || bet.betUser1}
-                                                    onChange={(e) => {
-                                                        const value = Number(e.target.value);
-                                                        setBetInputs((prev) => ({...prev, [bet.id]: value}));
 
-                                                        if (value > user.points) {
-                                                            setErrorMessages((prev) => ({
-                                                                ...prev,
-                                                                [bet.id]: "У вас недостаточно Points"
-                                                            }));
-                                                        } else if (value < bet.betUser1) {
-                                                            setErrorMessages((prev) => ({
-                                                                ...prev,
-                                                                [bet.id]: `Минимальное значение: ${bet.betUser1}`
-                                                            }));
-                                                        } else {
-                                                            setErrorMessages((prev) => ({...prev, [bet.id]: ""}));
-                                                        }
-                                                    }}
-                                                    placeholder="Your Bet"
-                                                    className="mb-2 p-2 border"
-                                                />
-                                                {errorMessages[bet.id] &&
-                                                    <div className="text-red-500">{errorMessages[bet.id]}</div>}
-                                                <Input
-                                                    type="text"
-                                                    value={descriptionInputs[bet.id] || ""}
-                                                    onChange={(e) => setDescriptionInputs((prev) => ({
-                                                        ...prev,
-                                                        [bet.id]: e.target.value
-                                                    }))}
-                                                    placeholder="Description (max 150 chars)"
-                                                    className="mb-2 p-2 border"
-                                                />
+                                        </div>
 
-                                                <Button
-                                                    onClick={() => handleAddBet(bet.id, bet.betUser1)}
-                                                    className={`p-2 text-white transition-colors duration-300 ${
-                                                        successButton === bet.id ? 'bg-green-500' : 'bg-blue-500'
-                                                    }`}
-                                                >
-                                                    {successButton === bet.id ? 'Added!' : 'Add to Game'}
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    )}
+
+
                                 </div>
                             </AccordionContent>
                         </AccordionItem>
