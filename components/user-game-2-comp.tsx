@@ -1,7 +1,7 @@
 "use client"
 import React, {useState, useEffect} from 'react';
 import {GameUserBet, User, Category, Product, ProductItem, $Enums} from '@prisma/client';
-import {Table, TableBody, TableCell, TableRow, TableHeader, TableHead} from "@/components/ui/table";
+import {Table, TableBody, TableCell, TableRow, TableHead} from "@/components/ui/table";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 import Link from "next/link";
 import {
@@ -44,7 +44,6 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>({});
     const [selectedUser, setSelectedUser] = useState<number | null>(null);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const [statusUserBetState, setStatusUserBetState] = useState<GameUserBetStatus>();
     const [checkWinUser1, setCheckWinUser1] = useState<boolean | null>(null);
     const [checkWinUser2, setCheckWinUser2] = useState<boolean | null>(null);
 
@@ -155,7 +154,6 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
 
             if (result) {
                 setDialogOpen(false);
-                setStatusUserBetState(GameUserBetStatus.START);
                 console.log("Игра успешно начата");
             }
         } catch (error) {
@@ -170,9 +168,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                 checkWinUser1: checkWinUser1,
                 checkWinUser2: checkWinUser2
             });
-
             if (result) {
-                setStatusUserBetState(GameUserBetStatus.CLOSED);
                 console.log("Игра успешно завершена");
             }
         } catch (error) {
@@ -259,7 +255,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             if (isValidParticipant(participant)) {
                                                 return (
                                                     <li key={index} className="flex justify-between items-center">
-                                                        {statusUserBetState === GameUserBetStatus.OPEN && (
+
                                                             <span>
                                                                 Bet: {participant.betUser2}{" "}
                                                                 {participant.userTelegram ? (
@@ -275,8 +271,8 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 )}{" "}
                                                                 Details: {participant.gameUserBetDetails}
                                                         </span>
-                                                        )}
-                                                        {participant.userId === user.id && statusUserBetState === GameUserBetStatus.OPEN && (
+
+                                                        {participant.userId === user.id && (
                                                             <Button
                                                                 onClick={() => handleRemoveBet(bet.id)}
                                                                 className="text-red-500 hover:text-blue-300 bg-grey-500 hover:bg-grey-500 font-bold h-5"
@@ -284,7 +280,8 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 Удалить
                                                             </Button>
                                                         )}
-                                                        {user.id === bet.gameUser1Bet.id && statusUserBetState === GameUserBetStatus.OPEN && (
+
+                                                        {user.id === bet.gameUser1Bet.id && (
                                                             <Button
                                                                 onClick={() => setSelectedUser(participant.userId)}
                                                                 className={`ml-2 ${selectedUser === participant.userId ? 'bg-green-500' : 'bg-gray-500'} h-5`}
