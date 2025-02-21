@@ -185,8 +185,8 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
 
     const handleConfirmResult = async (gameUserBetId: number) => {
         try {
-            const selectedWin1 = selectedWinUser1[gameUserBetId];
-            const selectedWin2 = selectedWinUser2[gameUserBetId];
+            const selectedWin1 = selectedWinUser1[gameUserBetId] ?? null; // Используйте null вместо undefined
+            const selectedWin2 = selectedWinUser2[gameUserBetId] ?? null; // Используйте null вместо undefined
 
             // Обновляем состояние игры в базе данных
             await gameUserBetClosed({
@@ -194,20 +194,6 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                 checkWinUser1: selectedWin1,
                 checkWinUser2: selectedWin2,
             });
-
-            // Проверяем условия для закрытия игры
-            if (selectedWin1 && selectedWin2) {
-                if (selectedWin1 === WinGameUserBet.WIN && selectedWin2 === WinGameUserBet.LOSS) {
-                    // User1 победил
-                    console.log("User1 победил");
-                } else if (selectedWin1 === WinGameUserBet.LOSS && selectedWin2 === WinGameUserBet.WIN) {
-                    // User2 победил
-                    console.log("User2 победил");
-                } else if (selectedWin1 === WinGameUserBet.DRAW || selectedWin2 === WinGameUserBet.DRAW) {
-                    // Ничья
-                    console.log("Ничья");
-                }
-            }
 
             // Закрываем диалог
             setDialogOpen(false);
@@ -453,12 +439,14 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                         <Button
                                                             onClick={() => setSelectedWinUser1(prev => ({ ...prev, [bet.id]: WinGameUserBet.LOSS }))}
                                                             className={selectedWinUser1[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'}
+                                                            disabled={selectedWinUser2[bet.id] === WinGameUserBet.DRAW}
                                                         >
                                                             Проиграл
                                                         </Button>
                                                         <Button
                                                             onClick={() => setSelectedWinUser1(prev => ({ ...prev, [bet.id]: WinGameUserBet.WIN }))}
                                                             className={selectedWinUser1[bet.id] === WinGameUserBet.WIN ? 'bg-green-500' : 'bg-gray-500'}
+                                                            disabled={selectedWinUser2[bet.id] === WinGameUserBet.DRAW}
                                                         >
                                                             Выиграл
                                                         </Button>
@@ -503,12 +491,14 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                         <Button
                                                             onClick={() => setSelectedWinUser2(prev => ({ ...prev, [bet.id]: WinGameUserBet.LOSS }))}
                                                             className={selectedWinUser2[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'}
+                                                            disabled={selectedWinUser1[bet.id] === WinGameUserBet.DRAW}
                                                         >
                                                             Проиграл
                                                         </Button>
                                                         <Button
                                                             onClick={() => setSelectedWinUser2(prev => ({ ...prev, [bet.id]: WinGameUserBet.WIN }))}
                                                             className={selectedWinUser2[bet.id] === WinGameUserBet.WIN ? 'bg-green-500' : 'bg-gray-500'}
+                                                            disabled={selectedWinUser1[bet.id] === WinGameUserBet.DRAW}
                                                         >
                                                             Выиграл
                                                         </Button>
@@ -548,6 +538,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                             )}
                                         </div>
                                     )}
+
 
                                     {bet.statusUserBet === "CLOSED" && (
                                         <div>

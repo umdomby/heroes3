@@ -1488,8 +1488,14 @@ export async function gameUserBetClosed(gameData: {
                 data: updateData,
             });
 
+            // Отладочные сообщения
+            console.log("checkWinUser1:", gameData.checkWinUser1);
+            console.log("checkWinUser2:", gameData.checkWinUser2);
+
             // Проверяем, если оба пользователя подтвердили результат
             if (gameData.checkWinUser1 !== null && gameData.checkWinUser2 !== null) {
+                console.log("Оба пользователя подтвердили результат");
+
                 if (gameData.checkWinUser1 === WinGameUserBet.WIN && gameData.checkWinUser2 === WinGameUserBet.LOSS) {
                     // User1 победил
                     await prisma.user.update({
@@ -1518,7 +1524,7 @@ export async function gameUserBetClosed(gameData: {
                     }
                 }
 
-                // Обновляем статус игры на CLOSED
+                // Обновляем статус игры на CLOSED только если оба подтвердили
                 await prisma.gameUserBet.update({
                     where: { id: gameData.gameUserBetId },
                     data: { statusUserBet: 'CLOSED' },
