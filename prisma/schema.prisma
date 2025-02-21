@@ -245,8 +245,8 @@ model GameUserBet {
   betUser2              Float? // при создании ставка User2 не ставится
   gameUserBetDetails    String            @default("") // детали которые пишет User1
   gameUserBetOpen       Boolean           @default(false) // устанавливается хочет ли он создать событие для ставок
-  checkWinUser1         Boolean? // подтверждение победы User1
-  checkWinUser2         Boolean? // подтверждение победы User2
+  checkWinUser1         WinGameUserBet? // подтверждение победы User1
+  checkWinUser2         WinGameUserBet? // подтверждение победы User2
   gameUser2Bet          User?             @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id]) // сюда User1 выбирает с кем будет играть
   gameUserBet2Id        Int? // User2.id
   gameUserBetDataUsers2 Json? // сюда будут добавляться другие users из которых user1 выберет с кем будет играть
@@ -259,6 +259,12 @@ model GameUserBet {
   statusUserBet         GameUserBetStatus @default(OPEN)
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
+}
+
+enum WinGameUserBet {
+  WIN
+  LOSS
+  DRAW
 }
 
 enum GameUserBetStatus {

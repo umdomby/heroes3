@@ -1,8 +1,8 @@
 "use client"
-import React, {useState, useEffect} from 'react';
-import {GameUserBet, User, Category, Product, ProductItem, $Enums} from '@prisma/client';
-import {Table, TableBody, TableCell, TableRow, TableHead} from "@/components/ui/table";
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+import React, { useState, useEffect } from 'react';
+import { GameUserBet, User, Category, Product, ProductItem, $Enums } from '@prisma/client';
+import { Table, TableBody, TableCell, TableRow, TableHead } from "@/components/ui/table";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
 import {
     gameUserBetRegistrations,
@@ -11,8 +11,8 @@ import {
     removeGameUserBetRegistration
 } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
-import {Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
-import {Button, Input} from "@/components/ui";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button, Input } from "@/components/ui";
 
 interface Props {
     user: User;
@@ -25,7 +25,7 @@ interface GameUserBetDataUser {
     userTelegram: string;
 }
 
-export const UserGame2Comp: React.FC<Props> = ({user}) => {
+export const UserGame2Comp: React.FC<Props> = ({ user }) => {
     const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
         gameUser1Bet: User;
         gameUser2Bet: User | null;
@@ -44,12 +44,12 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>({});
     const [selectedUser, setSelectedUser] = useState<number | null>(null);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-
     const [errorDialogOpen, setErrorDialogOpen] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
-    const [checkWinUser1, setCheckWinUser1] = useState<boolean | null>(null);
-    const [checkWinUser2, setCheckWinUser2] = useState<boolean | null>(null);
+    // Инициализация состояний для победителей
+    const [checkWinUser1, setCheckWinUser1] = useState<boolean>(false);
+    const [checkWinUser2, setCheckWinUser2] = useState<boolean>(false);
 
     useEffect(() => {
         // Fetch initial data
@@ -182,12 +182,12 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
         }
     };
 
-    const handleConfirmResult = async (gameUserBetId: number, isUser1Winner: boolean, isUser2Winner: boolean) => {
+    const handleConfirmResult = async (gameUserBetId: number) => {
         try {
             await gameUserBetClosed({
                 gameUserBetId,
-                checkWinUser1: isUser1Winner,
-                checkWinUser2: isUser2Winner
+                checkWinUser1,
+                checkWinUser2
             });
             console.log("Результат игры успешно подтвержден");
         } catch (error) {
@@ -277,21 +277,21 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                             <li key={index}
                                                                 className="flex justify-between items-center">
 
-                                                            <span>
-                                                                Bet: {participant.betUser2}{" "}
-                                                                {participant.userTelegram ? (
-                                                                    <Link
-                                                                        className="text-blue-500 hover:text-green-300 font-bold"
-                                                                        href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
-                                                                        target="_blank"
-                                                                    >
-                                                                        {participant.userTelegram}
-                                                                    </Link>
-                                                                ) : (
-                                                                    <span className="text-gray-500">Скрыто</span>
-                                                                )}{" "}
-                                                                Details: {participant.gameUserBetDetails}
-                                                        </span>
+                                                                <span>
+                                                                    Bet: {participant.betUser2}{" "}
+                                                                    {participant.userTelegram ? (
+                                                                        <Link
+                                                                            className="text-blue-500 hover:text-green-300 font-bold"
+                                                                            href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
+                                                                            target="_blank"
+                                                                        >
+                                                                            {participant.userTelegram}
+                                                                        </Link>
+                                                                    ) : (
+                                                                        <span className="text-gray-500">Скрыто</span>
+                                                                    )}{" "}
+                                                                    Details: {participant.gameUserBetDetails}
+                                                                </span>
 
                                                                 {participant.userId === user.id && (
                                                                     <Button
@@ -357,7 +357,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                             value={betInputs[bet.id] || bet.betUser1}
                                                             onChange={(e) => {
                                                                 const value = Number(e.target.value);
-                                                                setBetInputs((prev) => ({...prev, [bet.id]: value}));
+                                                                setBetInputs((prev) => ({ ...prev, [bet.id]: value }));
 
                                                                 if (value > user.points) {
                                                                     setErrorMessages((prev) => ({
@@ -403,9 +403,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                     </div>
                                                 )}
                                             </div>
-
                                         </div>
-
                                     )}
                                     {bet.statusUserBet === "START" && (
                                         <div>
@@ -425,17 +423,36 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                         <label>
                                                             <input
                                                                 type="checkbox"
-                                                                checked={checkWinUser1}
+                                                                checked={!checkWinUser1}
                                                                 onChange={() => setCheckWinUser1(!checkWinUser1)}
                                                             />
                                                             User1 проиграл
                                                         </label>
                                                     </div>
 
-                                                    <Button
-                                                        onClick={() => handleConfirmResult(bet.id, checkWinUser1, checkWinUser2)}>
-                                                        Подтвердить результат
-                                                    </Button>
+                                                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                        <DialogTrigger asChild>
+                                                            <Button
+                                                                className="mt-2 bg-blue-500 text-white"
+                                                            >
+                                                                Подтвердить результат
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogTitle>Подтверждение результата</DialogTitle>
+                                                            <DialogDescription>
+                                                                Вы уверены, что хотите подтвердить результат игры?
+                                                            </DialogDescription>
+                                                            <div className="p-4">
+                                                                <Button
+                                                                    onClick={() => handleConfirmResult(bet.id)}
+                                                                    className="mt-4 bg-green-500 text-white"
+                                                                >
+                                                                    Подтвердить
+                                                                </Button>
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
                                                 </div>
                                             )}
 
@@ -455,21 +472,39 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                         <label>
                                                             <input
                                                                 type="checkbox"
-                                                                checked={checkWinUser2}
+                                                                checked={!checkWinUser2}
                                                                 onChange={() => setCheckWinUser2(!checkWinUser2)}
                                                             />
                                                             User2 проиграл
                                                         </label>
                                                     </div>
-                                                    <Button
-                                                        onClick={() => handleConfirmResult(bet.id, checkWinUser1, checkWinUser2)}>
-                                                        Подтвердить результат
-                                                    </Button>
+                                                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                        <DialogTrigger asChild>
+                                                            <Button
+                                                                className="mt-2 bg-blue-500 text-white"
+                                                            >
+                                                                Подтвердить результат
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogTitle>Подтверждение результата</DialogTitle>
+                                                            <DialogDescription>
+                                                                Вы уверены, что хотите подтвердить результат игры?
+                                                            </DialogDescription>
+                                                            <div className="p-4">
+                                                                <Button
+                                                                    onClick={() => handleConfirmResult(bet.id)}
+                                                                    className="mt-4 bg-green-500 text-white"
+                                                                >
+                                                                    Подтвердить
+                                                                </Button>
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
                                                 </div>
                                             )}
                                         </div>
                                     )}
-
 
                                     {bet.statusUserBet === "CLOSED" && (
                                         <div>
@@ -482,7 +517,6 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             <div>Дата обновления: {new Date(bet.updatedAt).toLocaleString()}</div>
                                         </div>
                                     )}
-
                                 </div>
                             </AccordionContent>
                         </AccordionItem>
@@ -491,7 +525,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
             ))}
             <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
                 <DialogContent>
-                <DialogTitle>Ошибка</DialogTitle>
+                    <DialogTitle>Ошибка</DialogTitle>
                     <DialogDescription>{errorMessage}</DialogDescription>
                 </DialogContent>
             </Dialog>
