@@ -4,7 +4,7 @@ import { GameUserBet, User, Category, Product, ProductItem, $Enums } from '@pris
 import { Table, TableBody, TableCell, TableRow, TableHeader, TableHead } from "@/components/ui/table";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
-import { gameUserBetRegistrations } from "@/app/actions";
+import { gameUserBetRegistrations, removeGameUserBetRegistration } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
 
 interface Props {
@@ -24,6 +24,22 @@ interface Props {
 
 export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
     const [successButton, setSuccessButton] = useState<number | null>(null);
+
+    const handleRemoveBet = async (gameUserBetId: number) => {
+        try {
+            const result = await removeGameUserBetRegistration({
+                userId: user.id,
+                gameUserBetId: gameUserBetId
+            });
+
+            if (result) {
+                // Обновите состояние или выполните другие действия после успешного удаления
+                console.log("Регистрация успешно удалена");
+            }
+        } catch (error) {
+            console.error("Ошибка при удалении регистрации:", error);
+        }
+    };
 
     return (
         <div>
@@ -68,13 +84,14 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                             userId: user.id,
                             betUser2: betInput,
                             gameUserBetDetails: descriptionInput,
-                            gameUserBetId: gameUserBetId
+                            gameUserBetId: gameUserBetId,
+                            userTelegram: user.telegram || "No Telegram"
                         });
 
                         if (result) {
-                            setSuccessButton(bet.id); // Set the success state for the button
+                            setSuccessButton(bet.id);
                             setTimeout(() => {
-                                setSuccessButton(null); // Reset the button state after 2 seconds
+                                setSuccessButton(null);
                             }, 2000);
                         }
                     } catch (error) {
@@ -117,6 +134,24 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                                     <div className="p-4">
                                         <div className="mb-2">Description: {bet.gameUserBetDetails}</div>
                                         <div className="mb-2">Open Bet: {bet.gameUserBetOpen ? "Open" : "Closed"}</div>
+                                        <div className="mb-2">Participants:</div>
+                                        <ul>
+                                            {Array.isArray(bet.gameUserBetDataUsers2) && bet.gameUserBetDataUsers2.map((participant, index) => (
+                                                <li key={index} className="flex justify-between items-center">
+                                                    <span>
+                                                        User ID: {participant.userId}, Bet: {participant.betUser2}, Details: {participant.gameUserBetDetails}, Telegram: {participant.userTelegram}
+                                                    </span>
+                                                    {participant.userId === user.id && (
+                                                        <button
+                                                            onClick={() => handleRemoveBet(bet.id)}
+                                                            className="ml-2 p-1 bg-red-500 text-white rounded"
+                                                        >
+                                                            Удалить
+                                                        </button>
+                                                    )}
+                                                </li>
+                                            ))}
+                                        </ul>
                                         <div className="flex flex-col">
                                             <input
                                                 type="number"

@@ -1310,6 +1310,7 @@ export async function gameUserBetRegistrations(gameData: {
     betUser2: number;
     gameUserBetDetails: string;
     gameUserBetId: number;
+    userTelegram: string; // Добавляем telegram
 }) {
     try {
         // Получаем текущие данные из gameUserBetDataUsers2
@@ -1325,6 +1326,7 @@ export async function gameUserBetRegistrations(gameData: {
                 userId: gameData.userId,
                 betUser2: gameData.betUser2,
                 gameUserBetDetails: gameData.gameUserBetDetails,
+                userTelegram: gameData.userTelegram // Добавляем telegram
             }
         ];
 
@@ -1338,6 +1340,34 @@ export async function gameUserBetRegistrations(gameData: {
     } catch (error) {
         console.error("Ошибка при обновлении ставки:", error);
         throw new Error("Не удалось обновить ставку");
+    }
+}
+export async function removeGameUserBetRegistration(gameData: {
+    userId: number;
+    gameUserBetId: number;
+}) {
+    try {
+        // Получаем текущие данные из gameUserBetDataUsers2
+        const currentBet = await prisma.gameUserBet.findUnique({
+            where: { id: gameData.gameUserBetId },
+            select: { gameUserBetDataUsers2: true }
+        });
+
+        // Фильтруем данные, удаляя запись пользователя
+        const updatedData = (Array.isArray(currentBet?.gameUserBetDataUsers2) ? currentBet.gameUserBetDataUsers2 : []).filter(
+            (entry) => entry.userId !== gameData.userId
+        );
+
+        // Обновляем запись в базе данных
+        const updatedBet = await prisma.gameUserBet.update({
+            where: { id: gameData.gameUserBetId },
+            data: { gameUserBetDataUsers2: updatedData }
+        });
+
+        return updatedBet;
+    } catch (error) {
+        console.error("Ошибка при удалении регистрации:", error);
+        throw new Error("Не удалось удалить регистрацию");
     }
 }
 
