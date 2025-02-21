@@ -1345,7 +1345,7 @@ export async function gameUserBetCreate(gameData: {
 
         const existingGame = await prisma.gameUserBet.findFirst({
             where: {
-                gameUserBet1Id: currentUser.id,
+                gameUserBet1Id: Number(currentUser.id),
                 statusUserBet: {
                     in: ['OPEN', 'START']
                 }
@@ -1370,8 +1370,13 @@ export async function gameUserBetCreate(gameData: {
         });
         return newBet;
     } catch (error) {
-        console.error("Ошибка при создании ставки:", error);
-        throw new Error("Не удалось создать ставку");
+        if (error instanceof Error) {
+            console.error("Открытое событие уже создано:", error.message);
+            throw error; // Повторно выбрасываем ту же ошибку
+        } else {
+            console.error("Неизвестная ошибка при создании ставки:", error);
+            throw new Error("Произошла неизвестная ошибка");
+        }
     }
 }
 export async function gameUserBetRegistrations(gameData: {
@@ -1410,8 +1415,13 @@ export async function gameUserBetRegistrations(gameData: {
 
         return updatedBet;
     } catch (error) {
-        console.error("Ошибка при обновлении ставки:", error);
-        throw new Error("Вы уже зарегистрированы в этой игре");
+        if (error instanceof Error) {
+            console.error("Зарегистрироваться можно только один раз:", error.message);
+            throw error; // Повторно выбрасываем ту же ошибку
+        } else {
+            console.error("Неизвестная ошибка при создании ставки:", error);
+            throw new Error("Произошла неизвестная ошибка");
+        }
     }
 }
 export async function gameUserBetStart(gameData: {

@@ -51,6 +51,8 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
 
     const [createBetError, setCreateBetError] = useState<string | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
         const subscription = form.watch((value) => {
@@ -77,9 +79,11 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
             setIsDialogOpen(true);
         } catch (error) {
             if (error instanceof Error) {
-                setCreateBetError(error.message);
+                setErrorMessage(error.message);
+                setIsErrorDialogOpen(true);
             } else {
-                setCreateBetError("Произошла неизвестная ошибка");
+                setErrorMessage("Произошла неизвестная ошибка");
+                setIsErrorDialogOpen(true);
             }
         }
     };
@@ -225,13 +229,22 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Игра успешно создана!</DialogTitle>
-
                         <DialogDescription>
                             Переходите: <Link className="text-blue-500 text-xl" href="/user-game-2">поиск игрока</Link>
                         </DialogDescription>
-
                     </DialogHeader>
+                </DialogContent>
+            </Dialog>
 
+            <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Ошибка</DialogTitle>
+                        <DialogDescription>
+                            {errorMessage}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <Button onClick={() => setIsErrorDialogOpen(false)}>Закрыть</Button>
                 </DialogContent>
             </Dialog>
         </div>
