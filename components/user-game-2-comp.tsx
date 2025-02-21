@@ -1,8 +1,8 @@
 "use client"
-import React, { useState, useEffect } from 'react';
-import { GameUserBet, User, Category, Product, ProductItem, $Enums } from '@prisma/client';
-import { Table, TableBody, TableCell, TableRow, TableHead } from "@/components/ui/table";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import React, {useState, useEffect} from 'react';
+import {GameUserBet, User, Category, Product, ProductItem, $Enums} from '@prisma/client';
+import {Table, TableBody, TableCell, TableRow, TableHead} from "@/components/ui/table";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 import Link from "next/link";
 import {
     gameUserBetRegistrations,
@@ -11,8 +11,8 @@ import {
     removeGameUserBetRegistration
 } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button, Input } from "@/components/ui";
+import {Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {Button, Input} from "@/components/ui";
 
 interface Props {
     user: User;
@@ -25,7 +25,7 @@ interface GameUserBetDataUser {
     userTelegram: string;
 }
 
-export const UserGame2Comp: React.FC<Props> = ({ user }) => {
+export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
         gameUser1Bet: User;
         gameUser2Bet: User | null;
@@ -268,7 +268,8 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className="p-4">
-                                    <div className="mb-2"><span className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
+                                    <div className="mb-2"><span
+                                        className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
                                     {bet.statusUserBet === "OPEN" && (
                                         <div>
                                             <ul>
@@ -342,39 +343,39 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                             <DialogContent>
                                                                 <DialogTitle>Confirm Game Start</DialogTitle>
                                                                 <DialogDescription>
-                                                                    You are about to start the game with the selected player.
                                                                 </DialogDescription>
                                                                 <div className="p-4">
-                                                                    <h2 className="text-lg font-bold">Подтвердите запуск игры</h2>
-                                                                    {selectedUser !== null && (
-                                                                        <p>
-                                                                            Вы уверены, что хотите начать игру с выбранным игроком:
-                                                                            {Array.isArray(bet.gameUserBetDataUsers2) &&
-                                                                                bet.gameUserBetDataUsers2
-                                                                                    .filter(isGameUserBetDataUser)
-                                                                                    .find((participant) => participant.userId === selectedUser)?.userTelegram ?? "No Telegram"}
-                                                                        </p>
-                                                                    )}
-                                                                    <Button
-                                                                        onClick={() => handleStartGame(bet.id)}
-                                                                        className="mt-4 bg-green-500 text-white"
-                                                                    >
-                                                                        Подтвердить
-                                                                    </Button>
+                                                                    <h2 className="text-lg font-bold">Подтвердите регистрацию игры с</h2>
+                                                                        {(Array.isArray(bet.gameUserBetDataUsers2) &&
+                                                                            (bet.gameUserBetDataUsers2 as any[])
+                                                                                .filter(isGameUserBetDataUser)
+                                                                                .find((participant) => participant.userId === selectedUser)?.userTelegram) ?? "No Telegram"}
+                                                                    <div>
+                                                                        <Button
+                                                                            onClick={() => handleStartGame(bet.id)}
+                                                                            className="mt-4 bg-green-500 text-white"
+                                                                        >
+                                                                            Подтвердить
+                                                                        </Button>
+                                                                    </div>
                                                                 </div>
                                                             </DialogContent>
                                                         </Dialog>
                                                     </div>
                                                 ) : (
                                                     // Check if the user is already registered
-                                                    !bet.gameUserBetDataUsers2.some((participant: any) => participant.userId === user.id) && (
+                                                    !(Array.isArray(bet.gameUserBetDataUsers2) &&
+                                                        (bet.gameUserBetDataUsers2 as any[]).some((participant) => isGameUserBetDataUser(participant) && participant.userId === user.id)) && (
                                                         <div className="flex flex-col">
                                                             <Input
                                                                 type="number"
                                                                 value={betInputs[bet.id] || bet.betUser1}
                                                                 onChange={(e) => {
                                                                     const value = Number(e.target.value);
-                                                                    setBetInputs((prev) => ({ ...prev, [bet.id]: value }));
+                                                                    setBetInputs((prev) => ({
+                                                                        ...prev,
+                                                                        [bet.id]: value
+                                                                    }));
 
                                                                     if (value > user.points) {
                                                                         setErrorMessages((prev) => ({
@@ -397,7 +398,8 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                                 className="mb-2 p-2 border"
                                                             />
                                                             {errorMessages[bet.id] &&
-                                                                <div className="text-red-500">{errorMessages[bet.id]}</div>}
+                                                                <div
+                                                                    className="text-red-500">{errorMessages[bet.id]}</div>}
                                                             <Input
                                                                 type="text"
                                                                 value={descriptionInputs[bet.id] || ""}
