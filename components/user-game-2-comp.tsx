@@ -136,7 +136,11 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                 }, 2000);
             }
         } catch (error) {
-            setErrorMessage(error.message);
+            if (error instanceof Error) {
+                setErrorMessage(error.message);
+            } else {
+                setErrorMessage("An unknown error occurred");
+            }
             setErrorDialogOpen(true);
         }
     };
@@ -147,7 +151,18 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
             return;
         }
 
-        const selectedParticipant = gameUserBets.find(bet => bet.id === gameUserBetId)?.gameUserBetDataUsers2.find((participant: any) => participant.userId === selectedUser);
+        const selectedBet = gameUserBets.find(bet => bet.id === gameUserBetId);
+        if (!selectedBet) {
+            alert("Ставка не найдена");
+            return;
+        }
+
+        // Parse gameUserBetDataUsers2 as an array
+        const participants = Array.isArray(selectedBet.gameUserBetDataUsers2)
+            ? selectedBet.gameUserBetDataUsers2
+            : JSON.parse(selectedBet.gameUserBetDataUsers2 as string);
+
+        const selectedParticipant = participants.find((participant: any) => participant.userId === selectedUser);
 
         if (!selectedParticipant) {
             alert("Выбранный игрок не найден");
@@ -155,35 +170,33 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
         }
 
         try {
-            const result = await gameUserBetStart({
+            await gameUserBetStart({
                 gameUserBetId: gameUserBetId,
                 gameUserBet2Id: selectedUser,
                 betUser2: selectedParticipant.betUser2
             });
 
-            if (result) {
-                setDialogOpen(false);
-                console.log("Игра успешно начата");
-            }
+            setDialogOpen(false);
+            console.log("Игра успешно начата");
         } catch (error) {
             console.error("Ошибка при запуске игры:", error);
         }
     };
 
-    const handleGameEnd = async (gameUserBetId: number) => {
-        try {
-            const result = await gameUserBetClosed({
-                gameUserBetId: gameUserBetId,
-                checkWinUser1: checkWinUser1,
-                checkWinUser2: checkWinUser2
-            });
-            if (result) {
-                console.log("Игра успешно завершена");
-            }
-        } catch (error) {
-            console.error("Ошибка при завершении игры:", error);
-        }
-    };
+    // const handleGameEnd = async (gameUserBetId: number) => {
+    //     try {
+    //         const result = await gameUserBetClosed({
+    //             gameUserBetId: gameUserBetId,
+    //             checkWinUser1: checkWinUser1,
+    //             checkWinUser2: checkWinUser2
+    //         });
+    //         if (result) {
+    //             console.log("Игра успешно завершена");
+    //         }
+    //     } catch (error) {
+    //         console.error("Ошибка при завершении игры:", error);
+    //     }
+    // };
 
     return (
         <div>

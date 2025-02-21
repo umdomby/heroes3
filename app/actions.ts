@@ -1392,8 +1392,8 @@ export async function gameUserBetRegistrations(gameData: {
             select: { gameUserBetDataUsers2: true }
         });
 
-        const isAlreadyRegistered = currentBet?.gameUserBetDataUsers2.some((participant: any) => participant.userId === gameData.userId);
-
+        const gameUserBetDataUsers2 = currentBet?.gameUserBetDataUsers2 as GameUserBetDataUser[] | undefined;
+        const isAlreadyRegistered = Array.isArray(gameUserBetDataUsers2) && gameUserBetDataUsers2.some((participant) => participant.userId === gameData.userId);
         if (isAlreadyRegistered) {
             throw new Error('Вы уже зарегистрированы в этой игре');
         }
@@ -1478,24 +1478,28 @@ export async function gameUserBetClosed(gameData: {
                 // User1 победил
                 await prisma.user.update({
                     where: { id: gameUserBet.gameUserBet1Id },
-                    data: { points: { increment: gameUserBet.betUser1 + gameUserBet.betUser2 } },
+                    data: { points: { increment: gameUserBet.betUser1 + (gameUserBet.betUser2 ?? 0) } },
                 });
             } else if (!gameData.checkWinUser1 && gameData.checkWinUser2) {
                 // User2 победил
-                await prisma.user.update({
-                    where: { id: gameUserBet.gameUserBet2Id },
-                    data: { points: { increment: gameUserBet.betUser1 + gameUserBet.betUser2 } },
-                });
+                if (gameUserBet.gameUserBet2Id !== null) {
+                    await prisma.user.update({
+                        where: { id: gameUserBet.gameUserBet2Id },
+                        data: { points: { increment: gameUserBet.betUser1 + (gameUserBet.betUser2 ?? 0) } },
+                    });
+                }
             } else {
                 // Ничья
                 await prisma.user.update({
                     where: { id: gameUserBet.gameUserBet1Id },
                     data: { points: { increment: gameUserBet.betUser1 } },
                 });
-                await prisma.user.update({
-                    where: { id: gameUserBet.gameUserBet2Id },
-                    data: { points: { increment: gameUserBet.betUser2 } },
-                });
+                if (gameUserBet.gameUserBet2Id !== null) {
+                    await prisma.user.update({
+                        where: { id: gameUserBet.gameUserBet2Id },
+                        data: { points: { increment: gameUserBet.betUser2 ?? 0 } },
+                    });
+                }
             }
 
             return gameUserBet;
