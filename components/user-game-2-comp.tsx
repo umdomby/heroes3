@@ -7,23 +7,6 @@ import Link from "next/link";
 import { gameUserBetRegistrations } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
 
-// Компонент уведомления
-const Notification: React.FC<{ message: string; duration: number; onClose: () => void }> = ({ message, duration, onClose }) => {
-    React.useEffect(() => {
-        const timer = setTimeout(onClose, duration);
-        return () => clearTimeout(timer);
-    }, [duration, onClose]);
-
-    return (
-        <div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 m-4 bg-green-800 text-white rounded p-4"
-            style={{ fontSize: '24px' }} // Adjust the font size as needed
-        >
-            {message}
-        </div>
-    );
-};
-
 interface Props {
     user: User;
     gameUserBets: (GameUserBet & {
@@ -40,17 +23,10 @@ interface Props {
 }
 
 export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
-    const [showNotification, setShowNotification] = useState(false);
+    const [successButton, setSuccessButton] = useState<number | null>(null);
 
     return (
         <div>
-            {showNotification && (
-                <Notification
-                    message="Вы успешно добавлены в игру"
-                    duration={2000}
-                    onClose={() => setShowNotification(false)}
-                />
-            )}
             <div className="flex justify-between items-center">
                 <div>Points: {user?.points}</div>
                 <Link className="text-blue-500" href="/user-game-create-2">Create game</Link>
@@ -88,13 +64,19 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                     }
 
                     try {
-                        await gameUserBetRegistrations({
+                        const result = await gameUserBetRegistrations({
                             userId: user.id,
                             betUser2: betInput,
                             gameUserBetDetails: descriptionInput,
                             gameUserBetId: gameUserBetId
                         });
-                        setShowNotification(true); // Показать уведомление
+
+                        if (result) {
+                            setSuccessButton(bet.id); // Set the success state for the button
+                            setTimeout(() => {
+                                setSuccessButton(null); // Reset the button state after 2 seconds
+                            }, 2000);
+                        }
                     } catch (error) {
                         console.error("Ошибка при добавлении в игру:", error);
                     }
@@ -167,9 +149,11 @@ export const UserGame2Comp: React.FC<Props> = ({ user, gameUserBets }) => {
                                             ) : (
                                                 <button
                                                     onClick={() => handleAddBet(bet.id, bet.betUser1)}
-                                                    className="p-2 bg-blue-500 text-white"
+                                                    className={`p-2 text-white transition-colors duration-300 ${
+                                                        successButton === bet.id ? 'bg-green-500' : 'bg-blue-500'
+                                                    }`}
                                                 >
-                                                    Add to Game
+                                                    {successButton === bet.id ? 'Added!' : 'Add to Game'}
                                                 </button>
                                             )}
                                         </div>
