@@ -44,8 +44,13 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>({});
     const [selectedUser, setSelectedUser] = useState<number | null>(null);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+    const [errorDialogOpen, setErrorDialogOpen] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>("");
+
     const [checkWinUser1, setCheckWinUser1] = useState<boolean | null>(null);
     const [checkWinUser2, setCheckWinUser2] = useState<boolean | null>(null);
+
 
     useEffect(() => {
         // Fetch initial data
@@ -100,15 +105,18 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
         const descriptionInput = descriptionInputs[gameUserBetId] || "";
 
         if (betInput > user.points) {
-            alert("У вас недостаточно Points");
+            setErrorMessage("У вас недостаточно Points");
+            setErrorDialogOpen(true);
             return;
         }
         if (betInput < betUser1) {
-            alert("Ставка должна быть не меньше, чем у User1");
+            setErrorMessage("Ставка должна быть не меньше, чем у User1");
+            setErrorDialogOpen(true);
             return;
         }
         if (descriptionInput.length > 150) {
-            alert("Описание не должно превышать 150 символов");
+            setErrorMessage("Описание не должно превышать 150 символов");
+            setErrorDialogOpen(true);
             return;
         }
 
@@ -128,7 +136,8 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                 }, 2000);
             }
         } catch (error) {
-            console.error("Ошибка при добавлении в игру:", error);
+            setErrorMessage(error.message);
+            setErrorDialogOpen(true);
         }
     };
 
@@ -385,6 +394,12 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                     </Accordion>
                 </div>
             ))}
+            <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+                <DialogContent>
+                    <DialogTitle>Ошибка</DialogTitle>
+                    <DialogDescription>{errorMessage}</DialogDescription>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

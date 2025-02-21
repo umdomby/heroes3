@@ -1334,9 +1334,28 @@ export async function gameUserBetCreate(gameData: {
     productItemId: number;
     gameUserBetDetails: string;
     userId: number;
-    gameUserBetOpen: boolean; // Добавляем новое поле
+    gameUserBetOpen: boolean;
 }) {
     try {
+        const currentUser = await getUserSession();
+
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        const existingGame = await prisma.gameUserBet.findFirst({
+            where: {
+                gameUserBet1Id: currentUser.id,
+                statusUserBet: {
+                    in: ['OPEN', 'START']
+                }
+            }
+        });
+
+        if (existingGame) {
+            throw new Error('Открытое событие можно создать только один раз');
+        }
+
         const newBet = await prisma.gameUserBet.create({
             data: {
                 gameUserBet1Id: gameData.userId,
@@ -1345,7 +1364,7 @@ export async function gameUserBetCreate(gameData: {
                 categoryId: gameData.categoryId,
                 productId: gameData.productId,
                 productItemId: gameData.productItemId,
-                gameUserBetOpen: gameData.gameUserBetOpen, // Используем значение из параметров
+                gameUserBetOpen: gameData.gameUserBetOpen,
                 statusUserBet: 'OPEN',
             },
         });
@@ -1360,27 +1379,30 @@ export async function gameUserBetRegistrations(gameData: {
     betUser2: number;
     gameUserBetDetails: string;
     gameUserBetId: number;
-    userTelegram: string; // Добавляем telegram
+    userTelegram: string;
 }) {
     try {
-        // Получаем текущие данные из gameUserBetDataUsers2
         const currentBet = await prisma.gameUserBet.findUnique({
             where: { id: gameData.gameUserBetId },
             select: { gameUserBetDataUsers2: true }
         });
 
-        // Добавляем новые данные в gameUserBetDataUsers2
+        const isAlreadyRegistered = currentBet?.gameUserBetDataUsers2.some((participant: any) => participant.userId === gameData.userId);
+
+        if (isAlreadyRegistered) {
+            throw new Error('Вы уже зарегистрированы в этой игре');
+        }
+
         const updatedData = [
             ...(Array.isArray(currentBet?.gameUserBetDataUsers2) ? currentBet.gameUserBetDataUsers2 : []),
             {
                 userId: gameData.userId,
                 betUser2: gameData.betUser2,
                 gameUserBetDetails: gameData.gameUserBetDetails,
-                userTelegram: gameData.userTelegram // Добавляем telegram
+                userTelegram: gameData.userTelegram
             }
         ];
 
-        // Обновляем запись в базе данных
         const updatedBet = await prisma.gameUserBet.update({
             where: { id: gameData.gameUserBetId },
             data: { gameUserBetDataUsers2: updatedData }
@@ -1389,7 +1411,7 @@ export async function gameUserBetRegistrations(gameData: {
         return updatedBet;
     } catch (error) {
         console.error("Ошибка при обновлении ставки:", error);
-        throw new Error("Не удалось обновить ставку");
+        throw new Error("Вы уже зарегистрированы в этой игре");
     }
 }
 export async function gameUserBetStart(gameData: {
