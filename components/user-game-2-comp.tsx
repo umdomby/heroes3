@@ -1,16 +1,18 @@
 "use client"
-import React, {useState, useEffect} from 'react';
-import {GameUserBet, User, Category, Product, ProductItem, $Enums} from '@prisma/client';
-import {Table, TableBody, TableCell, TableRow, TableHeader, TableHead} from "@/components/ui/table";
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+import React, { useState, useEffect } from 'react';
+import { GameUserBet, User, Category, Product, ProductItem, $Enums } from '@prisma/client';
+import { Table, TableBody, TableCell, TableRow, TableHeader, TableHead } from "@/components/ui/table";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
-import {gameUserBetRegistrations, removeGameUserBetRegistration} from "@/app/actions";
+import { gameUserBetRegistrations, gameUserBetStart, gameUserBetClosed, removeGameUserBetRegistration } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
-import {Button} from "@/components/ui";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {Button, Input} from "@/components/ui";
 
 interface Props {
     user: User;
 }
+
 interface GameUserBetDataUser {
     userId: number;
     betUser2: number;
@@ -18,7 +20,7 @@ interface GameUserBetDataUser {
     userTelegram: string;
 }
 
-export const UserGame2Comp: React.FC<Props> = ({user}) => {
+export const UserGame2Comp: React.FC<Props> = ({ user }) => {
     const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
         gameUser1Bet: User;
         gameUser2Bet: User | null;
@@ -35,6 +37,8 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [betInputs, setBetInputs] = useState<{ [key: number]: number }>({});
     const [descriptionInputs, setDescriptionInputs] = useState<{ [key: number]: string }>({});
     const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>({});
+    const [selectedUser, setSelectedUser] = useState<number | null>(null);
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
     useEffect(() => {
         // Fetch initial data
@@ -121,6 +125,51 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
         }
     };
 
+    const handleStartGame = async (gameUserBetId: number) => {
+        if (selectedUser === null) {
+            alert("Выберите игрока для начала игры");
+            return;
+        }
+
+        const selectedParticipant = gameUserBets.find(bet => bet.id === gameUserBetId)?.gameUserBetDataUsers2.find((participant: any) => participant.userId === selectedUser);
+
+        if (!selectedParticipant) {
+            alert("Выбранный игрок не найден");
+            return;
+        }
+
+        try {
+            const result = await gameUserBetStart({
+                gameUserBetId: gameUserBetId,
+                gameUserBet2Id: selectedUser,
+                betUser2: selectedParticipant.betUser2
+            });
+
+            if (result) {
+                setDialogOpen(false);
+                console.log("Игра успешно начата");
+            }
+        } catch (error) {
+            console.error("Ошибка при запуске игры:", error);
+        }
+    };
+
+    const handleGameEnd = async (gameUserBetId: number, checkWinUser1: boolean, checkWinUser2: boolean) => {
+        try {
+            const result = await gameUserBetClosed({
+                gameUserBetId: gameUserBetId,
+                checkWinUser1: checkWinUser1,
+                checkWinUser2: checkWinUser2
+            });
+
+            if (result) {
+                console.log("Игра успешно завершена");
+            }
+        } catch (error) {
+            console.error("Ошибка при завершении игры:", error);
+        }
+    };
+
     return (
         <div>
             <div className="flex justify-between items-center">
@@ -136,8 +185,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Size</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Timer</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">State</TableHead>
-                        <TableHead
-                            className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
+                        <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
                     </TableRow>
                 </TableBody>
             </Table>
@@ -149,20 +197,13 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                 <Table>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.product.name}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.product.name}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">
                                                 {bet.gameUser1Bet.telegram ? (
                                                     <Link
                                                         className="text-center text-blue-500 hover:text-green-300 font-bold"
@@ -181,14 +222,10 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className="p-4">
-                                    <div className="mb-2"><span
-                                        className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
-                                    <div className="mb-2"><span
-                                        className="text-green-500">Open Bet: </span> {bet.gameUserBetOpen ? "Open" : "Closed"}
-                                    </div>
+                                    <div className="mb-2"><span className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
+                                    <div className="mb-2"><span className="text-green-500">Open Bet: </span> {bet.gameUserBetOpen ? "Open" : "Closed"}</div>
                                     <ul>
                                         {Array.isArray(bet.gameUserBetDataUsers2) && bet.gameUserBetDataUsers2.map((participant, index) => {
-                                            // Проверяем, что participant соответствует структуре GameUserBetDataUser
                                             const isValidParticipant = (participant: any): participant is GameUserBetDataUser => {
                                                 return typeof participant === 'object' &&
                                                     participant !== null &&
@@ -201,28 +238,35 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             if (isValidParticipant(participant)) {
                                                 return (
                                                     <li key={index} className="flex justify-between items-center">
-                    <span>
-
-                        Bet: {participant.betUser2}{" "}
-                        {participant.userTelegram ? (
-                            <Link
-                                className="text-blue-500 hover:text-green-300 font-bold"
-                                href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
-                                target="_blank"
-                            >
-                                {participant.userTelegram}
-                            </Link>
-                        ) : (
-                            <span className="text-gray-500">Скрыто</span>
-                        )}{" "}
-                        Details: {participant.gameUserBetDetails}
-                    </span>
+                            <span>
+                              Bet: {participant.betUser2}{" "}
+                                {participant.userTelegram ? (
+                                    <Link
+                                        className="text-blue-500 hover:text-green-300 font-bold"
+                                        href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
+                                        target="_blank"
+                                    >
+                                        {participant.userTelegram}
+                                    </Link>
+                                ) : (
+                                    <span className="text-gray-500">Скрыто</span>
+                                )}{" "}
+                                Details: {participant.gameUserBetDetails}
+                            </span>
                                                         {participant.userId === user.id && (
                                                             <Button
                                                                 onClick={() => handleRemoveBet(bet.id)}
                                                                 className="text-red-500 hover:text-blue-300 bg-grey-500 hover:bg-grey-500 font-bold h-5"
                                                             >
                                                                 Удалить
+                                                            </Button>
+                                                        )}
+                                                        {user.id === bet.gameUser1Bet.id && (
+                                                            <Button
+                                                                onClick={() => setSelectedUser(participant.userId)}
+                                                                className={`ml-2 ${selectedUser === participant.userId ? 'bg-green-500' : 'bg-gray-500'} h-5`}
+                                                            >
+                                                                Выбрать
                                                             </Button>
                                                         )}
                                                     </li>
@@ -233,15 +277,39 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                     </ul>
                                     <div>
                                         {user.id === bet.gameUser1Bet.id ? (
-                                            <div className="text-gray-500">Вы создатель этого события</div>
+                                            <div className="flex flex-col">
+                                                <div className="text-gray-500">Вы создатель этого события</div>
+                                                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            disabled={selectedUser === null}
+                                                            className="mt-2 bg-blue-500 text-white"
+                                                        >
+                                                            START
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <div className="p-4">
+                                                            <h2 className="text-lg font-bold">Подтвердите запуск игры</h2>
+                                                            <p>Вы уверены, что хотите начать игру с выбранным игроком?</p>
+                                                            <Button
+                                                                onClick={() => handleStartGame(bet.id)}
+                                                                className="mt-4 bg-green-500 text-white"
+                                                            >
+                                                                Подтвердить
+                                                            </Button>
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
                                         ) : (
                                             <div className="flex flex-col">
-                                                <input
+                                                <Input
                                                     type="number"
                                                     value={betInputs[bet.id] || bet.betUser1}
                                                     onChange={(e) => {
                                                         const value = Number(e.target.value);
-                                                        setBetInputs((prev) => ({...prev, [bet.id]: value}));
+                                                        setBetInputs((prev) => ({ ...prev, [bet.id]: value }));
 
                                                         if (value > user.points) {
                                                             setErrorMessages((prev) => ({
@@ -254,7 +322,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 [bet.id]: `Минимальное значение: ${bet.betUser1}`
                                                             }));
                                                         } else {
-                                                            setErrorMessages((prev) => ({...prev, [bet.id]: ""}));
+                                                            setErrorMessages((prev) => ({ ...prev, [bet.id]: "" }));
                                                         }
                                                     }}
                                                     placeholder="Your Bet"
@@ -262,7 +330,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                 />
                                                 {errorMessages[bet.id] &&
                                                     <div className="text-red-500">{errorMessages[bet.id]}</div>}
-                                                <input
+                                                <Input
                                                     type="text"
                                                     value={descriptionInputs[bet.id] || ""}
                                                     onChange={(e) => setDescriptionInputs((prev) => ({
@@ -273,14 +341,14 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                     className="mb-2 p-2 border"
                                                 />
 
-                                                <button
+                                                <Button
                                                     onClick={() => handleAddBet(bet.id, bet.betUser1)}
                                                     className={`p-2 text-white transition-colors duration-300 ${
                                                         successButton === bet.id ? 'bg-green-500' : 'bg-blue-500'
                                                     }`}
                                                 >
                                                     {successButton === bet.id ? 'Added!' : 'Add to Game'}
-                                                </button>
+                                                </Button>
                                             </div>
                                         )}
                                     </div>
