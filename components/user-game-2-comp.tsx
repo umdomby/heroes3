@@ -1,8 +1,8 @@
 "use client"
-import React, {useState, useEffect} from 'react';
-import {GameUserBet, User, Category, Product, ProductItem, $Enums} from '@prisma/client';
-import {Table, TableBody, TableCell, TableRow, TableHead} from "@/components/ui/table";
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+import React, { useState, useEffect } from 'react';
+import { GameUserBet, User, Category, Product, ProductItem, $Enums, WinGameUserBet } from '@prisma/client';
+import { Table, TableBody, TableCell, TableRow, TableHead } from "@/components/ui/table";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
 import {
     gameUserBetRegistrations,
@@ -11,8 +11,8 @@ import {
     removeGameUserBetRegistration
 } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
-import {Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
-import {Button, Input} from "@/components/ui";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button, Input } from "@/components/ui";
 
 interface Props {
     user: User;
@@ -25,7 +25,7 @@ interface GameUserBetDataUser {
     userTelegram: string;
 }
 
-export const UserGame2Comp: React.FC<Props> = ({user}) => {
+export const UserGame2Comp: React.FC<Props> = ({ user }) => {
     const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
         gameUser1Bet: User;
         gameUser2Bet: User | null;
@@ -47,9 +47,10 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [errorDialogOpen, setErrorDialogOpen] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
 
-    // Инициализация состояний для победителей
-    const [checkWinUser1, setCheckWinUser1] = useState<boolean>(false);
-    const [checkWinUser2, setCheckWinUser2] = useState<boolean>(false);
+    // Состояния для победителей
+    const [selectedWinUser1, setSelectedWinUser1] = useState<{ [key: number]: WinGameUserBet | null }>({});
+    const [selectedWinUser2, setSelectedWinUser2] = useState<{ [key: number]: WinGameUserBet | null }>({});
+    const [currentBetId, setCurrentBetId] = useState<number | null>(null);
 
     useEffect(() => {
         // Fetch initial data
@@ -184,17 +185,36 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
 
     const handleConfirmResult = async (gameUserBetId: number) => {
         try {
+            const selectedWin1 = selectedWinUser1[gameUserBetId];
+            const selectedWin2 = selectedWinUser2[gameUserBetId];
+
+            // Обновляем состояние игры в базе данных
             await gameUserBetClosed({
                 gameUserBetId,
-                checkWinUser1,
-                checkWinUser2
+                checkWinUser1: selectedWin1,
+                checkWinUser2: selectedWin2,
             });
-            console.log("Результат игры успешно подтвержден");
+
+            // Проверяем условия для закрытия игры
+            if (selectedWin1 && selectedWin2) {
+                if (selectedWin1 === WinGameUserBet.WIN && selectedWin2 === WinGameUserBet.LOSS) {
+                    // User1 победил
+                    console.log("User1 победил");
+                } else if (selectedWin1 === WinGameUserBet.LOSS && selectedWin2 === WinGameUserBet.WIN) {
+                    // User2 победил
+                    console.log("User2 победил");
+                } else if (selectedWin1 === WinGameUserBet.DRAW || selectedWin2 === WinGameUserBet.DRAW) {
+                    // Ничья
+                    console.log("Ничья");
+                }
+            }
+
+            // Закрываем диалог
+            setDialogOpen(false);
         } catch (error) {
             console.error("Ошибка при подтверждении результата игры:", error);
         }
     };
-
 
     function isGameUserBetDataUser(obj: any): obj is GameUserBetDataUser {
         return typeof obj === 'object' &&
@@ -268,8 +288,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className="p-4">
-                                    <div className="mb-2"><span
-                                        className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
+                                    <div className="mb-2"><span className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
                                     {bet.statusUserBet === "OPEN" && (
                                         <div>
                                             <ul>
@@ -343,13 +362,14 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                             <DialogContent>
                                                                 <DialogTitle>Confirm Game Start</DialogTitle>
                                                                 <DialogDescription>
+                                                                    You are about to start the game with the selected player.
                                                                 </DialogDescription>
                                                                 <div className="p-4">
-                                                                    <h2 className="text-lg font-bold">Подтвердите регистрацию игры с</h2>
-                                                                        {(Array.isArray(bet.gameUserBetDataUsers2) &&
-                                                                            (bet.gameUserBetDataUsers2 as any[])
-                                                                                .filter(isGameUserBetDataUser)
-                                                                                .find((participant) => participant.userId === selectedUser)?.userTelegram) ?? "No Telegram"}
+                                                                    <h2 className="text-lg font-bold">Подтвердите запуск игры</h2>
+                                                                    {(Array.isArray(bet.gameUserBetDataUsers2) &&
+                                                                        (bet.gameUserBetDataUsers2 as any[])
+                                                                            .filter(isGameUserBetDataUser)
+                                                                            .find((participant) => participant.userId === selectedUser)?.userTelegram) ?? "No Telegram"}
                                                                     <div>
                                                                         <Button
                                                                             onClick={() => handleStartGame(bet.id)}
@@ -430,30 +450,31 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             {user.id === bet.gameUser1Bet.id && (
                                                 <div>
                                                     <div>
-                                                        <label>
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={checkWinUser1}
-                                                                onChange={() => setCheckWinUser1(!checkWinUser1)}
-                                                            />
-                                                            User1 выиграл
-                                                        </label>
+                                                        <Button
+                                                            onClick={() => setSelectedWinUser1(prev => ({ ...prev, [bet.id]: WinGameUserBet.LOSS }))}
+                                                            className={selectedWinUser1[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'}
+                                                        >
+                                                            Проиграл
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => setSelectedWinUser1(prev => ({ ...prev, [bet.id]: WinGameUserBet.WIN }))}
+                                                            className={selectedWinUser1[bet.id] === WinGameUserBet.WIN ? 'bg-green-500' : 'bg-gray-500'}
+                                                        >
+                                                            Выиграл
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => setSelectedWinUser1(prev => ({ ...prev, [bet.id]: WinGameUserBet.DRAW }))}
+                                                            className={selectedWinUser1[bet.id] === WinGameUserBet.DRAW ? 'bg-yellow-500' : 'bg-gray-500'}
+                                                        >
+                                                            Ничья
+                                                        </Button>
                                                     </div>
-                                                    <div>
-                                                        <label>
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={!checkWinUser1}
-                                                                onChange={() => setCheckWinUser1(!checkWinUser1)}
-                                                            />
-                                                            User1 проиграл
-                                                        </label>
-                                                    </div>
-
-                                                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                    <Dialog open={dialogOpen && currentBetId === bet.id} onOpenChange={setDialogOpen}>
                                                         <DialogTrigger asChild>
                                                             <Button
                                                                 className="mt-2 bg-blue-500 text-white"
+                                                                disabled={!selectedWinUser1[bet.id]} // Кнопка активна только если выбран вариант
+                                                                onClick={() => setCurrentBetId(bet.id)}
                                                             >
                                                                 Подтвердить результат
                                                             </Button>
@@ -461,7 +482,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                         <DialogContent>
                                                             <DialogTitle>Подтверждение результата</DialogTitle>
                                                             <DialogDescription>
-                                                                Вы уверены, что хотите подтвердить результат игры?
+                                                                Вы уверены, что хотите подтвердить результат игры как {selectedWinUser1[bet.id]}?
                                                             </DialogDescription>
                                                             <div className="p-4">
                                                                 <Button
@@ -479,29 +500,31 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             {bet.gameUser2Bet && user.id === bet.gameUser2Bet.id && (
                                                 <div>
                                                     <div>
-                                                        <label>
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={checkWinUser2}
-                                                                onChange={() => setCheckWinUser2(!checkWinUser2)}
-                                                            />
-                                                            User2 выиграл
-                                                        </label>
+                                                        <Button
+                                                            onClick={() => setSelectedWinUser2(prev => ({ ...prev, [bet.id]: WinGameUserBet.LOSS }))}
+                                                            className={selectedWinUser2[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'}
+                                                        >
+                                                            Проиграл
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => setSelectedWinUser2(prev => ({ ...prev, [bet.id]: WinGameUserBet.WIN }))}
+                                                            className={selectedWinUser2[bet.id] === WinGameUserBet.WIN ? 'bg-green-500' : 'bg-gray-500'}
+                                                        >
+                                                            Выиграл
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => setSelectedWinUser2(prev => ({ ...prev, [bet.id]: WinGameUserBet.DRAW }))}
+                                                            className={selectedWinUser2[bet.id] === WinGameUserBet.DRAW ? 'bg-yellow-500' : 'bg-gray-500'}
+                                                        >
+                                                            Ничья
+                                                        </Button>
                                                     </div>
-                                                    <div>
-                                                        <label>
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={!checkWinUser2}
-                                                                onChange={() => setCheckWinUser2(!checkWinUser2)}
-                                                            />
-                                                            User2 проиграл
-                                                        </label>
-                                                    </div>
-                                                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                                                    <Dialog open={dialogOpen && currentBetId === bet.id} onOpenChange={setDialogOpen}>
                                                         <DialogTrigger asChild>
                                                             <Button
                                                                 className="mt-2 bg-blue-500 text-white"
+                                                                disabled={!selectedWinUser2[bet.id]} // Кнопка активна только если выбран вариант
+                                                                onClick={() => setCurrentBetId(bet.id)}
                                                             >
                                                                 Подтвердить результат
                                                             </Button>
@@ -509,7 +532,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                         <DialogContent>
                                                             <DialogTitle>Подтверждение результата</DialogTitle>
                                                             <DialogDescription>
-                                                                Вы уверены, что хотите подтвердить результат игры?
+                                                                Вы уверены, что хотите подтвердить результат игры как {selectedWinUser2[bet.id]}?
                                                             </DialogDescription>
                                                             <div className="p-4">
                                                                 <Button
