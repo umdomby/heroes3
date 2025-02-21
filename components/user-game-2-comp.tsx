@@ -1,17 +1,17 @@
 "use client"
-import React, { useState, useEffect } from 'react';
-import { GameUserBet, User, Category, Product, ProductItem, $Enums } from '@prisma/client';
-import { Table, TableBody, TableCell, TableRow, TableHeader, TableHead } from "@/components/ui/table";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import React, {useState, useEffect} from 'react';
+import {GameUserBet, User, Category, Product, ProductItem, $Enums} from '@prisma/client';
+import {Table, TableBody, TableCell, TableRow, TableHeader, TableHead} from "@/components/ui/table";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
 import Link from "next/link";
-import { gameUserBetRegistrations, removeGameUserBetRegistration } from "@/app/actions";
+import {gameUserBetRegistrations, removeGameUserBetRegistration} from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
 
 interface Props {
     user: User;
 }
 
-export const UserGame2Comp: React.FC<Props> = ({ user }) => {
+export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
         gameUser1Bet: User;
         gameUser2Bet: User | null;
@@ -22,7 +22,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
         betUser1: number;
         gameUserBetOpen: boolean;
         statusUserBet: GameUserBetStatus;
-        gameUserBetDataUsers2 : JSON;
+        gameUserBetDataUsers2: JSON;
     })[]>([]);
     const [successButton, setSuccessButton] = useState<number | null>(null);
     const [betInputs, setBetInputs] = useState<{ [key: number]: number }>({});
@@ -33,7 +33,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
         // Fetch initial data
         const fetchData = async () => {
             try {
-                const response = await fetch('/api/sse-game-user-get');
+                const response = await fetch('/api/game-user-get');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -47,7 +47,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
         fetchData();
 
         // Set up SSE
-        const eventSource = new EventSource('/api/sse-game-user');
+        const eventSource = new EventSource('/api/game-user-sse');
         eventSource.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
@@ -129,7 +129,8 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Size</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Timer</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">State</TableHead>
-                        <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
+                        <TableHead
+                            className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
                     </TableRow>
                 </TableBody>
             </Table>
@@ -141,13 +142,20 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                 <Table>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.product.name}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
-                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.product.name}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
+                                            <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">
                                                 {bet.gameUser1Bet.telegram ? (
                                                     <Link
                                                         className="text-center text-blue-500 hover:text-green-300 font-bold"
@@ -186,44 +194,57 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                             </li>
                                         ))}
                                     </ul>
-                                    <div className="flex flex-col">
-                                        <input
-                                            type="number"
-                                            value={betInputs[bet.id] || bet.betUser1}
-                                            onChange={(e) => {
-                                                const value = Number(e.target.value);
-                                                setBetInputs((prev) => ({ ...prev, [bet.id]: value }));
-
-                                                if (value > user.points) {
-                                                    setErrorMessages((prev) => ({ ...prev, [bet.id]: "У вас недостаточно Points" }));
-                                                } else if (value < bet.betUser1) {
-                                                    setErrorMessages((prev) => ({ ...prev, [bet.id]: `Минимальное значение: ${bet.betUser1}` }));
-                                                } else {
-                                                    setErrorMessages((prev) => ({ ...prev, [bet.id]: "" }));
-                                                }
-                                            }}
-                                            placeholder="Your Bet"
-                                            className="mb-2 p-2 border"
-                                        />
-                                        {errorMessages[bet.id] && <div className="text-red-500">{errorMessages[bet.id]}</div>}
-                                        <input
-                                            type="text"
-                                            value={descriptionInputs[bet.id] || ""}
-                                            onChange={(e) => setDescriptionInputs((prev) => ({ ...prev, [bet.id]: e.target.value }))}
-                                            placeholder="Description (max 150 chars)"
-                                            className="mb-2 p-2 border"
-                                        />
+                                    <div>
                                         {user.id === bet.gameUser1Bet.id ? (
                                             <div className="text-gray-500">Вы создатель этого события</div>
                                         ) : (
-                                            <button
-                                                onClick={() => handleAddBet(bet.id, bet.betUser1)}
-                                                className={`p-2 text-white transition-colors duration-300 ${
-                                                    successButton === bet.id ? 'bg-green-500' : 'bg-blue-500'
-                                                }`}
-                                            >
-                                                {successButton === bet.id ? 'Added!' : 'Add to Game'}
-                                            </button>
+                                            <div className="flex flex-col">
+                                                <input
+                                                    type="number"
+                                                    value={betInputs[bet.id] || bet.betUser1}
+                                                    onChange={(e) => {
+                                                        const value = Number(e.target.value);
+                                                        setBetInputs((prev) => ({...prev, [bet.id]: value}));
+
+                                                        if (value > user.points) {
+                                                            setErrorMessages((prev) => ({
+                                                                ...prev,
+                                                                [bet.id]: "У вас недостаточно Points"
+                                                            }));
+                                                        } else if (value < bet.betUser1) {
+                                                            setErrorMessages((prev) => ({
+                                                                ...prev,
+                                                                [bet.id]: `Минимальное значение: ${bet.betUser1}`
+                                                            }));
+                                                        } else {
+                                                            setErrorMessages((prev) => ({...prev, [bet.id]: ""}));
+                                                        }
+                                                    }}
+                                                    placeholder="Your Bet"
+                                                    className="mb-2 p-2 border"
+                                                />
+                                                {errorMessages[bet.id] &&
+                                                    <div className="text-red-500">{errorMessages[bet.id]}</div>}
+                                                <input
+                                                    type="text"
+                                                    value={descriptionInputs[bet.id] || ""}
+                                                    onChange={(e) => setDescriptionInputs((prev) => ({
+                                                        ...prev,
+                                                        [bet.id]: e.target.value
+                                                    }))}
+                                                    placeholder="Description (max 150 chars)"
+                                                    className="mb-2 p-2 border"
+                                                />
+
+                                                <button
+                                                    onClick={() => handleAddBet(bet.id, bet.betUser1)}
+                                                    className={`p-2 text-white transition-colors duration-300 ${
+                                                        successButton === bet.id ? 'bg-green-500' : 'bg-blue-500'
+                                                    }`}
+                                                >
+                                                    {successButton === bet.id ? 'Added!' : 'Add to Game'}
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
