@@ -1493,7 +1493,12 @@ export async function gameUserBetClosed(gameData: {
             console.log("checkWinUser2:", gameData.checkWinUser2);
 
             // Проверяем, если оба пользователя подтвердили результат
-            if (gameData.checkWinUser1 !== null && gameData.checkWinUser2 !== null) {
+            const updatedGameUserBet = await prisma.gameUserBet.findUnique({
+                where: { id: gameData.gameUserBetId },
+            });
+
+            // Проверяем, если оба пользователя подтвердили результат
+            if (updatedGameUserBet?.checkWinUser1 !== null && updatedGameUserBet?.checkWinUser2 !== null) {
                 console.log("Оба пользователя подтвердили результат");
 
                 if (gameData.checkWinUser1 === WinGameUserBet.WIN && gameData.checkWinUser2 === WinGameUserBet.LOSS) {
