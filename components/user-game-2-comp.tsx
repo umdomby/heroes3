@@ -145,7 +145,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                 <div key={bet.id} className="border border-gray-700 mt-1">
                     <Accordion type="single" collapsible>
                         <AccordionItem value={`item-${bet.id}`}>
-                            <AccordionTrigger className={user.id === bet.gameUser1Bet.id ? 'bg-gray-500' : ''}>
+                            <AccordionTrigger className={user.id === bet.gameUser1Bet.id ? 'text-red-500' : ''}>
                                 <Table>
                                     <TableBody>
                                         <TableRow>
