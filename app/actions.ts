@@ -1342,14 +1342,12 @@ export async function gameUserBetRegistrations(gameData: {
         throw new Error("Не удалось обновить ставку");
     }
 }
-
 type GameUserBetDataUser = {
     userId: number;
     betUser2: number; // Замените `any` на конкретный тип, если он известен
     gameUserBetDetails: string; // Замените `any` на конкретный тип, если он известен
     userTelegram: string;
 };
-
 export async function removeGameUserBetRegistration(gameData: {
     userId: number;
     gameUserBetId: number;
@@ -1391,6 +1389,69 @@ export async function removeGameUserBetRegistration(gameData: {
         console.error("Ошибка при удалении записи пользователя:", error);
         throw new Error("Не удалось удалить запись пользователя");
     }
+}
+
+export async function gameUserBetStart(gameData: {
+    initBetPlayer1: number;
+    categoryId: number;
+    productId: number;
+    productItemId: number;
+    gameUserBetDetails: string;
+    userId: number;
+    gameUserBetOpen: boolean; // Добавляем новое поле
+}) {
+    try {
+        const newBet = await prisma.gameUserBet.create({
+            data: {
+                gameUserBet1Id: gameData.userId,
+                betUser1: gameData.initBetPlayer1,
+                gameUserBetDetails: gameData.gameUserBetDetails,
+                categoryId: gameData.categoryId,
+                productId: gameData.productId,
+                productItemId: gameData.productItemId,
+                gameUserBetOpen: gameData.gameUserBetOpen,
+                statusUserBet: 'START',
+            },
+        });
+        return newBet;
+    } catch (error) {
+        console.error("Ошибка при создании ставки:", error);
+        throw new Error("Не удалось создать ставку");
+    }
+}
+
+
+export async function gameUserBetClosed(gameData: {
+    initBetPlayer1: number;
+    categoryId: number;
+    productId: number;
+    productItemId: number;
+    gameUserBetDetails: string;
+    userId: number;
+    gameUserBetOpen: boolean; // Добавляем новое поле
+}) {
+    try {
+        const newBet = await prisma.gameUserBet.create({
+            data: {
+                gameUserBet1Id: gameData.userId,
+                betUser1: gameData.initBetPlayer1,
+                gameUserBetDetails: gameData.gameUserBetDetails,
+                categoryId: gameData.categoryId,
+                productId: gameData.productId,
+                productItemId: gameData.productItemId,
+                gameUserBetOpen: gameData.gameUserBetOpen,
+                statusUserBet: 'CLOSED',
+            },
+        });
+        return newBet;
+    } catch (error) {
+        console.error("Ошибка при создании ставки:", error);
+        throw new Error("Не удалось создать ставку");
+    }
+}
+
+export async function gameUserBetDelete(){
+
 }
 
 
