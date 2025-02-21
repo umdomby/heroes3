@@ -1461,53 +1461,64 @@ export async function gameUserBetStart(gameData: {
 }
 export async function gameUserBetClosed(gameData: {
     gameUserBetId: number;
-    checkWinUser1: WinGameUserBet;
-    checkWinUser2: WinGameUserBet;
+    checkWinUser1: WinGameUserBet | null;
+    checkWinUser2: WinGameUserBet | null;
 }) {
     try {
         await prisma.$transaction(async (prisma) => {
-            const gameUserBet = await prisma.gameUserBet.update({
+            const gameUserBet = await prisma.gameUserBet.findUnique({
                 where: { id: gameData.gameUserBetId },
-                data: {
-                    checkWinUser1: gameData.checkWinUser1,
-                    checkWinUser2: gameData.checkWinUser2,
-                },
             });
 
-            if (gameData.checkWinUser1 === WinGameUserBet.WIN && gameData.checkWinUser2 === WinGameUserBet.LOSS) {
-                // User1 победил
-                await prisma.user.update({
-                    where: { id: gameUserBet.gameUserBet1Id },
-                    data: { points: { increment: gameUserBet.betUser1 + (gameUserBet.betUser2 ?? 0) } },
-                });
-                await prisma.gameUserBet.update({
-                    where: { id: gameData.gameUserBetId },
-                    data: { statusUserBet: 'CLOSED' },
-                });
-            } else if (gameData.checkWinUser1 === WinGameUserBet.LOSS && gameData.checkWinUser2 === WinGameUserBet.WIN) {
-                // User2 победил
-                if (gameUserBet.gameUserBet2Id !== null) {
+            if (!gameUserBet) {
+                throw new Error("Ставка не найдена");
+            }
+
+            // Обновляем только те поля, которые были изменены
+            const updateData: Partial<typeof gameUserBet> = {};
+            if (gameData.checkWinUser1 !== null) {
+                updateData.checkWinUser1 = gameData.checkWinUser1;
+            }
+            if (gameData.checkWinUser2 !== null) {
+                updateData.checkWinUser2 = gameData.checkWinUser2;
+            }
+
+            await prisma.gameUserBet.update({
+                where: { id: gameData.gameUserBetId },
+                data: updateData,
+            });
+
+            // Проверяем, если оба пользователя подтвердили результат
+            if (gameData.checkWinUser1 !== null && gameData.checkWinUser2 !== null) {
+                if (gameData.checkWinUser1 === WinGameUserBet.WIN && gameData.checkWinUser2 === WinGameUserBet.LOSS) {
+                    // User1 победил
                     await prisma.user.update({
-                        where: { id: gameUserBet.gameUserBet2Id },
+                        where: { id: gameUserBet.gameUserBet1Id },
                         data: { points: { increment: gameUserBet.betUser1 + (gameUserBet.betUser2 ?? 0) } },
                     });
-                }
-                await prisma.gameUserBet.update({
-                    where: { id: gameData.gameUserBetId },
-                    data: { statusUserBet: 'CLOSED' },
-                });
-            } else if (gameData.checkWinUser1 === WinGameUserBet.DRAW || gameData.checkWinUser2 === WinGameUserBet.DRAW) {
-                // Ничья
-                await prisma.user.update({
-                    where: { id: gameUserBet.gameUserBet1Id },
-                    data: { points: { increment: gameUserBet.betUser1 } },
-                });
-                if (gameUserBet.gameUserBet2Id !== null) {
+                } else if (gameData.checkWinUser1 === WinGameUserBet.LOSS && gameData.checkWinUser2 === WinGameUserBet.WIN) {
+                    // User2 победил
+                    if (gameUserBet.gameUserBet2Id !== null) {
+                        await prisma.user.update({
+                            where: { id: gameUserBet.gameUserBet2Id },
+                            data: { points: { increment: gameUserBet.betUser1 + (gameUserBet.betUser2 ?? 0) } },
+                        });
+                    }
+                } else if (gameData.checkWinUser1 === WinGameUserBet.DRAW || gameData.checkWinUser2 === WinGameUserBet.DRAW) {
+                    // Ничья
                     await prisma.user.update({
-                        where: { id: gameUserBet.gameUserBet2Id },
-                        data: { points: { increment: gameUserBet.betUser2 ?? 0 } },
+                        where: { id: gameUserBet.gameUserBet1Id },
+                        data: { points: { increment: gameUserBet.betUser1 } },
                     });
+                    if (gameUserBet.gameUserBet2Id !== null) {
+                        await prisma.user.update({
+                            where: { id: gameUserBet.gameUserBet2Id },
+                            data: { points: { increment: gameUserBet.betUser2 ?? 0 } },
+                        });
+                    }
                 }
+
+                // Обновляем статус игры на CLOSED
                 await prisma.gameUserBet.update({
                     where: { id: gameData.gameUserBetId },
                     data: { statusUserBet: 'CLOSED' },
