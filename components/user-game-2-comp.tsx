@@ -6,7 +6,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import Link from "next/link";
 import { gameUserBetRegistrations, gameUserBetStart, gameUserBetClosed, removeGameUserBetRegistration } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
 import {Button, Input} from "@/components/ui";
 
 interface Props {
@@ -289,6 +296,10 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                         </Button>
                                                     </DialogTrigger>
                                                     <DialogContent>
+                                                        <DialogTitle>Confirm Game Start</DialogTitle>
+                                                        <DialogDescription> {/* Add this line */}
+                                                            You are about to start the game with the selected player. {/* Add this line */}
+                                                        </DialogDescription> {/* Add this line */}
                                                         <div className="p-4">
                                                             <h2 className="text-lg font-bold">Подтвердите запуск игры</h2>
                                                             <p>Вы уверены, что хотите начать игру с выбранным игроком?</p>
