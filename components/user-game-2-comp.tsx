@@ -195,6 +195,16 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
         }
     };
 
+
+    function isGameUserBetDataUser(obj: any): obj is GameUserBetDataUser {
+        return typeof obj === 'object' &&
+            obj !== null &&
+            'userId' in obj &&
+            'betUser2' in obj &&
+            'gameUserBetDetails' in obj &&
+            'userTelegram' in obj;
+    }
+
     return (
         <div>
             <div className="flex justify-between items-center">
@@ -274,22 +284,24 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
 
                                                     if (isValidParticipant(participant)) {
                                                         return (
-                                                            <li key={index} className="flex justify-between items-center">
-                            <span>
-                                Bet: {participant.betUser2}{" "}
-                                {participant.userTelegram ? (
-                                    <Link
-                                        className="text-blue-500 hover:text-green-300 font-bold"
-                                        href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
-                                        target="_blank"
-                                    >
-                                        {participant.userTelegram}
-                                    </Link>
-                                ) : (
-                                    <span className="text-gray-500">Скрыто</span>
-                                )}{" "}
-                                Details: {participant.gameUserBetDetails}
-                            </span>
+                                                            <li key={index}
+                                                                className="flex justify-between items-center">
+
+                                                                <span>
+                                                                    Bet: {participant.betUser2}{" "}
+                                                                    {participant.userTelegram ? (
+                                                                        <Link
+                                                                            className="text-blue-500 hover:text-green-300 font-bold"
+                                                                            href={participant.userTelegram.replace(/^@/, 'https://t.me/')}
+                                                                            target="_blank"
+                                                                        >
+                                                                            {participant.userTelegram}
+                                                                        </Link>
+                                                                    ) : (
+                                                                        <span className="text-gray-500">Скрыто</span>
+                                                                    )}{" "}
+                                                                    Details: {participant.gameUserBetDetails}
+                                                                </span>
 
                                                                 {participant.userId === user.id && (
                                                                     <Button
@@ -334,7 +346,15 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                                 </DialogDescription>
                                                                 <div className="p-4">
                                                                     <h2 className="text-lg font-bold">Подтвердите запуск игры</h2>
-                                                                    <p>Вы уверены, что хотите начать игру с выбранным игроком?</p>
+                                                                    {selectedUser !== null && (
+                                                                        <p>
+                                                                            Вы уверены, что хотите начать игру с выбранным игроком:
+                                                                            {Array.isArray(bet.gameUserBetDataUsers2) &&
+                                                                                bet.gameUserBetDataUsers2
+                                                                                    .filter(isGameUserBetDataUser)
+                                                                                    .find((participant) => participant.userId === selectedUser)?.userTelegram ?? "No Telegram"}
+                                                                        </p>
+                                                                    )}
                                                                     <Button
                                                                         onClick={() => handleStartGame(bet.id)}
                                                                         className="mt-4 bg-green-500 text-white"
