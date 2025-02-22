@@ -18,7 +18,15 @@ export async function GET(request: Request) {
                 },
             });
 
-            writer.write(encoder.encode(`data: ${JSON.stringify(gameUserBets)}\n\n`));
+            const statusOrder = { OPEN: 1, START: 2, CLOSED: 3 };
+            const sortedGameUserBets = gameUserBets.sort((a, b) => {
+                if (statusOrder[a.statusUserBet] !== statusOrder[b.statusUserBet]) {
+                    return statusOrder[a.statusUserBet] - statusOrder[b.statusUserBet];
+                }
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+
+            writer.write(encoder.encode(`data: ${JSON.stringify(sortedGameUserBets)}\n\n`));
         } catch (error) {
             console.error('Failed to fetch data:', error);
             writer.write(encoder.encode('data: {"error": "Failed to fetch data"}\n\n'));
