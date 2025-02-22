@@ -126,7 +126,7 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                         name="gameUserBetDetails"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel>Описание события (ОХ) (максимум 150 символов)</FormLabel>
+                                <FormLabel>Описание события (максимум 150 символов)</FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Описание события"
