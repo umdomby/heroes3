@@ -1635,6 +1635,63 @@ export async function gameRatingGameUsers(gameData: {
         throw new Error('Не удалось обновить рейтинг');
     }
 }
+export async function gameUserStartBet(gameUserBetId: number, gameUserBet2Id: number, categoryId: number, productId: number, productItemId: number) {
+    try {
+        // Получаем player1Id и player2Id
+        const player1 = await prisma.player.findFirst({
+            where: { userId: gameUserBetId }
+        });
+
+        const player2 = await prisma.player.findFirst({
+            where: { userId: gameUserBet2Id }
+        });
+
+        if (!player1 || !player2) {
+            throw new Error("Игроки не найдены");
+        }
+
+        // Подготовка данных для ставки
+        const betData = {
+            oddsBetPlayer1: 2,
+            oddsBetPlayer2: 2,
+            creatorId: gameUserBetId,
+            player1Id: player1.id,
+            player2Id: player2.id,
+            status: 'OPEN_USER',
+            categoryId: categoryId,
+            productId: productId,
+            productItemId: productItemId,
+            totalBetPlayer1: 0,
+            totalBetPlayer2: 0,
+            totalBetAmount: 0, // Общая сумма начальных ставок
+            initBetPlayer1: 500,
+            initBetPlayer2: 500,
+            overlapPlayer1: 0, // Перекрытие на игрока 1
+            overlapPlayer2: 0, // Перекрытие на игрока 2
+            margin: 0, // Инициализируем общую маржу
+            maxBetPlayer1: 500, // Максимальная сумма ставок на игрока 1
+            maxBetPlayer2: 500, // Максимальная сумма ставок на игрока 2
+        };
+
+        // Создание ставки
+        const newBet = await prisma.bet.create({
+            data: betData
+        });
+
+        console.log("Ставка успешно создана:", newBet);
+        return newBet;
+    } catch (error) {
+        if (error === null || error === undefined) {
+            console.error('error === null || error === undefined');
+        } else if (error instanceof Error) {
+            console.error('Ошибка :', error.message);
+            console.error('Стек ошибки:', error.stack);
+        } else {
+            console.error('Ошибка else:', error);
+        }
+        throw new Error('throw new Error');
+    }
+}
 
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {

@@ -9,7 +9,7 @@ import {
     gameUserBetStart,
     gameUserBetClosed,
     removeGameUserBetRegistration,
-    gameUserBetDelete, gameRatingGameUsers // Import the delete function
+    gameUserBetDelete, gameRatingGameUsers, gameUserStartBet // Import the delete function
 } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
 import {Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
@@ -236,6 +236,24 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
             console.log('Рейтинг успешно отправлен');
         } catch (error) {
             console.error('Ошибка при отправке рейтинга:', error);
+        }
+    };
+
+
+    const handleCreateBet = async (bet) => {
+        if (bet.statusUserBet === "START" && bet.gameUserBetOpen) {
+            try {
+                const newBet = await gameUserStartBet(
+                    bet.gameUser1Bet.id,
+                    bet.gameUser2Bet?.id,
+                    bet.category.id,
+                    bet.product.id,
+                    bet.productItem.id
+                );
+                console.log("Ставка успешно создана:", newBet);
+            } catch (error) {
+                console.error("Ошибка при создании ставки:", error);
+            }
         }
     };
 
@@ -470,6 +488,9 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                     )}
                                     {bet.statusUserBet === "START" && (
                                         <div>
+                                            <Button onClick={() => handleCreateBet(bet)} className="bg-blue-500 text-white">
+                                                Create Bet
+                                            </Button>
                                             <div>
                                                 {bet.gameUser1Bet.telegram ? (
                                                     <Link
