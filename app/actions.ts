@@ -2297,6 +2297,17 @@ export async function closeBetDraw(betId: number) {
         }
     }
 }
+export async function suspendedBetCheck(betId: number, newValue: boolean) {
+    try {
+        await prisma.bet.update({
+            where: { id: betId },
+            data: { suspendedBet: newValue },
+        });
+    } catch (error) {
+        console.error("Ошибка при обновлении suspendedBet:", error);
+        throw new Error("Не удалось обновить статус suspendedBet.");
+    }
+}
 
 
 function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number) {
