@@ -2463,14 +2463,13 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
             include: { participants: true },
         });
 
-        if (bet.suspendedBet) {
-            throw new Error('Ставки на это событие приостановлены');
-        }
-
         if (!bet || bet.status !== 'OPEN') {
             throw new Error('Ставка недоступна для участия');
         }
 
+        if (bet.suspendedBet) {
+            throw new Error('Ставки на это событие приостановлены');
+        }
         const user = await prisma.user.findUnique({
             where: { id: userId },
         });
@@ -3085,13 +3084,12 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             include: {participants: true},
         });
 
-        // Проверка на suspendedBet
-        if (bet.suspendedBet) {
-            throw new Error('Ставки на это событие приостановлены');
-        }
-
         if (!bet || bet.status !== 'OPEN') {
             throw new Error('Ставка недоступна для участия');
+        }
+
+        if (bet.suspendedBet) {
+            throw new Error('Ставки на это событие приостановлены');
         }
 
         const user = await prisma.user.findUnique({
