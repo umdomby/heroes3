@@ -4,7 +4,6 @@ import { getUserSession } from '@/components/lib/get-user-session';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import Loading from "@/app/(root)/loading";
-import { clientCreateBet } from "@/app/actions";
 import { Container } from '@/components/container';
 import { UserGame2CreateComp } from "@/components/user-game-2-create-comp";
 import { Player } from '@prisma/client';

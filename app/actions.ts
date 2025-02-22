@@ -1338,7 +1338,6 @@ export async function removeGameUserBetRegistration(gameData: {
         throw new Error("Не удалось удалить запись пользователя");
     }
 }
-
 export async function gameUserBetCreate(gameData: {
     initBetPlayer1: number;
     categoryId: number;
@@ -1391,7 +1390,6 @@ export async function gameUserBetCreate(gameData: {
         }
     }
 }
-
 export async function gameUserBetRegistrations(gameData: {
     userId: number;
     betUser2: number;
@@ -1437,7 +1435,6 @@ export async function gameUserBetRegistrations(gameData: {
         }
     }
 }
-
 export async function gameUserBetStart(gameData: {
     gameUserBetId: number;
     gameUserBet2Id: number;
@@ -1471,7 +1468,6 @@ export async function gameUserBetStart(gameData: {
         throw new Error("Не удалось запустить игру");
     }
 }
-
 export async function gameUserBetClosed(gameData: {
     gameUserBetId: number;
     checkWinUser1: WinGameUserBet | null;
@@ -1563,7 +1559,6 @@ export async function gameUserBetClosed(gameData: {
         throw new Error("Не удалось завершить игру");
     }
 }
-
 export async function gameUserBetDelete(gameUserBetId: number) {
     try {
         const currentUser = await getUserSession();
@@ -1606,7 +1601,6 @@ export async function gameUserBetDelete(gameUserBetId: number) {
         throw new Error('Не удалось удалить ставку');
     }
 }
-
 export async function gameRatingGameUsers(gameData: {
     gameUserBetId: number;
     user1Rating: RatingUserEnum | null;
@@ -2087,7 +2081,6 @@ export async function closeBet(betId: number, winnerId: number) {
         }
     }
 }
-
 export async function closeBetDraw(betId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -3088,7 +3081,6 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }
-
 export async function closeBet4(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
