@@ -248,13 +248,13 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
             <Table>
                 <TableBody>
                     <TableRow>
+                        <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Set</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Bet</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Name</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Map</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Size</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Timer</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">State</TableHead>
-                        <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Bet</TableHead>
                         <TableHead
                             className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
                     </TableRow>
@@ -271,6 +271,8 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             <TableCell
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
                                             <TableCell
+                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUserBetOpen ? "Open" : "Closed"}</TableCell>
+                                            <TableCell
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
                                             <TableCell
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
@@ -280,8 +282,6 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
                                             <TableCell
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUserBetOpen ? "Open" : "Closed"}</TableCell>
                                             <TableCell
                                                 className="text-center overflow-hidden whitespace-nowrap w-[10%]">
                                                 {bet.gameUser1Bet.telegram ? (
@@ -657,19 +657,18 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             }>
                                                 {bet.gameUser2Bet?.telegram || "No Telegram"}
                                             </div>
-                                            <div>Дата завершения: {new Date(bet.updatedAt).toLocaleString()}</div>
 
                                             {user.id === bet.gameUser1Bet.id && (
                                                 <div>
                                                     <Button
                                                         onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.PLUS)}
-                                                        className={bet.gameUser1Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'}
+                                                        className={`${bet.gameUser1Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'} h-6`}
                                                     >
                                                         Плюс
                                                     </Button>
                                                     <Button
                                                         onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.MINUS)}
-                                                        className={bet.gameUser1Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'}
+                                                        className={`${bet.gameUser1Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'} h-6`}
                                                     >
                                                         Минус
                                                     </Button>
@@ -680,13 +679,13 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                 <div>
                                                     <Button
                                                         onClick={() => handleRating(bet.id, 'user2', RatingUserEnum.PLUS)}
-                                                        className={bet.gameUser2Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'}
+                                                        className={`${bet.gameUser2Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'} h-6`}
                                                     >
                                                         Плюс
                                                     </Button>
                                                     <Button
                                                         onClick={() => handleRating(bet.id, 'user2', RatingUserEnum.MINUS)}
-                                                        className={bet.gameUser2Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'}
+                                                        className={`${bet.gameUser2Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'} h-6`}
                                                     >
                                                         Минус
                                                     </Button>
@@ -694,22 +693,26 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             )}
 
                                             <div className="flex space-x-4 mt-2">
-                                                {bet.gameUser1Rating && (
+                                                {bet.gameUser1Rating !== null ? (
                                                     <div
                                                         className={bet.gameUser1Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
                                                         {bet.gameUser1Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
                                                     </div>
+                                                ) : (
+                                                    <div className="text-gray-500">нет голоса</div>
                                                 )}
-                                                {bet.gameUser2Rating && (
+                                                {bet.gameUser2Rating !== null ? (
                                                     <div
                                                         className={bet.gameUser2Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
                                                         {bet.gameUser2Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
                                                     </div>
+                                                ) : (
+                                                    <div className="text-gray-500">Оппонент не голосовал</div>
                                                 )}
                                             </div>
                                         </div>
                                     )}
-
+                                    <div>Старт: {new Date(bet.createdAt).toLocaleString()}</div>
                                 </div>
                             </AccordionContent>
                         </AccordionItem>
