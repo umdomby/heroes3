@@ -1688,7 +1688,7 @@ export async function clientCreateBet(formData: any) {
 
         const newBet = await prisma.bet.create({
             data: {
-                status: 'OPEN', // Устанавливаем статус ставки как "открытая"
+                status: formData.status, // Устанавливаем статус ставки как "открытая"
                 totalBetAmount: 0, // Общая сумма начальных ставок
                 maxBetPlayer1: maxBetPlayer1, // Максимальная сумма ставок на игрока 1
                 maxBetPlayer2: maxBetPlayer2, // Максимальная сумма ставок на игрока 2
