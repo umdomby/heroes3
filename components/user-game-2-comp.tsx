@@ -657,7 +657,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                             }>
                                                 {bet.gameUser2Bet?.telegram || "No Telegram"}
                                             </div>
-                                            <div>Дата обновления: {new Date(bet.updatedAt).toLocaleString()}</div>
+                                            <div>Дата завершения: {new Date(bet.updatedAt).toLocaleString()}</div>
 
                                             {user.id === bet.gameUser1Bet.id && (
                                                 <div>
