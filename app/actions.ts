@@ -1802,7 +1802,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
             include: {participants: true},
         });
 
-        if (!bet || bet.status !== 'OPEN') {
+        if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER')) {
             throw new Error('Ставка недоступна для участия');
         }
 
@@ -1919,13 +1919,21 @@ export async function placeBet(formData: { betId: number; userId: number; amount
 }// ставки
 export async function closeBet(betId: number, winnerId: number) {
     const session = await getUserSession();
-    if (!session || session.role !== 'ADMIN') {
+
+    if (!session) {
         throw new Error('У вас нет прав для выполнения этой операции');
     }
 
     try {
         if (winnerId === null || winnerId === undefined) {
             throw new Error("Не выбран победитель.");
+        }
+        const bet = await prisma.bet.findFirst({
+            where: {id: betId},
+        })
+
+        if (bet.creatorId !== Number(session.id)) {
+            throw new Error("Ошибка закрытия, обратитесь к администратору");
         }
 
         await prisma.$transaction(async (prisma) => {
@@ -2140,11 +2148,20 @@ export async function closeBet(betId: number, winnerId: number) {
 }
 export async function closeBetDraw(betId: number) {
     const session = await getUserSession();
-    if (!session || session.role !== 'ADMIN') {
+    if (!session) {
         throw new Error('У вас нет прав для выполнения этой операции');
     }
 
     try {
+
+        const bet = await prisma.bet.findFirst({
+            where: {id: betId},
+        })
+
+        if (bet.creatorId !== Number(session.id)) {
+            throw new Error("Ошибка закрытия, обратитесь к администратору");
+        }
+
         await prisma.$transaction(async (prisma) => {
             // Обновляем статус ставки на CLOSED и устанавливаем winnerId в null
             const bet = await prisma.bet.update({

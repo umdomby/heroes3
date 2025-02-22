@@ -494,7 +494,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                 </AccordionTrigger>
                                 <AccordionContent>
 
-                                    {bet.status === "OPEN" && (
+                                    {bet.status === "OPEN_USER" && (
                                         <div className="m-4">
                                             <p>
                                                 Общая сумма ставок на это событие:
@@ -577,23 +577,6 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                                         ? Math.floor((participant.overlap / profitToCover) * 10000) / 100
                                                         : 0;
 
-                                                // Определяем статус перекрытия
-                                                let overlapStatus = "";
-                                                // switch (participant.isCovered) {
-                                                //     case "OPEN":
-                                                //         overlapStatus =
-                                                //             "Ваша ставка не перекрыта (0 Points, 0%)";
-                                                //         break;
-                                                //     case "CLOSED":
-                                                //         overlapStatus = `Ваша ставка полностью перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                //         break;
-                                                //     case "PENDING":
-                                                //         overlapStatus = `Ваша ставка частично перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                //         break;
-                                                //     default:
-                                                //         overlapStatus = "Неизвестный статус перекрытия.";
-                                                // }
-
                                                 return (
                                                     <div
                                                         key={participant.id}
@@ -620,27 +603,13 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                                                     </span>
                                                             {", "} {new Date(participant.createdAt).toLocaleString()}
                                                         </p>
-                                                        {/* Отображаем информацию о перекрытии */}
-                                                        <p>
-                                                            {/*<span*/}
-                                                            {/*    className={*/}
-                                                            {/*        participant.isCovered === "OPEN"*/}
-                                                            {/*            ? "text-yellow-500"*/}
-                                                            {/*            : participant.isCovered === "CLOSED"*/}
-                                                            {/*                ? "text-green-500"*/}
-                                                            {/*                : "text-blue-500"*/}
-                                                            {/*    }*/}
-                                                            {/*>*/}
-                                                            {/*    {overlapStatus}*/}
-                                                            {/*</span>*/}
-                                                        </p>
                                                     </div>
                                                 );
                                             })}
                                         </div>
                                     )}
 
-                                    {bet.status === "OPEN" && (
+                                    {bet.status === "OPEN_USER" && (
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                                 <div className="flex gap-2 m-2">
@@ -723,7 +692,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                         </div>
                                     )}
 
-                                    {bet.status === "OPEN" && bet.creatorId === user?.id && (
+                                    {bet.status === "OPEN_USER" && bet.creatorId === user?.id && (
                                         <div className="m-2">
                                             <h4 className="text-lg font-semibold">Закрыть ставку</h4>
                                             <div className="flex gap-2 mt-2">
