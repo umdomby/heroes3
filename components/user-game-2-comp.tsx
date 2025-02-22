@@ -37,6 +37,8 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
         gameUserBetOpen: boolean;
         statusUserBet: GameUserBetStatus;
         gameUserBetDataUsers2: JSON;
+        checkWinUser1: WinGameUserBet | null;
+        checkWinUser2: WinGameUserBet | null;
     })[]>([]);
     const [successButton, setSuccessButton] = useState<number | null>(null);
     const [betInputs, setBetInputs] = useState<{ [key: number]: number }>({});
@@ -457,6 +459,13 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                             Ничья
                                                         </Button>
                                                     </div>
+                                                    <div>
+                                                        {bet.checkWinUser2 === null ? (
+                                                            <span className="text-gray-500">Противник не проголосовал</span>
+                                                        ) : (
+                                                            <span className="text-gray-500">Противник проголосовал: {bet.checkWinUser2}</span>
+                                                        )}
+                                                    </div>
                                                     <Dialog open={dialogOpen && currentBetId === bet.id} onOpenChange={setDialogOpen}>
                                                         <DialogTrigger asChild>
                                                             <Button
@@ -508,6 +517,13 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                         >
                                                             Ничья
                                                         </Button>
+                                                    </div>
+                                                    <div>
+                                                        {bet.checkWinUser1 === null ? (
+                                                            <span className="text-gray-500">Противник не проголосовал</span>
+                                                        ) : (
+                                                            <span className="text-gray-500">Противник проголосовал: {bet.checkWinUser1}</span>
+                                                        )}
                                                     </div>
                                                     <Dialog open={dialogOpen && currentBetId === bet.id} onOpenChange={setDialogOpen}>
                                                         <DialogTrigger asChild>
