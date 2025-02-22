@@ -405,8 +405,6 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                             <DialogContent>
                                                                 <DialogTitle>Confirm Game Start</DialogTitle>
                                                                 <DialogDescription>
-                                                                    You are about to start the game with the selected
-                                                                    player.
                                                                 </DialogDescription>
                                                                 <div className="p-4">
                                                                     <h2 className="text-lg font-bold">Подтвердите запуск
@@ -499,33 +497,41 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                     {bet.statusUserBet === "START" && (
                                         <div>
                                             {bet.gameUserBetOpen && user.id === bet.gameUser1Bet.id &&
-                                                <Button onClick={() => handleCreateBet(bet)} className="bg-blue-500 text-white h-6">
+                                                <Button onClick={() => handleCreateBet(bet)}
+                                                        className="bg-blue-500 text-white h-6">
                                                     Create Bet
                                                 </Button>
                                             }
 
+
                                             <div>
                                                 {bet.gameUser1Bet.telegram ? (
-                                                    <Link
-                                                        className="text-blue-500 hover:text-green-300 font-bold"
-                                                        href={bet.gameUser1Bet.telegram.replace(/^@/, 'https://t.me/')}
-                                                        target="_blank"
-                                                    >
-                                                        {bet.gameUser1Bet.telegram}
-                                                    </Link>
+                                                    <div>
+                                                        <Link
+                                                            className="text-blue-500 hover:text-green-300 font-bold"
+                                                            href={bet.gameUser1Bet.telegram.replace(/^@/, 'https://t.me/')}
+                                                            target="_blank"
+                                                        >
+                                                            {bet.gameUser1Bet.telegram}
+                                                        </Link>
+                                                        {" "} Bet: {bet.betUser1}
+                                                    </div>
                                                 ) : (
                                                     <span className="text-gray-500">Скрыто</span>
                                                 )}
                                             </div>
                                             <div>
                                                 {bet.gameUser2Bet?.telegram ? (
-                                                    <Link
-                                                        className="text-blue-500 hover:text-green-300 font-bold"
-                                                        href={bet.gameUser2Bet.telegram.replace(/^@/, 'https://t.me/')}
-                                                        target="_blank"
-                                                    >
-                                                        {bet.gameUser2Bet.telegram}
-                                                    </Link>
+                                                    <div>
+                                                        <Link
+                                                            className="text-blue-500 hover:text-green-300 font-bold"
+                                                            href={bet.gameUser2Bet.telegram.replace(/^@/, 'https://t.me/')}
+                                                            target="_blank"
+                                                        >
+                                                            {bet.gameUser2Bet.telegram}
+                                                        </Link>
+                                                        {" "} Bet: {bet.betUser2}
+                                                    </div>
                                                 ) : (
                                                     <span className="text-gray-500">Скрыто</span>
                                                 )}
@@ -682,14 +688,14 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                     bet.checkWinUser1 === WinGameUserBet.LOSS ? 'text-red-500' :
                                                         bet.checkWinUser1 === WinGameUserBet.DRAW ? 'text-yellow-500' : ''
                                             }>
-                                                {bet.gameUser1Bet.telegram}
+                                                {bet.gameUser1Bet.telegram}, {" "} Bet: {bet.betUser1}
                                             </div>
                                             <div className={
                                                 bet.checkWinUser2 === WinGameUserBet.WIN ? 'text-green-500' :
                                                     bet.checkWinUser2 === WinGameUserBet.LOSS ? 'text-red-500' :
                                                         bet.checkWinUser2 === WinGameUserBet.DRAW ? 'text-yellow-500' : ''
                                             }>
-                                                {bet.gameUser2Bet?.telegram || "No Telegram"}
+                                                {bet.gameUser2Bet?.telegram || "No Telegram"}, {" "} Bet: {bet.betUser2}
                                             </div>
 
                                             {user.id === bet.gameUser1Bet.id && (
