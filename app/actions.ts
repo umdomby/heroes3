@@ -871,94 +871,111 @@ export async function updateUserRole(id: number, role: UserRole) {
 
 export async function globalDataPoints() {
     try {
-        // Получаем текущие данные из GlobalData
-        const currentGlobalData = await prisma.globalData.findUnique({
-            where: {id: 1},
+        await prisma.$transaction(async (prisma) => {
+            // Получаем текущие данные из GlobalData
+            const currentGlobalData = await prisma.globalData.findUnique({
+                where: { id: 1 },
+            });
+
+            // Проверяем, прошло ли 10 секунд с момента последнего обновления
+            if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 10000) {
+                console.log('Данные обновлены недавно, пропускаем обновление.');
+                return;
+            }
+
+            // Если прошло больше 10 секунд, выполняем обновление
+            const usersCount = await prisma.user.count();
+
+            // Изменяем regCount, чтобы он равнялся сумме поля regPointsPoints
+            const regPointsResult = await prisma.regPoints.aggregate({
+                _sum: { regPointsPoints: true },
+            });
+            const regCount = regPointsResult._sum.regPointsPoints || 0;
+
+            const refCount = await prisma.referralUserIpAddress.count({
+                where: { referralStatus: true }
+            }) * 10;
+            const usersPointsResult = await prisma.user.aggregate({
+                _sum: { points: true }
+            });
+
+            const usersPointsSum = Math.floor((usersPointsResult._sum?.points || 0) * 100) / 100;
+
+            // Получаем сумму поля margin из таблиц BetCLOSED, BetCLOSED3 и BetCLOSED4
+            const marginResult = await prisma.betCLOSED.aggregate({
+                _sum: { margin: true }
+            });
+
+            const marginResult3 = await prisma.betCLOSED3.aggregate({
+                _sum: { margin: true }
+            });
+
+            const marginResult4 = await prisma.betCLOSED4.aggregate({
+                _sum: { margin: true }
+            });
+
+            // Суммируем все полученные значения margin из трех таблиц
+            const marginSum = Math.floor(((marginResult._sum?.margin || 0) +
+                (marginResult3._sum?.margin || 0) +
+                (marginResult4._sum?.margin || 0)) * 100) / 100;
+
+            // Получаем сумму поля totalBetAmount из таблиц bet, bet3 и bet4, где статус 'OPEN'
+            const openBetsPointsResult = await prisma.bet.aggregate({
+                _sum: { totalBetAmount: true },
+                where: { status: 'OPEN' }
+            });
+
+            const openBetsPointsResult3 = await prisma.bet3.aggregate({
+                _sum: { totalBetAmount: true },
+                where: { status: 'OPEN' }
+            });
+
+            const openBetsPointsResult4 = await prisma.bet4.aggregate({
+                _sum: { totalBetAmount: true },
+                where: { status: 'OPEN' }
+            });
+
+            // Суммируем все полученные значения totalBetAmount из трех таблиц
+            const openBetsPointsSum = Math.floor(((openBetsPointsResult._sum?.totalBetAmount || 0) +
+                (openBetsPointsResult3._sum?.totalBetAmount || 0) +
+                (openBetsPointsResult4._sum?.totalBetAmount || 0)) * 100) / 100;
+
+            // Получаем сумму ставок для GameUserBet с статусом START
+            const result = await prisma.gameUserBet.aggregate({
+                _sum: {
+                    betUser1: true,
+                    betUser2: true,
+                },
+                where: {
+                    statusUserBet: GameUserBetStatus.START,
+                },
+            });
+
+            const totalBetUser1 = result._sum.betUser1 || 0;
+            const totalBetUser2 = result._sum.betUser2 || 0;
+
+            // Обновляем или создаем запись в GlobalData
+            await prisma.globalData.upsert({
+                where: { id: 1 },
+                update: {
+                    users: usersCount,
+                    reg: regCount,
+                    ref: refCount,
+                    usersPoints: usersPointsSum,
+                    margin: marginSum,
+                    openBetsPoints: openBetsPointsSum + totalBetUser1 + totalBetUser2,
+                },
+                create: {
+                    users: usersCount,
+                    reg: regCount,
+                    ref: refCount,
+                    usersPoints: usersPointsSum,
+                    margin: marginSum,
+                    openBetsPoints: openBetsPointsSum + totalBetUser1 + totalBetUser2,
+                },
+            });
         });
 
-        // Проверяем, прошло ли 10 секунд с момента последнего обновления
-        if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 10000) {
-            console.log('Данные обновлены недавно, пропускаем обновление.');
-            return;
-        }
-
-        // Если прошло больше 10 секунд, выполняем обновление
-        const usersCount = await prisma.user.count();
-
-        // Изменяем regCount, чтобы он равнялся сумме поля regPointsPoints
-        const regPointsResult = await prisma.regPoints.aggregate({
-            _sum: {regPointsPoints: true},
-        });
-        const regCount = regPointsResult._sum.regPointsPoints || 0;
-
-        const refCount = await prisma.referralUserIpAddress.count({
-            where: {referralStatus: true}
-        }) * 10;
-        const usersPointsResult = await prisma.user.aggregate({
-            _sum: {points: true}
-        });
-
-        const usersPointsSum = Math.floor((usersPointsResult._sum?.points || 0) * 100) / 100;
-
-        // Получаем сумму поля margin из таблиц BetCLOSED, BetCLOSED3 и BetCLOSED4
-        const marginResult = await prisma.betCLOSED.aggregate({
-            _sum: {margin: true}
-        });
-
-        const marginResult3 = await prisma.betCLOSED3.aggregate({
-            _sum: {margin: true}
-        });
-
-        const marginResult4 = await prisma.betCLOSED4.aggregate({
-            _sum: {margin: true}
-        });
-
-        // Суммируем все полученные значения margin из трех таблиц
-        const marginSum = Math.floor(((marginResult._sum?.margin || 0) +
-            (marginResult3._sum?.margin || 0) +
-            (marginResult4._sum?.margin || 0)) * 100) / 100;
-
-        // Получаем сумму поля totalBetAmount из таблиц bet, bet3 и bet4, где статус 'OPEN'
-        const openBetsPointsResult = await prisma.bet.aggregate({
-            _sum: {totalBetAmount: true},
-            where: {status: 'OPEN'}
-        });
-
-        const openBetsPointsResult3 = await prisma.bet3.aggregate({
-            _sum: {totalBetAmount: true},
-            where: {status: 'OPEN'}
-        });
-
-        const openBetsPointsResult4 = await prisma.bet4.aggregate({
-            _sum: {totalBetAmount: true},
-            where: {status: 'OPEN'}
-        });
-
-        // Суммируем все полученные значения totalBetAmount из трех таблиц
-        const openBetsPointsSum = Math.floor(((openBetsPointsResult._sum?.totalBetAmount || 0) +
-            (openBetsPointsResult3._sum?.totalBetAmount || 0) +
-            (openBetsPointsResult4._sum?.totalBetAmount || 0)) * 100) / 100;
-
-        // Обновляем или создаем запись в GlobalData
-        await prisma.globalData.upsert({
-            where: {id: 1},
-            update: {
-                users: usersCount,
-                reg: regCount,
-                ref: refCount,
-                usersPoints: usersPointsSum,
-                margin: marginSum,
-                openBetsPoints: openBetsPointsSum,
-            },
-            create: {
-                users: usersCount,
-                reg: regCount,
-                ref: refCount,
-                usersPoints: usersPointsSum,
-                margin: marginSum,
-                openBetsPoints: openBetsPointsSum,
-            },
-        });
         console.log('Данные успешно обновлены.');
     } catch (error) {
         console.error('Ошибка при обновлении GlobalData:', error);
