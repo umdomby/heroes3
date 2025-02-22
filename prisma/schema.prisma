@@ -52,7 +52,7 @@ model User {
   gameUserBet2 GameUserBet[] @relation("GameUser2Bet")
 
   player                Player[]
-  ratingUserGame        RatingUserGame?
+  ratingUserGame        GlobalUserGame?
   chatUsers             ChatUsers[]
   regPoints             regPoints[]
   bankDetails           Json?
@@ -248,7 +248,6 @@ model GameUserBet {
   checkWinUser1         WinGameUserBet? // подтверждение победы User1
   checkWinUser2         WinGameUserBet? // подтверждение победы User2
   gameUser2Bet          User?             @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id]) // сюда User1 выбирает с кем будет играть
-  gameUser2Telegram     String?
   gameUserBet2Id        Int? // User2.id
   gameUserBetDataUsers2 Json? // сюда будут добавляться другие users из которых user1 выберет с кем будет играть
   category              Category          @relation(fields: [categoryId], references: [id]) // выбирает User1
@@ -264,10 +263,10 @@ model GameUserBet {
   updatedAt             DateTime          @updatedAt
 }
 
-model RatingUserGame {
+model GlobalUserGame {
   id           Int      @id @default(autoincrement())
-  ratingUser   User     @relation(fields: [ratingUserId], references: [id])
-  ratingUserId Int      @unique
+  globalUser   User     @relation(fields: [globalUserId], references: [id])
+  globalUserId Int      @unique
   plus         Int      @default(0)
   minus        Int      @default(0)
   createdAt    DateTime @default(now())
