@@ -9,11 +9,12 @@ import {
     gameUserBetStart,
     gameUserBetClosed,
     removeGameUserBetRegistration,
-    gameUserBetDelete // Import the delete function
+    gameUserBetDelete, gameRatingGameUsers // Import the delete function
 } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
 import {Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import {Button, Input} from "@/components/ui";
+import RatingUserEnum = $Enums.RatingUserEnum;
 
 interface Props {
     user: User;
@@ -40,6 +41,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
         gameUserBetDataUsers2: JSON;
         checkWinUser1: WinGameUserBet | null;
         checkWinUser2: WinGameUserBet | null;
+        gameUser1Rating: RatingUserEnum;
     })[]>([]);
     const [successButton, setSuccessButton] = useState<number | null>(null);
     const [betInputs, setBetInputs] = useState<{ [key: number]: number }>({});
@@ -222,6 +224,20 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
             'gameUserBetDetails' in obj &&
             'userTelegram' in obj;
     }
+
+    const handleRating = async (gameUserBetId: number, userType: 'user1' | 'user2', rating: RatingUserEnum) => {
+        try {
+            await gameRatingGameUsers({
+                gameUserBetId,
+                user1Rating: userType === 'user1' ? rating : null,
+                user2Rating: userType === 'user2' ? rating : null,
+            });
+
+            console.log('Рейтинг успешно отправлен');
+        } catch (error) {
+            console.error('Ошибка при отправке рейтинга:', error);
+        }
+    };
 
     return (
         <div>
@@ -642,8 +658,58 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                 {bet.gameUser2Bet?.telegram || "No Telegram"}
                                             </div>
                                             <div>Дата обновления: {new Date(bet.updatedAt).toLocaleString()}</div>
+
+                                            {user.id === bet.gameUser1Bet.id && (
+                                                <div>
+                                                    <Button
+                                                        onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.PLUS)}
+                                                        className={bet.gameUser1Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'}
+                                                    >
+                                                        Плюс
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.MINUS)}
+                                                        className={bet.gameUser1Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'}
+                                                    >
+                                                        Минус
+                                                    </Button>
+                                                </div>
+                                            )}
+
+                                            {bet.gameUser2Bet && user.id === bet.gameUser2Bet.id && (
+                                                <div>
+                                                    <Button
+                                                        onClick={() => handleRating(bet.id, 'user2', RatingUserEnum.PLUS)}
+                                                        className={bet.gameUser2Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'}
+                                                    >
+                                                        Плюс
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => handleRating(bet.id, 'user2', RatingUserEnum.MINUS)}
+                                                        className={bet.gameUser2Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'}
+                                                    >
+                                                        Минус
+                                                    </Button>
+                                                </div>
+                                            )}
+
+                                            <div className="flex space-x-4 mt-2">
+                                                {bet.gameUser1Rating && (
+                                                    <div
+                                                        className={bet.gameUser1Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
+                                                        {bet.gameUser1Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
+                                                    </div>
+                                                )}
+                                                {bet.gameUser2Rating && (
+                                                    <div
+                                                        className={bet.gameUser2Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
+                                                        {bet.gameUser2Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     )}
+
                                 </div>
                             </AccordionContent>
                         </AccordionItem>

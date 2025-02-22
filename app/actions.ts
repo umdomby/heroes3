@@ -18,6 +18,7 @@ import axios from "axios";
 import {JsonArray} from 'type-fest';
 import WinGameUserBet = $Enums.WinGameUserBet;
 import GameUserBetStatus = $Enums.GameUserBetStatus;
+import RatingUserEnum = $Enums.RatingUserEnum;
 
 const MARGIN = parseFloat('0.05');
 
@@ -1606,8 +1607,39 @@ export async function gameUserBetDelete(gameUserBetId: number) {
     }
 }
 
-export async function gameUser1User2() {
+export async function gameRatingGameUsers(gameData: {
+    gameUserBetId: number;
+    user1Rating: RatingUserEnum | null;
+    user2Rating: RatingUserEnum | null;
+}) {
+    try {
+        const gameUserBet = await prisma.gameUserBet.findUnique({
+            where: { id: gameData.gameUserBetId },
+        });
 
+        if (!gameUserBet) {
+            throw new Error("Ставка не найдена");
+        }
+
+        if (gameData.user1Rating !== null) {
+            await prisma.gameUserBet.update({
+                where: { id: gameData.gameUserBetId },
+                data: { gameUser1Rating: gameData.user1Rating },
+            });
+        }
+
+        if (gameData.user2Rating !== null && gameUserBet.gameUserBet2Id !== null) {
+            await prisma.gameUserBet.update({
+                where: { id: gameData.gameUserBetId },
+                data: { gameUser2Rating: gameData.user2Rating },
+            });
+        }
+
+        console.log('Рейтинг успешно обновлен');
+    } catch (error) {
+        console.error('Ошибка при обновлении рейтинга:', error);
+        throw new Error('Не удалось обновить рейтинг');
+    }
 }
 
 
