@@ -19,8 +19,12 @@ interface Props {
 
 export const Header: React.FC<Props> = ({className}) => {
 
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [openAuthModal, setOpenAuthModal] = React.useState(false);
+
+    if (status === "loading") {
+        return null; // или показывать loading spinner
+    }
 
     return (
         <header className={cn('border-b', className)}>
