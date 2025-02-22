@@ -1726,6 +1726,41 @@ export async function gameUserStartBet(gameUserBetId: number, gameUserBet2Id: nu
     }
 }
 
+export async function suspendedBetCheck(betId: number, newValue: boolean) {
+    try {
+        await prisma.bet.update({
+            where: { id: betId },
+            data: { suspendedBet: newValue },
+        });
+    } catch (error) {
+        console.error("Ошибка при обновлении suspendedBet:", error);
+        throw new Error("Не удалось обновить статус suspendedBet.");
+    }
+}
+
+export async function suspendedBetCheck3(betId: number, newValue: boolean) {
+    try {
+        await prisma.bet3.update({
+            where: { id: betId },
+            data: { suspendedBet: newValue },
+        });
+    } catch (error) {
+        console.error("Ошибка при обновлении suspendedBet:", error);
+        throw new Error("Не удалось обновить статус suspendedBet.");
+    }
+}
+
+export async function suspendedBetCheck4(betId: number, newValue: boolean) {
+    try {
+        await prisma.bet4.update({
+            where: { id: betId },
+            data: { suspendedBet: newValue },
+        });
+    } catch (error) {
+        console.error("Ошибка при обновлении suspendedBet:", error);
+        throw new Error("Не удалось обновить статус suspendedBet.");
+    }
+}
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     // Add a constant value to each player's total to stabilize the odds
@@ -1824,23 +1859,27 @@ export async function placeBet(formData: { betId: number; userId: number; amount
             throw new Error('Неверные данные формы');
         }
 
-        const {betId, userId, amount, player} = formData;
+        const { betId, userId, amount, player } = formData;
 
         if (!betId || !userId || !amount || !player) {
             throw new Error('Отсутствуют обязательные поля в данных формы');
         }
 
         const bet = await prisma.bet.findUnique({
-            where: {id: betId},
-            include: {participants: true},
+            where: { id: betId },
+            include: { participants: true },
         });
 
         if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER')) {
             throw new Error('Ставка недоступна для участия');
         }
 
+        if (bet.suspendedBet) {
+            throw new Error('Ставки на это событие приостановлены');
+        }
+
         const user = await prisma.user.findUnique({
-            where: {id: userId},
+            where: { id: userId },
         });
 
         if (!user || user.points < amount) {
@@ -1878,65 +1917,68 @@ export async function placeBet(formData: { betId: number; userId: number; amount
             throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
         }
 
-        await prisma.betParticipant.create({
-            data: {
-                betId,
-                userId,
-                amount,
-                player,
-                odds: currentOdds,
-                profit: potentialProfit,
-                margin: 0,
-                isCovered: "OPEN",
-                overlap: 0,
-            },
+        // Используем транзакцию для атомарного выполнения операций
+        await prisma.$transaction(async (prisma) => {
+            await prisma.betParticipant.create({
+                data: {
+                    betId,
+                    userId,
+                    amount,
+                    player,
+                    odds: currentOdds,
+                    profit: potentialProfit,
+                    margin: 0,
+                    isCovered: "OPEN",
+                    overlap: 0,
+                },
+            });
+
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    points: user.points - amount,
+                },
+            });
+
+            const {
+                oddsPlayer1,
+                oddsPlayer2
+            } = calculateOdds(
+                totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
+                totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0)
+            );
+
+            const totalMargin = await prisma.betParticipant.aggregate({
+                _sum: {
+                    margin: true,
+                },
+                where: {
+                    betId: betId,
+                },
+            });
+
+            const updatedBetData = {
+                oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+                oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+                totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
+                totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
+                totalBetAmount: totalPlayer1 + totalPlayer2 + amount,
+                margin: totalMargin._sum.margin || 0,
+                maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
+                maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
+                overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
+                overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
+            };
+
+            await prisma.bet.update({
+                where: { id: betId },
+                data: updatedBetData,
+            });
         });
-
-        await prisma.user.update({
-            where: {id: userId},
-            data: {
-                points: user.points - amount,
-            },
-        });
-
-        const {
-            oddsPlayer1,
-            oddsPlayer2
-        } = calculateOdds(
-            totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
-            totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0)
-        );
-
-        const totalMargin = await prisma.betParticipant.aggregate({
-            _sum: {
-                margin: true,
-            },
-            where: {
-                betId: betId,
-            },
-        });
-
-        const updatedBetData = {
-            oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
-            oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
-            totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
-            totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
-            totalBetAmount: totalPlayer1 + totalPlayer2 + amount,
-            margin: totalMargin._sum.margin || 0,
-            maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
-            maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
-            overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
-            overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
-        };
-
-        await prisma.bet.update({
-            where: {id: betId},
-            data: updatedBetData,
-        })
 
         revalidatePath('/');
 
-        return {success: true};
+        return { success: true };
     } catch (error) {
         if (error === null || error === undefined) {
             console.error('Ошибка в placeBet: Неизвестная ошибка (error is null или undefined)');
@@ -2297,17 +2339,6 @@ export async function closeBetDraw(betId: number) {
         }
     }
 }
-export async function suspendedBetCheck(betId: number, newValue: boolean) {
-    try {
-        await prisma.bet.update({
-            where: { id: betId },
-            data: { suspendedBet: newValue },
-        });
-    } catch (error) {
-        console.error("Ошибка при обновлении suspendedBet:", error);
-        throw new Error("Не удалось обновить статус suspendedBet.");
-    }
-}
 
 
 function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number) {
@@ -2421,23 +2452,27 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
             throw new Error('Неверные данные формы');
         }
 
-        const {betId, userId, amount, player} = formData;
+        const { betId, userId, amount, player } = formData;
 
         if (!betId || !userId || !amount || !player) {
             throw new Error('Отсутствуют обязательные поля в данных формы');
         }
 
         const bet = await prisma.bet3.findUnique({
-            where: {id: betId},
-            include: {participants: true},
+            where: { id: betId },
+            include: { participants: true },
         });
+
+        if (bet.suspendedBet) {
+            throw new Error('Ставки на это событие приостановлены');
+        }
 
         if (!bet || bet.status !== 'OPEN') {
             throw new Error('Ставка недоступна для участия');
         }
 
         const user = await prisma.user.findUnique({
-            where: {id: userId},
+            where: { id: userId },
         });
 
         if (!user || user.points < amount) {
@@ -2484,71 +2519,73 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
             throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
         }
 
-        await prisma.betParticipant3.create({
-            data: {
-                betId,
-                userId,
-                amount,
-                player,
-                odds: currentOdds,
-                profit: potentialProfit,
-                margin: 0,
-                isCovered: "OPEN",
-                overlap: 0,
-            },
-        });
+        await prisma.$transaction(async (prisma) => {
+            await prisma.betParticipant3.create({
+                data: {
+                    betId,
+                    userId,
+                    amount,
+                    player,
+                    odds: currentOdds,
+                    profit: potentialProfit,
+                    margin: 0,
+                    isCovered: "OPEN",
+                    overlap: 0,
+                },
+            });
 
-        await prisma.user.update({
-            where: {id: userId},
-            data: {
-                points: user.points - amount,
-            },
-        });
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    points: user.points - amount,
+                },
+            });
 
-        const {
-            oddsPlayer1,
-            oddsPlayer2,
-            oddsPlayer3
-        } = calculateOdds3(
-            totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
-            totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
-            totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0)
-        );
+            const {
+                oddsPlayer1,
+                oddsPlayer2,
+                oddsPlayer3
+            } = calculateOdds3(
+                totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
+                totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
+                totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0)
+            );
 
-        const totalMargin = await prisma.betParticipant3.aggregate({
-            _sum: {
-                margin: true,
-            },
-            where: {
-                betId: betId,
-            },
-        });
+            const totalMargin = await prisma.betParticipant3.aggregate({
+                _sum: {
+                    margin: true,
+                },
+                where: {
+                    betId: betId,
+                },
+            });
 
-        const updatedBetData = {
-            oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
-            oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
-            oddsBetPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
-            totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
-            totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
-            totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
-            totalBetAmount: totalPlayer1 + totalPlayer2 + totalPlayer3 + amount,
-            margin: totalMargin._sum.margin || 0,
-            maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
-            maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
-            maxBetPlayer3: player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer3 + amount,
-            overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
-            overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
-            overlapPlayer3: player === PlayerChoice.PLAYER3 ? bet.overlapPlayer3 + amount : bet.overlapPlayer3,
-        };
+            const updatedBetData = {
+                oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+                oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+                oddsBetPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
+                totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
+                totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
+                totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
+                totalBetAmount: totalPlayer1 + totalPlayer2 + totalPlayer3 + amount,
+                margin: totalMargin._sum.margin || 0,
+                maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
+                maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
+                maxBetPlayer3: player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer3 + amount,
+                overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
+                overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
+                overlapPlayer3: player === PlayerChoice.PLAYER3 ? bet.overlapPlayer3 + amount : bet.overlapPlayer3,
+            };
 
-        await prisma.bet3.update({
-            where: {id: betId},
-            data: updatedBetData,
+            await prisma.bet3.update({
+                where: { id: betId },
+                data: updatedBetData,
+            });
         });
 
         revalidatePath('/');
 
-        return {success: true};
+        return { success: true };
     } catch (error) {
         if (error === null || error === undefined) {
             console.error('Ошибка в placeBet3: Неизвестная ошибка (error is null или undefined)');
@@ -3047,6 +3084,11 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             where: {id: betId},
             include: {participants: true},
         });
+
+        // Проверка на suspendedBet
+        if (bet.suspendedBet) {
+            throw new Error('Ставки на это событие приостановлены');
+        }
 
         if (!bet || bet.status !== 'OPEN') {
             throw new Error('Ставка недоступна для участия');

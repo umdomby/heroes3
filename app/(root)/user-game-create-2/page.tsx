@@ -54,8 +54,6 @@ export default async function UserGamePage() {
             <p>
                 <Link href="/profile" className="text-blue-500">Profile</Link>
             </p>
-
-
         </div>;
     }
 

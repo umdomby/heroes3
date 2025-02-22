@@ -12,7 +12,7 @@ import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { placeBet, closeBet, closeBetDraw } from "@/app/actions";
+import {placeBet, closeBet, closeBetDraw, suspendedBetCheck} from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
 import { useUser } from "@/hooks/useUser";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"; // Импортируем компоненты диалогового окна
@@ -45,6 +45,9 @@ interface Bet extends PrismaBet {
     totalBetPlayer1: number;
     totalBetPlayer2: number;
     totalBetAmount: number;
+    creatorId : number;
+    suspendedBet : boolean;
+    status: BetStatus;
 }
 
 interface Props {
@@ -369,6 +372,15 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
         }
     };
 
+    const handleSuspendedBetChange = async (betId: number, newValue: boolean) => {
+        try {
+            await suspendedBetCheck(betId, newValue);
+            mutate(); // Обновляем данные ставок
+        } catch (error) {
+            console.error("Ошибка при обновлении флага suspendedBet:", error);
+        }
+    };
+
 
     if (!session) {
         return redirect("/not-auth");
@@ -488,6 +500,20 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                                         {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
                                                     </div>
                                                 </TableCell>
+
+                                                <TableCell className="w-10">
+                                                {bet.creatorId === user?.id && (
+                                                    <div className="flex items-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={bet.suspendedBet}
+                                                            onChange={() => handleSuspendedBetChange(bet.id, !bet.suspendedBet)}
+                                                            className="mr-2"
+                                                        />
+                                                    </div>
+                                                )}
+                                                </TableCell>
+
                                             </TableRow>
                                         </TableBody>
                                     </Table>
@@ -609,7 +635,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                         </div>
                                     )}
 
-                                    {bet.status === "OPEN_USER" && (
+                                    {bet.status === "OPEN_USER" && !bet.suspendedBet && (
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                                 <div className="flex gap-2 m-2">
