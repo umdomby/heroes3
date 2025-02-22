@@ -8,7 +8,8 @@ import {
     gameUserBetRegistrations,
     gameUserBetStart,
     gameUserBetClosed,
-    removeGameUserBetRegistration
+    removeGameUserBetRegistration,
+    gameUserBetDelete // Import the delete function
 } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -204,6 +205,15 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
         }
     };
 
+    const handleDeleteBet = async (gameUserBetId: number) => {
+        try {
+            await gameUserBetDelete(gameUserBetId);
+            console.log('Ставка успешно удалена');
+        } catch (error) {
+            console.error('Ошибка при удалении ставки:', error);
+        }
+    };
+
     function isGameUserBetDataUser(obj: any): obj is GameUserBetDataUser {
         return typeof obj === 'object' &&
             obj !== null &&
@@ -369,6 +379,12 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                                 </div>
                                                             </DialogContent>
                                                         </Dialog>
+                                                        <Button
+                                                            onClick={() => handleDeleteBet(bet.id)}
+                                                            className="mt-2 bg-red-500 text-white"
+                                                        >
+                                                            Удалить ставку
+                                                        </Button>
                                                     </div>
                                                 ) : (
                                                     // Check if the user is already registered
