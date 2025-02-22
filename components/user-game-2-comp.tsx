@@ -241,15 +241,19 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
     };
 
 
-    const handleCreateBet = async (bet) => {
+    const handleCreateBet = async (bet: GameUserBet) => {
         if (bet.statusUserBet === "START" && bet.gameUserBetOpen) {
             try {
+                if (bet.gameUserBet2Id === null) {
+                    throw new Error("Идентификатор второго пользователя не найден");
+                }
+
                 const newBet = await gameUserStartBet(
-                    bet.gameUser1Bet.id,
-                    bet.gameUser2Bet?.id,
-                    bet.category.id,
-                    bet.product.id,
-                    bet.productItem.id
+                    bet.gameUserBet1Id, // Используйте gameUserBet1Id вместо gameUser1Bet.id
+                    bet.gameUserBet2Id, // Убедитесь, что у вас есть gameUserBet2Id
+                    bet.categoryId, // Убедитесь, что у вас есть categoryId
+                    bet.productId, // Убедитесь, что у вас есть productId
+                    bet.productItemId // Убедитесь, что у вас есть productItemId
                 );
                 console.log("Ставка успешно создана:", newBet);
             } catch (error) {
