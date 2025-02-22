@@ -477,7 +477,7 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                                     </div>
                                                     <div>
                                                         {bet.checkWinUser2 === null ? (
-                                                            <span className="text-gray-500">Противник не проголосовал</span>
+                                                            <span className="text-gray-500">Противник не проголосовал </span>
                                                         ) : (
                                                             <span className="text-gray-500">Противник проголосовал: {bet.checkWinUser2}</span>
                                                         )}

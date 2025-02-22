@@ -1606,6 +1606,10 @@ export async function gameUserBetDelete(gameUserBetId: number) {
     }
 }
 
+export async function gameUser1User2() {
+
+}
+
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     // Add a constant value to each player's total to stabilize the odds
