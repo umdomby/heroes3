@@ -1460,7 +1460,7 @@ export async function gameUserBetStart(gameData: {
                 where: {id: gameData.gameUserBet2Id},
                 data: {points: {decrement: gameData.betUser2}},
             });
-
+            revalidatePath('/user-game-2')
             return gameUserBet;
         });
     } catch (error) {
@@ -1556,6 +1556,7 @@ export async function gameUserBetClosed(gameData: {
                     });
                 }
             }
+            revalidatePath('/user-game-2')
         });
     } catch (error) {
         console.error("Ошибка при завершении игры:", error);

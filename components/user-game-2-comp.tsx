@@ -498,7 +498,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                     )}
                                     {bet.statusUserBet === "START" && (
                                         <div>
-                                            {bet.gameUserBetOpen &&
+                                            {bet.gameUserBetOpen && user.id === bet.gameUser1Bet.id &&
                                                 <Button onClick={() => handleCreateBet(bet)} className="bg-blue-500 text-white h-6">
                                                     Create Bet
                                                 </Button>
