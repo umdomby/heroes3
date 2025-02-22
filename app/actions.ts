@@ -1637,6 +1637,19 @@ export async function gameRatingGameUsers(gameData: {
 }
 export async function gameUserStartBet(gameUserBetId: number, gameUserBet2Id: number, categoryId: number, productId: number, productItemId: number) {
     try {
+        // Check if a bet with the same creator and status START already exists
+        const existingBet = await prisma.bet.findFirst({
+            where: {
+                creatorId: gameUserBetId,
+                status: 'OPEN_USER',
+                // Add any other conditions if necessary
+            }
+        });
+
+        if (existingBet) {
+            throw new Error("Ставка уже запущена");
+        }
+
         // Получаем player1Id и player2Id
         const player1 = await prisma.player.findFirst({
             where: { userId: gameUserBetId }
@@ -1689,7 +1702,7 @@ export async function gameUserStartBet(gameUserBetId: number, gameUserBet2Id: nu
         } else {
             console.error('Ошибка else:', error);
         }
-        throw new Error('throw new Error');
+        throw new Error('Не удалось создать ставку');
     }
 }
 

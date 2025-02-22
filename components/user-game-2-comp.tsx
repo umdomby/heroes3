@@ -57,6 +57,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [selectedWinUser2, setSelectedWinUser2] = useState<{ [key: number]: WinGameUserBet | null }>({});
     const [currentBetId, setCurrentBetId] = useState<number | null>(null);
 
+
     useEffect(() => {
         // Fetch initial data
         const fetchData = async () => {
@@ -252,7 +253,12 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                 );
                 console.log("Ставка успешно создана:", newBet);
             } catch (error) {
-                console.error("Ошибка при создании ставки:", error);
+                if (error instanceof Error && error.message === "Ставка уже запущена") {
+                    setErrorMessage("Ставка уже запущена");
+                } else {
+                    setErrorMessage("Ставка уже запущена");
+                }
+                setErrorDialogOpen(true);
             }
         }
     };
@@ -420,7 +426,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                             onClick={() => handleDeleteBet(bet.id)}
                                                             className="mt-2 bg-red-500 text-white"
                                                         >
-                                                            Удалить ставку
+                                                            Удалить событие
                                                         </Button>
                                                     </div>
                                                 ) : (
@@ -488,9 +494,12 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                     )}
                                     {bet.statusUserBet === "START" && (
                                         <div>
-                                            <Button onClick={() => handleCreateBet(bet)} className="bg-blue-500 text-white">
-                                                Create Bet
-                                            </Button>
+                                            {bet.gameUserBetOpen &&
+                                                <Button onClick={() => handleCreateBet(bet)} className="bg-blue-500 text-white h-6">
+                                                    Create Bet
+                                                </Button>
+                                            }
+
                                             <div>
                                                 {bet.gameUser1Bet.telegram ? (
                                                     <Link
@@ -742,7 +751,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
             ))}
             <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
                 <DialogContent>
-                    <DialogTitle>Ошибка</DialogTitle>
+                    <DialogTitle></DialogTitle>
                     <DialogDescription>{errorMessage}</DialogDescription>
                 </DialogContent>
             </Dialog>
