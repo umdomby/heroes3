@@ -51,8 +51,8 @@ model User {
   gameUserBet1 GameUserBet[] @relation("GameUser1Bet")
   gameUserBet2 GameUserBet[] @relation("GameUser2Bet")
 
-  player Player[]
-
+  player                Player[]
+  ratingUserGame        RatingUserGame?
   chatUsers             ChatUsers[]
   regPoints             regPoints[]
   bankDetails           Json?
@@ -248,6 +248,7 @@ model GameUserBet {
   checkWinUser1         WinGameUserBet? // подтверждение победы User1
   checkWinUser2         WinGameUserBet? // подтверждение победы User2
   gameUser2Bet          User?             @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id]) // сюда User1 выбирает с кем будет играть
+  gameUser2Telegram     String?
   gameUserBet2Id        Int? // User2.id
   gameUserBetDataUsers2 Json? // сюда будут добавляться другие users из которых user1 выберет с кем будет играть
   category              Category          @relation(fields: [categoryId], references: [id]) // выбирает User1
@@ -257,8 +258,25 @@ model GameUserBet {
   productItem           ProductItem       @relation(fields: [productItemId], references: [id])
   productItemId         Int // выбирает User1
   statusUserBet         GameUserBetStatus @default(OPEN)
+  gameUser1Rating       RatingUserEnum?
+  gameUser2Rating       RatingUserEnum?
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
+}
+
+model RatingUserGame {
+  id           Int      @id @default(autoincrement())
+  ratingUser   User     @relation(fields: [ratingUserId], references: [id])
+  ratingUserId Int      @unique
+  plus         Int      @default(0)
+  minus        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum RatingUserEnum {
+  PLUS
+  MINUS
 }
 
 enum WinGameUserBet {
