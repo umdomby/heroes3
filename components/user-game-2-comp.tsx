@@ -554,14 +554,20 @@ export const UserGame2Comp: React.FC<Props> = ({ user }) => {
                                             )}
                                         </div>
                                     )}
-
-
                                     {bet.statusUserBet === "CLOSED" && (
                                         <div>
-                                            <div className={selectedWinUser1[bet.id] === WinGameUserBet.WIN ? 'text-green-500' : 'text-red-500'}>
+                                            <div className={
+                                                bet.checkWinUser1 === WinGameUserBet.WIN ? 'text-green-500' :
+                                                    bet.checkWinUser1 === WinGameUserBet.LOSS ? 'text-red-500' :
+                                                        bet.checkWinUser1 === WinGameUserBet.DRAW ? 'text-yellow-500' : ''
+                                            }>
                                                 {bet.gameUser1Bet.telegram}
                                             </div>
-                                            <div className={selectedWinUser2[bet.id] === WinGameUserBet.WIN ? 'text-green-500' : 'text-red-500'}>
+                                            <div className={
+                                                bet.checkWinUser2 === WinGameUserBet.WIN ? 'text-green-500' :
+                                                    bet.checkWinUser2 === WinGameUserBet.LOSS ? 'text-red-500' :
+                                                        bet.checkWinUser2 === WinGameUserBet.DRAW ? 'text-yellow-500' : ''
+                                            }>
                                                 {bet.gameUser2Bet?.telegram || "No Telegram"}
                                             </div>
                                             <div>Дата обновления: {new Date(bet.updatedAt).toLocaleString()}</div>
