@@ -39,10 +39,9 @@ export async function GET(request: Request) {
             const pendingOrdersCount = await prisma.orderP2P.count({
                 where: {
                     orderP2PStatus: 'PENDING',
-                    orderP2PUser1Id: parseInt(userId),
                     OR: [
-                        { orderP2PCheckUser1: null },
-                        { orderP2PCheckUser2: null }
+                        { orderP2PUser1Id: parseInt(userId), },
+                        { orderP2PUser2Id: parseInt(userId), }
                     ]
                 }
             });
