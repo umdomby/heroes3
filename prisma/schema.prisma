@@ -54,7 +54,7 @@ model User {
   player                Player[]
   ratingUserGame        GlobalUserGame?
   chatUsers             ChatUsers[]
-  regPoints             regPoints[]
+  regPoints             RegPoints[]
   bankDetails           Json?
   referralUserIpAddress ReferralUserIpAddress[]
   telegram              String?                 @unique
@@ -82,6 +82,25 @@ model OrderP2P {
   updatedAt          DateTime       @updatedAt
 }
 
+model CourseValuta {
+  id        Int      @id @default(autoincrement())
+  USD       Float
+  EUR       Float
+  BEL       Float
+  BTC       Float
+  USTD      Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UpdateDateTime {
+  id          Int       @id @default(autoincrement())
+  UDTvaluta   DateTime?
+  UDTOrderP2P DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
 model Transfer {
   id              Int      @id @default(autoincrement())
   transferUser1   User     @relation("TransferUser1", fields: [transferUser1Id], references: [id])
@@ -103,7 +122,7 @@ model ChatUsers {
   updatedAt  DateTime @updatedAt
 }
 
-model regPoints {
+model RegPoints {
   id              Int      @id @default(autoincrement())
   regPointsUser   User     @relation(fields: [regPointsUserId], references: [id])
   regPointsUserId Int

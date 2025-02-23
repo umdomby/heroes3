@@ -769,57 +769,6 @@ export async function openSellOrder(orderId: number, userId: number, bankDetails
         return false;
     }
 }// Функция для открытия сделки продажи
-export async function closeDealTime(orderId: number) {
-    // Получаем сделку
-    const order = await prisma.orderP2P.findUnique({where: {id: orderId}});
-    if (!order) {
-        throw new Error('Сделка не найдена');
-    }
-
-    if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'PENDING') {
-        await prisma.$transaction(async (prisma) => {
-            await prisma.user.update({
-                where: {id: order.orderP2PUser1Id},
-                data: {
-                    points: {increment: order.orderP2PPoints},
-                },
-            });
-
-            await prisma.orderP2P.update({
-                where: {id: order.id},
-                data: {
-                    orderP2PStatus: 'RETURN',
-                },
-            });
-        });
-    }
-
-    if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'PENDING') {
-        await prisma.$transaction(async (prisma) => {
-            await prisma.orderP2P.update({
-                where: {id: order.id},
-                data: {
-                    orderP2PStatus: 'RETURN',
-                },
-            });
-        });
-    }
-} // закрытие сделки по времени из клиента
-export async function checkAndCloseExpiredDeals() {
-    const now = new Date();
-    const expiredDeals = await prisma.orderP2P.findMany({
-        where: {
-            orderP2PStatus: 'PENDING',
-            updatedAt: {
-                lt: new Date(now.getTime() - 3600000), // 60 minutes ago 3600000
-            },
-        },
-    });
-
-    for (const deal of expiredDeals) {
-        await closeDealTime(deal.id); // Передаем id сделки
-    }
-}// серверное обновление серверной страницы сделок components\OrderP2PPending.tsx
 export async function getServerSideProps() {
     // Проверьте и закройте просроченные сделки перед отображением страницы
     await checkAndCloseExpiredDeals();
@@ -3594,3 +3543,51 @@ export async function closeBetDraw4(betId: number) {
         }
     }
 }// ничья на 4 игрока
+
+
+export async function checkAndCloseOrderP2PTime () {
+
+}
+
+export async function checkAndCloseOrderP2P() {
+    const now = new Date();
+    const expiredDeals = await prisma.orderP2P.findMany({
+        where: {
+            orderP2PStatus: 'PENDING',
+            updatedAt: {
+                lt: new Date(now.getTime() - 3600000), // 60 minutes ago
+            },
+        },
+    });
+
+    for (const order of expiredDeals) {
+        if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'PENDING') {
+            await prisma.$transaction(async (prisma) => {
+                await prisma.user.update({
+                    where: { id: order.orderP2PUser1Id },
+                    data: {
+                        points: { increment: order.orderP2PPoints },
+                    },
+                });
+
+                await prisma.orderP2P.update({
+                    where: { id: order.id },
+                    data: {
+                        orderP2PStatus: 'RETURN',
+                    },
+                });
+            });
+        }
+
+        if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'PENDING') {
+            await prisma.$transaction(async (prisma) => {
+                await prisma.orderP2P.update({
+                    where: { id: order.id },
+                    data: {
+                        orderP2PStatus: 'RETURN',
+                    },
+                });
+            });
+        }
+    }
+}// закрытие сделки по времени из клиента
