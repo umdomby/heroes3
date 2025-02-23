@@ -813,6 +813,41 @@ export async function globalDataPoints() {
                 return;
             }
 
+            //p2p
+            const results = await Promise.all([
+                prisma.orderP2P.aggregate({
+                    _sum: {
+                        orderP2PPoints: true,
+                    },
+                    where: {
+                        orderP2PStatus: 'OPEN',
+                        orderP2PBuySell: 'SELL',
+                    },
+                }),
+                prisma.orderP2P.aggregate({
+                    _sum: {
+                        orderP2PPoints: true,
+                    },
+                    where: {
+                        orderP2PStatus: 'PENDING',
+                        orderP2PBuySell: 'SELL',
+                    },
+                }),
+                prisma.orderP2P.aggregate({
+                    _sum: {
+                        orderP2PPoints: true,
+                    },
+                    where: {
+                        orderP2PStatus: 'PENDING',
+                        orderP2PBuySell: 'BUY',
+                    },
+                }),
+            ]);
+
+            const totalPoints = results.reduce((sum, result) => {
+                return sum + (result._sum.orderP2PPoints || 0);
+            }, 0);
+
             // Если прошло больше 10 секунд, выполняем обновление
             const usersCount = await prisma.user.count();
 
@@ -891,7 +926,7 @@ export async function globalDataPoints() {
                     users: usersCount,
                     reg: regCount,
                     ref: refCount,
-                    usersPoints: usersPointsSum,
+                    usersPoints: usersPointsSum + totalPoints,
                     margin: marginSum,
                     openBetsPoints: openBetsPointsSum + totalBetUser1 + totalBetUser2,
                 },
@@ -899,7 +934,7 @@ export async function globalDataPoints() {
                     users: usersCount,
                     reg: regCount,
                     ref: refCount,
-                    usersPoints: usersPointsSum,
+                    usersPoints: usersPointsSum + totalPoints,
                     margin: marginSum,
                     openBetsPoints: openBetsPointsSum + totalBetUser1 + totalBetUser2,
                 },
