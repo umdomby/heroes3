@@ -172,6 +172,11 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                         P2P PENDING
                                     </DropdownMenuRadioItem>
                                 </Link>
+                                <Link href="/order-p2p-closed">
+                                    <DropdownMenuRadioItem value="order-p2p-closed" className="cursor-pointer">
+                                        P2P CLOSED
+                                    </DropdownMenuRadioItem>
+                                </Link>
                                 <Link href="/contacts">
                                     <DropdownMenuRadioItem value="contacts" className="cursor-pointer">
                                         CONTACTS
