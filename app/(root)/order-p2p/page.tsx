@@ -28,7 +28,7 @@ export default async function OrderP2PPage() {
 
     // Fetch open orders
     const openOrders = await prisma.orderP2P.findMany({
-        where: { orderP2PStatus: 'OPEN' },
+        where: {orderP2PStatus: 'OPEN'},
         orderBy: {
             createdAt: 'desc',
         },
@@ -52,6 +52,7 @@ export default async function OrderP2PPage() {
     const pendingOrdersCount = await prisma.orderP2P.count({
         where: {
             orderP2PStatus: 'PENDING',
+            orderP2PUser1Id: user.id,
             OR: [
                 { orderP2PCheckUser1: null },
                 { orderP2PCheckUser2: null }

@@ -378,6 +378,8 @@ export async function updateBankDetails(updatedDetails: { name: string; details:
         throw new Error('Не удалось обновить банковские реквизиты');
     }
 } // редактирование банковских реквизитов
+
+
 export async function createBuyOrder(points: number, bankDetails: any[], allowPartial: boolean) {
     try {
         const currentUser = await getUserSession();
@@ -536,7 +538,7 @@ export async function getOpenOrders(): Promise<OrderP2P[]> {
         console.error('Ошибка при получении открытых заказов:', error);
         throw new Error('Не удалось получить открытые заказы'); // Выбрасывание ошибки для лучшей обработки
     }
-} // 5 секунд обновление открытых сделок для OrderP2PComponent
+} // 5 секунд обновление 'PENDING', 'CLOSED', 'RETURN' сделок для OrderP2PComponent
 export async function getPendingOrders(userId: number): Promise<OrderP2P[]> {
     try {
         return await prisma.orderP2P.findMany({
@@ -577,10 +579,10 @@ export async function getPendingOrders(userId: number): Promise<OrderP2P[]> {
             }
         });
     } catch (error) {
-        console.error('Ошибка при получении открытых заказов:', error);
-        throw new Error('Не удалось получить открытые заказы'); // Выбрасывание ошибки для лучшей обработки
+        console.error('Ошибка при получении PENDING заказов:', error);
+        throw new Error('Не удалось получить PENDING заказы'); // Выбрасывание ошибки для лучшей обработки
     }
-} // 5 секунд обновление открытых сделок для OrderP2PPending
+} // 5 секунд обновление PENDING сделок для OrderP2PPending
 // подтверждение оплаты для продажи
 export async function confirmSellOrderUser2(orderId: number) {
     try {
@@ -709,6 +711,7 @@ export async function confirmBuyOrderCreator(orderId: number) {
         return false;
     }
 }// завершение сделки-покупки, подтверждением создателем оплаты price
+
 export async function openBuyOrder(orderId: number, userId: number, bankDetails: any, price: number, points: number) {
     try {
         const currentUser = await getUserSession();
@@ -802,7 +805,7 @@ export async function closeDealTime(orderId: number) {
             });
         });
     }
-} // закрытие сделки по времени
+} // закрытие сделки по времени из клиента
 export async function checkAndCloseExpiredDeals() {
     const now = new Date();
     const expiredDeals = await prisma.orderP2P.findMany({
