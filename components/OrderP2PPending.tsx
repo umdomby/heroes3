@@ -64,9 +64,36 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
     const [closedOrders, setClosedOrders] = useState<Set<number>>(new Set());
     const router = useRouter();
 
+    const [currentPageState, setCurrentPageState] = useState(currentPage);
+    const [totalPagesState, setTotalPagesState] = useState(totalPages);
+
     useEffect(() => {
-        setOpenOrders(openOrders as OrderP2PWithUser[]);
-    }, [openOrders]);
+        const eventSource = new EventSource(`/api/order-p2p-pending?userId=${user.id}`);
+
+        eventSource.onmessage = (event: MessageEvent) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.error) {
+                    console.error('SSE Error:', data.error);
+                    return;
+                }
+
+                setOpenOrders(data.openOrders as OrderP2PWithUser[]);
+                setTotalPagesState(data.totalPages);
+            } catch (error) {
+                console.error('Error parsing SSE data:', error);
+            }
+        };
+
+        eventSource.onerror = (event: Event) => {
+            console.error('SSE connection error:', event);
+            eventSource.close();
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, [user.id, currentPageState]); // Зависимости для обновления при смене страницы или пользователя
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -138,15 +165,18 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
+// Обновляем функции навигации
     const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            router.push(`/order-p2p-pending?page=${currentPage + 1}`);
+        if (currentPageState < totalPagesState) {
+            setCurrentPageState(prev => prev + 1);
+            router.push(`/order-p2p-pending?page=${currentPageState + 1}`);
         }
     };
 
     const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            router.push(`/order-p2p-pending?page=${currentPage - 1}`);
+        if (currentPageState > 1) {
+            setCurrentPageState(prev => prev - 1);
+            router.push(`/order-p2p-pending?page=${currentPageState - 1}`);
         }
     };
 

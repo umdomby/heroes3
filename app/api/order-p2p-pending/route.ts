@@ -4,6 +4,9 @@ import { prisma } from '@/prisma/prisma-client';
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const betsPerPage = 100;
+    const skip = (page - 1) * betsPerPage;
 
     if (!userId) {
         return new NextResponse('User ID is required', { status: 400 });
@@ -13,23 +16,17 @@ export async function GET(request: Request) {
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
 
-
-    const page = parseInt(resolvedSearchParams.page ?? '1', 10);
-    const betsPerPage = 100;
-    const skip = (page - 1) * betsPerPage;
-
-
     const sendUpdate = async () => {
         try {
             const openOrders = await prisma.orderP2P.findMany({
                 where: {
                     OR: [
                         {
-                            orderP2PUser1: { id: parseInt(userId)},
+                            orderP2PUser1Id: parseInt(userId), // Правильное использование ID
                             orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
                         },
                         {
-                            orderP2PUser2: { id: parseInt(userId) },
+                            orderP2PUser2Id: parseInt(userId), // Правильное использование ID
                             orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
                         }
                     ]
@@ -63,20 +60,24 @@ export async function GET(request: Request) {
                 where: {
                     OR: [
                         {
-                            orderP2PUser1: { id: parseInt(userId) },
+                            orderP2PUser1Id: parseInt(userId), // Правильное использование ID
                             orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
                         },
                         {
-                            orderP2PUser2: { id: parseInt(userId) },
+                            orderP2PUser2Id: parseInt(userId), // Правильное использование ID
                             orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
                         }
                     ]
                 }
             });
 
+            const totalPages = Math.ceil(totalOrders / betsPerPage);
+
             const data = {
                 openOrders,
-                totalOrders
+                totalOrders,
+                currentPage: page,
+                totalPages
             };
 
             writer.write(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
