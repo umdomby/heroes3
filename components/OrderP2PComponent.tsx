@@ -25,10 +25,12 @@ interface OrderP2PWithUser extends OrderP2P {
     orderP2PUser1: {
         id: number;
         cardId: string;
+        telegram : string;
     };
     orderP2PUser2?: {
         id: number;
         cardId: string;
+        telegram: string;
     };
 }
 
@@ -557,7 +559,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
             </div>
             <div className={`flex-container ${className}`}>
                 <div className="buy-section mr-1 ml-1">
-                    <h2 className="text-xl font-bold mb-2">Купить Points (min 30)</h2>
+                    <h2 className="text-xl font-bold mb-2 text-amber-500">Купить Points (min 30)</h2>
                     <Input
                         type="text"
                         value={buyPoints}
@@ -631,7 +633,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                     </Button>
                 </div>
                 <div className="sell-section mr-1 ml-1">
-                    <h2 className="text-xl font-bold mb-2">Продать Points (min 30)</h2>
+                    <h2 className="text-xl font-bold mb-2 text-amber-500">Продать Points (min 30)</h2>
                     <Input
                         type="text"
                         value={sellPoints}
@@ -705,28 +707,53 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                     </Button>
                 </div>
             </div>
-            <Accordion className="border border-gray-300 mt-4" type="multiple">
+            <Table className="mt-5">
+                <TableBody>
+                    <TableRow >
+                        <TableCell className="w-[20%] text-center">Telegram</TableCell>
+
+                        <TableCell className="w-[15%] text-center">BUY/SELL</TableCell>
+                        <TableCell className="w-[10%] text-center">Points</TableCell>
+
+                        <TableCell className="w-[25%] text-center">CardID</TableCell>
+                        <TableCell className="w-[15%] text-center">State</TableCell>
+                        <TableCell className="w-[15%] text-center">Date</TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+            <Accordion className="border border-gray-300 mt-1" type="multiple">
                 {orders.map((order) => (
                     <AccordionItem
                         key={order.id}
                         value={order.id.toString()}
-                        className={order.orderP2PUser1Id === user.id ? 'bg-gray-500' : undefined}
+                        className={order.orderP2PStatus === "PENDING" ? 'text-red-500' : 'text-green-500'}
                     >
                         <AccordionTrigger>
                             <Table>
                                 <TableBody>
                                     <TableRow className="no-hover-bg">
-                                        <TableCell className="w-1/4">
-                                            {order.orderP2PUser1.cardId}
+                                        <TableCell
+                                            className="w-[20%] text-center "><Link className="ml-3 text-blue-500 hover:text-green-300 font-bold"
+                                                                                   href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')}
+                                                                                   target="_blank">{order.orderP2PUser1.telegram}</Link></TableCell>
+
+                                        <TableCell className="w-[15%] text-center">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} </TableCell>
+                                        <TableCell className="w-[10%] text-center">{order.orderP2PPoints} </TableCell>
+
+                                        <TableCell className="w-[25%] text-center">
+                                            <p>
+                                                {order.orderP2PUser1.cardId}
+                                            </p>
                                         </TableCell>
-                                        <TableCell className="w-1/4">
-                                            хочет {order.orderP2PBuySell === 'BUY' ? 'купить' : 'продать'}
+                                        <TableCell className="w-[15%] text-center">
+                                            <p>
+                                                {order.orderP2PStatus}
+                                            </p>
                                         </TableCell>
-                                        <TableCell className="w-1/4">
-                                            Points: {order.orderP2PPoints}
-                                        </TableCell>
-                                        <TableCell className="w-1/4">
-                                            {new Date(order.createdAt).toLocaleString()}
+                                        <TableCell className="w-[15%] text-center">
+                                            <p>
+                                                {new Date(order.createdAt).toLocaleString()}
+                                            </p>
                                         </TableCell>
                                     </TableRow>
                                 </TableBody>
