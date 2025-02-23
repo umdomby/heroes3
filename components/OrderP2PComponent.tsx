@@ -334,13 +334,22 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
     const handleBuyPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         const sanitizedValue = value.replace(/[^0-9]/g, '');
-        const points = sanitizedValue ? Number(sanitizedValue) : 0;
+
+        // Если поле пустое, устанавливаем 0
+        if (sanitizedValue === '') {
+            setBuyPoints(0);
+            setBuyPointsError('Минимальное количество для покупки - 30');
+            return;
+        }
+
+        const points = Number(sanitizedValue);
         setBuyPoints(points);
+
         if (points < 30) {
             setBuyPointsError('Минимальное количество для покупки - 30');
         } else if (points > 100000) {
             setBuyPointsError('Максимальное количество для покупки - 100,000');
-            setBuyPoints(100000); // Устанавливаем значение в 100,000, если больше
+            setBuyPoints(100000);
         } else {
             setBuyPointsError(null);
         }
@@ -350,18 +359,25 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
     const handleSellPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         const sanitizedValue = value.replace(/[^0-9]/g, '');
-        const points = sanitizedValue ? Number(sanitizedValue) : 30;
 
-        // Проверка, чтобы не превышать доступные Points
+        // Если поле пустое, устанавливаем 0
+        if (sanitizedValue === '') {
+            setSellPoints(0);
+            setSellPointsError('Минимальное количество для продажи - 30');
+            return;
+        }
+
+        const points = Number(sanitizedValue);
+
         if (points > user.points) {
-            setSellPoints(user.points); // Устанавливаем значение в максимальное количество Points
+            setSellPoints(user.points);
             setSellPointsError('Вы не можете продать больше, чем у вас есть points');
         } else if (points < 30) {
+            setSellPoints(points);
             setSellPointsError('Минимальное количество для продажи - 30');
-            setSellPoints(points); // Устанавливаем значение в 30, если меньше 30
         } else {
             setSellPoints(points);
-            setSellPointsError(null); // Сбрасываем ошибку, если все в порядке
+            setSellPointsError(null);
         }
     };
 
