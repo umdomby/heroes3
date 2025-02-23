@@ -110,8 +110,8 @@ export const OrderP2PClosed: React.FC<Props> = ({ user, closeOrders, className, 
                         <TableCell className="w-[10%] text-center">Points</TableCell>
 
                         <TableCell className="w-[25%] text-center">CardID</TableCell>
-                        <TableCell className="w-[15%] text-center">Date</TableCell>
                         <TableCell className="w-[15%] text-center">State</TableCell>
+                        <TableCell className="w-[15%] text-center">Date</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
