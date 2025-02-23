@@ -8,25 +8,43 @@ export async function GET(request: Request) {
 
     const sendUpdate = async () => {
         try {
-            const gameUserBets = await prisma.gameUserBet.findMany({
-                include: {
-                    gameUser1Bet: true,
-                    gameUser2Bet: true,
-                    category: true,
-                    product: true,
-                    productItem: true,
+
+            const openOrders = await prisma.orderP2P.findMany({
+                where: {orderP2PStatus: 'OPEN'},
+                orderBy: {
+                    createdAt: 'desc',
                 },
-            });
-
-            const statusOrder = { OPEN: 1, START: 2, CLOSED: 3 };
-            const sortedGameUserBets = gameUserBets.sort((a, b) => {
-                if (statusOrder[a.statusUserBet] !== statusOrder[b.statusUserBet]) {
-                    return statusOrder[a.statusUserBet] - statusOrder[b.statusUserBet];
+                include: {
+                    orderP2PUser1: {
+                        select: {
+                            id: true,
+                            cardId: true,
+                            // Добавьте другие необходимые поля
+                        }
+                    },
+                    orderP2PUser2: {
+                        select: {
+                            id: true,
+                            cardId: true,
+                            // Добавьте другие необходимые поля
+                        }
+                    }
                 }
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
             });
 
-            writer.write(encoder.encode(`data: ${JSON.stringify(sortedGameUserBets)}\n\n`));
+
+            const pendingOrdersCount = await prisma.orderP2P.count({
+                where: {
+                    orderP2PStatus: 'PENDING',
+                    // orderP2PUser1Id: user.id,
+                    OR: [
+                        { orderP2PCheckUser1: null },
+                        { orderP2PCheckUser2: null }
+                    ]
+                }
+            });
+
+            writer.write(encoder.encode(`data: ${JSON.stringify(openOrders)}\n\n`));
         } catch (error) {
             console.error('Failed to fetch data:', error);
             writer.write(encoder.encode('data: {"error": "Failed to fetch data"}\n\n'));
