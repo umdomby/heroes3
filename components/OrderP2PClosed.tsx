@@ -6,13 +6,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { OrderP2P, User, BuySell, OrderP2PStatus, Prisma } from "@prisma/client";
 import { Button } from "@/components/ui/button";
-import {
-    confirmBuyOrderUser2,
-    confirmBuyOrderCreator,
-    confirmSellOrderUser2,
-    confirmSellOrderCreator,
-    closeDealTime
-} from '@/app/actions';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 

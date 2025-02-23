@@ -10,7 +10,6 @@ import {
     confirmBuyOrderCreator,
     confirmSellOrderUser2,
     confirmSellOrderCreator,
-    closeDealTime, getOpenOrders, getPendingOrders
 } from '@/app/actions';
 import { DateTime } from "next-auth/providers/kakao";
 import Link from "next/link";
@@ -57,45 +56,10 @@ interface Props {
 
 export const OrderP2PPendingA: React.FC<Props> = ({ user, openOrders, className }) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
-    const [countdowns, setCountdowns] = useState<{ [key: number]: number }>({});
-    const [closedOrders, setClosedOrders] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         setOpenOrders(openOrders as OrderP2PWithUser[]);
     }, [openOrders]);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCountdowns(prevCountdowns => {
-                const newCountdowns = { ...prevCountdowns };
-                orders.forEach(order => {
-                    if (order.orderP2PStatus === "PENDING") {
-                        const updatedAt = new Date(order.updatedAt);
-                        const now = new Date();
-                        const timeDiff = now.getTime() - updatedAt.getTime();
-                        const timeLeft = 3600000 - timeDiff; // 60 minutes in milliseconds 3600000
-                        newCountdowns[order.id] = Math.max(0, timeLeft);
-                    }
-                });
-                return newCountdowns;
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [orders]);
-
-    useEffect(() => {
-        Object.entries(countdowns).forEach(([orderId, timeLeft]) => {
-            if (timeLeft <= 0) {
-                console.log("client 2222222222222222222");
-                const order = orders.find(o => o.id === parseInt(orderId));
-                if (order && !closedOrders.has(order.id)) {
-                    console.log("client 33333333333333333333");
-                    timeCloseDeal(order);
-                }
-            }
-        });
-    }, [countdowns, orders, closedOrders]);
 
     function isOrderBankDetail(detail: any): detail is OrderBankDetail {
         return (
@@ -124,19 +88,6 @@ export const OrderP2PPendingA: React.FC<Props> = ({ user, openOrders, className 
         }
     };
 
-    const timeCloseDeal = async (order: OrderP2PWithUser) => {
-        console.log("client 222222222222222222222");
-        await closeDealTime(order.id);
-        setClosedOrders(prev => new Set(prev).add(order.id));
-    };
-
-    const formatTime = (milliseconds: number) => {
-        const totalSeconds = Math.floor(milliseconds / 1000);
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    };
-
     return (
         <div className={className}>
             Points: {Math.floor(user.points * 100) / 100}
@@ -154,14 +105,6 @@ export const OrderP2PPendingA: React.FC<Props> = ({ user, openOrders, className 
                                         </TableCell>
                                         <TableCell className="w-1/4">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} {order.orderP2PPoints} Points</TableCell>
                                         <TableCell className="w-1/4">
-                                            {order.orderP2PStatus === "PENDING" && (
-                                                <>
-                                                    <p>Сделка ждет завершения: </p>
-                                                    <p>
-                                                        Закроется через: {formatTime(countdowns[order.id] || 0)}
-                                                    </p>
-                                                </>
-                                            )}
                                             {order.orderP2PStatus === "CLOSED" && <p>Сделка завершена</p>}
                                             {order.orderP2PStatus === "RETURN" && <p>Сделка не состоялась</p>}
                                         </TableCell>

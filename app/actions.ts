@@ -3,10 +3,7 @@ import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
 import {
     $Enums,
-    Bet, Bet3, Bet4,
-    BetParticipant,
-    BetParticipant3, BetParticipant4, BetStatus,
-    IsCovered,
+    BetStatus,
     OrderP2P,
     PlayerChoice,
     Prisma,
@@ -769,24 +766,6 @@ export async function openSellOrder(orderId: number, userId: number, bankDetails
         return false;
     }
 }// Функция для открытия сделки продажи
-export async function getServerSideProps() {
-    // Проверьте и закройте просроченные сделки перед отображением страницы
-    await checkAndCloseExpiredDeals();
-    // Извлечь другие необходимые данные для страницы
-    const openOrders = await prisma.orderP2P.findMany({
-        where: {orderP2PStatus: 'PENDING'},
-        include: {
-            orderP2PUser1: true,
-            orderP2PUser2: true,
-        },
-    });
-
-    return {
-        props: {
-            openOrders,
-        },
-    };
-}// серверное обновление серверной страницы сделок components\OrderP2PPending.tsx
 export async function updateUserRole(id: number, role: UserRole) {
     try {
         const currentUser = await getUserSession();
