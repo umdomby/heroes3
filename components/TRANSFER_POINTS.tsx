@@ -78,7 +78,7 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, curren
         <div className={`p-4 ${className}`}>
             <div className="flex justify-between items-center mb-4">
                 <div>
-                    <p className="text-lg font-semibold">Баллы: {Math.floor(user.points * 100) / 100}</p>
+                    <p className="text-lg font-semibold">Points: {Math.floor(user.points * 100) / 100}</p>
                 </div>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); handleTransfer(); }} className="space-y-4">
@@ -91,14 +91,24 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, curren
                     className="w-full"
                 />
                 <Input
-                    type="number"
-                    min="50"
-                    max={user.points}
+                    type="text"
                     value={points}
                     onChange={(e) => {
                         const value = e.target.value;
-                        setPoints(value === '' ? 0 : Number(value));
+                        // Удаляем все символы, кроме цифр
+                        const sanitizedValue = value.replace(/[^0-9]/g, '');
+                        // Удаляем ведущие нули
+                        const cleanedValue = sanitizedValue.replace(/^0+(?=\d)/, '');
+                        setPoints(cleanedValue === '' ? 0 : Number(cleanedValue));
                     }}
+                    onBlur={() => {
+                        if (points < 30) {
+                            setErrorMessage('Минимальное количество баллов для передачи - 30');
+                        } else {
+                            setErrorMessage('');
+                        }
+                    }}
+                    placeholder="Количество баллов"
                     required
                     className="w-full"
                 />

@@ -44,15 +44,14 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
     const [referrals, setReferrals] = useState<any[]>([]);
     const [bankDetails, setBankDetails] = useState<any[]>(Array.isArray(data.bankDetails) ? data.bankDetails : []);
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [newBankDetail, setNewBankDetail] = useState({name: '', details: '', description: '', price: ''});
-    const [editedDetail, setEditedDetail] = useState({name: '', details: '', description: '', price: ''});
+    const [newBankDetail, setNewBankDetail] = useState({ name: '', details: '', description: '', price: '' });
+    const [editedDetail, setEditedDetail] = useState({ name: '', details: '', description: '', price: '' });
     const [telegram, setTelegram] = useState<string>(data.telegram || '');
     const [telegramView, setTelegramView] = useState<boolean>(data.telegramView || false);
-    const [twitch, setTwitch] = useState<string>('');
+    const [twitch, setTwitch] = useState<string>(''); // Устанавливаем значение по умолчанию
     const [twitchError, setTwitchError] = useState<string | null>(null);
     const [isPlayer, setIsPlayer] = useState<boolean>(false);
     const [playerName, setPlayerName] = useState<string>('');
-
 
     useEffect(() => {
         const fetchReferrals = async () => {
@@ -67,14 +66,13 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
         fetchReferrals();
     }, []);
 
-
     useEffect(() => {
         const checkIfUserIsPlayer = async () => {
             try {
                 const result = await isUserPlayer();
-                setIsPlayer(result.isPlayer); // Устанавливаем начальное значение isPlayer
-                setTwitch(result.twitch ?? ''); // Provide a default empty string if twitch is null
-                setPlayerName(result.playerName); // Устанавливаем начальное значение имени игрока
+                setIsPlayer(result.isPlayer);
+                setTwitch(result.twitch || 'twitch.tv/heroes3_site');
+                setPlayerName(result.playerName);
             } catch (error) {
                 console.error('Ошибка при проверке статуса игрока:', error);
             }
@@ -614,7 +612,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                 <AccordionTrigger>Зарегистрироваться как игрок</AccordionTrigger>
                                 <AccordionContent>
                                     <div className="mb-4">
-                                        <label className="block text-sm font-medium mb-2">Twitch</label>
+                                        <label className="block text-sm font-medium mb-2">Twitch (можно оставить heroes3_site или введите свой)</label>
                                         <Input
                                             type="text"
                                             value={twitch}
