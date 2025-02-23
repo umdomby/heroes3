@@ -557,7 +557,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
             </div>
             <div className={`flex-container ${className}`}>
                 <div className="buy-section mr-1 ml-1">
-                    <h2 className="text-xl font-bold mb-2">Купить Points</h2>
+                    <h2 className="text-xl font-bold mb-2">Купить Points (min 30)</h2>
                     <Input
                         type="text"
                         value={buyPoints}
@@ -631,7 +631,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                     </Button>
                 </div>
                 <div className="sell-section mr-1 ml-1">
-                    <h2 className="text-xl font-bold mb-2">Продать Points</h2>
+                    <h2 className="text-xl font-bold mb-2">Продать Points (min 30)</h2>
                     <Input
                         type="text"
                         value={sellPoints}
