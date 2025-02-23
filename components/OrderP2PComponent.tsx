@@ -73,25 +73,34 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
     const [successMessage, setSuccessMessage] = useState<string | null>(null); // Состояние для управления сообщением об успешном закрытии сделки
     const [calculatedValues, setCalculatedValues] = useState<{ [key: number]: number | null }>({}); // Состояние для хранения результата умножения
     const [selectedBankDetails, setSelectedBankDetails] = useState<{ [key: number]: string }>({});
-
+    const [currentPendingCount, setCurrentPendingCount] = useState<number>(pendingOrdersCount);
 
     useEffect(() => {
         setOpenOrders(openOrders as OrderP2PWithUser[]);
     }, [openOrders]);
 
     useEffect(() => {
-        const fetchOpenOrders = async () => {
+        const eventSource = new EventSource(`/api/order-p2p?userId=${user.id}`);
+
+        eventSource.onmessage = (event) => {
             try {
-                const orders = await getOpenOrders(); // Fetch the latest open orders
-                setOpenOrders(orders as OrderP2PWithUser[]);
+                const data = JSON.parse(event.data);
+                setOpenOrders(data.openOrders as OrderP2PWithUser[]);
+                setCurrentPendingCount(data.pendingOrdersCount); // Обновляем значение из SSE
             } catch (error) {
-                console.error('Error fetching open orders:', error);
+                console.error('Error parsing SSE data:', error);
             }
         };
-        fetchOpenOrders(); // Initial fetch
-        const intervalId = setInterval(fetchOpenOrders, 5000); // Set interval to fetch every 5 seconds
-        return () => clearInterval(intervalId); // Clear interval on component unmount
-    }, []);
+
+        eventSource.onerror = (error) => {
+            console.error('SSE error:', error);
+            eventSource.close();
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, [user.id]);
 
     // Обработчик выбора банковских реквизитов для покупки
     const handleSelectBankDetailForBuy = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -512,9 +521,9 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                 <div className="flex justify-between items-center">
                     <h1>P2P Order</h1>
                     <Link href="/order-p2p-pending">
-                    <span className="text-blue-500 hover:underline">
-                         Open order : {pendingOrdersCount}
-                    </span>
+                        <span className="text-blue-500 hover:underline">
+                            Open order : {currentPendingCount}
+                        </span>
                     </Link>
                 </div>
             </div>
