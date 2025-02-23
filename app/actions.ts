@@ -984,7 +984,6 @@ export async function globalDataPoints() {
         console.error('Ошибка при обновлении GlobalData:', error);
     }
 }
-
 export async function transferPointsToFund(amount: number) {
     try {
         const session = await getUserSession();
@@ -1032,7 +1031,6 @@ export async function transferPointsToFund(amount: number) {
         throw new Error('Не удалось перевести баллы в фонд');
     }
 }
-
 export async function withdrawPointsFromFund(amount: number) {
     try {
         const session = await getUserSession();
@@ -1089,7 +1087,6 @@ export async function withdrawPointsFromFund(amount: number) {
         throw new Error('Не удалось снять баллы из фонда');
     }
 }
-
 export async function chatUsers(userId?: number, chatText?: string) {
     try {
         if (userId && chatText) {
@@ -1137,7 +1134,6 @@ export async function chatUsers(userId?: number, chatText?: string) {
         throw new Error('Не удалось обработать запрос чата. Пожалуйста, попробуйте еще раз.');
     }
 }
-
 export async function chatUsersGet() {
     try {
         // Fetch the latest 300 messages
@@ -1160,7 +1156,6 @@ export async function chatUsersGet() {
         throw new Error('Failed to fetch chat messages. Please try again.');
     }
 }
-
 export async function chatUsersDelete(messageId: number) {
     try {
         await prisma.chatUsers.delete({
@@ -1171,7 +1166,6 @@ export async function chatUsersDelete(messageId: number) {
         throw new Error('Failed to delete chat message. Please try again.');
     }
 }
-
 export async function registrationPlayer(twitch: string) {
     try {
         console.log(twitch)
@@ -1222,7 +1216,6 @@ export async function registrationPlayer(twitch: string) {
         throw new Error('Не удалось зарегистрироваться как игрок');
     }
 }
-
 export async function isUserPlayer() {
     const currentUser = await getUserSession();
 
@@ -1240,7 +1233,6 @@ export async function isUserPlayer() {
         playerName: player ? player.name : '', // Возвращает имя игрока для редактирования
     };
 }
-
 export async function updateTwitch(twitch: string) {
     try {
         const currentUser = await getUserSession();
@@ -1273,7 +1265,6 @@ export async function updateTwitch(twitch: string) {
         throw new Error('Не удалось обновить Twitch');
     }
 }
-
 export async function updatePlayerName(name: string) {
     try {
         const currentUser = await getUserSession();
@@ -1307,7 +1298,6 @@ export async function updatePlayerName(name: string) {
         throw new Error('Не удалось обновить имя игрока');
     }
 }
-
 
 type GameUserBetDataUser = {
     userId: number;
@@ -1739,32 +1729,7 @@ export async function suspendedBetCheck(betId: number, newValue: boolean) {
         console.error("Ошибка при обновлении suspendedBet:", error);
         throw new Error("Не удалось обновить статус suspendedBet.");
     }
-}
-
-export async function suspendedBetCheck3(betId: number, newValue: boolean) {
-    try {
-        await prisma.bet3.update({
-            where: { id: betId },
-            data: { suspendedBet: newValue },
-        });
-    } catch (error) {
-        console.error("Ошибка при обновлении suspendedBet:", error);
-        throw new Error("Не удалось обновить статус suspendedBet.");
-    }
-}
-
-export async function suspendedBetCheck4(betId: number, newValue: boolean) {
-    try {
-        await prisma.bet4.update({
-            where: { id: betId },
-            data: { suspendedBet: newValue },
-        });
-    } catch (error) {
-        console.error("Ошибка при обновлении suspendedBet:", error);
-        throw new Error("Не удалось обновить статус suspendedBet.");
-    }
-}
-
+}// остановка ставки
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     // Add a constant value to each player's total to stabilize the odds
     const adjustedTotalPlayer1 = totalWithInitPlayer1 + 2000;
@@ -2344,6 +2309,17 @@ export async function closeBetDraw(betId: number) {
 }
 
 
+export async function suspendedBetCheck3(betId: number, newValue: boolean) {
+    try {
+        await prisma.bet3.update({
+            where: { id: betId },
+            data: { suspendedBet: newValue },
+        });
+    } catch (error) {
+        console.error("Ошибка при обновлении suspendedBet:", error);
+        throw new Error("Не удалось обновить статус suspendedBet.");
+    }
+}// остановка ставки
 function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number) {
     // Add a constant value to each player's total to stabilize the odds
     const adjustedTotalPlayer1 = totalWithInitPlayer1 + 3000;
@@ -2951,6 +2927,17 @@ export async function closeBetDraw3(betId: number) {
     }
 }// ничья на 3 игрока
 
+export async function suspendedBetCheck4(betId: number, newValue: boolean) {
+    try {
+        await prisma.bet4.update({
+            where: { id: betId },
+            data: { suspendedBet: newValue },
+        });
+    } catch (error) {
+        console.error("Ошибка при обновлении suspendedBet:", error);
+        throw new Error("Не удалось обновить статус suspendedBet.");
+    }
+}// остановка ставки
 function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number, totalWithInitPlayer4: number) {
     // Add a constant value to each player's total to stabilize the odds
     const adjustedTotalPlayer1 = totalWithInitPlayer1 + 4000;
