@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
-import {checkAndCloseOrderP2PTime} from '@/app/actions';
+import { checkAndCloseOrderP2PTime } from '@/app/actions';
 import {OrderP2PPendingA} from "@/components/OrderP2PPendingA"; // Импортируем функцию
 
 export default async function OrderP2PPendingPage() {

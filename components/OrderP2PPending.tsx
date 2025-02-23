@@ -10,7 +10,6 @@ import {
     confirmBuyOrderCreator,
     confirmSellOrderUser2,
     confirmSellOrderCreator,
-    closeDealTime
 } from '@/app/actions';
 import Link from "next/link";
 
@@ -56,9 +55,6 @@ interface Props {
 
 export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className}) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
-    const [countdowns, setCountdowns] = useState<{ [key: number]: number }>({});
-    const [closedOrders, setClosedOrders] = useState<Set<number>>(new Set());
-
 
     useEffect(() => {
         const eventSource = new EventSource(`/api/order-p2p-pending?userId=${user.id}`);
@@ -87,37 +83,6 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
         };
     }, [user.id]);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCountdowns(prevCountdowns => {
-                const newCountdowns = { ...prevCountdowns };
-                orders.forEach(order => {
-                    if (order.orderP2PStatus === "PENDING") {
-                        const updatedAt = new Date(order.updatedAt);
-                        const now = new Date();
-                        const timeDiff = now.getTime() - updatedAt.getTime();
-                        const timeLeft = 3600000 - timeDiff;
-                        newCountdowns[order.id] = Math.max(0, timeLeft);
-                    }
-                });
-                return newCountdowns;
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [orders]);
-
-    useEffect(() => {
-        Object.entries(countdowns).forEach(([orderId, timeLeft]) => {
-            if (timeLeft <= 0) {
-                const order = orders.find(o => o.id === parseInt(orderId));
-                if (order && !closedOrders.has(order.id)) {
-                    timeCloseDeal(order);
-                }
-            }
-        });
-    }, [countdowns, orders, closedOrders]);
-
     function isOrderBankDetail(detail: any): detail is OrderBankDetail {
         return (
             detail &&
@@ -145,16 +110,11 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
         }
     };
 
-    const timeCloseDeal = async (order: OrderP2PWithUser) => {
-        await closeDealTime(order.id);
-        setClosedOrders(prev => new Set(prev).add(order.id));
-    };
-
-    const formatTime = (milliseconds: number) => {
-        const totalSeconds = Math.floor(milliseconds / 1000);
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    // Функция для вычисления времени авто-закрытия
+    const getAutoCloseTime = (updatedAt: Date) => {
+        const autoCloseDate = new Date(updatedAt);
+        autoCloseDate.setHours(autoCloseDate.getHours() + 1);
+        return autoCloseDate.toLocaleString();
     };
 
     return (
@@ -172,10 +132,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                 <TableBody>
                     <TableRow className="no-hover-bg">
                         <TableCell className="w-[20%] text-center">Telegram</TableCell>
-
                         <TableCell className="w-[15%] text-center">BUY/SELL</TableCell>
                         <TableCell className="w-[10%] text-center">Points</TableCell>
-
                         <TableCell className="w-[25%] text-center">CardID</TableCell>
                         <TableCell className="w-[15%] text-center">State</TableCell>
                         <TableCell className="w-[15%] text-center">Date</TableCell>
@@ -264,6 +222,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                                         ) : (
                                             <p>Нет доступных банковских реквизитов</p>
                                         )}
+                                        <p>Автозакрытие сделки начнется: {getAutoCloseTime(order.updatedAt)}</p>
                                         <p>User1: {order.orderP2PUser1.fullName} - {order.orderP2PCheckUser1 ? "Да" : "Нет"}</p>
                                         <p>User2: {order.orderP2PUser2 ? `${order.orderP2PUser2.fullName} - ${order.orderP2PCheckUser2 ? "Да" : "Нет"}` : "Ожидание"}</p>
                                     </div>

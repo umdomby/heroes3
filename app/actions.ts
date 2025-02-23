@@ -3547,31 +3547,40 @@ export async function closeBetDraw4(betId: number) {
 
 export async function checkAndCloseOrderP2PTime() {
     try {
-        // Fetch the current update time for OrderP2P
-        const updateTimeRecord = await prisma.updateDateTime.findUnique({
-            where: { id: 1 }, // Assuming there's a single record with id 1
+        // Пытаемся найти запись с временем обновления
+        let updateTimeRecord = await prisma.updateDateTime.findUnique({
+            where: { id: 1 }, // Предполагаем, что есть одна запись с id 1
         });
 
+        const now = new Date();
+
         if (!updateTimeRecord) {
-            throw new Error('Update time record not found');
+            // Если запись не существует, создаем новую
+            updateTimeRecord = await prisma.updateDateTime.create({
+                data: {
+                    UDTOrderP2P: now,
+                },
+            });
+            await checkAndCloseOrderP2P();
+            // Поскольку это первое создание, проверка просроченных сделок не требуется
+            return;
         }
 
-        const now = new Date();
-        const lastUpdate = updateTimeRecord.UDTOrderP2P || new Date(0); // Default to epoch if null
+        const lastUpdate = updateTimeRecord.UDTOrderP2P || new Date(0); // По умолчанию используем эпоху, если значение null
 
-        // Check if more than an hour has passed since the last update
-        if (now.getTime() - lastUpdate.getTime() > 3600000) { // 60 minutes in milliseconds
-            // Update the UDTOrderP2P field to the current time
+        // Проверяем, прошло ли больше часа с момента последнего обновления
+        if (now.getTime() - lastUpdate.getTime() > 3600000) { // 60 минут в миллисекундах
+            // Обновляем поле UDTOrderP2P до текущего времени
             await prisma.updateDateTime.update({
                 where: { id: 1 },
                 data: { UDTOrderP2P: now },
             });
 
-            // Call the function to check and close expired deals
+            // Вызываем функцию для проверки и закрытия просроченных сделок
             await checkAndCloseOrderP2P();
         }
     } catch (error) {
-        console.error('Error in checkAndCloseOrderP2PTime:', error);
+        console.error('Ошибка в checkAndCloseOrderP2PTime:', error);
     }
 }
 
@@ -3581,7 +3590,7 @@ export async function checkAndCloseOrderP2P() {
         where: {
             orderP2PStatus: 'PENDING',
             updatedAt: {
-                lt: new Date(now.getTime() - 3600000), // 60 minutes ago
+                lt: new Date(now.getTime() - 3600000), // 60 минут назад
             },
         },
     });

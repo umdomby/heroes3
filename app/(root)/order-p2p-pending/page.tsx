@@ -7,10 +7,11 @@ import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { OrderP2PPending } from "@/components/OrderP2PPending";
-import { checkAndCloseExpiredDeals } from '@/app/actions';
+import {checkAndCloseOrderP2PTime} from "@/app/actions";
+
 
 export default async function OrderP2PPendingPage() {
-    await checkAndCloseExpiredDeals();
+    await checkAndCloseOrderP2PTime();
     const session = await getUserSession();
 
     if (!session) {

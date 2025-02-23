@@ -111,7 +111,7 @@ export const OrderP2PClosedA: React.FC<Props> = ({ user, closeOrders, className,
 
                         <TableCell className="w-[25%] text-center">CardID</TableCell>
                         <TableCell className="w-[15%] text-center">State</TableCell>
-                        <TableCell className="w-[15%] text-center">Date</TableCell>
+                        <TableCell className="w-[15%] text-center">Date Closed</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
@@ -142,7 +142,7 @@ export const OrderP2PClosedA: React.FC<Props> = ({ user, closeOrders, className,
                                         </TableCell>
                                         <TableCell className="w-[15%] text-center">
                                             <p>
-                                                {new Date(order.createdAt).toLocaleString()}
+                                                {new Date(order.updatedAt).toLocaleString()}
                                             </p>
                                         </TableCell>
                                     </TableRow>
