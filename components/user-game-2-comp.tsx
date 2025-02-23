@@ -688,34 +688,33 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                     bet.checkWinUser1 === WinGameUserBet.LOSS ? 'text-red-500' :
                                                         bet.checkWinUser1 === WinGameUserBet.DRAW ? 'text-yellow-500' : ''
                                             }>
-                                                {bet.gameUser1Bet.telegram}, {" "} Bet: {bet.betUser1}
+                                                {bet.gameUser1Bet.telegram}, {" "} Bet: {bet.betUser1} {" "}
+                                                {bet.gameUser1Rating !== null ? (
+                                                    <span
+                                                        className={bet.gameUser1Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
+                                                        {bet.gameUser1Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
+                                                    </span>
+                                                ) : (
+                                                    <div className="text-gray-500">нет голоса</div>
+                                                )}
                                             </div>
                                             <div className={
                                                 bet.checkWinUser2 === WinGameUserBet.WIN ? 'text-green-500' :
                                                     bet.checkWinUser2 === WinGameUserBet.LOSS ? 'text-red-500' :
                                                         bet.checkWinUser2 === WinGameUserBet.DRAW ? 'text-yellow-500' : ''
                                             }>
-                                                {bet.gameUser2Bet?.telegram || "No Telegram"}, {" "} Bet: {bet.betUser2}
+                                                {bet.gameUser2Bet?.telegram || "No Telegram"}, {" "} Bet: {bet.betUser2} {" "}
+                                                {bet.gameUser2Rating !== null ? (
+                                                    <span
+                                                        className={bet.gameUser2Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
+                                                        {bet.gameUser2Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
+                                                    </span>
+                                                ) : (
+                                                    <div className="text-gray-500">Оппонент не голосовал</div>
+                                                )}
                                             </div>
 
                                             {user.id === bet.gameUser1Bet.id && (
-                                                <div>
-                                                    <Button
-                                                        onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.PLUS)}
-                                                        className={`${bet.gameUser1Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'} h-6`}
-                                                    >
-                                                        Плюс
-                                                    </Button>
-                                                    <Button
-                                                        onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.MINUS)}
-                                                        className={`${bet.gameUser1Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'} h-6`}
-                                                    >
-                                                        Минус
-                                                    </Button>
-                                                </div>
-                                            )}
-
-                                            {bet.gameUser2Bet && user.id === bet.gameUser2Bet.id && (
                                                 <div>
                                                     <Button
                                                         onClick={() => handleRating(bet.id, 'user2', RatingUserEnum.PLUS)}
@@ -732,24 +731,22 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                 </div>
                                             )}
 
-                                            <div className="flex space-x-4 mt-2">
-                                                {bet.gameUser1Rating !== null ? (
-                                                    <div
-                                                        className={bet.gameUser1Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
-                                                        {bet.gameUser1Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-gray-500">нет голоса</div>
-                                                )}
-                                                {bet.gameUser2Rating !== null ? (
-                                                    <div
-                                                        className={bet.gameUser2Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
-                                                        {bet.gameUser2Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-gray-500">Оппонент не голосовал</div>
-                                                )}
-                                            </div>
+                                            {bet.gameUser2Bet && user.id === bet.gameUser2Bet.id && (
+                                                <div>
+                                                    <Button
+                                                        onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.PLUS)}
+                                                        className={`${bet.gameUser1Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'} h-6`}
+                                                    >
+                                                        Плюс
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.MINUS)}
+                                                        className={`${bet.gameUser1Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'} h-6`}
+                                                    >
+                                                        Минус
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     <div>Старт: {new Date(bet.createdAt).toLocaleString()}</div>
