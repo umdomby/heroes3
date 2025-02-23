@@ -3545,8 +3545,34 @@ export async function closeBetDraw4(betId: number) {
 }// ничья на 4 игрока
 
 
-export async function checkAndCloseOrderP2PTime () {
+export async function checkAndCloseOrderP2PTime() {
+    try {
+        // Fetch the current update time for OrderP2P
+        const updateTimeRecord = await prisma.updateDateTime.findUnique({
+            where: { id: 1 }, // Assuming there's a single record with id 1
+        });
 
+        if (!updateTimeRecord) {
+            throw new Error('Update time record not found');
+        }
+
+        const now = new Date();
+        const lastUpdate = updateTimeRecord.UDTOrderP2P || new Date(0); // Default to epoch if null
+
+        // Check if more than an hour has passed since the last update
+        if (now.getTime() - lastUpdate.getTime() > 3600000) { // 60 minutes in milliseconds
+            // Update the UDTOrderP2P field to the current time
+            await prisma.updateDateTime.update({
+                where: { id: 1 },
+                data: { UDTOrderP2P: now },
+            });
+
+            // Call the function to check and close expired deals
+            await checkAndCloseOrderP2P();
+        }
+    } catch (error) {
+        console.error('Error in checkAndCloseOrderP2PTime:', error);
+    }
 }
 
 export async function checkAndCloseOrderP2P() {
