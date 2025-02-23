@@ -52,11 +52,9 @@ interface Props {
     openOrders: OrderP2P[];
     className?: string;
     user: User;
-    currentPage: number;
-    totalPages: number;
 }
 
-export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, currentPage, totalPages }) => {
+export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className}) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
     const [countdowns, setCountdowns] = useState<{ [key: number]: number }>({});
     const [closedOrders, setClosedOrders] = useState<Set<number>>(new Set());
