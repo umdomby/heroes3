@@ -1,5 +1,4 @@
 // /components/OrderP2PPending.tsx
-
 "use client"
 import React, { useEffect, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -14,7 +13,6 @@ import {
     closeDealTime
 } from '@/app/actions';
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
 
 interface OrderBankDetail {
     name: string;
@@ -62,10 +60,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
     const [countdowns, setCountdowns] = useState<{ [key: number]: number }>({});
     const [closedOrders, setClosedOrders] = useState<Set<number>>(new Set());
-    const router = useRouter();
 
-    const [currentPageState, setCurrentPageState] = useState(currentPage);
-    const [totalPagesState, setTotalPagesState] = useState(totalPages);
 
     useEffect(() => {
         const eventSource = new EventSource(`/api/order-p2p-pending?userId=${user.id}`);
@@ -79,7 +74,6 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
                 }
 
                 setOpenOrders(data.openOrders as OrderP2PWithUser[]);
-                setTotalPagesState(data.totalPages);
             } catch (error) {
                 console.error('Error parsing SSE data:', error);
             }
@@ -93,7 +87,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
         return () => {
             eventSource.close();
         };
-    }, [user.id, currentPageState]); // Зависимости для обновления при смене страницы или пользователя
+    }, [user.id]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -163,21 +157,6 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    };
-
-// Обновляем функции навигации
-    const handleNextPage = () => {
-        if (currentPageState < totalPagesState) {
-            setCurrentPageState(prev => prev + 1);
-            router.push(`/order-p2p-pending?page=${currentPageState + 1}`);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (currentPageState > 1) {
-            setCurrentPageState(prev => prev - 1);
-            router.push(`/order-p2p-pending?page=${currentPageState - 1}`);
-        }
     };
 
     return (
@@ -320,17 +299,6 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
                     </AccordionItem>
                 ))}
             </Accordion>
-            <div className="pagination-buttons flex justify-center mt-6">
-                <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
-                    Previous
-                </Button>
-                <span className="mx-3 text-lg font-semibold">
-                    Page {currentPage} of {totalPages}
-                </span>
-                <Button onClick={handleNextPage} disabled={currentPage >= totalPages}>
-                    Next
-                </Button>
-            </div>
         </div>
     );
 };

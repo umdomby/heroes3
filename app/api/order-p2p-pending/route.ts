@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/prisma/prisma-client';
 
+// В route.ts
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const betsPerPage = 100;
-    const skip = (page - 1) * betsPerPage;
 
     if (!userId) {
         return new NextResponse('User ID is required', { status: 400 });
@@ -22,18 +20,16 @@ export async function GET(request: Request) {
                 where: {
                     OR: [
                         {
-                            orderP2PUser1Id: parseInt(userId), // Правильное использование ID
+                            orderP2PUser1Id: parseInt(userId),
                             orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
                         },
                         {
-                            orderP2PUser2Id: parseInt(userId), // Правильное использование ID
+                            orderP2PUser2Id: parseInt(userId),
                             orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
                         }
                     ]
                 },
-                orderBy: {
-                    createdAt: 'desc',
-                },
+                orderBy: { createdAt: 'desc' },
                 include: {
                     orderP2PUser1: {
                         select: {
@@ -51,33 +47,11 @@ export async function GET(request: Request) {
                             telegram: true,
                         }
                     }
-                },
-                skip: skip,
-                take: betsPerPage,
-            });
-
-            const totalOrders = await prisma.orderP2P.count({
-                where: {
-                    OR: [
-                        {
-                            orderP2PUser1Id: parseInt(userId), // Правильное использование ID
-                            orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
-                        },
-                        {
-                            orderP2PUser2Id: parseInt(userId), // Правильное использование ID
-                            orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
-                        }
-                    ]
                 }
             });
 
-            const totalPages = Math.ceil(totalOrders / betsPerPage);
-
             const data = {
-                openOrders,
-                totalOrders,
-                currentPage: page,
-                totalPages
+                openOrders
             };
 
             writer.write(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));

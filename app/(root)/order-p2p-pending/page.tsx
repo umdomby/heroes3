@@ -1,5 +1,5 @@
 // /app/(root)/order-p2p-pending/page.tsx
-
+"use server"
 import { Container } from '@/components/container';
 import { prisma } from '@/prisma/prisma-client';
 import { redirect } from 'next/navigation';
@@ -9,12 +9,8 @@ import { getUserSession } from "@/components/lib/get-user-session";
 import { OrderP2PPending } from "@/components/OrderP2PPending";
 import { checkAndCloseExpiredDeals } from '@/app/actions';
 
-
-
-export default async function OrderP2PPendingPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-    const resolvedSearchParams = await searchParams; // Await the searchParams if it's a Promise
+export default async function OrderP2PPendingPage() {
     await checkAndCloseExpiredDeals();
-
     const session = await getUserSession();
 
     if (!session) {
@@ -31,10 +27,6 @@ export default async function OrderP2PPendingPage({ searchParams }: { searchPara
     if (user.role === 'BANED') {
         return redirect('/');
     }
-
-    const page = parseInt(resolvedSearchParams.page ?? '1', 10);
-    const betsPerPage = 100;
-    const skip = (page - 1) * betsPerPage;
 
     const openOrders = await prisma.orderP2P.findMany({
         where: {
@@ -69,33 +61,17 @@ export default async function OrderP2PPendingPage({ searchParams }: { searchPara
                     telegram: true,
                 }
             }
-        },
-        skip: skip,
-        take: betsPerPage,
-    });
-
-    const totalOrders = await prisma.orderP2P.count({
-        where: {
-            OR: [
-                {
-                    orderP2PUser1: { id: user.id },
-                    orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
-                },
-                {
-                    orderP2PUser2: { id: user.id },
-                    orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
-                }
-            ]
         }
     });
-
-    const totalPages = Math.ceil(totalOrders / betsPerPage);
 
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <OrderP2PPending user={user} openOrders={openOrders} currentPage={page} totalPages={totalPages} />
+                <OrderP2PPending user={user} openOrders={openOrders} />
             </Suspense>
         </Container>
     );
 }
+
+
+
