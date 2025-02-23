@@ -520,7 +520,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
             <div className={className}>
                 <div className="flex justify-between items-center">
                     <h1>P2P Order</h1>
-                    <Link href="/order-p2p-pending">
+                    <Link href="/order-p2p-pending" target="_blank">
                         <span className="text-blue-500 hover:underline">
                             Open order : {currentPendingCount}
                         </span>

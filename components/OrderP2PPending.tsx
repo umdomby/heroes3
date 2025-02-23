@@ -155,7 +155,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className, 
             Points: {Math.floor(user.points * 100) / 100}
             <div className="flex justify-between items-center">
                 <h1>Open Orders</h1>
-                <Link href="/order-p2p">
+                <Link href="/order-p2p" target="_blank">
                     <span className="text-blue-500 hover:underline">
                         P2P Order
                     </span>
