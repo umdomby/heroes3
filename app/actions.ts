@@ -379,7 +379,6 @@ export async function updateBankDetails(updatedDetails: { name: string; details:
     }
 } // редактирование банковских реквизитов
 
-
 export async function createBuyOrder(points: number, bankDetails: any[], allowPartial: boolean) {
     try {
         const currentUser = await getUserSession();
@@ -2307,7 +2306,6 @@ export async function closeBetDraw(betId: number) {
         }
     }
 }
-
 
 export async function suspendedBetCheck3(betId: number, newValue: boolean) {
     try {
