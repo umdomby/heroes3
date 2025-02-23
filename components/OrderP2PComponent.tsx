@@ -835,6 +835,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                   Итоговая сумма: {calculatedValues[order.id]}
                 </span>
                             )}
+                            <div className="text-center">
                             {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id === user.id && (
                                 <Button className="ml-3 h-6" onClick={() => handleCloseBuyOrder(order)}>
                                     Закрыть сделку покупки
@@ -862,6 +863,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                                     Заключить сделку
                                 </Button>
                             )}
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
                 ))}
