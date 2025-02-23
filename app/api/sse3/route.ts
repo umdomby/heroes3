@@ -17,7 +17,7 @@ export async function GET(request: Request) {
                     try {
                         const data = `data: ${JSON.stringify({ type: 'keep-alive' })}\n\n`;
                         controller.enqueue(new TextEncoder().encode(data));
-                        console.log('Sent keep-alive message');
+                        // console.log('Sent keep-alive message');
                     } catch (error) {
                         console.error('Ошибка при записи данных:', error);
                         clearInterval(intervalId);
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
 
                         // Если есть изменения, отправляем их клиенту
                         if (changes.length > 0) {
-                            console.log('Changes detected:', changes);
+                            //console.log('Changes detected:', changes);
                             changes.forEach(change => {
                                 const data = `data: ${JSON.stringify({ type: 'update', data: change })}\n\n`;
                                 controller.enqueue(new TextEncoder().encode(data));
