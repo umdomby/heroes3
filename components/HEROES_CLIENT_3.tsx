@@ -540,18 +540,6 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                                         {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="w-10">
-                                                    {bet.creatorId === user?.id && (
-                                                        <div className="flex items-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={bet.suspendedBet}
-                                                                onChange={() => handleSuspendedBetChange(bet.id, !bet.suspendedBet)}
-                                                                className="mr-2"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </TableCell>
                                             </TableRow>
                                         </TableBody>
                                     </Table>
@@ -893,6 +881,16 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                             >
                                                 Закрыть ставку
                                             </Button>
+
+                                                <div className="flex items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={bet.suspendedBet}
+                                                        onChange={() => handleSuspendedBetChange(bet.id, !bet.suspendedBet)}
+                                                        className="mr-2"
+                                                    />
+                                                </div>
+
                                         </div>
                                     )}
                                 </AccordionContent>

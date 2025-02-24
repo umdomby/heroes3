@@ -575,18 +575,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                         {Math.floor(bet.oddsBetPlayer4 * 100) / 100}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="w-10">
-                                                    {bet.creatorId === user?.id && (
-                                                        <div className="flex items-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={bet.suspendedBet}
-                                                                onChange={() => handleSuspendedBetChange(bet.id, !bet.suspendedBet)}
-                                                                className="mr-2"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </TableCell>
                                             </TableRow>
                                         </TableBody>
                                     </Table>
@@ -733,22 +721,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                                     participant.overlap > 0
                                                         ? Math.floor((participant.overlap / profitToCover) * 10000) / 100
                                                         : 0;
-
-                                                // let overlapStatus = "";
-                                                // switch (participant.isCovered) {
-                                                //     case "OPEN":
-                                                //         overlapStatus =
-                                                //             "Ваша ставка не перекрыта (0 Points, 0%)";
-                                                //         break;
-                                                //     case "CLOSED":
-                                                //         overlapStatus = `Ваша ставка полностью перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                //         break;
-                                                //     case "PENDING":
-                                                //         overlapStatus = `Ваша ставка частично перекрыта на ${Math.floor(participant.overlap * 100) / 100} Points (${overlapPercentage}%)`;
-                                                //         break;
-                                                //     default:
-                                                //         overlapStatus = "Неизвестный статус перекрытия.";
-                                                // }
 
                                                 return (
                                                     <div
@@ -1011,6 +983,14 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                             >
                                                 Закрыть ставку
                                             </Button>
+                                                <div className="flex items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={bet.suspendedBet}
+                                                        onChange={() => handleSuspendedBetChange(bet.id, !bet.suspendedBet)}
+                                                        className="mr-2"
+                                                    />
+                                                </div>
                                             {closeBetError && (
                                                 <p className="text-red-500">{closeBetError}</p>
                                             )}
