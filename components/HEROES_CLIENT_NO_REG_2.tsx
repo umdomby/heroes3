@@ -12,7 +12,7 @@ import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { unstable_batchedUpdates } from "react-dom";
-import { useUser } from "@/hooks/useUser";
+
 
 import {
     Accordion,

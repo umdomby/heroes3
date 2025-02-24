@@ -14,7 +14,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import {placeBet4, closeBet4, closeBetDraw4, suspendedBetCheck4} from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
-import { useUser } from "@/hooks/useUser";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
     Accordion,
@@ -82,12 +82,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         refreshInterval: 10000,
         revalidateOnFocus: true,
     });
-    const {
-        user: userUp,
-        isLoading: isLoadingUser,
-        isError: isErrorUser,
-        mutate: mutateUser,
-    } = useUser(user ? user.id : null);
+
 
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
     const [selectedWinners, setSelectedWinners] = useState<{ [key: number]: number | "draw" | null }>({});
@@ -115,7 +110,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                     data.type === "delete"
                 ) {
                     mutate();
-                    mutateUser();
+                    
                 }
             });
         };
@@ -131,10 +126,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         return () => {
             source.close();
         };
-    }, [mutate, mutateUser]);
-
-    if (isLoadingUser) return <div>Загрузка данных пользователя...</div>;
-    if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
+    }, [mutate]);
 
     const filteredBets =
         bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
@@ -384,7 +376,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             }
 
             mutate();
-            mutateUser();
+            
             setSelectedWinners((prev) => ({ ...prev, [currentBet.id]: null }));
             setCloseBetError(null);
             closeConfirmationDialog();

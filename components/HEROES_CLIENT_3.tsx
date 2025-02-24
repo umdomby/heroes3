@@ -14,7 +14,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import {placeBet3, closeBet3, closeBetDraw3, suspendedBetCheck3} from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
-import { useUser } from "@/hooks/useUser";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 import {
@@ -80,12 +80,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
         refreshInterval: 10000, // Опционально: периодическое обновление
         revalidateOnFocus: true, // Обновление при фокусе на вкладке
     });
-    const {
-        user: userUp,
-        isLoading: isLoadingUser,
-        isError: isErrorUser,
-        mutate: mutateUser,
-    } = useUser(user ? user.id : null);
+
 
     const [closeBetError, setCloseBetError] = useState<string | null>(null);
     const [selectedWinners, setSelectedWinners] = useState<{ [key: number]: number | "draw" | null }>({});
@@ -113,7 +108,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                     data.type === "delete"
                 ) {
                     mutate(); // Обновляем данные ставок
-                    mutateUser(); // Обновляем данные пользователя
+                     // Обновляем данные пользователя
                 }
             });
         };
@@ -129,11 +124,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
         return () => {
             source.close();
         };
-    }, [mutate, mutateUser]);
-
-    // Условные операторы перенесены после всех хуков
-    if (isLoadingUser) return <div>Загрузка данных пользователя...</div>;
-    if (isErrorUser) return <div>Ошибка при загрузке данных пользователя</div>;
+    }, [mutate]);
 
     // Фильтрация ставок по статусу OPEN
     const filteredBets = bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
@@ -363,7 +354,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             }
 
             mutate();
-            mutateUser();
+            
             setSelectedWinners((prev) => ({ ...prev, [currentBet.id]: null }));
             setCloseBetError(null);
             closeConfirmationModal();
