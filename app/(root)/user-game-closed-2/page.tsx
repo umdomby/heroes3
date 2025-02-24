@@ -3,12 +3,12 @@
 import { prisma } from '@/prisma/prisma-client';
 import React from "react";
 import { getUserSession } from "@/components/lib/get-user-session";
-import { UserGame2Comp } from "@/components/user-game-2-comp";
 import { Container } from '@/components/container';
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import {UserGame2Closed} from "@/components/user-game-2-closed";
 
-export default async function UserGame2Page() {
+export default async function UserGameClosed2Page() {
     const session = await getUserSession();
 
     if (!session) {
@@ -44,7 +44,7 @@ export default async function UserGame2Page() {
     const gameUserBetsData = await prisma.gameUserBet.findMany({
         where: {
             statusUserBet: {
-                in: ['OPEN', 'START'], // Фильтрация по статусу
+                in: ['CLOSED'], // Фильтрация по статусу
             },
         },
         include: {
@@ -61,8 +61,8 @@ export default async function UserGame2Page() {
 
     return (
         <Container className="flex flex-col my-10 w-[96%]">
-            <UserGame2Comp
-                gameUserBetsData={gameUserBetsData} // Убедитесь, что здесь используется правильный синтаксис
+            <UserGame2Closed
+                gameUserBetsData = {gameUserBetsData}
                 user={user}
             />
         </Container>

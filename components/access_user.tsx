@@ -32,14 +32,19 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                         HOME
                                     </DropdownMenuRadioItem>
                                 </Link>
+                                <Link href="/user-game-create-2">
+                                    <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
+                                        GAME USER 2 CREATE
+                                    </DropdownMenuRadioItem>
+                                </Link>
                                 <Link href="/user-game-2">
                                     <DropdownMenuRadioItem value="user-game-2" className="cursor-pointer">
                                         GAME USER 2
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <Link href="/user-game-create-2">
-                                    <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
-                                        GAME USER 2 CREATE
+                                <Link href="/user-game-closed-2">
+                                    <DropdownMenuRadioItem value="user-game-closed-2" className="cursor-pointer">
+                                        GAME USER 2 CLOSED
                                     </DropdownMenuRadioItem>
                                 </Link>
                                 <Link href="/user-game-bet-2">

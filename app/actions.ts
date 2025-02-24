@@ -1604,7 +1604,7 @@ export async function gameRatingGameUsers(gameData: {
                 data: { gameUser2Rating: gameData.user2Rating },
             });
         }
-
+        revalidatePath('/user-game-closed-2')
         console.log('Рейтинг успешно обновлен');
     } catch (error) {
         console.error('Ошибка при обновлении рейтинга:', error);

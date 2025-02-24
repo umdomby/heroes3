@@ -9,6 +9,11 @@ export async function GET(request: Request) {
     const sendUpdate = async () => {
         try {
             const gameUserBets = await prisma.gameUserBet.findMany({
+                where: {
+                    statusUserBet: {
+                        in: ['OPEN', 'START'], // Фильтрация по статусу
+                    },
+                },
                 include: {
                     gameUser1Bet: true,
                     gameUser2Bet: true,
@@ -18,15 +23,7 @@ export async function GET(request: Request) {
                 },
             });
 
-            const statusOrder = { OPEN: 1, START: 2, CLOSED: 3 };
-            const sortedGameUserBets = gameUserBets.sort((a, b) => {
-                if (statusOrder[a.statusUserBet] !== statusOrder[b.statusUserBet]) {
-                    return statusOrder[a.statusUserBet] - statusOrder[b.statusUserBet];
-                }
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            });
-
-            writer.write(encoder.encode(`data: ${JSON.stringify(sortedGameUserBets)}\n\n`));
+            writer.write(encoder.encode(`data: ${JSON.stringify(gameUserBets)}\n\n`));
         } catch (error) {
             console.error('Failed to fetch data:', error);
             writer.write(encoder.encode('data: {"error": "Failed to fetch data"}\n\n'));

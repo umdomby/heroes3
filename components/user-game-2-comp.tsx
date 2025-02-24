@@ -18,6 +18,21 @@ import RatingUserEnum = $Enums.RatingUserEnum;
 
 interface Props {
     user: User;
+    gameUserBetsData: (GameUserBet & {
+        gameUser1Bet: User;
+        gameUser2Bet: User | null;
+        category: Category;
+        product: Product;
+        productItem: ProductItem;
+        gameUserBetDetails: string;
+        betUser1: number;
+        gameUserBetOpen: boolean;
+        statusUserBet: GameUserBetStatus;
+        gameUserBetDataUsers2: JSON;
+        checkWinUser1: WinGameUserBet | null;
+        checkWinUser2: WinGameUserBet | null;
+        gameUser1Rating: RatingUserEnum;
+    })[];
 }
 
 interface GameUserBetDataUser {
@@ -27,7 +42,7 @@ interface GameUserBetDataUser {
     userTelegram: string;
 }
 
-export const UserGame2Comp: React.FC<Props> = ({user}) => {
+export const UserGame2Comp: React.FC<Props> = ({user, gameUserBetsData}) => {
     const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
         gameUser1Bet: User;
         gameUser2Bet: User | null;
@@ -59,22 +74,10 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
 
 
     useEffect(() => {
-        // Fetch initial data
-        const fetchData = async () => {
-            try {
-                const response = await fetch('/api/game-user-get');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                setGameUserBets(data);
-            } catch (error) {
-                console.error("Failed to fetch data:", error);
-            }
-        };
+        setGameUserBets(gameUserBetsData);
+    }, [gameUserBetsData]);
 
-        fetchData();
-
+    useEffect(() => {
         // Set up SSE
         const eventSource = new EventSource('/api/game-user-sse');
         eventSource.onmessage = (event) => {
