@@ -58,26 +58,26 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                         <RegisterForm onClose={handleClose}/>
                     )}
                     <hr/>
-                    <div className="flex gap-2">
+                    {/*<div className="flex gap-2">*/}
 
-                        {/*<Button*/}
-                        {/*  variant="secondary"*/}
-                        {/*  onClick={() =>*/}
-                        {/*    signIn('github', {*/}
-                        {/*      callbackUrl: '/',*/}
-                        {/*      redirect: true,*/}
-                        {/*    })*/}
-                        {/*  }*/}
-                        {/*  type="button"*/}
-                        {/*  className="gap-2 h-12 p-2 flex-1">*/}
-                        {/*  <img className="w-6 h-6" src="https://github.githubassets.com/favicons/favicon.svg" />*/}
-                        {/*  GitHub*/}
-                        {/*</Button>*/}
+                    {/*    <Button*/}
+                    {/*      variant="secondary"*/}
+                    {/*      onClick={() =>*/}
+                    {/*        signIn('github', {*/}
+                    {/*          callbackUrl: '/',*/}
+                    {/*          redirect: true,*/}
+                    {/*        })*/}
+                    {/*      }*/}
+                    {/*      type="button"*/}
+                    {/*      className="gap-2 h-12 p-2 flex-1">*/}
+                    {/*      <img className="w-6 h-6" src="https://github.githubassets.com/favicons/favicon.svg" />*/}
+                    {/*      GitHub*/}
+                    {/*    </Button>*/}
 
-                    </div>
-                    {/*<Button variant="outline" onClick={onSwitchType} type="button" className="h-12">*/}
-                    {/*    {type !== 'login' ? 'Войти' : 'Регистрация'}*/}
-                    {/*</Button>*/}
+                    {/*</div>*/}
+                    <Button variant="outline" onClick={onSwitchType} type="button" className="h-12">
+                        {type !== 'login' ? 'Войти' : 'Регистрация'}
+                    </Button>
             </DialogContent>
         </Dialog>
 );
