@@ -49,7 +49,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                 >
                     <Button variant="outline" className="h-5 w-full">USER</Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
+                <DropdownMenuContent className="w-46">
                     <DropdownMenuRadioGroup>
                         <Link href="/">
                             <DropdownMenuRadioItem value="home" className="cursor-pointer">
@@ -60,21 +60,21 @@ export const Access_user: React.FC<Props> = ({className}) => {
                             <DropdownMenuSubTrigger>
                                 P2P
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-56">
+                            <DropdownMenuSubContent className="w-46">
                                 <DropdownMenuRadioGroup>
                                     <Link href="/order-p2p">
                                         <DropdownMenuRadioItem value="order-p2p" className="cursor-pointer">
-                                            P2P TRADE
+                                            TRADE
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/order-p2p-pending">
                                         <DropdownMenuRadioItem value="order-p2p-pending" className="cursor-pointer">
-                                            P2P PENDING
+                                            PENDING
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/order-p2p-closed">
                                         <DropdownMenuRadioItem value="order-p2p-closed" className="cursor-pointer">
-                                            P2P CLOSED
+                                            CLOSED
                                         </DropdownMenuRadioItem>
                                     </Link>
                                 </DropdownMenuRadioGroup>
@@ -82,21 +82,21 @@ export const Access_user: React.FC<Props> = ({className}) => {
                         </DropdownMenuSub>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
-                                GAME USERS
+                                GAME USERS 2
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent className="w-56">
                                 <DropdownMenuRadioGroup>
                                     <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
-                                        GAME USER 2 CREATE
+                                        PLAYER 2 CREATE
                                     </DropdownMenuRadioItem>
                                     <Link href="/user-game-2">
                                         <DropdownMenuRadioItem value="user-game-2" className="cursor-pointer">
-                                            GAME USER 2 START
+                                            PLAYER 2 START
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/user-game-closed-2">
                                         <DropdownMenuRadioItem value="user-game-closed-2" className="cursor-pointer">
-                                            GAME USER 2 CLOSED
+                                            PLAYER 2 CLOSED
                                         </DropdownMenuRadioItem>
                                     </Link>
                                 </DropdownMenuRadioGroup>
@@ -110,22 +110,22 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                 <DropdownMenuRadioGroup>
                                     <Link href="/bet-closed-2-3-4">
                                         <DropdownMenuRadioItem value="bet-closed-2-3-4" className="cursor-pointer">
-                                            BET CLOSED ALL
+                                            ALL
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/bet-closed-2">
                                         <DropdownMenuRadioItem value="bet-closed-2" className="cursor-pointer">
-                                            BET CLOSED 2
+                                            PLAYER 2
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/bet-closed-3">
                                         <DropdownMenuRadioItem value="bet-closed-3" className="cursor-pointer">
-                                            BET CLOSED 3
+                                            PLAYER 3
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/bet-closed-4">
                                         <DropdownMenuRadioItem value="bet-closed-4" className="cursor-pointer">
-                                            BET CLOSED 4
+                                            PLAYER 4
                                         </DropdownMenuRadioItem>
                                     </Link>
                                 </DropdownMenuRadioGroup>
@@ -140,19 +140,19 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                     <Link href="/bet-winn-lose-closed-2">
                                         <DropdownMenuRadioItem value="bet-winn-lose-closed-2"
                                                                className="cursor-pointer">
-                                            WIN/LOSE PLAYERS 2
+                                            PLAYERS 2
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/bet-winn-lose-closed-3">
                                         <DropdownMenuRadioItem value="bet-winn-lose-closed-3"
                                                                className="cursor-pointer">
-                                            WIN/LOSE PLAYERS 3
+                                            PLAYERS 3
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/bet-winn-lose-closed-4">
                                         <DropdownMenuRadioItem value="bet-winn-lose-closed-4"
                                                                className="cursor-pointer">
-                                            WIN/LOSE PLAYERS 4
+                                            PLAYERS 4
                                         </DropdownMenuRadioItem>
                                     </Link>
                                 </DropdownMenuRadioGroup>
