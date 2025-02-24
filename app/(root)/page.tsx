@@ -13,28 +13,15 @@ import { HEROES_CLIENT_3 } from "@/components/HEROES_CLIENT_3";
 import { HEROES_CLIENT_NO_REG_3 } from "@/components/HEROES_CLIENT_NO_REG_3";
 import { HEROES_CLIENT_4 } from "@/components/HEROES_CLIENT_4";
 import { HEROES_CLIENT_NO_REG_4 } from "@/components/HEROES_CLIENT_NO_REG_4";
-import { User } from "@prisma/client";
 import GlobalDataComponent from "@/components/globalData";
 import {SheetChat} from "@/components/SheetChat";
-
-
+import {PointsUser} from "@/components/PointsUser";
 
 const FixedLink = () => (
     <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
         <p className="text-md text-blue-500 font-bold">
             <Link className="text-blue-500 hover:text-green-300 font-bold text-xl" href={'https://t.me/navatar85'}
                   target="_blank">@navatar85</Link>
-        </p>
-    </div>
-);
-
-interface PointsUserProps {
-    user: User;
-}
-const PointsUser: React.FC<PointsUserProps> = ({ user }) => (
-    <div className="absolute top-0 flex justify-center items-center ml-20 py-2 z-50 transform -translate-y-12 mx-auto max-w-xs">
-        <p className="text-sm font-bold">
-            Points: <span className="text-red-500 textDecoration: 'none'">{Math.floor((user.points ?? 0) * 100) / 100}</span>
         </p>
     </div>
 );

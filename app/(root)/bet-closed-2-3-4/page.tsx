@@ -13,6 +13,7 @@ import { HEROES_CLIENT_CLOSED_2 } from "@/components/HEROES_CLIENT_CLOSED_2";
 import { HEROES_CLIENT_CLOSED_3 } from "@/components/HEROES_CLIENT_CLOSED_3";
 import { HEROES_CLIENT_CLOSED_4 } from "@/components/HEROES_CLIENT_CLOSED_4";
 import { redirect } from "next/navigation";
+import {PointsUser} from "@/components/PointsUser";
 
 const FixedLink = () => (
     <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
@@ -26,14 +27,6 @@ const FixedLink = () => (
 interface PointsUserProps {
     user: User;
 }
-
-const PointsUser: React.FC<PointsUserProps> = ({ user }) => (
-    <div className="absolute top-0 left-0 right-0 flex justify-center items-center py-2 z-50 transform -translate-y-9">
-        <p className="text-sm font-bold">
-            Points: <span className="text-red-500">{Math.floor((user.points ?? 0) * 100) / 100}</span>
-        </p>
-    </div>
-);
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ page2?: string, page3?: string, page4?: string }> }) {
     const resolvedSearchParams = await searchParams; // Await the searchParams if it's a Promise
