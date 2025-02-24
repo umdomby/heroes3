@@ -120,12 +120,17 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
     return (
         <div className={className}>
             Points: {Math.floor(user.points * 100) / 100}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center m-7">
                 <h1>Open Orders</h1>
-                <Link href="/order-p2p" target="_blank">
+                <Link href="/order-p2p">
                     <span className="text-blue-500 hover:underline">
-                        P2P Order
+                        P2P
                     </span>
+                </Link>
+                <Link href="/order-p2p-closed">
+                        <span className="text-blue-500 hover:underline">
+                            P2P Closed
+                        </span>
                 </Link>
             </div>
             <Table>

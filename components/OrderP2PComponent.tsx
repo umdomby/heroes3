@@ -25,7 +25,7 @@ interface OrderP2PWithUser extends OrderP2P {
     orderP2PUser1: {
         id: number;
         cardId: string;
-        telegram : string;
+        telegram: string;
     };
     orderP2PUser2?: {
         id: number;
@@ -76,6 +76,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
     const [calculatedValues, setCalculatedValues] = useState<{ [key: number]: number | null }>({}); // Состояние для хранения результата умножения
     const [selectedBankDetails, setSelectedBankDetails] = useState<{ [key: number]: string }>({});
     const [currentPendingCount, setCurrentPendingCount] = useState<number>(pendingOrdersCount);
+    const [dealSuccessMessage, setDealSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
         setOpenOrders(openOrders as OrderP2PWithUser[]);
@@ -294,7 +295,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
             // Проверяем, что price не равен null или undefined
             if (price !== undefined && price !== null) {
                 await openBuyOrder(order.id, user.id, bankDetails, price, points);
-                alert('Сделка успешно заключена, перейдите в раздел: P2P PENDING');
+                setDealSuccessMessage('Сделка успешно заключена, перейдите в раздел: P2P PENDING');
+                setTimeout(() => setDealSuccessMessage(null), 3000); // Hide the message after 3 seconds
             } else {
                 alert('Пожалуйста, выберите действительные банковские реквизиты и цену');
             }
@@ -535,28 +537,25 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
 
     return (
         <div className={className}>
-            <div className={className}>
-                <div className="flex justify-between items-center">
-                    <h1>P2P Order</h1>
-                    <Link href="/order-p2p-pending" target="_blank">
+            Points: {Math.floor(user.points * 100) / 100}
+            <div className="flex justify-between items-center m-7">
+                <h1>P2P</h1>
+                <div>
+                    <Link href="/order-p2p-pending">
                         <span className="text-blue-500 hover:underline">
                             Open order : {currentPendingCount}
                         </span>
                     </Link>
                 </div>
-            </div>
-            {successMessage && (
-                <div className="relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4">
-                        {successMessage}
-                    </div>
-                </div>
-            )}
-            <div className="flex justify-between items-center mb-4">
                 <div>
-                    <p className="text-lg font-semibold">Points: {Math.floor(user.points * 100) / 100}</p>
+                    <Link href="/order-p2p-closed">
+                        <span className="text-blue-500 hover:underline">
+                            P2P Closed
+                        </span>
+                    </Link>
                 </div>
             </div>
+
             <div className={`flex-container ${className}`}>
                 <div className="buy-section mr-1 ml-1">
                     <h2 className="text-xl font-bold mb-2 text-amber-500">Купить Points (min 30)</h2>
@@ -709,7 +708,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
             </div>
             <Table className="mt-5">
                 <TableBody>
-                    <TableRow >
+                    <TableRow>
                         <TableCell className="w-[20%] text-center">Telegram</TableCell>
 
                         <TableCell className="w-[15%] text-center">BUY/SELL</TableCell>
@@ -733,11 +732,13 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                                 <TableBody>
                                     <TableRow className="no-hover-bg">
                                         <TableCell
-                                            className="w-[20%] text-center "><Link className="ml-3 text-blue-500 hover:text-green-300 font-bold"
-                                                                                   href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')}
-                                                                                   target="_blank">{order.orderP2PUser1.telegram}</Link></TableCell>
+                                            className="w-[20%] text-center "><Link
+                                            className="ml-3 text-blue-500 hover:text-green-300 font-bold"
+                                            href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')}
+                                            target="_blank">{order.orderP2PUser1.telegram}</Link></TableCell>
 
-                                        <TableCell className="w-[15%] text-center">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} </TableCell>
+                                        <TableCell
+                                            className="w-[15%] text-center">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} </TableCell>
                                         <TableCell className="w-[10%] text-center">{order.orderP2PPoints} </TableCell>
 
                                         <TableCell className="w-[25%] text-center">
@@ -836,38 +837,55 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                 </span>
                             )}
                             <div className="text-center">
-                            {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id === user.id && (
-                                <Button className="ml-3 h-6" onClick={() => handleCloseBuyOrder(order)}>
-                                    Закрыть сделку покупки
-                                </Button>
-                            )}
-                            {order.orderP2PBuySell === 'SELL' && order.orderP2PUser1Id === user.id && (
-                                <Button className="ml-3 h-6" onClick={() => handleCloseSellOrder(order)}>
-                                    Закрыть сделку продажи
-                                </Button>
-                            )}
-                            {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id !== user.id && (
-                                <Button
-                                    className="ml-3 h-6"
-                                    onClick={() => handleConcludeDealBuy(order)}
-                                    disabled={calculatedValues[order.id] === undefined || calculatedValues[order.id] === null}
-                                >
-                                    Заключить сделку -{order.orderP2PPoints} Points
-                                </Button>
-                            )}
-                            {order.orderP2PBuySell === 'SELL' && order.orderP2PUser1Id !== user.id && (
-                                <Button className="ml-3 h-6"
-                                        onClick={() => handleConcludeDealSell(order)}
+                                {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id === user.id && (
+                                    <Button className="ml-3 h-6" onClick={() => handleCloseBuyOrder(order)}>
+                                        Закрыть сделку покупки
+                                    </Button>
+                                )}
+                                {order.orderP2PBuySell === 'SELL' && order.orderP2PUser1Id === user.id && (
+                                    <Button className="ml-3 h-6" onClick={() => handleCloseSellOrder(order)}>
+                                        Закрыть сделку продажи
+                                    </Button>
+                                )}
+                                {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id !== user.id && (
+                                    <Button
+                                        className="ml-3 h-6"
+                                        onClick={() => handleConcludeDealBuy(order)}
                                         disabled={calculatedValues[order.id] === undefined || calculatedValues[order.id] === null}
-                                >
-                                    Заключить сделку
-                                </Button>
-                            )}
+                                    >
+                                        Заключить сделку -{order.orderP2PPoints} Points
+                                    </Button>
+                                )}
+                                {order.orderP2PBuySell === 'SELL' && order.orderP2PUser1Id !== user.id && (
+                                    <Button className="ml-3 h-6"
+                                            onClick={() => handleConcludeDealSell(order)}
+                                            disabled={calculatedValues[order.id] === undefined || calculatedValues[order.id] === null}
+                                    >
+                                        Заключить сделку
+                                    </Button>
+                                )}
                             </div>
                         </AccordionContent>
                     </AccordionItem>
                 ))}
             </Accordion>
+
+            {successMessage && (
+                <div className="relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4">
+                        {successMessage}
+                    </div>
+                </div>
+            )}
+
+            {dealSuccessMessage && (
+                <div className="relative">
+                    <div
+                        className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4 bg-green-500 text-white">
+                        {dealSuccessMessage}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

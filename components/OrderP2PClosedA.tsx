@@ -85,13 +85,18 @@ export const OrderP2PClosedA: React.FC<Props> = ({ user, closeOrders, className,
 
     return (
         <div className={className}>
+            Points: {Math.floor(user.points * 100) / 100}
             <div className="flex justify-between items-center m-7">
-                Points: {Math.floor(user.points * 100) / 100}
-                <h1>Closed / Return / Admin</h1>
+                <h1>Closed / Return</h1>
                 <Link href="/order-p2p">
                     <span className="text-blue-500 hover:underline">
-                        P2P Order
+                        P2P
                     </span>
+                </Link>
+                <Link href="/order-p2p-pending">
+                        <span className="text-blue-500 hover:underline">
+                            P2P Open
+                        </span>
                 </Link>
             </div>
             <Table>
@@ -116,11 +121,13 @@ export const OrderP2PClosedA: React.FC<Props> = ({ user, closeOrders, className,
                                 <TableBody>
                                     <TableRow className="no-hover-bg">
                                         <TableCell
-                                            className="w-[20%] text-center "><Link className="ml-3 text-blue-500 hover:text-green-300 font-bold"
-                                                                    href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')}
-                                                                    target="_blank">{order.orderP2PUser1.telegram}</Link></TableCell>
+                                            className="w-[20%] text-center "><Link
+                                            className="ml-3 text-blue-500 hover:text-green-300 font-bold"
+                                            href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')}
+                                            target="_blank">{order.orderP2PUser1.telegram}</Link></TableCell>
 
-                                        <TableCell className="w-[15%] text-center">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} </TableCell>
+                                        <TableCell
+                                            className="w-[15%] text-center">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} </TableCell>
                                         <TableCell className="w-[10%] text-center">{order.orderP2PPoints} </TableCell>
 
                                         <TableCell className="w-[25%] text-center">
