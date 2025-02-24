@@ -26,7 +26,7 @@ interface Props {
     users: User[];
 }
 
-export const TUR: React.FC<Props> = ({ className, users }) => {
+export const TURNIR_ADMIN: React.FC<Props> = ({ className, users }) => {
     const [showCopyMessage, setShowCopyMessage] = useState(false);
     const [copiedUserName, setCopiedUserName] = useState('');
 

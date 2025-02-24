@@ -1,7 +1,7 @@
 "use server";
 import {prisma} from '@/prisma/prisma-client';
 import {Container} from "@/components/container";
-import {TUR_ADMIN} from "@/components/TUR_ADMIN";
+import {TURNIR_ADMIN} from "@/components/TURNIR_ADMIN";
 
 export default async function TurAdmin() {
 
@@ -13,7 +13,7 @@ export default async function TurAdmin() {
 
     return (
         <Container className="flex flex-col my-10">
-            <TUR_ADMIN users={users}/>
+            <TURNIR_ADMIN users={users}/>
         </Container>
     )
 }

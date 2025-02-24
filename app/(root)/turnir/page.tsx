@@ -1,9 +1,9 @@
 "use server";
 import {prisma} from '@/prisma/prisma-client';
 import {Container} from "@/components/container";
-import {TUR} from "@/components/TUR";
+import {TURNIR} from "@/components/TURNIR";
 
-export default async function Tur() {
+export default async function Turnir() {
 
     const users = await prisma.user.findMany({
         orderBy: {
@@ -13,7 +13,7 @@ export default async function Tur() {
 
     return (
         <Container className="flex flex-col my-10">
-            <TUR users={users}/>
+            <TURNIR users={users}/>
         </Container>
     )
 }

@@ -19,7 +19,7 @@ interface Props {
 export const Access_admin: React.FC<Props> = ({className}) => {
 
     return (
-        <div>
+        <div className={className}>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild className="width-[20%]">
                     <Button variant="outline" className="h-5 w-full">ADMIN</Button>
@@ -183,9 +183,14 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 P2P CLOSED
                             </DropdownMenuRadioItem>
                         </Link>
-                        <Link href="/contacts">
-                            <DropdownMenuRadioItem value="contacts" className="cursor-pointer">
-                                CONTACTS
+                        <Link href="/turnir">
+                            <DropdownMenuRadioItem value="turnir" className="cursor-pointer">
+                                ТУРНИРЫ
+                            </DropdownMenuRadioItem>
+                        </Link>
+                        <Link href="/statistics">
+                            <DropdownMenuRadioItem value="statistics" className="cursor-pointer">
+                                STATISTICS
                             </DropdownMenuRadioItem>
                         </Link>
                         <Link href="/rating">
@@ -198,9 +203,9 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 MANUAL
                             </DropdownMenuRadioItem>
                         </Link>
-                        <Link href="/tur">
-                            <DropdownMenuRadioItem value="tur" className="cursor-pointer">
-                                ТУРНИРЫ
+                        <Link href="/contacts">
+                            <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
+                                CONTACTS
                             </DropdownMenuRadioItem>
                         </Link>
                         <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
