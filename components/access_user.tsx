@@ -31,7 +31,6 @@ export const Access_user: React.FC<Props> = ({className}) => {
             <DropdownMenu open={open} onOpenChange={setOpen}>
                 <DropdownMenuTrigger
                     asChild
-                    className="width-[20%]"
                     onMouseEnter={() => {
                         if (delayHandler) clearTimeout(delayHandler);
                         setIsHovered(true);
@@ -49,7 +48,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                 >
                     <Button variant="outline" className="h-5 w-full">USER</Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-46">
+                <DropdownMenuContent className="w-45">
                     <DropdownMenuRadioGroup>
                         <Link href="/">
                             <DropdownMenuRadioItem value="home" className="cursor-pointer">
@@ -60,7 +59,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                             <DropdownMenuSubTrigger>
                                 P2P
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-46">
+                            <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <Link href="/order-p2p">
                                         <DropdownMenuRadioItem value="order-p2p" className="cursor-pointer">
@@ -84,7 +83,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                             <DropdownMenuSubTrigger>
                                 GAME USERS 2
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-56">
+                            <DropdownMenuSubContent className="w-40">
                                 <DropdownMenuRadioGroup>
                                     <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
                                         PLAYER 2 CREATE

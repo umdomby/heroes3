@@ -31,7 +31,6 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
             <DropdownMenu open={open} onOpenChange={setOpen}>
                 <DropdownMenuTrigger
                     asChild
-                    className="width-[20%]"
                     onMouseEnter={() => {
                         if (delayHandler) clearTimeout(delayHandler);
                         setIsHovered(true);
@@ -185,7 +184,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                             <DropdownMenuSubTrigger>
                                 BET CLOSED
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-56">
+                            <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <Link href="/bet-closed-2-3-4">
                                         <DropdownMenuRadioItem value="bet-closed-2-3-4" className="cursor-pointer">
@@ -214,7 +213,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                             <DropdownMenuSubTrigger>
                                 WIN/LOSE
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-56">
+                            <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <Link href="/bet-winn-lose-closed-2">
                                         <DropdownMenuRadioItem value="bet-winn-lose-closed-2" className="cursor-pointer">
