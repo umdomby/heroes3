@@ -48,7 +48,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                 >
                     <Button variant="outline" className="h-5 w-full">ADMIN</Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
+                <DropdownMenuContent className="w-45">
                     <DropdownMenuRadioGroup>
                         <Link href="/">
                             <DropdownMenuRadioItem value="home" className="cursor-pointer">
@@ -59,7 +59,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                             <DropdownMenuSubTrigger>
                                 P2P
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-56">
+                            <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <Link href="/order-p2p">
                                         <DropdownMenuRadioItem value="order-p2p" className="cursor-pointer">
@@ -83,7 +83,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                             <DropdownMenuSubTrigger>
                                     ADMIN OPTIONS
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-56">
+                            <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <Link href="/bet-create-2">
                                         <DropdownMenuRadioItem value="bet-create" className="cursor-pointer">
@@ -162,7 +162,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                             <DropdownMenuSubTrigger>
                                 GAME USERS 2
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-56">
+                            <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
                                         PLAYER 2 CREATE

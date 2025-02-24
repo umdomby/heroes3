@@ -83,7 +83,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                             <DropdownMenuSubTrigger>
                                 GAME USERS 2
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-40">
+                            <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
                                         PLAYER 2 CREATE
@@ -105,7 +105,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                             <DropdownMenuSubTrigger>
                                 BET CLOSED
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-56">
+                            <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <Link href="/bet-closed-2-3-4">
                                         <DropdownMenuRadioItem value="bet-closed-2-3-4" className="cursor-pointer">
@@ -134,7 +134,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                             <DropdownMenuSubTrigger>
                                 WIN/LOSE
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent className="w-56">
+                            <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <Link href="/bet-winn-lose-closed-2">
                                         <DropdownMenuRadioItem value="bet-winn-lose-closed-2"
