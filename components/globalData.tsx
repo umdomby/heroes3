@@ -66,11 +66,11 @@ export default async function GlobalDataComponent() {
             </TableHeader>
             <TableBody>
                 <TableRow style={{ transition: 'background-color 0.3s', cursor: 'pointer' }}>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#db2777' }}>11M</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{globalData.betFund ?? 'N/A'}</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.margin ?? 'N/A'}</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>{Math.floor(totalSum * 100) / 100}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#db2777', textDecoration: 'none' }}>11M</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59', textDecoration: 'none' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3', textDecoration: 'none' }}>{globalData.betFund ?? 'N/A'}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb', textDecoration: 'none' }}>{globalData.margin ?? 'N/A'}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812', textDecoration: 'none' }}>{Math.floor(totalSum * 100) / 100}</TableCell>
                 </TableRow>
             </TableBody>
         </Table>

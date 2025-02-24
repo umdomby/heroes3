@@ -40,7 +40,7 @@ export const Header: React.FC<Props> = ({className}) => {
                             priority
                         />
                         <div>
-                            <h1 className="text-2xl uppercase font-black">
+                            <h1 className="text-2xl mb-7 uppercase font-black">
                                 HEROES<span className="text-red-500">3</span>
                             </h1>
                             {/*<p className="text-sm text-gray-400 leading-3">SITE</p>*/}
