@@ -25,9 +25,9 @@ model User {
   contact      Json? // поле для хранения контактных данных
   loginHistory Json? // поле для хранения истории входов
 
-  betsCreated       Bet[]       @relation("BetsCreated")
-  betsCLOSEDCreated BetCLOSED[] @relation("BetsCLOSEDCreated")
-
+  betsCreated        Bet[]        @relation("BetsCreated")
+  betsCLOSEDCreated  BetCLOSED[]  @relation("BetsCLOSEDCreated")
+  resetToken         String?
   betsCreated3       Bet3[]       @relation("BetsCreated3")
   betsCLOSEDCreated3 BetCLOSED3[] @relation("BetsCLOSEDCreated3")
 

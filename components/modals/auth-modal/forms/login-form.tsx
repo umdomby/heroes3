@@ -2,11 +2,11 @@ import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { TFormLoginValues, formLoginSchema } from './schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Title } from '../../../title';
 import { FormInput } from '@/components/form/form-input';
 import { Button } from '@/components/ui';
 import toast from 'react-hot-toast';
 import { signIn } from 'next-auth/react';
+import axios from 'axios';
 
 interface Props {
   onClose?: VoidFunction;
@@ -39,30 +39,48 @@ export const LoginForm: React.FC<Props> = ({ onClose }) => {
       onClose?.();
     } catch (error) {
       console.error('Error [LOGIN]', error);
-      toast.error('Не удалось войти в аккаунт', {
+      toast.error('Не удалось войти в аккаунт', {
+        icon: '❌',
+      });
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    const email = form.getValues('email');
+    if (!email) {
+      toast.error('Пожалуйста, введите ваш E-Mail', {
+        icon: '❌',
+      });
+      return;
+    }
+
+    try {
+      await axios.post('/api/auth/reset-password', { email });
+      toast.success('Инструкции по сбросу пароля отправлены на ваш E-Mail', {
+        icon: '📧',
+      });
+    } catch (error) {
+      console.error('Error [RESET PASSWORD]', error);
+      toast.error('Не удалось отправить инструкции по сбросу пароля', {
         icon: '❌',
       });
     }
   };
 
   return (
-    <FormProvider {...form}>
-      <form className="flex flex-col gap-5" onSubmit={form.handleSubmit(onSubmit)}>
-        {/*<div className="flex justify-between items-center">*/}
-        {/*  <div className="mr-2">*/}
-        {/*    <Title text="Вход в аккаунт" size="md" className="font-bold text-gray-400" />*/}
-        {/*    <p className="text-gray-400">Введите свою почту, чтобы войти в свой аккаунт</p>*/}
-        {/*  </div>*/}
-        {/*  <img src="/assets/images/phone-icon.png" alt="phone-icon" width={60} height={60} />*/}
-        {/*</div>*/}
+      <FormProvider {...form}>
+        <form className="flex flex-col gap-5" onSubmit={form.handleSubmit(onSubmit)}>
+          <FormInput name="email" label="E-Mail" required />
+          <FormInput name="password" label="Пароль" type="password" required />
 
-        <FormInput name="email" label="E-Mail" required />
-        <FormInput name="password" label="Пароль" type="password" required />
+          <Button loading={form.formState.isSubmitting} className="h-12 text-base" type="submit">
+            Войти
+          </Button>
 
-        <Button loading={form.formState.isSubmitting} className="h-12 text-base" type="submit">
-          Войти
-        </Button>
-      </form>
-    </FormProvider>
+          <Button type="button" onClick={handlePasswordReset} className="h-12 text-base">
+            Забыли пароль?
+          </Button>
+        </form>
+      </FormProvider>
   );
 };
