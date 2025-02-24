@@ -374,7 +374,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
 
 
     if (!session) {
-        return redirect("/not-auth");
+        return redirect("/");
     }
 
     if (isLoading) {

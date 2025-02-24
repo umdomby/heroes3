@@ -400,7 +400,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
     };
 
     if (!session) {
-        return redirect("/not-auth");
+        return redirect("/");
     }
 
     if (isLoading) {

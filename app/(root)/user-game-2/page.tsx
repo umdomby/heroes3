@@ -12,7 +12,7 @@ export default async function UserGame2Page() {
     const session = await getUserSession();
 
     if (!session) {
-        redirect('/not-auth');
+        redirect('/');
     }
 
     const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });

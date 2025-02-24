@@ -13,7 +13,7 @@ async function fetchData() {
     const session = await getUserSession();
 
     if (!session) {
-        redirect('/not-auth');
+        redirect('/');
     }
 
     try {
@@ -39,7 +39,7 @@ export default async function UserGamePage() {
     const { user, categories, products, productItems, player } = await fetchData();
 
     if (!user) {
-        redirect('/not-auth');
+        redirect('/');
     }
 
     if (!player) {

@@ -362,7 +362,7 @@ export const GAME_USERS_2: React.FC<Props> = ({ className, user }) => {
 
 
     if (!session) {
-        return redirect("/not-auth");
+        return redirect("/");
     }
 
     if (isLoading) {

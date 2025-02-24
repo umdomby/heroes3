@@ -12,7 +12,7 @@ async function fetchData() {
     const session = await getUserSession();
 
     if (!session) {
-        redirect('/not-auth');
+        redirect('/');
     }
 
     try {
@@ -34,7 +34,7 @@ export default async function CreateBetPage() {
     const { user, categories, products, productItems, players } = await fetchData();
 
     if (!user || user.role !== 'ADMIN') {
-        redirect('/not-auth');
+        redirect('/');
     }
 
     return (
