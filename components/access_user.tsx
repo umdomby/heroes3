@@ -1,3 +1,4 @@
+"use client"
 import React from 'react';
 import Link from 'next/link';
 import {ModeToggle} from "@/components/buttonTheme";
@@ -9,8 +10,10 @@ import {
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
+    DropdownMenuSub,
+    DropdownMenuSubTrigger,
+    DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu"
-
 
 interface Props {
     className?: string;
@@ -18,10 +21,32 @@ interface Props {
 
 export const Access_user: React.FC<Props> = ({className}) => {
 
+    const [open, setOpen] = React.useState(false);
+    const [isHovered, setIsHovered] = React.useState(false);
+    const [delayHandler, setDelayHandler] = React.useState<number | null>(null);
+
+
     return (
         <div className={className}>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild className="width-[20%]">
+            <DropdownMenu open={open} onOpenChange={setOpen}>
+                <DropdownMenuTrigger
+                    asChild
+                    className="width-[20%]"
+                    onMouseEnter={() => {
+                        if (delayHandler) clearTimeout(delayHandler);
+                        setIsHovered(true);
+                        setDelayHandler(window.setTimeout(() => {
+                            setOpen(true);
+                        }, 200));
+                    }}
+                    onMouseLeave={() => {
+                        if (delayHandler) clearTimeout(delayHandler);
+                        setIsHovered(false);
+                        setDelayHandler(window.setTimeout(() => {
+                            if (!isHovered) setOpen(false);
+                        }, 200));
+                    }}
+                >
                     <Button variant="outline" className="h-5 w-full">USER</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
@@ -31,79 +56,111 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                 HOME
                             </DropdownMenuRadioItem>
                         </Link>
-                        <Link href="/user-game-create-2">
-                            <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
-                                GAME USER 2 CREATE
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/user-game-2">
-                            <DropdownMenuRadioItem value="user-game-2" className="cursor-pointer">
-                                GAME USER 2
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/user-game-closed-2">
-                            <DropdownMenuRadioItem value="user-game-closed-2" className="cursor-pointer">
-                                GAME USER 2 CLOSED
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/user-game-bet-2">
-                            <DropdownMenuRadioItem value="user-game-bet-2" className="cursor-pointer">
-                                BET USER 2
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/bet-closed-2-3-4">
-                            <DropdownMenuRadioItem value="bet-closed-2-3-4" className="cursor-pointer">
-                                BET CLOSED ALL
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/bet-closed-2">
-                            <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
-                                BET CLOSED 2
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/bet-closed-3">
-                            <DropdownMenuRadioItem value="bet-closed-3" className="cursor-pointer">
-                                BET CLOSED 3
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/bet-closed-4">
-                            <DropdownMenuRadioItem value="bet-closed-4" className="cursor-pointer">
-                                BET CLOSED 4
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/bet-winn-lose-closed-2">
-                            <DropdownMenuRadioItem value="bet-winn-lose-closed-2" className="cursor-pointer">
-                                WINN/LOSE PLAYERS 2
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/bet-winn-lose-closed-3">
-                            <DropdownMenuRadioItem value="bet-winn-lose-closed-3" className="cursor-pointer">
-                                WINN/LOSE PLAYERS 3
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/bet-winn-lose-closed-4">
-                            <DropdownMenuRadioItem value="bet-winn-lose-closed-4" className="cursor-pointer">
-                                WINN/LOSE PLAYERS 4
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/transfer-points">
-                            <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
-                                TRANSFER
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/order-p2p">
-                            <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
                                 P2P
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/order-p2p-pending">
-                            <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
-                                P2P PENDING
-                            </DropdownMenuRadioItem>
-                        </Link>
-                        <Link href="/order-p2p-closed">
-                            <DropdownMenuRadioItem value="order-p2p-closed" className="cursor-pointer">
-                                P2P CLOSED
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-56">
+                                <DropdownMenuRadioGroup>
+                                    <Link href="/order-p2p">
+                                        <DropdownMenuRadioItem value="order-p2p" className="cursor-pointer">
+                                            P2P TRADE
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/order-p2p-pending">
+                                        <DropdownMenuRadioItem value="order-p2p-pending" className="cursor-pointer">
+                                            P2P PENDING
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/order-p2p-closed">
+                                        <DropdownMenuRadioItem value="order-p2p-closed" className="cursor-pointer">
+                                            P2P CLOSED
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                                GAME USERS
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-56">
+                                <DropdownMenuRadioGroup>
+                                    <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
+                                        GAME USER 2 CREATE
+                                    </DropdownMenuRadioItem>
+                                    <Link href="/user-game-2">
+                                        <DropdownMenuRadioItem value="user-game-2" className="cursor-pointer">
+                                            GAME USER 2 START
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/user-game-closed-2">
+                                        <DropdownMenuRadioItem value="user-game-closed-2" className="cursor-pointer">
+                                            GAME USER 2 CLOSED
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                                BET CLOSED
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-56">
+                                <DropdownMenuRadioGroup>
+                                    <Link href="/bet-closed-2-3-4">
+                                        <DropdownMenuRadioItem value="bet-closed-2-3-4" className="cursor-pointer">
+                                            BET CLOSED ALL
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-closed-2">
+                                        <DropdownMenuRadioItem value="bet-closed-2" className="cursor-pointer">
+                                            BET CLOSED 2
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-closed-3">
+                                        <DropdownMenuRadioItem value="bet-closed-3" className="cursor-pointer">
+                                            BET CLOSED 3
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-closed-4">
+                                        <DropdownMenuRadioItem value="bet-closed-4" className="cursor-pointer">
+                                            BET CLOSED 4
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                                WIN/LOSE
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-56">
+                                <DropdownMenuRadioGroup>
+                                    <Link href="/bet-winn-lose-closed-2">
+                                        <DropdownMenuRadioItem value="bet-winn-lose-closed-2"
+                                                               className="cursor-pointer">
+                                            WIN/LOSE PLAYERS 2
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-winn-lose-closed-3">
+                                        <DropdownMenuRadioItem value="bet-winn-lose-closed-3"
+                                                               className="cursor-pointer">
+                                            WIN/LOSE PLAYERS 3
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/bet-winn-lose-closed-4">
+                                        <DropdownMenuRadioItem value="bet-winn-lose-closed-4"
+                                                               className="cursor-pointer">
+                                            WIN/LOSE PLAYERS 4
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <Link href="/transfer-points">
+                            <DropdownMenuRadioItem value="transfer-points" className="cursor-pointer">
+                                TRANSFER POINTS
                             </DropdownMenuRadioItem>
                         </Link>
                         <Link href="/turnir">
@@ -131,7 +188,6 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                 CONTACTS
                             </DropdownMenuRadioItem>
                         </Link>
-
                         <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
                 </DropdownMenuContent>

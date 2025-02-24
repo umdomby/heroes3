@@ -236,7 +236,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                         </DropdownMenuSub>
                         <Link href="/transfer-points">
                             <DropdownMenuRadioItem value="transfer-points" className="cursor-pointer">
-                                TRANSFER
+                                TRANSFER POINTS
                             </DropdownMenuRadioItem>
                         </Link>
                         <Link href="/turnir">
