@@ -5,17 +5,19 @@ import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { Button } from '@/components/ui';
 import toast from 'react-hot-toast';
+import { useForm, FormProvider } from 'react-hook-form';
 import { FormInput } from '@/components/form/form-input';
 
+
 const ResetPassword: React.FC = () => {
+    const methods = useForm();
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
-    const [password, setPassword] = useState('');
 
-    const handleResetPassword = async () => {
+    const handleResetPassword = async (data: { password: string }) => {
         try {
-            await axios.post('/api/auth/update-password', { token, password });
+            await axios.post('/api/auth/update-password', { token, password: data.password });
             toast.success('Пароль успешно обновлён', {
                 icon: '✅',
             });
@@ -29,20 +31,20 @@ const ResetPassword: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col items-center">
-            <h1>Сброс пароля</h1>
-            <FormInput
-                name="password"
-                label="Новый пароль"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-            />
-            <Button onClick={handleResetPassword} className="h-12 text-base">
-                Обновить пароль
-            </Button>
-        </div>
+        <FormProvider {...methods}>
+            <form onSubmit={methods.handleSubmit(handleResetPassword)} className="flex flex-col items-center">
+                <h1>Сброс пароля</h1>
+                <FormInput
+                    name="password"
+                    label="Новый пароль"
+                    type="password"
+                    required
+                />
+                <Button type="submit" className="h-12 text-base">
+                    Обновить пароль
+                </Button>
+            </form>
+        </FormProvider>
     );
 };
 
