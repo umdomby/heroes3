@@ -7,6 +7,7 @@ import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { OrderP2PComponent } from "@/components/OrderP2PComponent";
+import Link from "next/link";
 
 export default async function OrderP2PPage() {
     const session = await getUserSession();
@@ -19,13 +20,23 @@ export default async function OrderP2PPage() {
         where: { id: Number(session?.id) },
     });
 
-    if (!user) {
-        return redirect('/');
-    }
-    if (user.role === 'BANED') {
+    if (!user || user.role === 'BANED') {
         return redirect('/');
     }
 
+    if (user.telegram === null || user.telegram === undefined || user.telegram === '') {
+        return (
+            <div className="text-center">
+                <p className="text-green-500">Заполните:</p>
+                <p>
+                    Настройки Telegram
+                </p>
+                <p>
+                    <Link href="/profile" className="text-blue-500">Profile</Link>
+                </p>
+            </div>
+        );
+    }
     // Fetch open orders
     const openOrders = await prisma.orderP2P.findMany({
         where: {orderP2PStatus: 'OPEN'},

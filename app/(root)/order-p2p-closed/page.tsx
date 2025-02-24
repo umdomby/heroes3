@@ -6,6 +6,7 @@ import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import {OrderP2PClosed} from "@/components/OrderP2PClosed";
+import Link from "next/link";
 
 
 
@@ -25,8 +26,23 @@ export default async function OrderP2PClosedPage({ searchParams }: { searchParam
     if (!user) {
         return redirect('/');
     }
+
     if (user.role === 'BANED') {
         return redirect('/');
+    }
+
+    if (user.telegram === null || user.telegram === undefined || user.telegram === '') {
+        return (
+            <div className="text-center">
+                <p className="text-green-500">Заполните:</p>
+                <p>
+                    Настройки Telegram
+                </p>
+                <p>
+                    <Link href="/profile" className="text-blue-500">Profile</Link>
+                </p>
+            </div>
+        );
     }
 
     const page = parseInt(resolvedSearchParams.page ?? '1', 10);

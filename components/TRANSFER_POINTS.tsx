@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
     Table,
     TableBody,
@@ -8,10 +8,10 @@ import {
     TableHeader,
     TableHead,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { User } from "@prisma/client";
-import { getEmailByCardId, transferPoints } from "@/app/actions";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {User} from "@prisma/client";
+import {getEmailByCardId, transferPoints} from "@/app/actions";
 import Link from "next/link";
 
 interface Transfer {
@@ -19,8 +19,15 @@ interface Transfer {
     transferUser2Id: number | null;
     transferPoints: number;
     createdAt: Date;
-    transferUser1: { cardId: string };
-    transferUser2: { cardId: string } | null;
+    transferUser1: {
+        cardId: string;
+        telegram: string | null;
+    };
+    transferUser2: {
+        cardId: string;
+        telegram: string | null;
+    } | null;
+
 }
 
 interface Props {
@@ -31,7 +38,7 @@ interface Props {
     className?: string;
 }
 
-export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, currentPage, totalPages, className }) => {
+export const TRANSFER_POINTS: React.FC<Props> = ({user, transferHistory, currentPage, totalPages, className}) => {
     const [cardId, setCardId] = useState('');
     const [points, setPoints] = useState(50);
     const [recipientEmail, setRecipientEmail] = useState('');
@@ -52,7 +59,7 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, curren
             return;
         }
 
-        const { email, error } = await getEmailByCardId(cardId);
+        const {email, error} = await getEmailByCardId(cardId);
 
         if (email) {
             setRecipientEmail(email);
@@ -81,7 +88,10 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, curren
                     <p className="text-lg font-semibold">Points: {Math.floor(user.points * 100) / 100}</p>
                 </div>
             </div>
-            <form onSubmit={(e) => { e.preventDefault(); handleTransfer(); }} className="space-y-4">
+            <form onSubmit={(e) => {
+                e.preventDefault();
+                handleTransfer();
+            }} className="space-y-4">
                 <Input
                     type="text"
                     placeholder="ID карты получателя"
@@ -122,7 +132,8 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, curren
             {showDialog && (
                 <div className="dialog mt-4 p-4 border rounded shadow-lg">
                     <p>Email получателя: {recipientEmail}</p>
-                    <Button onClick={() => navigator.clipboard.writeText(recipientEmail)} className="mr-2">Копировать Email</Button>
+                    <Button onClick={() => navigator.clipboard.writeText(recipientEmail)} className="mr-2">Копировать
+                        Email</Button>
                     <Button onClick={confirmTransfer} className="bg-green-500 text-white">Подтвердить передачу</Button>
                 </div>
             )}
@@ -139,20 +150,47 @@ export const TRANSFER_POINTS: React.FC<Props> = ({ user, transferHistory, curren
                         <TableHead className="text-center">Дата</TableHead>
                         <TableHead className="text-center">Тип</TableHead>
                         <TableHead className="text-center">ID карты</TableHead>
+                        <TableHead className="text-center">Telegram</TableHead>
                         <TableHead className="text-center">Баллы</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {transferHistory.map((transfer, index) => (
                         <TableRow key={index}>
-                            <TableCell className="text-center">{new Date(transfer.createdAt).toLocaleString()}</TableCell>
-                            <TableCell className="text-center">{transfer.transferUser1Id === user.id ? 'Исходящий' : 'Входящий'}</TableCell>
+                            <TableCell
+                                className="text-center">{new Date(transfer.createdAt).toLocaleString()}</TableCell>
+                            <TableCell
+                                className="text-center">{transfer.transferUser1Id === user.id ? 'Исходящий' : 'Входящий'}</TableCell>
                             <TableCell className="text-center">
                                 {transfer.transferUser1Id === user.id
                                     ? (transfer.transferUser2 ? transfer.transferUser2.cardId : 'N/A')
                                     : transfer.transferUser1.cardId}
                             </TableCell>
-                            <TableCell className="text-center">{transfer.transferUser1Id === user.id ? `-${transfer.transferPoints}` : `+${transfer.transferPoints}`}</TableCell>
+                            <TableCell className="text-center">
+                                {transfer.transferUser1Id === user.id
+                                    ? (transfer.transferUser2 && transfer.transferUser2.telegram
+                                        ? <Link
+                                            className="text-blue-500 hover:text-green-300 font-bold"
+                                            href={transfer.transferUser2.telegram?.replace(/^@/, 'https://t.me/') || '#'}
+                                            target="_blank"
+                                        >
+                                            {transfer.transferUser2.telegram}
+                                        </Link>
+                                        : 'N/A')
+                                    : (transfer.transferUser1.telegram
+                                            ? <Link
+                                                className="text-blue-500 hover:text-green-300 font-bold"
+                                                href={transfer.transferUser1.telegram?.replace(/^@/, 'https://t.me/') || '#'}
+                                                target="_blank"
+                                            >
+                                                {transfer.transferUser1.telegram}
+                                            </Link>
+                                            : 'N/A'
+                                    )
+                                }
+                            </TableCell>
+                            <TableCell
+                                className="text-center">{transfer.transferUser1Id === user.id ? `-${transfer.transferPoints}` : `+${transfer.transferPoints}`}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

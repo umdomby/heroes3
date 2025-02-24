@@ -7,6 +7,7 @@ import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { TRANSFER_POINTS } from "@/components/TRANSFER_POINTS";
+import Link from "next/link";
 
 export default async function TransferPointsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const resolvedSearchParams = await searchParams; // Await the searchParams if it's a Promise
@@ -25,6 +26,19 @@ export default async function TransferPointsPage({ searchParams }: { searchParam
         return redirect('/');
     }
 
+    if (user.telegram === null || user.telegram === undefined || user.telegram === '') {
+        return (
+            <div className="text-center">
+                <p className="text-green-500">Заполните:</p>
+                <p>
+                    Настройки Telegram
+                </p>
+                <p>
+                    <Link href="/profile" className="text-blue-500">Profile</Link>
+                </p>
+            </div>
+        );
+    }
 
     const page = parseInt(resolvedSearchParams.page ?? '1', 10);
     const transfersPerPage = 100;
@@ -40,8 +54,8 @@ export default async function TransferPointsPage({ searchParams }: { searchParam
             transferUser2Id: { not: null } // Exclude transfers with null transferUser2Id
         },
         include: {
-            transferUser1: { select: { cardId: true } },
-            transferUser2: { select: { cardId: true } }
+            transferUser1: { select: { cardId: true, telegram: true } },
+            transferUser2: { select: { cardId: true, telegram: true } }
         },
         orderBy: { createdAt: 'desc' },
         skip: skip,

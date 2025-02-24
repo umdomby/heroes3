@@ -8,6 +8,7 @@ import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { OrderP2PPending } from "@/components/OrderP2PPending";
 import {checkAndCloseOrderP2PTime} from "@/app/actions";
+import Link from "next/link";
 
 
 export default async function OrderP2PPendingPage() {
@@ -27,6 +28,20 @@ export default async function OrderP2PPendingPage() {
     }
     if (user.role === 'BANED') {
         return redirect('/');
+    }
+
+    if (user.telegram === null || user.telegram === undefined || user.telegram === '') {
+        return (
+            <div className="text-center">
+                <p className="text-green-500">Заполните:</p>
+                <p>
+                    Настройки Telegram
+                </p>
+                <p>
+                    <Link href="/profile" className="text-blue-500">Profile</Link>
+                </p>
+            </div>
+        );
     }
 
     const openOrders = await prisma.orderP2P.findMany({
