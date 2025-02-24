@@ -43,23 +43,21 @@ export const Header: React.FC<Props> = ({className}) => {
                             <h1 className="text-2xl uppercase font-black">
                                 HEROES<span className="text-red-500">3</span>
                             </h1>
-                            <p className="text-sm text-gray-400 leading-3">SITE</p>
+                            {/*<p className="text-sm text-gray-400 leading-3">SITE</p>*/}
                         </div>
                     </div>
                 </Link>
 
-
                 {/* Правая часть */}
-                <div className="flex items-center gap-3">
-                    <div>
+                <div className="items-center gap-3">
+                    <div className="mt-5">
+                        <AuthModal open={openAuthModal} onClose={() => setOpenAuthModal(false)}/>
+                        <ProfileButton onClickSignIn={() => setOpenAuthModal(true)}/>
+                    </div>
+                    <div className="mt-1">
                         {session?.user?.role === 'ADMIN' && <Access_admin/>}
                         {session?.user?.role === 'USER' && <Access_user/>}
                         {!session && <Access_no/>}
-
-                    </div>
-                    <div>
-                        <AuthModal open={openAuthModal} onClose={() => setOpenAuthModal(false)}/>
-                        <ProfileButton onClickSignIn={() => setOpenAuthModal(true)}/>
                     </div>
                 </div>
             </Container>

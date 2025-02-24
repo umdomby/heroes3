@@ -22,7 +22,7 @@ export const Access_admin: React.FC<Props> = ({className}) => {
         <div>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild className="width-[20%]">
-                    <Button variant="outline" className="h-5">ADMIN</Button>
+                    <Button variant="outline" className="h-5 w-full">ADMIN</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
                     <DropdownMenuRadioGroup>

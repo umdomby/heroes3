@@ -31,9 +31,8 @@ const FixedLink = () => (
 interface PointsUserProps {
     user: User;
 }
-
 const PointsUser: React.FC<PointsUserProps> = ({ user }) => (
-    <div className="absolute top-0 left-0 right-0 flex justify-center items-center py-2 z-50 transform -translate-y-9">
+    <div className="absolute top-0 flex justify-center items-center ml-20 py-2 z-50 transform -translate-y-8 mx-auto max-w-xs">
         <p className="text-sm font-bold">
             Points: <span className="text-red-500">{Math.floor((user.points ?? 0) * 100) / 100}</span>
         </p>

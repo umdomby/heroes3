@@ -58,9 +58,6 @@ export default async function GlobalDataComponent() {
             <TableHeader>
                 <TableRow style={{ backgroundColor: '#1f2937' }}>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Start</TableHead>
-                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Reg</TableHead>
-                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Ref</TableHead>
-                    <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Open</TableHead>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>User</TableHead>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Fund</TableHead>
                     <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Margin</TableHead>
@@ -69,10 +66,7 @@ export default async function GlobalDataComponent() {
             </TableHeader>
             <TableBody>
                 <TableRow style={{ transition: 'background-color 0.3s', cursor: 'pointer' }}>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#db2777' }}>11000000</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#9333ea' }}>{globalData.reg ?? 'N/A'}</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#dc2626' }}>{globalData.ref ?? 'N/A'}</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#868788' }}>{globalData.openBetsPoints ?? 'N/A'}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#db2777' }}>11M</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{globalData.betFund ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.margin ?? 'N/A'}</TableCell>
