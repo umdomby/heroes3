@@ -21,7 +21,7 @@ const ResetPassword: React.FC = () => {
             toast.success('Пароль успешно обновлён', {
                 icon: '✅',
             });
-            router.push('/login');
+            router.push('/');
         } catch (error) {
             console.error('Error [UPDATE PASSWORD]', error);
             toast.error('Не удалось обновить пароль', {
