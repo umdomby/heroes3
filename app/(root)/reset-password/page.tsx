@@ -1,21 +1,26 @@
 "use client"
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { Button } from '@/components/ui';
 import toast from 'react-hot-toast';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, SubmitHandler } from 'react-hook-form';
 import { FormInput } from '@/components/form/form-input';
 
+// Define the type for your form values
+type FormValues = {
+    password: string;
+};
 
 const ResetPassword: React.FC = () => {
-    const methods = useForm();
+    // Use the type with useForm
+    const methods = useForm<FormValues>();
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
 
-    const handleResetPassword = async (data: { password: string }) => {
+    const handleResetPassword: SubmitHandler<FormValues> = async (data) => {
         try {
             await axios.post('/api/auth/update-password', { token, password: data.password });
             toast.success('Пароль успешно обновлён', {
