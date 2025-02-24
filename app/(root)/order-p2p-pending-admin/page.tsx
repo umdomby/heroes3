@@ -14,7 +14,7 @@ export default async function OrderP2PPendingPage() {
     const session = await getUserSession();
 
     if (!session) {
-        return redirect('/not-auth');
+        return redirect('/');
     }
 
     const user = await prisma.user.findFirst({
@@ -22,7 +22,7 @@ export default async function OrderP2PPendingPage() {
     });
 
     if (!user || user.role !== 'ADMIN') {
-        return redirect('/not-auth');
+        return redirect('/');
     }
 
     // Запрос к базе данных

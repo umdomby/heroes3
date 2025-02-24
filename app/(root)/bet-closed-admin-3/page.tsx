@@ -11,13 +11,13 @@ export default async function BetClosedPage() {
     const session = await getUserSession();
 
     if (!session) {
-        return redirect('/not-auth');
+        return redirect('/');
     }
 
     const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
 
     if (!user || user.role !== 'ADMIN') {
-        return redirect('/not-auth');
+        return redirect('/');
     }
 
     // Получаем все закрытые ставки на трех игроков

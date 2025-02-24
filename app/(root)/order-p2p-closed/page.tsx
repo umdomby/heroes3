@@ -15,7 +15,7 @@ export default async function OrderP2PClosedPage({ searchParams }: { searchParam
     const session = await getUserSession();
 
     if (!session) {
-        return redirect('/not-auth');
+        return redirect('/');
     }
 
     const user = await prisma.user.findFirst({
@@ -23,7 +23,7 @@ export default async function OrderP2PClosedPage({ searchParams }: { searchParam
     });
 
     if (!user) {
-        return redirect('/not-auth');
+        return redirect('/');
     }
     if (user.role === 'BANED') {
         return redirect('/');

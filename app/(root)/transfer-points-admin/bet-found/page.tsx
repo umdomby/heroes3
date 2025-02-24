@@ -11,7 +11,7 @@ export default async function BetFoundPage() {
     const session = await getUserSession();
 
     if (!session) {
-        return redirect('/not-auth');
+        return redirect('/');
     }
 
     const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });

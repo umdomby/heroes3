@@ -13,13 +13,13 @@ export default async function TransferPointsPage({ searchParams }: { searchParam
     const session = await getUserSession();
 
     if (!session) {
-        return redirect('/not-auth');
+        return redirect('/');
     }
 
     const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
 
     if (!user) {
-        return redirect('/not-auth');
+        return redirect('/');
     }
     if (user.role === 'BANED') {
         return redirect('/');

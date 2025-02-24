@@ -15,13 +15,13 @@ export default async function UserGameClosed2Page({ searchParams }: { searchPara
     const session = await getUserSession();
 
     if (!session) {
-        return redirect('/not-auth');
+        return redirect('/');
     }
 
     const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
 
     if (!user) {
-        return redirect('/not-auth');
+        return redirect('/');
     }
     const player = await prisma.player.findFirst({ where: { userId: Number(session?.id) } });
 
