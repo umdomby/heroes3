@@ -20,10 +20,33 @@ interface Props {
 }
 
 export const Access_admin: React.FC<Props> = ({ className }) => {
+
+    const [open, setOpen] = React.useState(false);
+    const [isHovered, setIsHovered] = React.useState(false);
+    const [delayHandler, setDelayHandler] = React.useState<number | null>(null);
+
+
     return (
         <div className={className}>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild className="width-[20%]">
+            <DropdownMenu open={open} onOpenChange={setOpen}>
+                <DropdownMenuTrigger
+                    asChild
+                    className="width-[20%]"
+                    onMouseEnter={() => {
+                        if (delayHandler) clearTimeout(delayHandler);
+                        setIsHovered(true);
+                        setDelayHandler(window.setTimeout(() => {
+                            setOpen(true);
+                        }, 200));
+                    }}
+                    onMouseLeave={() => {
+                        if (delayHandler) clearTimeout(delayHandler);
+                        setIsHovered(false);
+                        setDelayHandler(window.setTimeout(() => {
+                            if (!isHovered) setOpen(false);
+                        }, 200));
+                    }}
+                >
                     <Button variant="outline" className="h-5 w-full">ADMIN</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
@@ -35,9 +58,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                         </Link>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
-                                <DropdownMenuRadioItem value="admin" className="cursor-pointer">
                                     ADMIN OPTIONS
-                                </DropdownMenuRadioItem>
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent className="w-56">
                                 <DropdownMenuRadioGroup>
