@@ -1,47 +1,45 @@
-"use client"
-import React, {useState, useEffect} from 'react';
-import {GameUserBet, User, Category, Product, ProductItem, $Enums, WinGameUserBet} from '@prisma/client';
-import {Table, TableBody, TableCell, TableRow, TableHead} from "@/components/ui/table";
-import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from "@/components/ui/accordion";
+"use client";
+import React, { useState, useEffect } from 'react';
+import { GameUserBet, User, Category, Product, ProductItem, $Enums, WinGameUserBet } from '@prisma/client';
+import { Table, TableBody, TableCell, TableRow, TableHead } from "@/components/ui/table";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
-import {
-     gameRatingGameUsers, gameUserStartBet // Import the delete function
-} from "@/app/actions";
+import { gameRatingGameUsers } from "@/app/actions";
 import GameUserBetStatus = $Enums.GameUserBetStatus;
-import {Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
-import {Button, Input} from "@/components/ui";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui";
 import RatingUserEnum = $Enums.RatingUserEnum;
 
 interface Props {
     user: User;
-    gameUserBetsData : GameUserBet;
-}
-
-export const UserGame2Closed: React.FC<Props> = ({user, gameUserBetsData}) => {
-    const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
+    gameUserBetsData: (GameUserBet & {
+        id: number;
+        gameUserBet1Id: number;
+        betUser1: number;
+        betUser2: number | null;
+        gameUserBetDetails: string;
+        gameUserBetOpen: boolean;
+        checkWinUser1: WinGameUserBet | null;
+        checkWinUser2: WinGameUserBet | null;
         gameUser1Bet: User;
         gameUser2Bet: User | null;
         category: Category;
         product: Product;
         productItem: ProductItem;
-        gameUserBetDetails: string;
-        betUser1: number;
-        gameUserBetOpen: boolean;
         statusUserBet: GameUserBetStatus;
-        gameUserBetDataUsers2: JSON;
-        checkWinUser1: WinGameUserBet | null;
-        checkWinUser2: WinGameUserBet | null;
-        gameUser1Rating: RatingUserEnum;
-    })[]>([]);
+        gameUser1Rating: RatingUserEnum | null;
+        gameUser2Rating: RatingUserEnum | null;
+        createdAt: Date;
+        updatedAt: Date;
+    })[];
+}
 
-    const [errorDialogOpen, setErrorDialogOpen] = useState<boolean>(false);
-    const [errorMessage, setErrorMessage] = useState<string>("");
-
+export const UserGame2Closed: React.FC<Props> = ({ user, gameUserBetsData }) => {
+    const [gameUserBets, setGameUserBets] = useState<Props['gameUserBetsData']>([]);
 
     useEffect(() => {
         setGameUserBets(gameUserBetsData);
     }, [gameUserBetsData]);
-
 
     const handleRating = async (gameUserBetId: number, userType: 'user1' | 'user2', rating: RatingUserEnum) => {
         try {
@@ -73,8 +71,7 @@ export const UserGame2Closed: React.FC<Props> = ({user, gameUserBetsData}) => {
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Size</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Timer</TableHead>
                         <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">State</TableHead>
-                        <TableHead
-                            className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
+                        <TableHead className="text-center overflow-hidden whitespace-nowrap w-[10%]">Telegram</TableHead>
                     </TableRow>
                 </TableBody>
             </Table>
@@ -86,22 +83,14 @@ export const UserGame2Closed: React.FC<Props> = ({user, gameUserBetsData}) => {
                                 <Table>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUserBetOpen ? "Open" : "Closed"}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.product.name}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
-                                            <TableCell
-                                                className="text-center overflow-hidden whitespace-nowrap w-[10%]">
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.betUser1}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUserBetOpen ? "Open" : "Closed"}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.gameUser1Bet.fullName}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.category.name}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.product.name}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.productItem.name}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">{bet.statusUserBet}</TableCell>
+                                            <TableCell className="text-center overflow-hidden whitespace-nowrap w-[10%]">
                                                 {bet.gameUser1Bet.telegram ? (
                                                     <Link
                                                         className="text-center text-blue-500 hover:text-green-300 font-bold"
@@ -120,8 +109,7 @@ export const UserGame2Closed: React.FC<Props> = ({user, gameUserBetsData}) => {
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className="p-4">
-                                    <div className="mb-2"><span
-                                        className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
+                                    <div className="mb-2"><span className="text-green-500">Description: </span> {bet.gameUserBetDetails}</div>
                                     {bet.statusUserBet === "CLOSED" && (
                                         <div>
                                             <div className={
@@ -197,12 +185,6 @@ export const UserGame2Closed: React.FC<Props> = ({user, gameUserBetsData}) => {
                     </Accordion>
                 </div>
             ))}
-            <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
-                <DialogContent>
-                    <DialogTitle></DialogTitle>
-                    <DialogDescription>{errorMessage}</DialogDescription>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 };

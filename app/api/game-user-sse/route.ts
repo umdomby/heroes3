@@ -8,7 +8,7 @@ export async function GET(request: Request) {
 
     const sendUpdate = async () => {
         try {
-            const gameUserBets = await prisma.gameUserBet.findMany({
+            const gameUserBetsData = await prisma.gameUserBet.findMany({
                 where: {
                     statusUserBet: {
                         in: ['OPEN', 'START'], // Фильтрация по статусу
@@ -21,9 +21,12 @@ export async function GET(request: Request) {
                     product: true,
                     productItem: true,
                 },
+                orderBy: {
+                    createdAt: 'desc', // Сортировка по createdAt в порядке убывания
+                },
             });
 
-            writer.write(encoder.encode(`data: ${JSON.stringify(gameUserBets)}\n\n`));
+            writer.write(encoder.encode(`data: ${JSON.stringify(gameUserBetsData)}\n\n`));
         } catch (error) {
             console.error('Failed to fetch data:', error);
             writer.write(encoder.encode('data: {"error": "Failed to fetch data"}\n\n'));

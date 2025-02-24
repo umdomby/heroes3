@@ -18,21 +18,6 @@ import RatingUserEnum = $Enums.RatingUserEnum;
 
 interface Props {
     user: User;
-    gameUserBetsData: (GameUserBet & {
-        gameUser1Bet: User;
-        gameUser2Bet: User | null;
-        category: Category;
-        product: Product;
-        productItem: ProductItem;
-        gameUserBetDetails: string;
-        betUser1: number;
-        gameUserBetOpen: boolean;
-        statusUserBet: GameUserBetStatus;
-        gameUserBetDataUsers2: JSON;
-        checkWinUser1: WinGameUserBet | null;
-        checkWinUser2: WinGameUserBet | null;
-        gameUser1Rating: RatingUserEnum;
-    })[];
 }
 
 interface GameUserBetDataUser {
@@ -42,7 +27,7 @@ interface GameUserBetDataUser {
     userTelegram: string;
 }
 
-export const UserGame2Comp: React.FC<Props> = ({user, gameUserBetsData}) => {
+export const UserGame2Comp: React.FC<Props> = ({user}) => {
     const [gameUserBets, setGameUserBets] = useState<(GameUserBet & {
         gameUser1Bet: User;
         gameUser2Bet: User | null;
@@ -74,10 +59,22 @@ export const UserGame2Comp: React.FC<Props> = ({user, gameUserBetsData}) => {
 
 
     useEffect(() => {
-        setGameUserBets(gameUserBetsData);
-    }, [gameUserBetsData]);
+        // Fetch initial data
+        const fetchData = async () => {
+            try {
+                const response = await fetch('/api/game-user-get');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                setGameUserBets(data);
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+            }
+        };
 
-    useEffect(() => {
+        fetchData();
+
         // Set up SSE
         const eventSource = new EventSource('/api/game-user-sse');
         eventSource.onmessage = (event) => {
@@ -228,20 +225,6 @@ export const UserGame2Comp: React.FC<Props> = ({user, gameUserBetsData}) => {
             'gameUserBetDetails' in obj &&
             'userTelegram' in obj;
     }
-
-    const handleRating = async (gameUserBetId: number, userType: 'user1' | 'user2', rating: RatingUserEnum) => {
-        try {
-            await gameRatingGameUsers({
-                gameUserBetId,
-                user1Rating: userType === 'user1' ? rating : null,
-                user2Rating: userType === 'user2' ? rating : null,
-            });
-
-            console.log('Рейтинг успешно отправлен');
-        } catch (error) {
-            console.error('Ошибка при отправке рейтинга:', error);
-        }
-    };
 
 
     const handleCreateBet = async (bet: GameUserBet) => {
@@ -680,74 +663,6 @@ export const UserGame2Comp: React.FC<Props> = ({user, gameUserBetsData}) => {
                                                             </div>
                                                         </DialogContent>
                                                     </Dialog>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                    {bet.statusUserBet === "CLOSED" && (
-                                        <div>
-                                            <div className={
-                                                bet.checkWinUser1 === WinGameUserBet.WIN ? 'text-green-500' :
-                                                    bet.checkWinUser1 === WinGameUserBet.LOSS ? 'text-red-500' :
-                                                        bet.checkWinUser1 === WinGameUserBet.DRAW ? 'text-yellow-500' : ''
-                                            }>
-                                                {bet.gameUser1Bet.telegram}, {" "} Bet: {bet.betUser1} {" "}
-                                                {bet.gameUser1Rating !== null ? (
-                                                    <span
-                                                        className={bet.gameUser1Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
-                                                        {bet.gameUser1Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
-                                                    </span>
-                                                ) : (
-                                                    <div className="text-gray-500">нет голоса</div>
-                                                )}
-                                            </div>
-                                            <div className={
-                                                bet.checkWinUser2 === WinGameUserBet.WIN ? 'text-green-500' :
-                                                    bet.checkWinUser2 === WinGameUserBet.LOSS ? 'text-red-500' :
-                                                        bet.checkWinUser2 === WinGameUserBet.DRAW ? 'text-yellow-500' : ''
-                                            }>
-                                                {bet.gameUser2Bet?.telegram || "No Telegram"}, {" "} Bet: {bet.betUser2} {" "}
-                                                {bet.gameUser2Rating !== null ? (
-                                                    <span
-                                                        className={bet.gameUser2Rating === RatingUserEnum.PLUS ? 'text-green-500' : 'text-red-500'}>
-                                                        {bet.gameUser2Rating === RatingUserEnum.PLUS ? 'Плюс' : 'Минус'}
-                                                    </span>
-                                                ) : (
-                                                    <div className="text-gray-500">Оппонент не голосовал</div>
-                                                )}
-                                            </div>
-
-                                            {user.id === bet.gameUser1Bet.id && (
-                                                <div>
-                                                    <Button
-                                                        onClick={() => handleRating(bet.id, 'user2', RatingUserEnum.PLUS)}
-                                                        className={`${bet.gameUser2Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'} h-6`}
-                                                    >
-                                                        Плюс
-                                                    </Button>
-                                                    <Button
-                                                        onClick={() => handleRating(bet.id, 'user2', RatingUserEnum.MINUS)}
-                                                        className={`${bet.gameUser2Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'} h-6`}
-                                                    >
-                                                        Минус
-                                                    </Button>
-                                                </div>
-                                            )}
-
-                                            {bet.gameUser2Bet && user.id === bet.gameUser2Bet.id && (
-                                                <div>
-                                                    <Button
-                                                        onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.PLUS)}
-                                                        className={`${bet.gameUser1Rating === RatingUserEnum.PLUS ? 'bg-green-500' : 'bg-gray-500'} h-6`}
-                                                    >
-                                                        Плюс
-                                                    </Button>
-                                                    <Button
-                                                        onClick={() => handleRating(bet.id, 'user1', RatingUserEnum.MINUS)}
-                                                        className={`${bet.gameUser1Rating === RatingUserEnum.MINUS ? 'bg-red-500' : 'bg-gray-500'} h-6`}
-                                                    >
-                                                        Минус
-                                                    </Button>
                                                 </div>
                                             )}
                                         </div>

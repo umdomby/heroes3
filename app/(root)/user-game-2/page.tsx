@@ -22,7 +22,6 @@ export default async function UserGame2Page() {
     }
     const player = await prisma.player.findFirst({ where: { userId: Number(session?.id) } });
 
-    // Проверяем, существует ли объект player
     if (!player) {
         return (
             <div className="text-center">
@@ -40,29 +39,9 @@ export default async function UserGame2Page() {
         );
     }
 
-
-    const gameUserBetsData = await prisma.gameUserBet.findMany({
-        where: {
-            statusUserBet: {
-                in: ['OPEN', 'START'], // Фильтрация по статусу
-            },
-        },
-        include: {
-            gameUser1Bet: true,
-            gameUser2Bet: true,
-            category: true,
-            product: true,
-            productItem: true,
-        },
-        orderBy: {
-            createdAt: 'desc', // Sort by createdAt in descending order
-        },
-    });
-
     return (
         <Container className="flex flex-col my-10 w-[96%]">
             <UserGame2Comp
-                gameUserBetsData={gameUserBetsData} // Убедитесь, что здесь используется правильный синтаксис
                 user={user}
             />
         </Container>
