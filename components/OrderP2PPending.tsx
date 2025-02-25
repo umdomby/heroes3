@@ -113,8 +113,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
     // Функция для вычисления времени авто-закрытия
     const getAutoCloseTime = (updatedAt: Date) => {
         const autoCloseDate = new Date(updatedAt);
-        //autoCloseDate.setHours(autoCloseDate.getHours() + 1);
-        autoCloseDate.setMinutes(autoCloseDate.getMinutes() + 1); // Add 5 minutes (300 seconds)
+        autoCloseDate.setHours(autoCloseDate.getHours() + 1);
+        //autoCloseDate.setMinutes(autoCloseDate.getMinutes() + 1); // Add 5 minutes (300 seconds)
         return autoCloseDate.toLocaleString();
     };
 
