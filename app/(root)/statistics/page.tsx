@@ -7,7 +7,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { globalDataPoints } from "@/app/actions";
+import Link from 'next/link';
+import { Button } from "@/components/ui";
+import React from "react";
+import {globalDataPoints} from "@/app/actions";
 
 interface GlobalData {
     id: number;
@@ -23,26 +26,33 @@ interface GlobalData {
     gameUserBetOpen: number | null;
 }
 
-async function fetchGlobalData(): Promise<GlobalData[]> {
-    try {
-        const data = await prisma.globalData.findMany({
-            orderBy: {
-                id: 'desc', // Сортировка по id в порядке убывания
-            },
-        });
-        return data;
-    } catch (error) {
-        console.error('Failed to fetch global data:', error);
-        return [];
-    }
+async function fetchGlobalData(page: number): Promise<GlobalData[]> {
+    const take = 27;
+    const skip = (page - 1) * take;
+
+    const data = await prisma.globalData.findMany({
+        orderBy: {
+            id: 'desc',
+        },
+        take,
+        skip,
+    });
+
+    return data;
 }
 
-export default async function StatisticsPage() {
-    // Запускаем обновление данных
-    await globalDataPoints();
+async function fetchTotalCount(): Promise<number> {
+    const count = await prisma.globalData.count();
+    return count;
+}
 
-    // Получаем обновленные данные
-    const globalDataList = await fetchGlobalData();
+export default async function StatisticsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+    await globalDataPoints();
+    const resolvedSearchParams = await searchParams;
+    const currentPage = parseInt(resolvedSearchParams.page ?? '1', 10);
+    const globalDataList = await fetchGlobalData(currentPage);
+    const totalCount = await fetchTotalCount();
+    const totalPages = Math.ceil(totalCount / 27);
 
     if (globalDataList.length === 0) {
         return <div>Нет доступных данных</div>;
@@ -53,6 +63,7 @@ export default async function StatisticsPage() {
             <Table style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
                 <TableHeader>
                     <TableRow style={{ backgroundColor: '#1f2937' }}>
+                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Date</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Start</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Reg</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Ref</TableHead>
@@ -61,7 +72,6 @@ export default async function StatisticsPage() {
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>User</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Fund</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Margin</TableHead>
-                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Date</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Sum</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -74,7 +84,6 @@ export default async function StatisticsPage() {
                             (globalData.margin ?? 0) +
                             (globalData.gameUserBetOpen ?? 0);
 
-                        // Условие для выделения первой записи
                         const isFirstRecord = index === 0;
                         const rowStyle = isFirstRecord
                             ? { backgroundColor: '#4c4c4c', transition: 'background-color 0.3s', cursor: 'pointer' }
@@ -82,6 +91,7 @@ export default async function StatisticsPage() {
 
                         return (
                             <TableRow key={globalData.id} style={rowStyle}>
+                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>{new Date(globalData.updatedAt).toLocaleString('en-US', { hour12: false })}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>11M</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{globalData.reg ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{globalData.ref ?? 'N/A'}</TableCell>
@@ -90,14 +100,23 @@ export default async function StatisticsPage() {
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{globalData.betFund ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.margin ?? 'N/A'}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>{new Date(globalData.updatedAt).toLocaleString()}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(totalSum * 100) / 100}</TableCell>
-
                             </TableRow>
                         );
                     })}
                 </TableBody>
             </Table>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                <Link href={`?page=${currentPage - 1}`}>
+                    <Button className="btn btn-primary mx-2 w-[100px] h-7" disabled={currentPage === 1}>Previous</Button>
+                </Link>
+                <span style={{ margin: '0 10px' }}>Page {currentPage}</span>
+                {currentPage < totalPages && (
+                    <Link href={`?page=${currentPage + 1}`}>
+                        <Button className="btn btn-primary mx-2 w-[100px] h-7">Next</Button>
+                    </Link>
+                )}
+            </div>
         </div>
     );
 }
