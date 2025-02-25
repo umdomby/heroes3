@@ -11,7 +11,6 @@ import {
     confirmSellOrderUser2,
     confirmSellOrderCreator,
 } from '@/app/actions';
-import { DateTime } from "next-auth/providers/kakao";
 import Link from "next/link";
 
 interface OrderBankDetail {
