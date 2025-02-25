@@ -22,6 +22,7 @@ interface GlobalData {
     usersPoints: number | null;
     openBetsPoints: number | null;
     betFund: number | null;
+    gameUserBetOpen: number | null;
 }
 
 async function fetchGlobalData(): Promise<GlobalData | null> {
@@ -46,11 +47,16 @@ export default async function GlobalDataComponent() {
     if (!globalData) {
         return <div>Нет доступных данных</div>;
     }
-    const totalSum =
+
+    const totalSumUsers =
         (globalData.openBetsPoints ?? 0) +
         (globalData.usersPoints ?? 0) +
+        (globalData.gameUserBetOpen ?? 0);
+
+    const totalSum = totalSumUsers +
         (globalData.betFund ?? 0) +
         (globalData.margin ?? 0);
+
 
     return (
         <Table style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
@@ -66,7 +72,7 @@ export default async function GlobalDataComponent() {
             <TableBody>
                 <TableRow style={{ transition: 'background-color 0.3s', cursor: 'pointer' }}>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#db2777', textDecoration: 'none' }}>11M</TableCell>
-                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59', textDecoration: 'none' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
+                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59', textDecoration: 'none' }}>{totalSumUsers ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3', textDecoration: 'none' }}>{globalData.betFund ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb', textDecoration: 'none' }}>{globalData.margin ?? 'N/A'}</TableCell>
                     <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812', textDecoration: 'none' }}>{Math.floor(totalSum * 100) / 100}</TableCell>
