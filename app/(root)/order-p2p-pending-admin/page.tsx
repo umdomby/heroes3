@@ -28,7 +28,7 @@ export default async function OrderP2PPendingPage() {
     // Запрос к базе данных
     const openOrders = await prisma.orderP2P.findMany({
         where: {
-            orderP2PStatus: { in: ['PENDING', 'CLOSED', 'RETURN'] }
+            orderP2PStatus: { in: ['PENDING'] }
         },
         orderBy: {
             createdAt: 'desc',
