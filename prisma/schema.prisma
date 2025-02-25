@@ -244,16 +244,17 @@ enum PlayerChoice {
 }
 
 model GlobalData {
-  id             Int      @id @default(autoincrement())
-  users          Int      @default(0) // Количество зарегистрированных пользователей
-  betFund        Float?   @default(1000000) // Количество зарегистрированных пользователей
-  reg            Float?   @default(0) // количество записей regPoints
-  ref            Float?   @default(0) // количество записей ReferralUserIpAddress referralStatus=true
-  usersPoints    Float?   @default(0) // сумма Points всех пользователей
-  margin         Float?   @default(0) // сумма маржи model sum BetClosed, BetClosed3 and BetClosed4 - margin
-  openBetsPoints Float?   @default(0) // сумма ставок, которые еще не закрылись Bet-totalBetAmount, Bet3-totalBetAmount and Bet4 - totalBetAmount
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  users           Int      @default(0) // Количество зарегистрированных пользователей
+  betFund         Float?   @default(1000000) // Количество зарегистрированных пользователей
+  reg             Float?   @default(0) // количество записей regPoints
+  ref             Float?   @default(0) // количество записей ReferralUserIpAddress referralStatus=true
+  usersPoints     Float?   @default(0) // сумма Points всех пользователей
+  margin          Float?   @default(0) // сумма маржи model sum BetClosed, BetClosed3 and BetClosed4 - margin
+  openBetsPoints  Float?   @default(0) // сумма ставок, которые еще не закрылись Bet-totalBetAmount, Bet3-totalBetAmount and Bet4 - totalBetAmount
+  gameUserBetOpen Float?   @default(0) // ставки игроками на свои игры
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model GameUserBet {

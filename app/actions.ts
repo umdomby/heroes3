@@ -928,7 +928,8 @@ export async function globalDataPoints() {
                     ref: refCount,
                     usersPoints: usersPointsSum + totalPoints,
                     margin: marginSum,
-                    openBetsPoints: openBetsPointsSum + totalBetUser1 + totalBetUser2,
+                    openBetsPoints: openBetsPointsSum,
+                    gameUserBetOpen: totalBetUser1 + totalBetUser2,
                 },
                 create: {
                     users: usersCount,
@@ -936,7 +937,8 @@ export async function globalDataPoints() {
                     ref: refCount,
                     usersPoints: usersPointsSum + totalPoints,
                     margin: marginSum,
-                    openBetsPoints: openBetsPointsSum + totalBetUser1 + totalBetUser2,
+                    openBetsPoints: openBetsPointsSum,
+                    gameUserBetOpen: totalBetUser1 + totalBetUser2,
                 },
             });
         });
