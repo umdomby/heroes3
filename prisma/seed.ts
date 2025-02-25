@@ -154,7 +154,7 @@ async function up() {
       betFund: 1000000,
       reg: 0,
       ref: 0,
-      usersPoints: 0,
+      usersPoints: 10000000,
       margin: 0,
       openBetsPoints: 0,
       gameUserBetOpen: 0,

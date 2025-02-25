@@ -1,4 +1,5 @@
 "use client";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,15 +12,13 @@ import {
     SheetDescription,
 } from "@/components/ui/sheet";
 import { User } from "@prisma/client";
-import React, { useState, useEffect } from "react";
 import { chatUsers, chatUsersGet, chatUsersDelete } from "@/app/actions";
 import Link from "next/link";
 
-// Определяем тип для объектов сообщений
 interface Message {
-    id: number; // Убедитесь, что это поле присутствует
+    id: number;
     userEmail: string;
-    userTelegram?: string | null; // Разрешаем null значения
+    userTelegram?: string | null;
     chatText: string;
 }
 
@@ -45,7 +44,7 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
             async function fetchMessages() {
                 try {
                     const fetchedMessages = await chatUsersGet();
-                    console.log('Fetched Messages:', fetchedMessages); // Логируем сообщения для проверки структуры
+                    console.log('Fetched Messages:', fetchedMessages);
                     setMessages(fetchedMessages);
                 } catch (error) {
                     console.error('Error fetching messages:', error);
@@ -99,13 +98,23 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                 </SheetTrigger>
                 <SheetContent className="flex flex-col h-full" aria-describedby="chat-description">
                     <SheetHeader>
-                        <SheetTitle>Chat</SheetTitle>
+                        <SheetTitle></SheetTitle>
                         <SheetDescription>
                         </SheetDescription>
                     </SheetHeader>
-                    <div className="flex-grow p-4 overflow-y-auto flex flex-col-reverse">
+                    <SheetFooter className="flex items-center p-4 border-b">
+                        <Input
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Type your message..."
+                            className="flex-grow mr-2"
+                        />
+                        <Button onClick={handleSendMessage}>Send</Button>
+                    </SheetFooter>
+                    <div className="flex-grow p-4 overflow-y-auto flex flex-col">
                         {messages.map((msg) => (
-                            <div key={msg.id} className="mb-2 flex justify-between items-center">
+                            <div key={msg.id} className="flex justify-between items-center">
                                 <div>
                                     <strong>
                                         {msg.userTelegram ?
@@ -119,23 +128,13 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                                     </strong> <span dangerouslySetInnerHTML={{ __html: linkify(msg.chatText) }} />
                                 </div>
                                 {user.role === "ADMIN" && (
-                                    <Button variant="ghost" onClick={() => handleDeleteMessage(msg.id)}>
+                                    <Button variant="ghost" className="h-5" onClick={() => handleDeleteMessage(msg.id)}>
                                         Delete
                                     </Button>
                                 )}
                             </div>
                         ))}
                     </div>
-                    <SheetFooter className="flex items-center p-4 border-t">
-                        <Input
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder="Type your message..."
-                            className="flex-grow mr-2"
-                        />
-                        <Button onClick={handleSendMessage}>Send</Button>
-                    </SheetFooter>
                 </SheetContent>
             </Sheet>
         </div>
