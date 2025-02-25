@@ -35,9 +35,9 @@ export async function POST(req: NextRequest) {
         });
 
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `"Heroes3" <${process.env.EMAIL_USER}>`,
             to: email,
-            subject: 'Сброс пароля',
+            subject: 'Сброс пароля123',
             text: `Перейдите по ссылке для сброса пароля: ${process.env.NEXTAUTH_URL}/reset-password?token=${resetToken}`,
         };
 
