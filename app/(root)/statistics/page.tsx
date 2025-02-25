@@ -48,6 +48,7 @@ async function fetchTotalCount(): Promise<number> {
 
 export default async function StatisticsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     await globalDataPoints();
+
     const resolvedSearchParams = await searchParams;
     const currentPage = parseInt(resolvedSearchParams.page ?? '1', 10);
     const globalDataList = await fetchGlobalData(currentPage);
