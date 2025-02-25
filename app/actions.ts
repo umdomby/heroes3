@@ -813,7 +813,7 @@ export async function globalDataPoints() {
                 return;
             }
 
-            //p2p
+            // p2p
             const results = await Promise.all([
                 prisma.orderP2P.aggregate({
                     _sum: {
@@ -848,10 +848,8 @@ export async function globalDataPoints() {
                 return sum + (result._sum.orderP2PPoints || 0);
             }, 0);
 
-            // Если прошло больше 10 секунд, выполняем обновление
             const usersCount = await prisma.user.count();
 
-            // Изменяем regCount, чтобы он равнялся сумме поля regPointsPoints
             const regPointsResult = await prisma.regPoints.aggregate({
                 _sum: { regPointsPoints: true },
             });
@@ -866,7 +864,6 @@ export async function globalDataPoints() {
 
             const usersPointsSum = Math.floor((usersPointsResult._sum?.points || 0) * 100) / 100;
 
-            // Получаем сумму поля margin из таблиц BetCLOSED, BetCLOSED3 и BetCLOSED4
             const marginResult = await prisma.betCLOSED.aggregate({
                 _sum: { margin: true }
             });
@@ -879,12 +876,10 @@ export async function globalDataPoints() {
                 _sum: { margin: true }
             });
 
-            // Суммируем все полученные значения margin из трех таблиц
             const marginSum = Math.floor(((marginResult._sum?.margin || 0) +
                 (marginResult3._sum?.margin || 0) +
                 (marginResult4._sum?.margin || 0)) * 100) / 100;
 
-            // Получаем сумму поля totalBetAmount из таблиц bet, bet3 и bet4, где статус 'OPEN'
             const openBetsPointsResult = await prisma.bet.aggregate({
                 _sum: { totalBetAmount: true },
                 where: { status: 'OPEN' }
@@ -900,12 +895,10 @@ export async function globalDataPoints() {
                 where: { status: 'OPEN' }
             });
 
-            // Суммируем все полученные значения totalBetAmount из трех таблиц
             const openBetsPointsSum = Math.floor(((openBetsPointsResult._sum?.totalBetAmount || 0) +
                 (openBetsPointsResult3._sum?.totalBetAmount || 0) +
                 (openBetsPointsResult4._sum?.totalBetAmount || 0)) * 100) / 100;
 
-            // Получаем сумму ставок для GameUserBet с статусом START
             const result = await prisma.gameUserBet.aggregate({
                 _sum: {
                     betUser1: true,
@@ -919,10 +912,10 @@ export async function globalDataPoints() {
             const totalBetUser1 = result._sum.betUser1 || 0;
             const totalBetUser2 = result._sum.betUser2 || 0;
 
-            // Обновляем или создаем запись в GlobalData
-            await prisma.globalData.upsert({
+            // Обновляем запись с id = 1
+            await prisma.globalData.update({
                 where: { id: 1 },
-                update: {
+                data: {
                     users: usersCount,
                     reg: regCount,
                     ref: refCount,
@@ -931,7 +924,11 @@ export async function globalDataPoints() {
                     openBetsPoints: openBetsPointsSum,
                     gameUserBetOpen: totalBetUser1 + totalBetUser2,
                 },
-                create: {
+            });
+
+            // Создаем новую запись для новых данных
+            await prisma.globalData.create({
+                data: {
                     users: usersCount,
                     reg: regCount,
                     ref: refCount,
