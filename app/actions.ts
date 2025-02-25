@@ -535,51 +535,6 @@ export async function getOpenOrders(): Promise<OrderP2P[]> {
         throw new Error('Не удалось получить открытые заказы'); // Выбрасывание ошибки для лучшей обработки
     }
 } // 5 секунд обновление 'PENDING', 'CLOSED', 'RETURN' сделок для OrderP2PComponent
-export async function getPendingOrders(userId: number): Promise<OrderP2P[]> {
-    try {
-        return await prisma.orderP2P.findMany({
-            where: {
-                OR: [
-                    {
-                        orderP2PUser1: {id: userId},
-                        orderP2PStatus: {in: ['PENDING', 'CLOSED', 'RETURN']}
-                    },
-                    {
-                        orderP2PUser2: {id: userId},
-                        orderP2PStatus: {in: ['PENDING', 'CLOSED', 'RETURN']}
-                    }
-                ]
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-            include: {
-                orderP2PUser1: {
-                    select: {
-                        id: true,
-                        cardId: true,
-                        fullName: true,
-                        telegram: true,
-                        // Добавьте другие необходимые поля
-                    }
-                },
-                orderP2PUser2: {
-                    select: {
-                        id: true,
-                        cardId: true,
-                        fullName: true,
-                        telegram: true,
-                        // Добавьте другие необходимые поля
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Ошибка при получении PENDING заказов:', error);
-        throw new Error('Не удалось получить PENDING заказы'); // Выбрасывание ошибки для лучшей обработки
-    }
-} // 5 секунд обновление PENDING сделок для OrderP2PPending
-// подтверждение оплаты для продажи
 export async function confirmSellOrderUser2(orderId: number) {
     try {
         const currentUser = await getUserSession();
@@ -3567,23 +3522,13 @@ export async function checkAndCloseOrderP2PTime() {
 
         const now = new Date();
 
-        if (!updateTimeRecord) {
-            // Если запись не существует, создаем новую
-            updateTimeRecord = await prisma.updateDateTime.create({
-                data: {
-                    UDTOrderP2P: now,
-                },
-            });
-            await checkAndCloseOrderP2P();
-            // Поскольку это первое создание, проверка просроченных сделок не требуется
-            return;
-        }
-
         const lastUpdate = updateTimeRecord.UDTOrderP2P || new Date(0); // По умолчанию используем эпоху, если значение null
-
+        console.log("111111111111")
         // Проверяем, прошло ли больше часа с момента последнего обновления
-        if (now.getTime() - lastUpdate.getTime() > 3600000) { // 60 минут в миллисекундах
+        //if (now.getTime() - lastUpdate.getTime() > 3600000) { // 60 минут в миллисекундах
+        if (now.getTime() - lastUpdate.getTime() > 60000) { // 60 секунд
             // Обновляем поле UDTOrderP2P до текущего времени
+            console.log("2222222222")
             await prisma.updateDateTime.update({
                 where: { id: 1 },
                 data: { UDTOrderP2P: now },
@@ -3595,20 +3540,54 @@ export async function checkAndCloseOrderP2PTime() {
     } catch (error) {
         console.error('Ошибка в checkAndCloseOrderP2PTime:', error);
     }
-}
+} // обновление по первой записи
 
 export async function checkAndCloseOrderP2P() {
     const now = new Date();
     const expiredDeals = await prisma.orderP2P.findMany({
         where: {
-            orderP2PStatus: 'PENDING',
+            OR: [
+                { orderP2PStatus: 'PENDING' },
+                { orderP2PStatus: 'OPEN' }
+            ],
             updatedAt: {
-                lt: new Date(now.getTime() - 3600000), // 60 минут назад
+                //lt: new Date(now.getTime() - 3600000), // 60 минут назад
+                lt: new Date(now.getTime() - 60000), // 60 секунд
             },
         },
     });
 
     for (const order of expiredDeals) {
+
+        if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'OPEN') {
+            await prisma.$transaction(async (prisma) => {
+                await prisma.user.update({
+                    where: { id: order.orderP2PUser1Id },
+                    data: {
+                        points: { increment: order.orderP2PPoints },
+                    },
+                });
+
+                await prisma.orderP2P.update({
+                    where: { id: order.id },
+                    data: {
+                        orderP2PStatus: 'RETURN',
+                    },
+                });
+            });
+        }
+
+        if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'OPEN') {
+            await prisma.$transaction(async (prisma) => {
+                await prisma.orderP2P.update({
+                    where: { id: order.id },
+                    data: {
+                        orderP2PStatus: 'RETURN',
+                    },
+                });
+            });
+        }
+
         if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'PENDING') {
             await prisma.$transaction(async (prisma) => {
                 await prisma.user.update({
@@ -3629,12 +3608,21 @@ export async function checkAndCloseOrderP2P() {
 
         if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'PENDING') {
             await prisma.$transaction(async (prisma) => {
+
+                await prisma.user.update({
+                    where: { id: order.orderP2PUser2Id },
+                    data: {
+                        points: { increment: order.orderP2PPoints },
+                    },
+                });
+
                 await prisma.orderP2P.update({
                     where: { id: order.id },
                     data: {
                         orderP2PStatus: 'RETURN',
                     },
                 });
+
             });
         }
     }

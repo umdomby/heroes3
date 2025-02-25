@@ -319,7 +319,8 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
             // Проверяем, что price не равен null или undefined
             if (price !== undefined && price !== null) {
                 await openSellOrder(order.id, user.id, bankDetails, price);
-                alert('Сделка успешно заключена');
+                setDealSuccessMessage('Сделка успешно заключена, перейдите в раздел: P2P PENDING');
+                setTimeout(() => setDealSuccessMessage(null), 3000); // Hide the message after 3 seconds
             } else {
                 alert('Пожалуйста, выберите действительные банковские реквизиты и цену');
             }
@@ -535,6 +536,15 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
         }
     };
 
+    // Функция для вычисления времени авто-закрытия
+    const getAutoCloseTime = (updatedAt: Date) => {
+        const autoCloseDate = new Date(updatedAt);
+        //autoCloseDate.setHours(autoCloseDate.getHours() + 1);
+        autoCloseDate.setMinutes(autoCloseDate.getMinutes() + 1); // Add 5 minutes (300 seconds)
+        return autoCloseDate.toLocaleString();
+    };
+
+
     return (
         <div className={className}>
             Points: {Math.floor(user.points * 100) / 100}
@@ -543,7 +553,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                 <div>
                     <Link href="/order-p2p-pending">
                         <span className="text-blue-500 hover:underline">
-                            Open order : {currentPendingCount}
+                            P2P PENDING : {currentPendingCount}
                         </span>
                     </Link>
                 </div>
@@ -864,6 +874,9 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                                         Заключить сделку
                                     </Button>
                                 )}
+                                <div className="text-center">
+                                    Автозакрытие сделки начнется: {getAutoCloseTime(order.updatedAt)}, (обновить) +1 час
+                                </div>
                             </div>
                         </AccordionContent>
                     </AccordionItem>

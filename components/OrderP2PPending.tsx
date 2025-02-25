@@ -113,7 +113,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
     // Функция для вычисления времени авто-закрытия
     const getAutoCloseTime = (updatedAt: Date) => {
         const autoCloseDate = new Date(updatedAt);
-        autoCloseDate.setHours(autoCloseDate.getHours() + 1);
+        //autoCloseDate.setHours(autoCloseDate.getHours() + 1);
+        autoCloseDate.setMinutes(autoCloseDate.getMinutes() + 1); // Add 5 minutes (300 seconds)
         return autoCloseDate.toLocaleString();
     };
 
@@ -188,8 +189,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                                                            href={order.orderP2PUser1.telegram.replace(/^@/, 'https://t.me/')}
                                                            target="_blank">{order.orderP2PUser1.telegram}</Link></p>
                                         <p>Card ID: {order.orderP2PUser1.cardId}</p>
-                                        <p>Points: {order.orderP2PPoints}</p>
-                                        <p>Price: {order.orderP2PPrice}</p>
+                                        <p>Points: - {order.orderP2PPoints}</p>
+                                        <p>Price: + {order.orderP2PPrice}</p>
                                         {order.orderP2PBuySell === 'SELL' &&
                                             <Button
                                                 onClick={() => handleConfirm(order, true)}
@@ -227,7 +228,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                                         ) : (
                                             <p>Нет доступных банковских реквизитов</p>
                                         )}
-                                        <p>Автозакрытие сделки начнется: {getAutoCloseTime(order.updatedAt)}</p>
+                                        <p>Автозакрытие сделки начнется: {getAutoCloseTime(order.updatedAt)}, (обновить) +1 час</p>
                                         <p>User1: {order.orderP2PUser1.fullName} - {order.orderP2PCheckUser1 ? "Да" : "Нет"}</p>
                                         <p>User2: {order.orderP2PUser2 ? `${order.orderP2PUser2.fullName} - ${order.orderP2PCheckUser2 ? "Да" : "Нет"}` : "Ожидание"}</p>
                                     </div>
@@ -247,8 +248,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                                         )}
                                         </p>
                                         <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
-                                        <p>Points: {order.orderP2PPoints}</p>
-                                        <p>Price: {order.orderP2PPrice}</p>
+                                        <p>Points: + {order.orderP2PPoints}</p>
+                                        <p>Price: - {order.orderP2PPrice}</p>
 
                                         {order.orderP2PBuySell === 'SELL' &&
                                             <Button

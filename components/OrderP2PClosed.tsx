@@ -95,7 +95,7 @@ export const OrderP2PClosed: React.FC<Props> = ({ user, closeOrders, className, 
                 </Link>
                 <Link href="/order-p2p-pending">
                         <span className="text-blue-500 hover:underline">
-                            P2P Open
+                            P2P PENDING
                         </span>
                 </Link>
             </div>

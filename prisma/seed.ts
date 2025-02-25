@@ -160,6 +160,14 @@ async function up() {
       gameUserBetOpen: 0,
     },
   });
+
+  await prisma.updateDateTime.create({
+    data: {
+      UDTvaluta: new Date(),
+      UDTOrderP2P: new Date(),
+    },
+  });
+
 }
 
 

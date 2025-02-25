@@ -44,6 +44,9 @@ export default async function OrderP2PPendingPage() {
         );
     }
 
+    // Закрываем просроченные сделки перед рендерингом страницы
+    await checkAndCloseOrderP2PTime();
+
     const openOrders = await prisma.orderP2P.findMany({
         where: {
             OR: [
