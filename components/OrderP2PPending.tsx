@@ -140,7 +140,6 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                         <TableCell className="w-[20%] text-center">Telegram</TableCell>
                         <TableCell className="w-[15%] text-center">BUY/SELL</TableCell>
                         <TableCell className="w-[10%] text-center">Points</TableCell>
-                        <TableCell className="w-[25%] text-center">CardID</TableCell>
                         <TableCell className="w-[15%] text-center">State</TableCell>
                         <TableCell className="w-[15%] text-center">Date</TableCell>
                     </TableRow>
@@ -160,12 +159,6 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
 
                                         <TableCell className="w-[15%] text-center">{order.orderP2PBuySell === 'BUY' ? 'Покупает' : 'Продаёт'} </TableCell>
                                         <TableCell className="w-[10%] text-center">{order.orderP2PPoints} </TableCell>
-
-                                        <TableCell className="w-[25%] text-center">
-                                            <p>
-                                                {order.orderP2PUser1.cardId}
-                                            </p>
-                                        </TableCell>
                                         <TableCell className="w-[15%] text-center">
                                             <p>
                                                 {order.orderP2PStatus}
