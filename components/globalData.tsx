@@ -46,7 +46,6 @@ export default async function GlobalDataComponent() {
     if (!globalData) {
         return <div>Нет доступных данных</div>;
     }
-
     const totalSum =
         (globalData.openBetsPoints ?? 0) +
         (globalData.usersPoints ?? 0) +
