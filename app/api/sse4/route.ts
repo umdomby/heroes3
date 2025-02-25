@@ -56,7 +56,7 @@ export async function GET(request: Request) {
                         clearInterval(checkIntervalId);
                         controller.close();
                     }
-                }, 1000); // Проверяем изменения каждые 1 секунду
+                }, 5000); // Проверяем изменения каждые 1 секунду
 
                 // Обработка закрытия соединения
                 request.signal.onabort = () => {

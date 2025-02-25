@@ -147,6 +147,19 @@ async function up() {
   await prisma.player.createMany({
     data: players,
   });
+
+  await prisma.globalData.create({
+    data: {
+      users: 0,
+      betFund: 1000000,
+      reg: 0,
+      ref: 0,
+      usersPoints: 0,
+      margin: 0,
+      openBetsPoints: 0,
+      gameUserBetOpen: 0,
+    },
+  });
 }
 
 
