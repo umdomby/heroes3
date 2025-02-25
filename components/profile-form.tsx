@@ -454,12 +454,12 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                     <div className="space-y-1">
                                         {bankDetails.map((detail, index) => (
                                             <div key={index}
-                                                 className="p-1 border border-gray-300 rounded-lg flex justify-between items-center">
+                                                 className="p-1 border border-gray-300 rounded-lg">
                                                 {editIndex === index ? (
                                                     <div>
                                                         <input
                                                             type="text"
-                                                            value={editedDetail.name || ''} // Убедитесь, что значение всегда строка
+                                                            value={editedDetail.name || ''}
                                                             onChange={(e) => setEditedDetail({
                                                                 ...editedDetail,
                                                                 name: e.target.value
@@ -468,7 +468,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                                         />
                                                         <input
                                                             type="text"
-                                                            value={editedDetail.details || ''} // Убедитесь, что значение всегда строка
+                                                            value={editedDetail.details || ''}
                                                             onChange={(e) => setEditedDetail({
                                                                 ...editedDetail,
                                                                 details: e.target.value
@@ -477,7 +477,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                                         />
                                                         <input
                                                             type="text"
-                                                            value={editedDetail.description || ''} // Убедитесь, что значение всегда строка
+                                                            value={editedDetail.description || ''}
                                                             onChange={(e) => setEditedDetail({
                                                                 ...editedDetail,
                                                                 description: e.target.value
@@ -489,45 +489,34 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                                             value={editedDetail.price || ''}
                                                             onChange={(e) => {
                                                                 let value = e.target.value;
-                                                                // Заменяем точку на запятую
                                                                 value = value.replace('.', ',');
-                                                                // Проверяем, соответствует ли значение регулярному выражению
                                                                 const regex = /^\d*[,]?\d*$/;
                                                                 if (regex.test(value)) {
-                                                                    // Если значение пустое, сбрасываем цену
                                                                     if (value === '') {
                                                                         setEditedDetail({...editedDetail, price: ''});
                                                                         return;
                                                                     }
-                                                                    // Если значение начинается с запятой или точки, добавляем "0," в начало
                                                                     if (value.startsWith(',') || value.startsWith('.')) {
                                                                         value = '0,' + value.slice(1);
                                                                     }
-                                                                    // Если значение начинается с "0" и за ним не следует запятая, добавляем запятую
                                                                     if (value.startsWith('0') && value.length > 1 && value[1] !== ',') {
                                                                         value = '0,' + value.slice(1);
                                                                     }
-                                                                    // Предотвращаем добавление второй запятой после "0,0"
                                                                     if (value.startsWith('0,') && value[3] === ',') {
                                                                         value = '0,' + value.slice(4);
                                                                     }
-                                                                    // Разделяем значение на части до и после запятой
                                                                     const parts = value.split(',');
-                                                                    // Ограничиваем длину части до запятой и проверяем, не превышает ли она 100000
                                                                     if (parts[0].length > 6 || parseInt(parts[0]) > 100000) {
                                                                         parts[0] = parts[0].slice(0, 6);
                                                                         if (parseInt(parts[0]) > 100000) {
                                                                             parts[0] = '100000';
                                                                         }
                                                                     }
-                                                                    // Ограничиваем длину части после запятой
                                                                     if (parts[1] && parts[1].length > 10) {
                                                                         parts[1] = parts[1].slice(0, 10);
                                                                     }
-                                                                    // Объединяем части обратно в строку
                                                                     value = parts.join(',');
 
-                                                                    // Преобразуем строку в число с плавающей точкой и проверяем, является ли оно числом
                                                                     const floatValue = parseFloat(value.replace(',', '.'));
                                                                     if (!isNaN(floatValue)) {
                                                                         setEditedDetail({
@@ -542,7 +531,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                                         <Button
                                                             onClick={handleSaveBankDetail}
                                                             className="mt-2"
-                                                            disabled={!editedDetail.name || !editedDetail.details || !editedDetail.description || !editedDetail.price} // Disable if any field is empty
+                                                            disabled={!editedDetail.name || !editedDetail.details || !editedDetail.description || !editedDetail.price}
                                                         >
                                                             Сохранить
                                                         </Button>
@@ -555,7 +544,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                                         <p><strong>Цена за 1 Point:</strong> {detail.price}</p>
                                                     </div>
                                                 )}
-                                                <div className="flex space-x-2">
+                                                <div className="flex flex-wrap space-x-2 mt-2">
                                                     <Button onClick={() => handleEditBankDetail(index)}
                                                             variant="secondary">Изменить</Button>
                                                     <Button onClick={() => handleDeleteBankDetail(index)}
@@ -612,7 +601,8 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                 <AccordionTrigger>Зарегистрироваться как игрок</AccordionTrigger>
                                 <AccordionContent>
                                     <div className="mb-4">
-                                        <label className="block text-sm font-medium mb-2">Twitch (можно оставить heroes3_site или введите свой)</label>
+                                        <label className="block text-sm font-medium mb-2">Twitch (можно оставить
+                                            heroes3_site или введите свой)</label>
                                         <Input
                                             type="text"
                                             value={twitch}
