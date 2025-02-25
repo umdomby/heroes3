@@ -391,6 +391,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
 
     return (
         <div>
+            <span className="text-blue-500">Heroes3.site не несет ответственность за закрытие ставок открытые другими игроками.</span>
             {/* Отображение отфильтрованных ставок */}
             {filteredBets.map((bet: Bet) => {
                 const userBets = bet.participants.filter((p) => p.userId === user?.id);
@@ -740,6 +741,14 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                                     />
                                                     <span>Ничья</span>
                                                 </label>
+                                                <label>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={bet.suspendedBet}
+                                                        onChange={() => handleSuspendedBetChange(bet.id, !bet.suspendedBet)}
+                                                    />
+                                                    <span>Остановить</span>
+                                                </label>
                                             </div>
                                             <Button
                                                 type="button"
@@ -749,15 +758,6 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                             >
                                                 Закрыть ставку
                                             </Button>
-
-                                                <div className="flex items-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={bet.suspendedBet}
-                                                        onChange={() => handleSuspendedBetChange(bet.id, !bet.suspendedBet)}
-                                                        className="mr-2"
-                                                    />
-                                                </div>
                                             {closeBetError && (
                                                 <p className="text-red-500">{closeBetError}</p>
                                             )}

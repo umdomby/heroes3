@@ -55,6 +55,11 @@ export const Access_user: React.FC<Props> = ({className}) => {
                                 HOME
                             </DropdownMenuRadioItem>
                         </Link>
+                        <Link href="/user-game-bet-2">
+                            <DropdownMenuRadioItem value="user-game-bet-2" className="cursor-pointer">
+                                PLAYER 2 BET
+                            </DropdownMenuRadioItem>
+                        </Link>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
                                 P2P

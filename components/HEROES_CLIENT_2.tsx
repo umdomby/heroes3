@@ -739,6 +739,15 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                                     />
                                                     <span>Ничья</span>
                                                 </label>
+
+                                                <label>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={bet.suspendedBet}
+                                                        onChange={() => handleSuspendedBetChange(bet.id, !bet.suspendedBet)}
+                                                    />
+                                                    <span>Остановить</span>
+                                                </label>
                                             </div>
                                             <Button
                                                 type="button"
@@ -748,15 +757,6 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                             >
                                                 Закрыть ставку
                                             </Button>
-
-                                                <div className="flex items-center">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={bet.suspendedBet}
-                                                        onChange={() => handleSuspendedBetChange(bet.id, !bet.suspendedBet)}
-                                                        className="mr-2"
-                                                    />
-                                                </div>
 
                                             {closeBetError && (
                                                 <p className="text-red-500">{closeBetError}</p>
