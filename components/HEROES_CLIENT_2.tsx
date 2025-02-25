@@ -65,12 +65,14 @@ const playerColors = {
 
 export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
     const { data: session } = useSession();
-
-    const { data: bets, error, isLoading, mutate } = useSWR<Bet[]>("/api/get-bets", fetcher, {
-        revalidateOnFocus: false, // Отключаем обновление при фокусе на вкладке
-        revalidateOnReconnect: false, // Отключаем обновление при переподключении
-        // refreshInterval: 10000,
-        // revalidateOnFocus: true,
+    const {
+        data: bets,
+        error,
+        isLoading,
+        mutate,
+    } = useSWR<Bet[]>("/api/get-bets", fetcher, {
+        refreshInterval: 10000, // Опционально: периодическое обновление
+        revalidateOnFocus: true, // Обновление при фокусе на вкладке
     });
 
 

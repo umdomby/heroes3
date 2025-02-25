@@ -79,8 +79,8 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
         isLoading,
         mutate,
     } = useSWR<Bet[]>("/api/get-bets4", fetcher, {
-        revalidateOnFocus: false, // Отключаем обновление при фокусе на вкладке
-        revalidateOnReconnect: false, // Отключаем обновление при переподключении
+        refreshInterval: 10000,
+        revalidateOnFocus: true,
     });
 
 
