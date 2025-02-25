@@ -837,17 +837,32 @@ export async function globalDataPoints() {
 
             const openBetsPointsResult = await prisma.bet.aggregate({
                 _sum: { totalBetAmount: true },
-                where: { status: 'OPEN' }
+                where: {
+                    OR: [
+                        { status: 'OPEN' },
+                        {status: 'OPEN_USER' }
+                    ]
+                }
             });
 
             const openBetsPointsResult3 = await prisma.bet3.aggregate({
                 _sum: { totalBetAmount: true },
-                where: { status: 'OPEN' }
+                where: {
+                    OR: [
+                        { status: 'OPEN' },
+                        {status: 'OPEN_USER' }
+                    ]
+                }
             });
 
             const openBetsPointsResult4 = await prisma.bet4.aggregate({
                 _sum: { totalBetAmount: true },
-                where: { status: 'OPEN' }
+                where: {
+                    OR: [
+                        { status: 'OPEN' },
+                        {status: 'OPEN_USER' }
+                    ]
+                }
             });
 
             const openBetsPointsSum = Math.floor(((openBetsPointsResult._sum?.totalBetAmount || 0) +

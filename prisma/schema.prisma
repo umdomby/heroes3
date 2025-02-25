@@ -209,6 +209,7 @@ model ProductItem {
 enum BetStatus {
   OPEN
   OPEN_USER
+  OPEN_TUR
   CLOSED
   PENDING
 }

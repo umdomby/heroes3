@@ -85,12 +85,19 @@ export const Access_user: React.FC<Props> = ({className}) => {
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
-                                    <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
-                                        PLAYER 2 CREATE
-                                    </DropdownMenuRadioItem>
+                                    <Link href="/user-game-create-2">
+                                        <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
+                                            PLAYER 2 CREATE
+                                        </DropdownMenuRadioItem>
+                                    </Link>
                                     <Link href="/user-game-2">
                                         <DropdownMenuRadioItem value="user-game-2" className="cursor-pointer">
                                             PLAYER 2 START
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/user-game-bet-2">
+                                        <DropdownMenuRadioItem value="user-game-bet-2" className="cursor-pointer">
+                                            PLAYER 2 BET
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/user-game-closed-2">

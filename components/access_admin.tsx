@@ -1,8 +1,8 @@
 "use client"
 import React from 'react';
 import Link from 'next/link';
-import { ModeToggle } from "@/components/buttonTheme";
-import { Button } from "@/components/ui";
+import {ModeToggle} from "@/components/buttonTheme";
+import {Button} from "@/components/ui";
 
 import {
     DropdownMenu,
@@ -19,7 +19,7 @@ interface Props {
     className?: string;
 }
 
-export const Access_admin: React.FC<Props> = ({ className }) => {
+export const Access_admin: React.FC<Props> = ({className}) => {
 
     const [open, setOpen] = React.useState(false);
     const [isHovered, setIsHovered] = React.useState(false);
@@ -81,7 +81,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                         </DropdownMenuSub>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
-                                    ADMIN OPTIONS
+                                ADMIN OPTIONS
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
@@ -126,12 +126,14 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/order-p2p-pending-admin">
-                                        <DropdownMenuRadioItem value="order-p2p-pending-admin" className="cursor-pointer">
+                                        <DropdownMenuRadioItem value="order-p2p-pending-admin"
+                                                               className="cursor-pointer">
                                             P2P PENDING
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/order-p2p-closed-admin">
-                                        <DropdownMenuRadioItem value="order-p2p-closed-admin" className="cursor-pointer">
+                                        <DropdownMenuRadioItem value="order-p2p-closed-admin"
+                                                               className="cursor-pointer">
                                             P2P CLOSED
                                         </DropdownMenuRadioItem>
                                     </Link>
@@ -141,7 +143,8 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/transfer-points-admin/bet-found">
-                                        <DropdownMenuRadioItem value="transfer-points-admin-bet-found" className="cursor-pointer">
+                                        <DropdownMenuRadioItem value="transfer-points-admin-bet-found"
+                                                               className="cursor-pointer">
                                             BET FOUND
                                         </DropdownMenuRadioItem>
                                     </Link>
@@ -164,12 +167,19 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                             </DropdownMenuSubTrigger>
                             <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
-                                    <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
-                                        PLAYER 2 CREATE
-                                    </DropdownMenuRadioItem>
+                                    <Link href="/user-game-create-2">
+                                        <DropdownMenuRadioItem value="user-game-create-2" className="cursor-pointer">
+                                            PLAYER 2 CREATE
+                                        </DropdownMenuRadioItem>
+                                    </Link>
                                     <Link href="/user-game-2">
                                         <DropdownMenuRadioItem value="user-game-2" className="cursor-pointer">
                                             PLAYER 2 START
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/user-game-bet-2">
+                                        <DropdownMenuRadioItem value="user-game-bet-2" className="cursor-pointer">
+                                            PLAYER 2 BET
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/user-game-closed-2">
@@ -216,17 +226,20 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                             <DropdownMenuSubContent className="w-45">
                                 <DropdownMenuRadioGroup>
                                     <Link href="/bet-winn-lose-closed-2">
-                                        <DropdownMenuRadioItem value="bet-winn-lose-closed-2" className="cursor-pointer">
+                                        <DropdownMenuRadioItem value="bet-winn-lose-closed-2"
+                                                               className="cursor-pointer">
                                             PLAYERS 2
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/bet-winn-lose-closed-3">
-                                        <DropdownMenuRadioItem value="bet-winn-lose-closed-3" className="cursor-pointer">
+                                        <DropdownMenuRadioItem value="bet-winn-lose-closed-3"
+                                                               className="cursor-pointer">
                                             PLAYERS 3
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/bet-winn-lose-closed-4">
-                                        <DropdownMenuRadioItem value="bet-winn-lose-closed-4" className="cursor-pointer">
+                                        <DropdownMenuRadioItem value="bet-winn-lose-closed-4"
+                                                               className="cursor-pointer">
                                             PLAYERS 4
                                         </DropdownMenuRadioItem>
                                     </Link>
@@ -263,7 +276,7 @@ export const Access_admin: React.FC<Props> = ({ className }) => {
                                 CONTACTS
                             </DropdownMenuRadioItem>
                         </Link>
-                        <DropdownMenuRadioItem value="create-bet"><ModeToggle /></DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
             </DropdownMenu>
