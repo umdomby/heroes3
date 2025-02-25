@@ -18,13 +18,14 @@ import { Category, Product, ProductItem, User, Player } from '@prisma/client';
 import { clientCreateBet } from "@/app/actions";
 
 const createBetSchema = z.object({
-    player1Id: z.coerce.number().int(), // Только целые числа
-    player2Id: z.coerce.number().int(), // Только целые числа
-    initBetPlayer1: z.number().int().min(10, { message: 'Минимальная ставка на игрока 1: 10 баллов' }), // Только целые числа
-    initBetPlayer2: z.number().int().min(10, { message: 'Минимальная ставка на игрока 2: 10 баллов' }), // Только целые числа
-    categoryId: z.coerce.number().int(), // Только целые числа
-    productId: z.coerce.number().int(), // Только целые числа
-    productItemId: z.coerce.number().int(), // Только целые числа
+    player1Id: z.coerce.number().int(),
+    player2Id: z.coerce.number().int(),
+    initBetPlayer1: z.number().int().min(10, { message: 'Минимальная ставка на игрока 1: 10 баллов' }),
+    initBetPlayer2: z.number().int().min(10, { message: 'Минимальная ставка на игрока 2: 10 баллов' }),
+    categoryId: z.coerce.number().int(),
+    productId: z.coerce.number().int(),
+    productItemId: z.coerce.number().int(),
+    description: z.string().optional(), // Add description field
 });
 
 interface Props {
@@ -47,6 +48,7 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
             categoryId: categories[0]?.id,
             productId: products[0]?.id,
             productItemId: productItems[0]?.id,
+            description: 'online', // Default value for description
         },
     });
 
@@ -55,20 +57,17 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
     const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
         const { initBetPlayer1, initBetPlayer2 } = values;
 
-        // Проверка на минимальную сумму ставки
         if (initBetPlayer1 < 100 || initBetPlayer2 < 100) {
             setCreateBetError('Минимальная ставка на каждого игрока: 100 баллов');
             return;
         }
 
-        // Проверка на максимальную сумму ставки (1000 баллов)
         const totalBetAmount = initBetPlayer1 + initBetPlayer2;
         if (totalBetAmount > 1000) {
             setCreateBetError('Максимальная сумма ставок на обоих игроков: 1000 баллов');
             return;
         }
 
-        // Рассчитываем коэффициенты
         const totalBets = initBetPlayer1 + initBetPlayer2;
         const oddsBetPlayer1 = totalBets / initBetPlayer1;
         const oddsBetPlayer2 = totalBets / initBetPlayer2;
@@ -157,7 +156,7 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
                                         value={field.value === undefined ? '' : field.value}
                                         onChange={(e) => {
                                             const value = e.target.valueAsNumber;
-                                            if (Number.isInteger(value)) { // Проверка на целое число
+                                            if (Number.isInteger(value)) {
                                                 field.onChange(value);
                                             }
                                         }}
@@ -183,7 +182,7 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
                                         value={field.value === undefined ? '' : field.value}
                                         onChange={(e) => {
                                             const value = e.target.valueAsNumber;
-                                            if (Number.isInteger(value)) { // Проверка на целое число
+                                            if (Number.isInteger(value)) {
                                                 field.onChange(value);
                                             }
                                         }}
@@ -245,6 +244,25 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
                                             <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
                                         ))}
                                     </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Поле для описания */}
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Описание"
+                                        type="text"
+                                        {...field}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

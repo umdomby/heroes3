@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     Bet as PrismaBet,
     Player,
@@ -9,20 +9,20 @@ import {
     BetStatus,
 } from "@prisma/client";
 import useSWR from "swr";
-import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import {Button} from "@/components/ui/button";
+import {useSession} from "next-auth/react";
+import {redirect} from "next/navigation";
 import {placeBet, closeBet, closeBetDraw, suspendedBetCheck} from "@/app/actions";
-import { unstable_batchedUpdates } from "react-dom";
+import {unstable_batchedUpdates} from "react-dom";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"; // Импортируем компоненты диалогового окна
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog"; // Импортируем компоненты диалогового окна
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
 import Link from "next/link";
 
 const fetcher = (url: string, options?: RequestInit) =>
@@ -45,9 +45,10 @@ interface Bet extends PrismaBet {
     totalBetPlayer1: number;
     totalBetPlayer2: number;
     totalBetAmount: number;
-    creatorId : number;
-    suspendedBet : boolean;
+    creatorId: number;
+    suspendedBet: boolean;
     status: BetStatus;
+    description: string | null; // Change this line
 }
 
 interface Props {
@@ -63,8 +64,8 @@ const playerColors = {
     [PlayerChoice.PLAYER4]: "text-yellow-400", // Color for Player 4
 };
 
-export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
-    const { data: session } = useSession();
+export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
+    const {data: session} = useSession();
     const {
         data: bets,
         error,
@@ -102,7 +103,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                     data.type === "delete"
                 ) {
                     mutate(); // Обновляем данные ставок
-                     // Обновляем данные пользователя
+                    // Обновляем данные пользователя
                 }
             });
         };
@@ -349,8 +350,8 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
             }
 
             mutate();
-            
-            setSelectedWinners((prev) => ({ ...prev, [currentBet.id]: null }));
+
+            setSelectedWinners((prev) => ({...prev, [currentBet.id]: null}));
             setCloseBetError(null);
             closeConfirmationDialog();
         } catch (error) {
@@ -418,7 +419,14 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                     <div key={bet.id} className="border border-gray-700 mt-1">
                         <Accordion type="single" collapsible>
                             <AccordionItem value={`item-${bet.id}`}>
-                                <AccordionTrigger>
+                                <AccordionTrigger className="relative">
+                                    <span
+                                        className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 text-sm p-1 rounded shadow ${
+                                            bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
+                                        }`}
+                                    >
+                                    {bet?.description}
+                                    </span>
                                     <Table>
                                         <TableBody>
                                             <TableRow>
@@ -501,7 +509,8 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                                         <div className="m-4">
                                             <p>
                                                 Общая сумма ставок на это событие:
-                                                <span className="text-green-400"> {Math.floor(bet.totalBetAmount * 100) / 100}</span>
+                                                <span
+                                                    className="text-green-400"> {Math.floor(bet.totalBetAmount * 100) / 100}</span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}
@@ -777,7 +786,8 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({ className, user }) => {
                         <DialogHeader>
                             <DialogTitle>Подтверждение закрытия ставки</DialogTitle>
                         </DialogHeader>
-                        <p>Введите {selectedWinners[currentBet.id] === "draw" ? "ничья" : selectedWinners[currentBet.id] === currentBet.player1Id ? currentBet.player1.name : currentBet.player2.name} для подтверждения:</p>
+                        <p>Введите {selectedWinners[currentBet.id] === "draw" ? "ничья" : selectedWinners[currentBet.id] === currentBet.player1Id ? currentBet.player1.name : currentBet.player2.name} для
+                            подтверждения:</p>
                         <input
                             type="text"
                             value={confirmationInput}

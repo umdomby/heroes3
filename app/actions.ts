@@ -1736,6 +1736,7 @@ export async function clientCreateBet(formData: any) {
                 totalBetPlayer1: 0, // Инициализируем сумму ставок на игрока 1
                 totalBetPlayer2: 0, // Инициализируем сумму ставок на игрока 2
                 margin: 0, // Инициализируем общую маржу
+                description: formData.description,
             },
         });
 
@@ -2335,6 +2336,7 @@ export async function clientCreateBet3(formData: any) {
                 totalBetPlayer2: 0,
                 totalBetPlayer3: 0,
                 margin: 0,
+                description: formData.description,
             },
         });
 
@@ -2953,6 +2955,7 @@ export async function clientCreateBet4(formData: any) {
                 totalBetPlayer3: 0,
                 totalBetPlayer4: 0,
                 margin: 0,
+                description: formData.description,
             },
         });
 

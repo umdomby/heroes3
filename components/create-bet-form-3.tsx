@@ -27,6 +27,7 @@ const createBetSchema3 = z.object({
     categoryId: z.coerce.number().int(),
     productId: z.coerce.number().int(),
     productItemId: z.coerce.number().int(),
+    description: z.string().optional(), // Add description field
 });
 
 interface Props {
@@ -51,6 +52,7 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
             categoryId: categories[0]?.id,
             productId: products[0]?.id,
             productItemId: productItems[0]?.id,
+            description: 'online', // Default value for description
         },
     });
 
@@ -59,20 +61,17 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
     const onSubmit = async (values: z.infer<typeof createBetSchema3>) => {
         const { initBetPlayer1, initBetPlayer2, initBetPlayer3 } = values;
 
-        // Check minimum bet amount
         if (initBetPlayer1 < 100 || initBetPlayer2 < 100 || initBetPlayer3 < 100) {
             setCreateBetError('Минимальная ставка на каждого игрока: 100 баллов');
             return;
         }
 
-        // Check maximum total bet amount (1000 points)
         const totalBetAmount = initBetPlayer1 + initBetPlayer2 + initBetPlayer3;
         if (totalBetAmount > 1000) {
             setCreateBetError('Максимальная сумма ставок на всех игроков: 1000 баллов');
             return;
         }
 
-        // Calculate odds
         const totalBets = initBetPlayer1 + initBetPlayer2 + initBetPlayer3;
         const oddsBetPlayer1 = totalBets / initBetPlayer1;
         const oddsBetPlayer2 = totalBets / initBetPlayer2;
@@ -297,6 +296,25 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
                                             <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
                                         ))}
                                     </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Description Field */}
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Описание"
+                                        type="text"
+                                        {...field}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

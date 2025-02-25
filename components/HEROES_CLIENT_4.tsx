@@ -57,6 +57,7 @@ interface Bet extends PrismaBet4 {
     creatorId : number;
     suspendedBet : boolean;
     status: BetStatus;
+    description: string | null; // Change this line
 }
 
 interface Props {
@@ -110,7 +111,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                     data.type === "delete"
                 ) {
                     mutate();
-                    
+
                 }
             });
         };
@@ -376,7 +377,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             }
 
             mutate();
-            
+
             setSelectedWinners((prev) => ({ ...prev, [currentBet.id]: null }));
             setCloseBetError(null);
             closeConfirmationDialog();
@@ -461,7 +462,14 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                     <div key={bet.id} className="border border-gray-700 mt-1">
                         <Accordion type="single" collapsible>
                             <AccordionItem value={`item-${bet.id}`}>
-                                <AccordionTrigger>
+                                <AccordionTrigger className="relative">
+                                    <span
+                                        className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 text-sm p-1 rounded shadow ${
+                                            bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
+                                        }`}
+                                    >
+                                    {bet?.description}
+                                    </span>
                                     <Table>
                                         <TableBody>
                                             <TableRow>
@@ -585,7 +593,8 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                         <div className="m-4">
                                             <p>
                                                 Общая сумма ставок на это событие:
-                                                <span className="text-green-400"> {Math.floor(bet.totalBetAmount * 100) / 100}</span>
+                                                <span
+                                                    className="text-green-400"> {Math.floor(bet.totalBetAmount * 100) / 100}</span>
                                             </p>
                                             <p>
                                                 Максимальная ставка на{" "}

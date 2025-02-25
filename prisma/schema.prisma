@@ -341,6 +341,7 @@ model Bet {
   productItem     ProductItem?     @relation(fields: [productItemId], references: [id])
   winnerId        Int? // кто победил PLAYER1 или PLAYER2
   suspendedBet    Boolean          @default(false)
+  description     String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -453,6 +454,7 @@ model Bet3 {
   productItem     ProductItem?      @relation(fields: [productItemId], references: [id])
   winnerId        Int? // кто победил PLAYER1 или PLAYER2 или PLAYER3
   suspendedBet    Boolean           @default(false)
+  description     String?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
@@ -579,6 +581,7 @@ model Bet4 {
   productItem     ProductItem?      @relation(fields: [productItemId], references: [id])
   winnerId        Int? // кто победил PLAYER1 или PLAYER2 или PLAYER3
   suspendedBet    Boolean           @default(false)
+  description     String?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
