@@ -391,7 +391,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
 
     return (
         <div>
-            <span className="text-blue-500">Heroes3.site не несет ответственность за закрытие ставок открытые другими игроками.</span>
+            <span className="text-blue-500">Heroes3.site не несет ответственность за закрытие ставок открытыми другими игроками.</span>
             {/* Отображение отфильтрованных ставок */}
             {filteredBets.map((bet: Bet) => {
                 const userBets = bet.participants.filter((p) => p.userId === user?.id);

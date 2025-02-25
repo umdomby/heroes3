@@ -840,7 +840,8 @@ export async function globalDataPoints() {
                 where: {
                     OR: [
                         { status: 'OPEN' },
-                        {status: 'OPEN_USER' }
+                        { status: 'OPEN_USER' },
+                        { status: 'OPEN_TUR' }
                     ]
                 }
             });
@@ -850,7 +851,8 @@ export async function globalDataPoints() {
                 where: {
                     OR: [
                         { status: 'OPEN' },
-                        {status: 'OPEN_USER' }
+                        { status: 'OPEN_USER' },
+                        { status: 'OPEN_TUR' },
                     ]
                 }
             });
@@ -860,7 +862,8 @@ export async function globalDataPoints() {
                 where: {
                     OR: [
                         { status: 'OPEN' },
-                        {status: 'OPEN_USER' }
+                        { status: 'OPEN_USER' },
+                        { status: 'OPEN_TUR' }
                     ]
                 }
             });
@@ -1769,7 +1772,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
             include: { participants: true },
         });
 
-        if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER')) {
+        if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
             throw new Error('Ставка недоступна для участия');
         }
 
@@ -2372,7 +2375,7 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
             include: { participants: true },
         });
 
-        if (!bet || bet.status !== 'OPEN') {
+        if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
             throw new Error('Ставка недоступна для участия');
         }
 
@@ -3004,7 +3007,7 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             include: {participants: true},
         });
 
-        if (!bet || bet.status !== 'OPEN') {
+        if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
             throw new Error('Ставка недоступна для участия');
         }
 

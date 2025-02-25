@@ -85,6 +85,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
 
         const betData = {
             ...values,
+            status: 'OPEN',
             oddsBetPlayer1,
             oddsBetPlayer2,
             oddsBetPlayer3,
