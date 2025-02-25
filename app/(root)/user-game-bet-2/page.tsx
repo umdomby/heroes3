@@ -17,6 +17,7 @@ import { User } from "@prisma/client";
 import GlobalDataComponent from "@/components/globalData";
 import {SheetChat} from "@/components/SheetChat";
 import {HEROES_CLIENT_2_USERS} from "@/components/HEROES_CLIENT_2_USERS";
+import {PointsUser} from "@/components/PointsUser";
 
 
 
@@ -32,14 +33,6 @@ const FixedLink = () => (
 interface PointsUserProps {
     user: User;
 }
-
-const PointsUser: React.FC<PointsUserProps> = ({ user }) => (
-    <div className="absolute top-0 left-0 right-0 flex justify-center items-center py-2 z-50 transform -translate-y-9">
-        <p className="text-sm font-bold">
-            Points: <span className="text-red-500">{Math.floor((user.points ?? 0) * 100) / 100}</span>
-        </p>
-    </div>
-);
 
 
 

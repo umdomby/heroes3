@@ -720,18 +720,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                                 <div className="flex gap-2 m-2">
-                                                    <input
-                                                        className="border p-2 rounded w-[20%]"
-                                                        type="number"
-                                                        name="amount"
-                                                        placeholder="BET"
-                                                        min="1"
-                                                        step="1"
-                                                        required
-                                                        value={betAmounts[bet.id] || ""}
-                                                        onChange={(e) => handleAmountChange(e, bet)}
-                                                    />
-                                                    <label className="border p-2 rounded w-[20%] text-center">
+                                                    <label className="border p-2 rounded w-[33%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
@@ -755,7 +744,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             </span>
                                                     </label>
 
-                                                    <label className="border p-2 rounded w-[20%] text-center">
+                                                    <label className="border p-2 rounded w-[33%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
@@ -779,7 +768,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             </span>
                                                     </label>
 
-                                                    <label className="border p-2 rounded w-[20%] text-center">
+                                                    <label className="border p-2 rounded w-[33%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
@@ -802,8 +791,22 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                 {bet.player3.name}
             </span>
                                                     </label>
+                                                </div>
+
+                                                <div className="flex gap-2 m-2">
+                                                    <input
+                                                        className="border p-2 rounded w-[50%]"
+                                                        type="number"
+                                                        name="amount"
+                                                        placeholder="BET"
+                                                        min="1"
+                                                        step="1"
+                                                        required
+                                                        value={betAmounts[bet.id] || ""}
+                                                        onChange={(e) => handleAmountChange(e, bet)}
+                                                    />
                                                     <Button
-                                                        className={`mt-2 w-[20%] ${
+                                                        className={`mt-2 w-[50%] ${
                                                             isBetDisabled[bet.id] ? "bg-gray-400 cursor-not-allowed" : ""
                                                         }`}
                                                         type="submit"
