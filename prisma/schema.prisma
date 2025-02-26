@@ -65,35 +65,36 @@ model User {
 }
 
 model TurnirPlayer {
-  id           Int        @id @default(autoincrement())
-  orderP2PUser User       @relation(fields: [userId], references: [id])
-  userId       Int
-  startPoints  Float
-  checkPoints  Float?
-  playerBool   Boolean    @default(true)
-  turnirGame   TurnirGame @relation(fields: [turnirGameId], references: [id])
-  turnirGameId Int
+  id                Int     @id @default(autoincrement())
+  orderP2PUser      User    @relation(fields: [userId], references: [id])
+  userId            Int
+  startPointsPlayer Float
+  checkPointsPlayer Float?
+  playerBool        Boolean @default(true)
+  turnir            Turnir  @relation(fields: [turnirId], references: [id])
+  turnirId          Int
 }
 
-model TurnirGame {
-  id               Int              @id @default(autoincrement())
-  turnirPlayer     TurnirPlayer[]
-  titleTurnir      String
-  startPoints      Float
-  statusTurnirGame StatusTurnirGame @default(REGISTRATION)
-  TurnirGameBool   Boolean          @default(true)
-  turnirLap1       Json?
-  turnirLap2       Json?
-  turnirLap3       Json?
-  turnirLap4       Json?
-  turnirLap5       Json?
-  turnirLap6       Json?
-  turnirLap7       Json?
-  turnirLap8       Json?
-  turnirLap9       Json?
+model Turnir {
+  id                Int            @id @default(autoincrement())
+  turnirPlayer      TurnirPlayer[]
+  titleTurnir       String
+  textTurnirTurnir  String
+  startPointsTurnir Float
+  statusTurnir      StatusTurnir   @default(REGISTRATION)
+  TurnirBool        Boolean        @default(true)
+  turnirLap1        Json?
+  turnirLap2        Json?
+  turnirLap3        Json?
+  turnirLap4        Json?
+  turnirLap5        Json?
+  turnirLap6        Json?
+  turnirLap7        Json?
+  turnirLap8        Json?
+  turnirLap9        Json?
 }
 
-enum StatusTurnirGame {
+enum StatusTurnir {
   REGISTRATION
   REGISTRATION_OFF
   START
