@@ -27,8 +27,6 @@ const FixedLink = () => (
 );
 
 
-
-
 export default async function Home() {
     const session = await getUserSession();
     let user = null;
