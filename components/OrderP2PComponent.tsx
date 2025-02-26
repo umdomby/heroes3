@@ -249,18 +249,19 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
 
     // Обработчик создания заявки на покупку
     const handleCreateBuyOrder = async () => {
+
         if (buyPoints > 100000) {
             alert('Вы не можете купить более 100,000 points');
             return;
         }
         try {
-            await createBuyOrder(buyPoints, selectedBankDetailsForBuy, allowPartialBuy);
+            await createBuyOrder( buyPoints, selectedBankDetailsForBuy, allowPartialBuy);
             setBuyOrderSuccess(true);
             setSelectedBankDetailsForBuy([]); // Очищаем выбранные банковские реквизиты
             setTimeout(() => setBuyOrderSuccess(false), 3000); // Скрыть сообщение через 3 секунды
         } catch (error) {
             console.error('Ошибка при создании заявки на покупку:', error);
-            alert('Не удалось создать заявку на покупку');
+            alert('Не удалось создать заявку на покупку', error);
         }
     };
 

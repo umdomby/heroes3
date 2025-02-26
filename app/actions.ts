@@ -383,6 +383,19 @@ export async function createBuyOrder(points: number, bankDetails: any[], allowPa
             throw new Error('Пользователь не найден');
         }
 
+        // Check if there is already an "OPEN" buy order for the current user
+        const existingOpenOrder = await prisma.orderP2P.findFirst({
+            where: {
+                orderP2PUser1Id: Number(currentUser.id),
+                orderP2PStatus: 'OPEN',
+                orderP2PBuySell: 'BUY',
+            },
+        });
+
+        if (existingOpenOrder) {
+            throw new Error('Заявку на покупку можно создать только один раз');
+        }
+
         if (points < 30 || points > 100000) {
             throw new Error('Количество points должно быть от 30 до 100000');
         }
