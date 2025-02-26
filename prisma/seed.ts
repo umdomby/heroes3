@@ -168,14 +168,26 @@ async function up() {
     },
   });
 
+
+  await prisma.courseValuta.create({
+    data: {
+      USD: 3.173, // USD к USD всегда 1
+      EUR: 3.3232,
+      BEL: 1,
+      RUS: 30,
+      BTC: 88224,
+      USTD: 3.173,
+      updatedAt: new Date(), // Обновляем дату
+    },
+  });
 }
 
 
 async function down() {
-  await prisma.$executeRaw`TRUNCATE TABLE "User" RESTART IDENTITY CASCADE`;
-  await prisma.$executeRaw`TRUNCATE TABLE "Category" RESTART IDENTITY CASCADE`;
-  await prisma.$executeRaw`TRUNCATE TABLE "Product" RESTART IDENTITY CASCADE`;
-  await prisma.$executeRaw`TRUNCATE TABLE "ProductItem" RESTART IDENTITY CASCADE`;
+  // await prisma.$executeRaw`TRUNCATE TABLE "User" RESTART IDENTITY CASCADE`;
+  // await prisma.$executeRaw`TRUNCATE TABLE "Category" RESTART IDENTITY CASCADE`;
+  // await prisma.$executeRaw`TRUNCATE TABLE "Product" RESTART IDENTITY CASCADE`;
+  // await prisma.$executeRaw`TRUNCATE TABLE "ProductItem" RESTART IDENTITY CASCADE`;
 }
 
 

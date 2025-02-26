@@ -8,7 +8,7 @@ import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { OrderP2PComponent } from "@/components/OrderP2PComponent";
 import Link from "next/link";
-import {checkAndCloseOrderP2PTime} from "@/app/actions";
+import {checkAndCloseOrderP2PTime, updateCurrencyRatesIfNeeded,} from "@/app/actions";
 
 export default async function OrderP2PPage() {
     const session = await getUserSession();
@@ -38,6 +38,8 @@ export default async function OrderP2PPage() {
             </div>
         );
     }
+
+    await updateCurrencyRatesIfNeeded();
     // Закрываем просроченные сделки перед рендерингом страницы
     await checkAndCloseOrderP2PTime();
     // Fetch open orders
