@@ -3694,12 +3694,12 @@ export async function updateCurrencyRatesIfNeeded() {
         const rubToBynRate = rates.find((rate: any) => rate.Cur_Abbreviation === 'RUB')?.Cur_OfficialRate || 0;
 
         // Пересчитываем курсы валют относительно доллара США
-        const usdRate = 1; // USD к USD всегда 1
+        const usdRate = usdToBynRate; // USD к USD всегда 1
         const eurRate = eurToBynRate / usdToBynRate;
         const rubRate = rubToBynRate / usdToBynRate;
         const belRate = 1 / usdToBynRate; // BYN к USD
         const btcRate = await fetchBitcoinRate(); // Получаем курс биткойна отдельно
-        const usdtRate = usdRate; // Предполагаем, что USDT привязан к USD
+        const usdtRate = usdToBynRate; // Предполагаем, что USDT привязан к USD
 
         // Обновляем курсы валют в базе данных
         await prisma.courseValuta.update({
