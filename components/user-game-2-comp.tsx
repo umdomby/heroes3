@@ -503,6 +503,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                             {bet.gameUser1Bet.telegram}
                                                         </Link>
                                                         {" "} Bet: {bet.betUser1}
+                                                        {" "} Twitch: {bet.betUser1}
                                                     </div>
                                                 ) : (
                                                     <span className="text-gray-500">Скрыто</span>

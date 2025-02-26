@@ -732,9 +732,9 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                     <AccordionItem
                         key={order.id}
                         value={order.id.toString()}
-                        className={order.orderP2PStatus === "PENDING" ? 'text-red-500' : 'text-green-500'}
+                        className="text-green-500"
                     >
-                        <AccordionTrigger>
+                        <AccordionTrigger className={user.id === order.orderP2PUser1.id ? 'text-amber-500' : ''}>
                             <Table>
                                 <TableBody>
                                     <TableRow className="no-hover-bg">

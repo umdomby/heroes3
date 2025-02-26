@@ -64,13 +64,23 @@ export default async function OrderP2PPage() {
         }
     });
 
+    // Сортируем заказы: сначала свои, потом по дате создания
+    openOrders.sort((a, b) => {
+        const isAUserOrder = a.orderP2PUser1Id === user.id || a.orderP2PUser2Id === user.id;
+        const isBUserOrder = b.orderP2PUser1Id === user.id || b.orderP2PUser2Id === user.id;
+
+        if (isAUserOrder && !isBUserOrder) return -1;
+        if (!isAUserOrder && isBUserOrder) return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
     // Count pending orders
     const pendingOrdersCount = await prisma.orderP2P.count({
         where: {
             orderP2PStatus: 'PENDING',
             OR: [
-                { orderP2PUser1Id: user.id, },
-                { orderP2PUser2Id: user.id, }
+                { orderP2PUser1Id: user.id },
+                { orderP2PUser2Id: user.id }
             ]
         }
     });
