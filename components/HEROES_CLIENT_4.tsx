@@ -468,7 +468,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                             bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
                                         }`}
                                     >
-                                    {bet?.description}
+                                    № 4-{bet.id} {bet?.description}
                                     </span>
                                     <Table>
                                         <TableBody>
@@ -555,11 +555,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                 : Math.floor(profitIfPlayer4Wins * 100) / 100}
         </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer4 * 100) / 100}</div>
-                                                </TableCell>
-                                                <TableCell
-                                                    className="text-ellipsis  overflow-hidden whitespace-nowrap w-10"
-                                                >
-                                                    № {bet.id}
                                                 </TableCell>
                                                 <TableCell className="w-10">
                                                     <div
@@ -784,13 +779,16 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                                 <div className="flex gap-2 m-2">
-                                                    <label className="border p-2 rounded w-[25%] text-center">
+                                                    <label className="border p-2 rounded w-[50%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
                                                             {"("}
                                                             {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
                                                             {") "}
+
+                                                        </div>
+                                                        <div>
                                                             {potentialProfit[bet.id]?.player1
                                                                 ? `+${Math.floor(potentialProfit[bet.id].player1 * 100) / 100}`
                                                                 : ""}
@@ -808,13 +806,16 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             </span>
                                                     </label>
 
-                                                    <label className="border p-2 rounded w-[25%] text-center">
+                                                    <label className="border p-2 rounded w-[50%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
                                                             {"("}
                                                             {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
                                                             {") "}
+
+                                                        </div>
+                                                        <div>
                                                             {potentialProfit[bet.id]?.player2
                                                                 ? `+${Math.floor(potentialProfit[bet.id].player2 * 100) / 100}`
                                                                 : ""}
@@ -831,14 +832,18 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                 {bet.player2.name}
             </span>
                                                     </label>
-
-                                                    <label className="border p-2 rounded w-[25%] text-center">
+                                                </div>
+                                                    <div className="flex gap-2 m-2">
+                                                    <label className="border p-2 rounded w-[50%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
                                                             {"("}
                                                             {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
                                                             {") "}
+
+                                                        </div>
+                                                        <div>
                                                             {potentialProfit[bet.id]?.player3
                                                                 ? `+${Math.floor(potentialProfit[bet.id].player3 * 100) / 100}`
                                                                 : ""}
@@ -856,13 +861,16 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             </span>
                                                     </label>
 
-                                                    <label className="border p-2 rounded w-[25%] text-center">
+                                                    <label className="border p-2 rounded w-[50%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
                                                             {"("}
                                                             {Math.floor(bet.oddsBetPlayer4 * 100) / 100}
                                                             {") "}
+
+                                                        </div>
+                                                        <div>
                                                             {potentialProfit[bet.id]?.player4
                                                                 ? `+${Math.floor(potentialProfit[bet.id].player4 * 100) / 100}`
                                                                 : ""}

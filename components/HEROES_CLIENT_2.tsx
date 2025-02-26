@@ -425,7 +425,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                                             bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
                                         }`}
                                     >
-                                    {bet?.description}
+                                    № 2-{bet.id} {bet?.description}
                                     </span>
                                     <Table>
                                         <TableBody>
@@ -480,11 +480,6 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className="text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]"
                                                 >
-                                                </TableCell>
-                                                <TableCell
-                                                    className="text-ellipsis  overflow-hidden whitespace-nowrap w-10"
-                                                >
-                                                    № {bet.id}
                                                 </TableCell>
                                                 {/* Коэффициент для игрока 1 и 2*/}
                                                 <TableCell className="w-10">
@@ -632,6 +627,9 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                                                             {"("}
                                                             {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
                                                             {") "}
+
+                                                        </div>
+                                                        <div>
                                                             {potentialProfit[bet.id]?.player1
                                                                 ? `+${Math.floor(potentialProfit[bet.id].player1 * 100) / 100}`
                                                                 : ""}
@@ -656,6 +654,9 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                                                             {"("}
                                                             {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
                                                             {") "}
+
+                                                        </div>
+                                                        <div>
                                                             {potentialProfit[bet.id]?.player2
                                                                 ? `+${Math.floor(potentialProfit[bet.id].player2 * 100) / 100}`
                                                                 : ""}
