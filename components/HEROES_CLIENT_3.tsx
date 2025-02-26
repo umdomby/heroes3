@@ -446,7 +446,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                             <AccordionItem value={`item-${bet.id}`}>
                                 <AccordionTrigger className="relative">
                                     <span
-                                        className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 text-sm p-1 rounded shadow ${
+                                        className={`absolute top-0 left-1 transform -translate-x-1 -translate-y-1 text-sm p-1 rounded shadow ${
                                             bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
                                         }`}
                                     >
