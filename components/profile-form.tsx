@@ -538,7 +538,7 @@ export const ProfileForm: React.FC<Props> = ({data}) => {
                                                     </div>
                                                 ) : (
                                                     <div>
-                                                        <p><strong>Название:</strong> {detail.name}</p>
+                                                        <p><strong>Название валюты:</strong> {detail.name}</p>
                                                         <p><strong>Реквизиты:</strong> {detail.details}</p>
                                                         <p><strong>Описание:</strong> {detail.description}</p>
                                                         <p><strong>Цена за 1 Point:</strong> {detail.price}</p>
