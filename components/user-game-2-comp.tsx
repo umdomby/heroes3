@@ -530,7 +530,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 ...prev,
                                                                 [bet.id]: WinGameUserBet.LOSS
                                                             }))}
-                                                            className={selectedWinUser1[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : bet.checkWinUser1 === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'}
+                                                            className={`${selectedWinUser1[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : bet.checkWinUser1 === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'} mr-2 h-6`}
                                                             disabled={selectedWinUser2[bet.id] === WinGameUserBet.DRAW}
                                                         >
                                                             Проиграл
@@ -540,7 +540,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 ...prev,
                                                                 [bet.id]: WinGameUserBet.WIN
                                                             }))}
-                                                            className={selectedWinUser1[bet.id] === WinGameUserBet.WIN ? 'bg-green-500' : bet.checkWinUser1 === WinGameUserBet.WIN ? 'bg-green-500' : 'bg-gray-500'}
+                                                            className={`${selectedWinUser1[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : bet.checkWinUser1 === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'} mr-2 h-6`}
                                                             disabled={selectedWinUser2[bet.id] === WinGameUserBet.DRAW}
                                                         >
                                                             Выиграл
@@ -550,7 +550,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 ...prev,
                                                                 [bet.id]: WinGameUserBet.DRAW
                                                             }))}
-                                                            className={selectedWinUser1[bet.id] === WinGameUserBet.DRAW ? 'bg-yellow-500' : bet.checkWinUser1 === WinGameUserBet.DRAW ? 'bg-yellow-500' : 'bg-gray-500'}
+                                                            className={`${selectedWinUser1[bet.id] === WinGameUserBet.DRAW ? 'bg-yellow-500' : bet.checkWinUser1 === WinGameUserBet.DRAW ? 'bg-yellow-500' : 'bg-gray-500'} mr-2 h-6`}
                                                         >
                                                             Ничья
                                                         </Button>
@@ -602,7 +602,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 ...prev,
                                                                 [bet.id]: WinGameUserBet.LOSS
                                                             }))}
-                                                            className={selectedWinUser2[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : bet.checkWinUser2 === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'}
+                                                            className={`${selectedWinUser2[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : bet.checkWinUser2 === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'} mr-2 h-6`}
                                                             disabled={selectedWinUser1[bet.id] === WinGameUserBet.DRAW}
                                                         >
                                                             Проиграл
@@ -612,7 +612,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 ...prev,
                                                                 [bet.id]: WinGameUserBet.WIN
                                                             }))}
-                                                            className={selectedWinUser2[bet.id] === WinGameUserBet.WIN ? 'bg-green-500' : bet.checkWinUser2 === WinGameUserBet.WIN ? 'bg-green-500' : 'bg-gray-500'}
+                                                            className={`${selectedWinUser2[bet.id] === WinGameUserBet.WIN ? 'bg-green-500' : bet.checkWinUser2 === WinGameUserBet.WIN ? 'bg-green-500' : 'bg-gray-500'} mr-2 h-6`}
                                                             disabled={selectedWinUser1[bet.id] === WinGameUserBet.DRAW}
                                                         >
                                                             Выиграл
@@ -622,7 +622,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 ...prev,
                                                                 [bet.id]: WinGameUserBet.DRAW
                                                             }))}
-                                                            className={selectedWinUser2[bet.id] === WinGameUserBet.DRAW ? 'bg-yellow-500' : bet.checkWinUser2 === WinGameUserBet.DRAW ? 'bg-yellow-500' : 'bg-gray-500'}
+                                                            className={`${selectedWinUser2[bet.id] === WinGameUserBet.DRAW ? 'bg-yellow-500' : bet.checkWinUser2 === WinGameUserBet.DRAW ? 'bg-yellow-500' : 'bg-gray-500'} mr-2 h-6`}
                                                         >
                                                             Ничья
                                                         </Button>
