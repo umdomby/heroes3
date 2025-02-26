@@ -117,7 +117,7 @@ export const SheetChat: React.FC<PointsUserProps> = ({user}) => {
                     <div className="flex-grow p-4 overflow-y-auto flex flex-col">
                         {messages.map((msg) => (
                             <div key={msg.id} className="flex justify-between items-center">
-                                <div>
+                                <div className="text-green-300">
                                     <strong>
                                         {msg.userTelegram ?
                                             <Link
