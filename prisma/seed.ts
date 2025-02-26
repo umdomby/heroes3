@@ -170,13 +170,14 @@ async function up() {
 
 
   await prisma.courseValuta.create({
+    // к доллару
     data: {
-      USD: 3.173, // USD к USD всегда 1
-      EUR: 3.3232,
-      BEL: 1,
-      RUS: 30,
-      BTC: 88224,
-      USTD: 3.173,
+      USD: 3.17, // USD к USD всегда 1
+      EUR: 1.04,
+      BEL: 0.31,
+      RUS: 1.13,
+      BTC: 86554,
+      USTD: 3.17,
       updatedAt: new Date(), // Обновляем дату
     },
   });

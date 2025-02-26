@@ -3617,12 +3617,12 @@ export async function updateCurrencyRatesIfNeeded() {
         await prisma.courseValuta.update({
             where: { id: 1 }, // Обновляем только первую запись
             data: {
-                USD: usdRate,
-                EUR: eurRate,
-                RUS: rubRate,
-                BEL: belRate,
+                USD: Math.floor(usdRate * 100) / 100,
+                EUR: Math.floor(eurRate * 100) / 100,
+                RUS: Math.floor(rubRate * 100) / 100,
+                BEL: Math.floor(belRate * 100) / 100,
                 BTC: btcRate,
-                USTD: usdtRate,
+                USTD: Math.floor(usdtRate * 100) / 100,
                 updatedAt: new Date(),
             },
         });

@@ -36,7 +36,10 @@ export default async function OrderP2PClosedPage({ searchParams }: { searchParam
             <div className="text-center">
                 <p className="text-green-500">Заполните:</p>
                 <p>
-                    Настройки Telegram
+                    1. Настройки Telegram
+                </p>
+                <p>
+                    2. Один или несколько: Реквизиты банков
                 </p>
                 <p>
                     <Link href="/profile" className="text-blue-500">Profile</Link>

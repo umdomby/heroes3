@@ -25,12 +25,15 @@ export default async function OrderP2PPage() {
         return redirect('/');
     }
 
-    if (user.telegram === null || user.telegram === undefined || user.telegram === '') {
+    if (user.telegram === null || user.bankDetails === null ) {
         return (
             <div className="text-center">
                 <p className="text-green-500">Заполните:</p>
                 <p>
-                    Настройки Telegram
+                    1. Настройки Telegram
+                </p>
+                <p>
+                    2. Один или несколько Реквизиты банков
                 </p>
                 <p>
                     <Link href="/profile" className="text-blue-500">Profile</Link>
