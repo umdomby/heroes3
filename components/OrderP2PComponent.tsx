@@ -48,16 +48,26 @@ interface orderBankDetail {
     description: string;
 }
 
+interface CourseValuta {
+    USD: number;
+    EUR: number;
+    BEL: number;
+    RUS: number;
+    BTC: number;
+    USTD: number;
+}
+
 // Интерфейс для свойств компонента
 interface Props {
     user: User;
-    openOrders: OrderP2P[]; // Ensure this is an array
+    openOrders: OrderP2P[];
     pendingOrdersCount: number;
     className?: string;
+    exchangeRates: CourseValuta | null; // Add this line
 }
 
 // Компонент для работы с P2P заказами
-export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrdersCount, className}) => {
+export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrdersCount, className, exchangeRates}) => {
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
     const [buyOrderSuccess, setBuyOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
     const [sellOrderSuccess, setSellOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
@@ -557,7 +567,18 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
 
     return (
         <div className={className}>
-            Points: {Math.floor(user.points * 100) / 100}
+            <div>Points: {Math.floor(user.points * 100) / 100}</div>
+            <div className="text-center"> {exchangeRates && (
+                <div className="marquee">
+                        <span className="text-green-500">USD: {exchangeRates.USD} </span>
+                        <span className="text-fuchsia-500">EUR: {exchangeRates.EUR} </span>
+                        <span className="text-amber-500">BEL: {exchangeRates.BEL} </span>
+                        <span className="text-yellow-500">RUS: {exchangeRates.RUS} </span>
+                        <span className="text-emerald-500">BTC: {exchangeRates.BTC} </span>
+                        <span className="text-blue-500">USTD: {exchangeRates.USTD} </span>
+                </div>
+            )}</div>
+
             <div className="flex justify-between items-center m-7">
                 <h1>P2P</h1>
                 <div>

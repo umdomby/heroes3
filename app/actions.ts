@@ -3559,6 +3559,94 @@ export async function closeBetDraw4(betId: number) {
 }// ничья на 4 игрока
 
 
+async function fetchBitcoinRate() {
+    try {
+        const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+            params: {
+                ids: 'bitcoin',
+                vs_currencies: 'usd',
+            },
+        });
+        return response.data.bitcoin.usd;
+    } catch (error) {
+        console.error('Ошибка при получении курса биткойна:', error);
+
+        // Если запрос не удался, возвращаем предыдущее значение из базы данных
+        const previousData = await prisma.courseValuta.findUnique({
+            where: { id: 1 },
+        });
+
+        if (previousData) {
+            console.log('Возвращаем предыдущее значение курса биткойна:', previousData.BTC);
+            return previousData.BTC;
+        }
+
+        return 0; // Если данных нет, возвращаем 0 или другое значение по умолчанию
+    }
+}
+export async function updateCurrencyRatesIfNeeded() {
+    try {
+        // Получаем первую запись с курсами валют
+        const courseValutaData = await prisma.courseValuta.findUnique({
+            where: { id: 1 }, // Проверяем только первую запись
+        });
+
+        // Проверяем, прошло ли 10 секунд с момента последнего обновления
+        if (courseValutaData && (new Date().getTime() - new Date(courseValutaData.updatedAt).getTime()) < 10000) {
+            console.log('Данные обновлены недавно, пропускаем обновление.');
+            return;
+        }
+
+        const response = await axios.get('https://www.nbrb.by/api/exrates/rates?periodicity=0');
+        const rates = response.data;
+
+        // Извлекаем курсы валют относительно белорусского рубля
+        const usdToBynRate = rates.find((rate: any) => rate.Cur_Abbreviation === 'USD')?.Cur_OfficialRate || 1;
+        const eurToBynRate = rates.find((rate: any) => rate.Cur_Abbreviation === 'EUR')?.Cur_OfficialRate || 0;
+        const rubToBynRate = rates.find((rate: any) => rate.Cur_Abbreviation === 'RUB')?.Cur_OfficialRate || 0;
+
+        // Пересчитываем курсы валют относительно доллара США
+        const usdRate = usdToBynRate; // USD к USD всегда 1
+        const eurRate = eurToBynRate / usdToBynRate;
+        const rubRate = rubToBynRate / usdToBynRate;
+        const belRate = 1 / usdToBynRate; // BYN к USD
+        const btcRate = await fetchBitcoinRate(); // Получаем курс биткойна отдельно
+        const usdtRate = usdToBynRate; // Предполагаем, что USDT привязан к USD
+
+        // Обновляем курсы валют в базе данных
+        await prisma.courseValuta.update({
+            where: { id: 1 }, // Обновляем только первую запись
+            data: {
+                USD: usdRate,
+                EUR: eurRate,
+                RUS: rubRate,
+                BEL: belRate,
+                BTC: btcRate,
+                USTD: usdtRate,
+                updatedAt: new Date(),
+            },
+        });
+
+        console.log('Курсы валют успешно обновлены.');
+    } catch (error) {
+        console.error('Ошибка при обновлении курсов валют:', error);
+    }
+}
+
+export async function getCourseValuta() {
+    try {
+        const latestCourseValuta = await prisma.courseValuta.findFirst({
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+        return latestCourseValuta;
+    } catch (error) {
+        console.error('Error fetching CourseValuta:', error);
+        return null;
+    }
+}
+
 export async function checkAndCloseOrderP2PTime() {
     try {
         // Пытаемся найти запись с временем обновления
@@ -3583,8 +3671,7 @@ export async function checkAndCloseOrderP2PTime() {
         console.error('Ошибка в checkAndCloseOrderP2PTime:', error);
     }
 } // обновление по первой записи
-
-export async function checkAndCloseOrderP2P() {
+async function checkAndCloseOrderP2P() {
     const now = new Date();
     const expiredDeals = await prisma.orderP2P.findMany({
         where: {
@@ -3672,77 +3759,3 @@ export async function checkAndCloseOrderP2P() {
     }
 }// закрытие сделки по времени из клиента
 
-export async function updateCurrencyRatesIfNeeded() {
-    try {
-        // Получаем первую запись с курсами валют
-        const courseValutaData = await prisma.courseValuta.findUnique({
-            where: { id: 1 }, // Проверяем только первую запись
-        });
-
-        // Проверяем, прошло ли 10 секунд с момента последнего обновления
-        if (courseValutaData && (new Date().getTime() - new Date(courseValutaData.updatedAt).getTime()) < 10000) {
-            console.log('Данные обновлены недавно, пропускаем обновление.');
-            return;
-        }
-
-        const response = await axios.get('https://www.nbrb.by/api/exrates/rates?periodicity=0');
-        const rates = response.data;
-
-        // Извлекаем курсы валют относительно белорусского рубля
-        const usdToBynRate = rates.find((rate: any) => rate.Cur_Abbreviation === 'USD')?.Cur_OfficialRate || 1;
-        const eurToBynRate = rates.find((rate: any) => rate.Cur_Abbreviation === 'EUR')?.Cur_OfficialRate || 0;
-        const rubToBynRate = rates.find((rate: any) => rate.Cur_Abbreviation === 'RUB')?.Cur_OfficialRate || 0;
-
-        // Пересчитываем курсы валют относительно доллара США
-        const usdRate = usdToBynRate; // USD к USD всегда 1
-        const eurRate = eurToBynRate / usdToBynRate;
-        const rubRate = rubToBynRate / usdToBynRate;
-        const belRate = 1 / usdToBynRate; // BYN к USD
-        const btcRate = await fetchBitcoinRate(); // Получаем курс биткойна отдельно
-        const usdtRate = usdToBynRate; // Предполагаем, что USDT привязан к USD
-
-        // Обновляем курсы валют в базе данных
-        await prisma.courseValuta.update({
-            where: { id: 1 }, // Обновляем только первую запись
-            data: {
-                USD: usdRate,
-                EUR: eurRate,
-                RUS: rubRate,
-                BEL: belRate,
-                BTC: btcRate,
-                USTD: usdtRate,
-                updatedAt: new Date(),
-            },
-        });
-
-        console.log('Курсы валют успешно обновлены.');
-    } catch (error) {
-        console.error('Ошибка при обновлении курсов валют:', error);
-    }
-}
-
-async function fetchBitcoinRate() {
-    try {
-        const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
-            params: {
-                ids: 'bitcoin',
-                vs_currencies: 'usd',
-            },
-        });
-        return response.data.bitcoin.usd;
-    } catch (error) {
-        console.error('Ошибка при получении курса биткойна:', error);
-
-        // Если запрос не удался, возвращаем предыдущее значение из базы данных
-        const previousData = await prisma.courseValuta.findUnique({
-            where: { id: 1 },
-        });
-
-        if (previousData) {
-            console.log('Возвращаем предыдущее значение курса биткойна:', previousData.BTC);
-            return previousData.BTC;
-        }
-
-        return 0; // Если данных нет, возвращаем 0 или другое значение по умолчанию
-    }
-}
