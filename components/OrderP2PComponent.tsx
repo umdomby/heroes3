@@ -520,8 +520,15 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, pendingOr
     };
 
     // New function to check if any price is 0 or NaN
-    const hasInvalidPrice = () => {
+    const hasInvalidPriceBuy = () => {
         return selectedBankDetailsForBuy.some(detail => {
+            const price = parseFloat(detail.price.replace(',', '.'));
+            return isNaN(price) || price === 0;
+        });
+    };
+
+    const hasInvalidPriceSell = () => {
+        return selectedBankDetailsForSell.some(detail => {
             const price = parseFloat(detail.price.replace(',', '.'));
             return isNaN(price) || price === 0;
         });
@@ -629,20 +636,20 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, pendingOr
                             <div className="flex items-center w-full">
                                 <span className="flex-grow mt-1">{detail.details}</span>
                             </div>
-
                             <div className="flex items-center w-full">
                                 <div className="flex-grow mt-1">
-                                    За <span className="text-amber-500">{buyPoints} points</span>нужно
+                                    За <span className="text-amber-500">{buyPoints} points</span>
+                                    <span> нужно </span>
                                     <span className="text-green-600">{(parseFloat(detail.price.replace(',', '.')) * buyPoints).toFixed(10)} {detail.name}</span> </div>
-                            </div>
 
+                            </div>
                         </div>
 
                     ))}
                     <Button
                         onClick={handleCreateBuyOrder}
                         className={`w-full ${buyOrderSuccess ? 'button-success' : ''}`}
-                        disabled={selectedBankDetailsForBuy.length === 0 || isCreateOrderDisabled(buyPoints) || hasInvalidPrice()}
+                        disabled={selectedBankDetailsForBuy.length === 0 || isCreateOrderDisabled(buyPoints) || hasInvalidPriceBuy()}
                     >
                         {buyOrderSuccess ? 'Заявка создана!' : 'Создать заявку'}
                     </Button>
@@ -708,15 +715,27 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, pendingOr
                                 </Button>
                             </div>
                             <div className="flex items-center w-full">
-                <span
-                    className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.price}</span>
+                                <span className="flex-grow mt-1">{detail.name}</span>
+                            </div>
+                            <div className="flex items-center w-full">
+                                <span className="flex-grow mt-1">{detail.details}</span>
+                            </div>
+                            <div className="flex items-center w-full">
+                                <div className="flex-grow mt-1">
+                                    За <span className="text-amber-500">{sellPoints} points</span>
+                                    <span> нужно </span>
+                                    <span
+                                        className="text-green-600">{(parseFloat(detail.price.replace(',', '.')) * sellPoints).toFixed(10)} {detail.name}</span>
+                                </div>
+
                             </div>
                         </div>
+
                     ))}
                     <Button
                         onClick={handleCreateSellOrder}
                         className={`w-full ${sellOrderSuccess ? 'button-success' : ''}`}
-                        disabled={selectedBankDetailsForSell.length === 0 || isCreateOrderDisabled(sellPoints)}
+                        disabled={selectedBankDetailsForSell.length === 0 || isCreateOrderDisabled(sellPoints) || hasInvalidPriceSell() }
                     >
                         {sellOrderSuccess ? 'Заявка создана!' : 'Создать заявку'}
                     </Button>
