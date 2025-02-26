@@ -61,6 +61,7 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
     const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
     const [buyOrderSuccess, setBuyOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
     const [sellOrderSuccess, setSellOrderSuccess] = useState<boolean>(false); // уведомление о создании заявки
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);// о уже созданном Buy
     const [buyPoints, setBuyPoints] = useState<number>(0); // Количество очков для покупки
     const [sellPoints, setSellPoints] = useState<number>(0); // Количество очков для продажи
     const [buyPointsError, setBuyPointsError] = useState<string | null>(null);
@@ -249,19 +250,27 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
 
     // Обработчик создания заявки на покупку
     const handleCreateBuyOrder = async () => {
-
         if (buyPoints > 100000) {
             alert('Вы не можете купить более 100,000 points');
             return;
         }
         try {
-            await createBuyOrder( buyPoints, selectedBankDetailsForBuy, allowPartialBuy);
-            setBuyOrderSuccess(true);
-            setSelectedBankDetailsForBuy([]); // Очищаем выбранные банковские реквизиты
-            setTimeout(() => setBuyOrderSuccess(false), 3000); // Скрыть сообщение через 3 секунды
+            const result = await createBuyOrder(buyPoints, selectedBankDetailsForBuy, allowPartialBuy);
+            if (result.success) {
+                setBuyOrderSuccess(true);
+                setSelectedBankDetailsForBuy([]); // Очищаем выбранные банковские реквизиты
+                setTimeout(() => setBuyOrderSuccess(false), 3000); // Скрыть сообщение через 3 секунды
+            } else {
+                if (result.message) {
+                    setErrorMessage(result.message); // Устанавливаем сообщение об ошибке
+                } else {
+                    setErrorMessage('Неизвестная ошибка'); // Устанавливаем сообщение по умолчанию
+                }
+                setTimeout(() => setErrorMessage(null), 3000); // Скрыть сообщение через 3 секунды
+            }
         } catch (error) {
             console.error('Ошибка при создании заявки на покупку:', error);
-            alert('Не удалось создать заявку на покупку', error);
+            alert('Не удалось создать заявку на покупку');
         }
     };
 
@@ -889,6 +898,14 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                     <div
                         className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4 bg-green-500 text-white">
                         {dealSuccessMessage}
+                    </div>
+                </div>
+            )}
+
+            {errorMessage && (
+                <div className="relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4 bg-red-500 text-white">
+                        {errorMessage}
                     </div>
                 </div>
             )}

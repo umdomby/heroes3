@@ -380,10 +380,9 @@ export async function createBuyOrder(points: number, bankDetails: any[], allowPa
     try {
         const currentUser = await getUserSession();
         if (!currentUser) {
-            throw new Error('Пользователь не найден');
+            return { success: false, message: 'Пользователь не найден' };
         }
 
-        // Check if there is already an "OPEN" buy order for the current user
         const existingOpenOrder = await prisma.orderP2P.findFirst({
             where: {
                 orderP2PUser1Id: Number(currentUser.id),
@@ -393,11 +392,11 @@ export async function createBuyOrder(points: number, bankDetails: any[], allowPa
         });
 
         if (existingOpenOrder) {
-            throw new Error('Заявку на покупку можно создать только один раз');
+            return { success: false, message: 'Заявку на покупку можно создать только один раз' };
         }
 
         if (points < 30 || points > 100000) {
-            throw new Error('Количество points должно быть от 30 до 100000');
+            return { success: false, message: 'Количество points должно быть от 30 до 100000' };
         }
 
         const newOrder = await prisma.orderP2P.create({
@@ -412,10 +411,10 @@ export async function createBuyOrder(points: number, bankDetails: any[], allowPa
         });
 
         revalidatePath('/order-p2p');
-        return newOrder;
+        return { success: true, order: newOrder };
     } catch (error) {
         console.error('Ошибка при создании заявки на покупку:', error);
-        throw new Error('Не удалось создать заявку на покупку');
+        return { success: false, message: 'Не удалось создать заявку на покупку' };
     }
 } // Функция для создания заявки на покупку points
 export async function createSellOrder(points: number, bankDetails: any[], allowPartial: boolean) {
