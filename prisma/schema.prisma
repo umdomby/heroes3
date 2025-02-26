@@ -308,6 +308,7 @@ enum WinGameUserBet {
 enum GameUserBetStatus {
   OPEN
   START
+  START_BET
   CLOSED
 }
 // ------------------------------------------- 2 -------------------------------
