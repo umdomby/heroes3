@@ -536,6 +536,30 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, pendingOr
 
     return (
         <div className={className}>
+            {successMessage && (
+                <div className="relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4">
+                        {successMessage}
+                    </div>
+                </div>
+            )}
+
+            {dealSuccessMessage && (
+                <div className="relative">
+                    <div
+                        className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4 bg-green-500 text-white">
+                        {dealSuccessMessage}
+                    </div>
+                </div>
+            )}
+
+            {errorMessage && (
+                <div className="relative">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4 bg-red-500 text-white">
+                        {errorMessage}
+                    </div>
+                </div>
+            )}
             <div>Points: {Math.floor(user.points * 100) / 100}</div>
             <div className="text-center"> {exchangeRates && (
                 <div className="marquee">
@@ -787,8 +811,8 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, pendingOr
                             </Table>
                         </AccordionTrigger>
                         <AccordionContent className="border-b border-gray-200">
-                            <div className="font-bold ml-1"> Points: {order.orderP2PPoints} </div>
                             <div className="font-bold ml-1"> CardID {order.orderP2PUser1.cardId}</div>
+                            <div className="font-bold ml-1"> Points: {order.orderP2PPoints} </div>
                             <Table>
                                 <TableBody>
                                     <TableRow className="no-hover-bg">
@@ -803,13 +827,15 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, pendingOr
                                                             description: typeof detail.description === 'string' ? detail.description : '',
                                                         };
                                                         return (
-                                                            <div key={index} className="flex py-2">
+                                                            <div key={index} className="flex py-1 border border-blue-200 m-2">
+                                                                <div className="flex px-2">
                                                                 <div style={{width: '35%'}}>
                                                                     <div>
-                                                                        <strong>{bankDetail.price}</strong> за one Point
+                                                                        <strong className="text-amber-500"> 1 </strong> points = <strong className="text-amber-500">{bankDetail.price}</strong> {bankDetail.name}
                                                                     </div>
                                                                     <div>
-                                                                        <strong>{bankDetail.name}</strong>
+
+                                                                        <strong className="text-amber-500">{order.orderP2PPoints}</strong> points = <strong className="text-amber-500">{order.orderP2PPoints.toFixed(10) * parseFloat(bankDetail.price.replace(',', '.'))}</strong> {bankDetail.name}
                                                                     </div>
                                                                 </div>
                                                                 <div style={{width: '65%'}}>
@@ -819,6 +845,7 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, pendingOr
                                                                     <div>
                                                                         {bankDetail.description}
                                                                     </div>
+                                                                </div>
                                                                 </div>
                                                             </div>
                                                         );
@@ -897,31 +924,6 @@ export const OrderP2PComponent: React.FC<Props> = ({ user, openOrders, pendingOr
                     </AccordionItem>
                 ))}
             </Accordion>
-
-            {successMessage && (
-                <div className="relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4">
-                        {successMessage}
-                    </div>
-                </div>
-            )}
-
-            {dealSuccessMessage && (
-                <div className="relative">
-                    <div
-                        className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4 bg-green-500 text-white">
-                        {dealSuccessMessage}
-                    </div>
-                </div>
-            )}
-
-            {errorMessage && (
-                <div className="relative">
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-2 mb-4 rounded mt-4 bg-red-500 text-white">
-                        {errorMessage}
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
