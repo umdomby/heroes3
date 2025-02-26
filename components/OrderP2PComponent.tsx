@@ -570,12 +570,15 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
             <div>Points: {Math.floor(user.points * 100) / 100}</div>
             <div className="text-center"> {exchangeRates && (
                 <div className="marquee">
+                    <div className="text-green-500">1 USD </div>
+                    <div>
                         <span className="text-green-500">USD: {exchangeRates.USD} </span>
-                        <span className="text-fuchsia-500">EUR: {exchangeRates.EUR} </span>
-                        <span className="text-amber-500">BEL: {exchangeRates.BEL} </span>
-                        <span className="text-yellow-500">RUS: {exchangeRates.RUS} </span>
-                        <span className="text-emerald-500">BTC: {exchangeRates.BTC} </span>
-                        <span className="text-blue-500">USTD: {exchangeRates.USTD} </span>
+                        <span className="text-fuchsia-500"> EUR: {exchangeRates.EUR} </span>
+                        <span className="text-amber-500"> BEL: {exchangeRates.BEL} </span>
+                        <span className="text-yellow-500"> RUS: {exchangeRates.RUS} </span>
+                        <span className="text-emerald-500"> BTC: {exchangeRates.BTC} </span>
+                        <span className="text-blue-500"> USTD: {exchangeRates.USTD} </span>
+                    </div>
                 </div>
             )}</div>
 
