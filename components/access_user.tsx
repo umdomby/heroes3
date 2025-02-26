@@ -49,7 +49,7 @@ export const Access_user: React.FC<Props> = ({className, role}) => {
                         }, 200));
                     }}
                 >
-                    <Button variant="outline" className="h-5 w-full">{role}</Button>
+                    <Button variant="outline" className="h-7 w-full">{role}</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-45">
                     <DropdownMenuRadioGroup>

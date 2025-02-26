@@ -23,9 +23,9 @@ export const Access_no: React.FC<Props> = ({className}) => {
                 <div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild className="width-[20%]">
-                            <Button variant="outline" className="h-5">SYSTEM</Button>
+                            <Button variant="outline" className="h-7">SYSTEM</Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56">
+                        <DropdownMenuContent className="w-45">
                             <DropdownMenuRadioGroup>
                                 <Link href="/">
                                     <DropdownMenuRadioItem value="home" className="cursor-pointer">

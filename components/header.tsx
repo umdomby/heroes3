@@ -11,6 +11,7 @@ import {useSession} from "next-auth/react";
 import {Access_admin} from "@/components/access_admin";
 import {Access_user} from "@/components/access_user";
 import {Access_no} from "@/components/access_no";
+import {SheetChat} from "@/components/SheetChat";
 
 
 interface Props {
@@ -50,7 +51,7 @@ export const Header: React.FC<Props> = ({className}) => {
 
                 {/* Правая часть */}
                 <div className="items-center gap-3">
-                    <div className="mt-5">
+                    <div className="mt-1">
                         <AuthModal open={openAuthModal} onClose={() => setOpenAuthModal(false)}/>
                         <ProfileButton onClickSignIn={() => setOpenAuthModal(true)}/>
                     </div>

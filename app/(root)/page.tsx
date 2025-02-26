@@ -41,18 +41,17 @@ export default async function Home() {
         <Container className="w-[100%] relative">
             {user && (
                 <>
-                    <PointsUser user={user} />
-                    <SheetChat user={user}/>
+                    <PointsUser user={user}/> <SheetChat user={user}/>
                 </>
 
             )}
             {user && user.role !== 'BANED' && (
                 <>
                     {isTelegramEmpty && (
-                        <TelegramNotification initialTelegram={user.telegram || ''} />
+                        <TelegramNotification initialTelegram={user.telegram || ''}/>
                     )}
-                    <FixedLink />
-                    <Suspense fallback={<Loading />}>
+                    <FixedLink/>
+                    <Suspense fallback={<Loading/>}>
                         <GlobalDataComponent/>
                         <HEROES_CLIENT_2 user={user} />
                         <HEROES_CLIENT_3 user={user} />

@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, {useState, useEffect} from "react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
 import {
     Sheet,
     SheetContent,
@@ -11,8 +11,8 @@ import {
     SheetTrigger,
     SheetDescription,
 } from "@/components/ui/sheet";
-import { User } from "@prisma/client";
-import { chatUsers, chatUsersGet, chatUsersDelete } from "@/app/actions";
+import {User} from "@prisma/client";
+import {chatUsers, chatUsersGet, chatUsersDelete} from "@/app/actions";
 import Link from "next/link";
 
 interface Message {
@@ -33,7 +33,7 @@ const linkify = (text: string) => {
     });
 };
 
-export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
+export const SheetChat: React.FC<PointsUserProps> = ({user}) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const [isOpen, setIsOpen] = useState(false);
@@ -50,6 +50,7 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                     console.error('Error fetching messages:', error);
                 }
             }
+
             fetchMessages();
             intervalId = setInterval(fetchMessages, 5000);
         }
@@ -91,12 +92,13 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
     };
 
     return (
-        <div className="fixed top-4 right-4 shadow-lg rounded-lg z-50 transform -translate-y-3">
+        <div
+            className="absolute top-0 flex justify-center items-center ml-20 py-2 z-50 transform -translate-y-7 mx-auto max-w-xs">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger className='h-5' asChild>
                     <Button variant="outline">Chat {user.fullName}</Button>
                 </SheetTrigger>
-                <SheetContent className="flex flex-col h-full" aria-describedby="chat-description">
+                <SheetContent side="left" className="flex flex-col h-full" aria-describedby="chat-description">
                     <SheetHeader>
                         <SheetTitle></SheetTitle>
                         <SheetDescription>
@@ -125,7 +127,7 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                                             >
                                                 {msg.userTelegram}
                                             </Link> : msg.userEmail.split('@')[0]}:
-                                    </strong> <span dangerouslySetInnerHTML={{ __html: linkify(msg.chatText) }} />
+                                    </strong> <span dangerouslySetInnerHTML={{__html: linkify(msg.chatText)}}/>
                                 </div>
                                 {user.role === "ADMIN" && (
                                     <Button variant="ghost" className="h-5" onClick={() => handleDeleteMessage(msg.id)}>
@@ -138,5 +140,5 @@ export const SheetChat: React.FC<PointsUserProps> = ({ user }) => {
                 </SheetContent>
             </Sheet>
         </div>
-    );
-};
+            );
+            };
