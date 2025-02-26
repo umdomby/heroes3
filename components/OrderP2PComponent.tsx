@@ -662,10 +662,19 @@ export const OrderP2PComponent: React.FC<Props> = ({user, openOrders, pendingOrd
                                 </Button>
                             </div>
                             <div className="flex items-center w-full">
-                <span
-                    className="flex-grow mt-1">{detail.name} - {detail.details}, Цена за 1 Point: {detail.price}</span>
+                                <span className="flex-grow mt-1">{detail.name}</span>
                             </div>
+                            <div className="flex items-center w-full">
+                                <span className="flex-grow mt-1">{detail.details}</span>
+                            </div>
+
+                            <div className="flex items-center w-full">
+                                <span
+                                    className="flex-grow mt-1">Цена за {buyPoints} Point: {parseFloat(detail.price.replace(',', '.')) * buyPoints}</span>
+                            </div>
+
                         </div>
+
                     ))}
                     <Button
                         onClick={handleCreateBuyOrder}
