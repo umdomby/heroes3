@@ -542,7 +542,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                                                 ...prev,
                                                                 [bet.id]: WinGameUserBet.WIN
                                                             }))}
-                                                            className={`${selectedWinUser1[bet.id] === WinGameUserBet.LOSS ? 'bg-red-500' : bet.checkWinUser1 === WinGameUserBet.LOSS ? 'bg-red-500' : 'bg-gray-500'} mr-2 h-6`}
+                                                            className={`${selectedWinUser1[bet.id] === WinGameUserBet.WIN ? 'bg-green-500' : bet.checkWinUser1 === WinGameUserBet.WIN ? 'bg-red-500' : 'bg-gray-500'} mr-2 h-6`}
                                                             disabled={selectedWinUser2[bet.id] === WinGameUserBet.DRAW}
                                                         >
                                                             Выиграл
