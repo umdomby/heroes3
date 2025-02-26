@@ -1583,7 +1583,7 @@ export async function gameRatingGameUsers(gameData: {
         throw new Error('Не удалось обновить рейтинг');
     }
 }
-export async function gameUserStartBet(gameUserBetId: number, gameUserBet2Id: number, categoryId: number, productId: number, productItemId: number) {
+export async function gameUserStartBet(id: number, gameUserBetId: number, gameUserBet2Id: number, categoryId: number, productId: number, productItemId: number) {
     try {
         // Check if a bet with the same creator and status START already exists
         const existingBet = await prisma.bet.findFirst({
@@ -1633,13 +1633,26 @@ export async function gameUserStartBet(gameUserBetId: number, gameUserBet2Id: nu
             maxBetPlayer2: 500, // Максимальная сумма ставок на игрока 2
         };
 
-        // Создание ставки
-        const newBet = await prisma.bet.create({
-            data: betData
+        await prisma.$transaction(async (prisma) => {
+            // Создание ставки
+            const newBet = await prisma.bet.create({
+                data: betData
+            });
+
+            // Обновление gameUserBetStatus
+            await prisma.gameUserBet.update({
+                where: {
+                    id: id,
+                },
+                data: {
+                    gameUserBetStatus: true,
+                },
+            });
+
+            console.log('Ставка создана и статус обновлен:', newBet);
+            return newBet;
         });
 
-        console.log("Ставка успешно создана:", newBet);
-        return newBet;
     } catch (error) {
         if (error === null || error === undefined) {
             console.error('error === null || error === undefined');

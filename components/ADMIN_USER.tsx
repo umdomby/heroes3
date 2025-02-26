@@ -115,6 +115,15 @@ export const ADMIN_USER: React.FC<Props> = ({ className, user, users }) => {
                                         <input
                                             type="radio"
                                             name={`role-${user.id}`}
+                                            checked={user.role === 'USER_BET'}
+                                            onChange={() => handleRoleChange(user.id, 'USER_BET')}
+                                        />
+                                        USER_BET
+                                    </label>
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name={`role-${user.id}`}
                                             checked={user.role === 'ADMIN'}
                                             onChange={() => handleRoleChange(user.id, 'ADMIN')}
                                         />
@@ -137,7 +146,8 @@ export const ADMIN_USER: React.FC<Props> = ({ className, user, users }) => {
             </Table>
 
             {showCopyMessage && (
-                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-2 rounded shadow-lg">
+                <div
+                    className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-2 rounded shadow-lg">
                     Card ID {copiedUserName} скопирован!
                 </div>
             )}

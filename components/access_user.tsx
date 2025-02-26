@@ -14,12 +14,15 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu"
+import {UserRole} from "@prisma/client";
+
 
 interface Props {
     className?: string;
+    role: UserRole;
 }
 
-export const Access_user: React.FC<Props> = ({className}) => {
+export const Access_user: React.FC<Props> = ({className, role}) => {
 
     const [open, setOpen] = React.useState(false);
     const [isHovered, setIsHovered] = React.useState(false);
@@ -46,7 +49,7 @@ export const Access_user: React.FC<Props> = ({className}) => {
                         }, 200));
                     }}
                 >
-                    <Button variant="outline" className="h-5 w-full">USER</Button>
+                    <Button variant="outline" className="h-5 w-full">{role}</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-45">
                     <DropdownMenuRadioGroup>

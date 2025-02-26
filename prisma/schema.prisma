@@ -216,6 +216,7 @@ enum BetStatus {
 
 enum UserRole {
   USER
+  USER_BET
   ADMIN
   BANED
 }
@@ -266,6 +267,7 @@ model GameUserBet {
   betUser2              Float? // при создании ставка User2 не ставится
   gameUserBetDetails    String            @default("") // детали которые пишет User1
   gameUserBetOpen       Boolean           @default(false) // устанавливается хочет ли он создать событие для ставок
+  gameUserBetStatus     Boolean           @default(false) // создалось ли событие.
   checkWinUser1         WinGameUserBet? // подтверждение победы User1
   checkWinUser2         WinGameUserBet? // подтверждение победы User2
   gameUser2Bet          User?             @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id]) // сюда User1 выбирает с кем будет играть
@@ -308,7 +310,6 @@ enum WinGameUserBet {
 enum GameUserBetStatus {
   OPEN
   START
-  START_BET
   CLOSED
 }
 // ------------------------------------------- 2 -------------------------------

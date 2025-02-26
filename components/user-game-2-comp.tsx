@@ -42,6 +42,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
         checkWinUser1: WinGameUserBet | null;
         checkWinUser2: WinGameUserBet | null;
         gameUser1Rating: RatingUserEnum;
+        gameUserBetStatus: boolean;
     })[]>([]);
     const [successButton, setSuccessButton] = useState<number | null>(null);
     const [betInputs, setBetInputs] = useState<{ [key: number]: number }>({});
@@ -235,6 +236,7 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                 }
 
                 const newBet = await gameUserStartBet(
+                    bet.id,
                     bet.gameUserBet1Id, // Используйте gameUserBet1Id вместо gameUser1Bet.id
                     bet.gameUserBet2Id, // Убедитесь, что у вас есть gameUserBet2Id
                     bet.categoryId, // Убедитесь, что у вас есть categoryId
@@ -484,11 +486,11 @@ export const UserGame2Comp: React.FC<Props> = ({user}) => {
                                         <div>
                                             {bet.gameUserBetOpen && user.id === bet.gameUser1Bet.id &&
                                                 <Button onClick={() => handleCreateBet(bet)}
+                                                        disabled={(bet.gameUserBetStatus === true && (user.role === 'ADMIN' || user.role === 'USER_BET'))}
                                                         className="bg-blue-500 text-white h-6">
                                                     Create Bet
                                                 </Button>
                                             }
-
 
                                             <div>
                                                 {bet.gameUser1Bet.telegram ? (

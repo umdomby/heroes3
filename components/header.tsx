@@ -56,7 +56,7 @@ export const Header: React.FC<Props> = ({className}) => {
                     </div>
                     <div className="mt-1">
                         {session?.user?.role === 'ADMIN' && <Access_admin/>}
-                        {session?.user?.role === 'USER' && <Access_user/>}
+                        {(session?.user?.role === 'USER' || session?.user?.role === 'USER_BET') && <Access_user role={session?.user?.role}/>}
                         {!session && <Access_no/>}
                     </div>
                 </div>
