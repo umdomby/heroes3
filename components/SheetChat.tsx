@@ -140,5 +140,5 @@ export const SheetChat: React.FC<PointsUserProps> = ({user}) => {
                 </SheetContent>
             </Sheet>
         </div>
-            );
-            };
+    );
+};
