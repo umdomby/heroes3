@@ -773,13 +773,12 @@ export async function globalDataPoints() {
             const currentGlobalData = await prisma.globalData.findUnique({
                 where: { id: 1 },
             });
-
             // Проверяем, прошло ли 10 секунд с момента последнего обновления
             if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 10000) {
                 console.log('Данные обновлены недавно, пропускаем обновление.');
                 return;
             }
-
+            console.log('Данные обновлялись');
             // p2p
             const resultsP2P = await Promise.all([
                 prisma.orderP2P.aggregate({
@@ -926,8 +925,6 @@ export async function globalDataPoints() {
                 },
             });
         });
-
-        console.log('Данные успешно обновлены.');
     } catch (error) {
         console.error('Ошибка при обновлении GlobalData:', error);
     }
@@ -3684,7 +3681,7 @@ async function checkAndCloseOrderP2P() {
                 { orderP2PStatus: 'OPEN' }
             ],
             updatedAt: {
-                lt: new Date(now.getTime() - 60000), // 300000 - 5 минут назад, 1 час 3600000
+                lt: new Date(now.getTime() - 3600000), // 300000 - 5 минут назад, 1 час 3600000
             },
         },
     });

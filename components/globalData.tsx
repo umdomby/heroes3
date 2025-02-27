@@ -8,7 +8,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import {globalDataPoints} from "@/app/actions";
 
 
 interface GlobalData {
@@ -39,8 +38,6 @@ async function fetchGlobalData(): Promise<GlobalData | null> {
 }
 
 export default async function GlobalDataComponent() {
-    // Запускаем обновление данных
-    await globalDataPoints();
 
     // Получаем обновленные данные
     const globalData = await fetchGlobalData();
