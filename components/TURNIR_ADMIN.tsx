@@ -30,6 +30,14 @@ export const TURNIR_ADMIN: React.FC<Props> = ({ className, user, turnirs: initia
     const [startPoints, setStartPoints] = useState(0);
     const [turnirs, setTurnirs] = useState<Turnir[]>(initialTurnirs);
     const [editTurnir, setEditTurnir] = useState<Partial<Turnir> | null>(null);
+    const [notification, setNotification] = useState<string | null>(null);
+
+    const showNotification = (message: string) => {
+        setNotification(message);
+        setTimeout(() => {
+            setNotification(null);
+        }, 3000);
+    };
 
     const handleCreate = async () => {
         try {
@@ -42,10 +50,10 @@ export const TURNIR_ADMIN: React.FC<Props> = ({ className, user, turnirs: initia
             setTitle('');
             setText('');
             setStartPoints(0);
-            alert('Турнир успешно создан');
+            showNotification('Турнир успешно создан');
         } catch (error) {
             console.error('Ошибка при создании турнира:', error);
-            alert('Не удалось создать турнир');
+            showNotification('Не удалось создать турнир');
         }
     };
 
@@ -56,10 +64,10 @@ export const TURNIR_ADMIN: React.FC<Props> = ({ className, user, turnirs: initia
             const updatedTurnir = await updateTurnir(editTurnir.id, editTurnir);
             setTurnirs(turnirs.map(t => (t.id === editTurnir.id ? updatedTurnir : t)));
             setEditTurnir(null);
-            alert('Турнир успешно обновлен');
+            showNotification('Турнир успешно обновлен');
         } catch (error) {
             console.error('Ошибка при обновлении турнира:', error);
-            alert('Не удалось обновить турнир');
+            showNotification('Не удалось обновить турнир');
         }
     };
 
@@ -70,15 +78,20 @@ export const TURNIR_ADMIN: React.FC<Props> = ({ className, user, turnirs: initia
         try {
             await deleteTurnir(id);
             setTurnirs(turnirs.filter(t => t.id !== id));
-            alert('Турнир успешно удален');
+            showNotification('Турнир успешно удален');
         } catch (error) {
             console.error('Ошибка при удалении турнира:', error);
-            alert('Не удалось удалить турнир');
+            showNotification('Не удалось удалить турнир');
         }
     };
 
     return (
         <div className={className}>
+            {notification && (
+                <div className="fixed top-4 right-4 bg-green-500 text-white p-3 rounded shadow-lg">
+                    {notification}
+                </div>
+            )}
             <h2>Создать турнир</h2>
             <div><Input type="text" placeholder="Название турнира" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
             <div><Input type="text" placeholder="Описание турнира" value={text} onChange={(e) => setText(e.target.value)} /></div>
