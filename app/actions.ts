@@ -3673,7 +3673,6 @@ export async function checkAndCloseOrderP2PTime() {
 } // 1 час + p2p
 async function checkAndCloseOrderP2P() {
     const now = new Date();
-    console.log('1234-2')
     const expiredDeals = await prisma.orderP2P.findMany({
         where: {
             OR: [
