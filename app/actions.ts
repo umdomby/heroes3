@@ -3682,6 +3682,9 @@ async function checkAndCloseOrderP2P() {
             updatedAt: {
                 lt: new Date(now.getTime() - 3600000), // 300000 - 5 минут назад, 1 час 3600000
             },
+            NOT: {
+                orderP2PUser1: 1,
+            },
         },
     });
 
