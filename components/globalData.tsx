@@ -23,6 +23,7 @@ interface GlobalData {
     openBetsPoints: number | null;
     betFund: number | null;
     gameUserBetOpen: number | null;
+    p2pPoints: number | null;
 }
 
 async function fetchGlobalData(): Promise<GlobalData | null> {
@@ -51,7 +52,8 @@ export default async function GlobalDataComponent() {
     const totalSumUsers =
         (globalData.openBetsPoints ?? 0) +
         (globalData.usersPoints ?? 0) +
-        (globalData.gameUserBetOpen ?? 0);
+        (globalData.gameUserBetOpen ?? 0)+
+        (globalData.p2pPoints ?? 0);
 
     const totalSum = totalSumUsers +
         (globalData.betFund ?? 0) +

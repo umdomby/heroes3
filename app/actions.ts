@@ -781,7 +781,7 @@ export async function globalDataPoints() {
             }
 
             // p2p
-            const results = await Promise.all([
+            const resultsP2P = await Promise.all([
                 prisma.orderP2P.aggregate({
                     _sum: {
                         orderP2PPoints: true,
@@ -811,7 +811,7 @@ export async function globalDataPoints() {
                 }),
             ]);
 
-            const totalPoints = results.reduce((sum, result) => {
+            const totalPointsP2P = resultsP2P.reduce((sum, result) => {
                 return sum + (result._sum.orderP2PPoints || 0);
             }, 0);
 
@@ -904,7 +904,8 @@ export async function globalDataPoints() {
                     users: usersCount,
                     reg: regCount,
                     ref: refCount,
-                    usersPoints: usersPointsSum + totalPoints,
+                    usersPoints: usersPointsSum,
+                    p2pPoints:totalPointsP2P,
                     margin: marginSum,
                     openBetsPoints: openBetsPointsSum,
                     gameUserBetOpen: totalBetUser1 + totalBetUser2,
@@ -917,7 +918,8 @@ export async function globalDataPoints() {
                     users: usersCount,
                     reg: regCount,
                     ref: refCount,
-                    usersPoints: usersPointsSum + totalPoints,
+                    usersPoints: usersPointsSum,
+                    p2pPoints: totalPointsP2P,
                     margin: marginSum,
                     openBetsPoints: openBetsPointsSum,
                     gameUserBetOpen: totalBetUser1 + totalBetUser2,
@@ -3653,17 +3655,18 @@ export async function checkAndCloseOrderP2PTime() {
         let updateTimeRecord = await prisma.updateDateTime.findUnique({
             where: { id: 1 }, // Предполагаем, что есть одна запись с id 1
         });
+        console.log('1111 start 1111')
         const now = new Date();
         const lastUpdate = updateTimeRecord && updateTimeRecord.UDTOrderP2P ? updateTimeRecord.UDTOrderP2P : new Date(0);
         // Проверяем, прошло ли больше часа с момента последнего обновления
-        if (now.getTime() - lastUpdate.getTime() > 3600000) { // 60 минут в миллисекундах
+        if (now.getTime() - lastUpdate.getTime() > 300000) { // 5 минут в миллисекундах
         //if (now.getTime() - lastUpdate.getTime() > 60000) { // 60 секунд
             // Обновляем поле UDTOrderP2P до текущего времени
             await prisma.updateDateTime.update({
                 where: { id: 1 },
                 data: { UDTOrderP2P: now },
             });
-
+            console.log('1234-1')
             // Вызываем функцию для проверки и закрытия просроченных сделок
             await checkAndCloseOrderP2P();
         }
@@ -3673,6 +3676,7 @@ export async function checkAndCloseOrderP2PTime() {
 } // 1 час + p2p
 async function checkAndCloseOrderP2P() {
     const now = new Date();
+    console.log('1234-2')
     const expiredDeals = await prisma.orderP2P.findMany({
         where: {
             OR: [
@@ -3680,7 +3684,7 @@ async function checkAndCloseOrderP2P() {
                 { orderP2PStatus: 'OPEN' }
             ],
             updatedAt: {
-                lt: new Date(now.getTime() - 3600000), // 60 минут назад
+                lt: new Date(now.getTime() - 300000), // 5 минут назад
                 //lt: new Date(now.getTime() - 60000), // 60 секунд
             },
         },
@@ -3689,6 +3693,7 @@ async function checkAndCloseOrderP2P() {
     for (const order of expiredDeals) {
 
         if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'OPEN') {
+            console.log('111')
             await prisma.$transaction(async (prisma) => {
                 await prisma.user.update({
                     where: { id: order.orderP2PUser1Id },
@@ -3703,21 +3708,12 @@ async function checkAndCloseOrderP2P() {
                         orderP2PStatus: 'RETURN',
                     },
                 });
-            });
-        }
-
-        if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'OPEN') {
-            await prisma.$transaction(async (prisma) => {
-                await prisma.orderP2P.update({
-                    where: { id: order.id },
-                    data: {
-                        orderP2PStatus: 'RETURN',
-                    },
-                });
+                console.log('2222')
             });
         }
 
         if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'PENDING') {
+            console.log('55555')
             await prisma.$transaction(async (prisma) => {
                 await prisma.user.update({
                     where: { id: order.orderP2PUser1Id },
@@ -3732,10 +3728,27 @@ async function checkAndCloseOrderP2P() {
                         orderP2PStatus: 'RETURN',
                     },
                 });
+                console.log('6666')
             });
         }
 
+        if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'OPEN') {
+            console.log('33333')
+            await prisma.$transaction(async (prisma) => {
+                await prisma.orderP2P.update({
+                    where: { id: order.id },
+                    data: {
+                        orderP2PStatus: 'RETURN',
+                    },
+                });
+                console.log('44444')
+            });
+        }
+
+
+
         if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'PENDING') {
+            console.log('7777')
             await prisma.$transaction(async (prisma) => {
 
                 if (order.orderP2PUser2Id !== null) {
@@ -3753,7 +3766,7 @@ async function checkAndCloseOrderP2P() {
                         },
                     });
                 }
-
+                console.log('8888')
             });
         }
     }

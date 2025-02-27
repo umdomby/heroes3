@@ -24,6 +24,8 @@ interface GlobalData {
     openBetsPoints: number | null;
     betFund: number | null;
     gameUserBetOpen: number | null;
+    p2pPoints: number | null;
+
 }
 
 async function fetchGlobalData(page: number): Promise<GlobalData[]> {
@@ -68,7 +70,8 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Start</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Reg</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Ref</TableHead>
-                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Open</TableHead>
+                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>OpenBet</TableHead>
+                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>OpenP2P</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>myGame</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>User</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Fund</TableHead>
@@ -83,7 +86,8 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                             (globalData.usersPoints ?? 0) +
                             (globalData.betFund ?? 0) +
                             (globalData.margin ?? 0) +
-                            (globalData.gameUserBetOpen ?? 0);
+                            (globalData.gameUserBetOpen ?? 0) +
+                            (globalData.p2pPoints ?? 0);
 
                         const isFirstRecord = index === 0;
                         const rowStyle = isFirstRecord
@@ -97,6 +101,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{globalData.reg ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{globalData.ref ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#718dff' }}>{globalData.openBetsPoints ?? 'N/A'}</TableCell>
+                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{globalData.p2pPoints ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.gameUserBetOpen ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{globalData.betFund ?? 'N/A'}</TableCell>

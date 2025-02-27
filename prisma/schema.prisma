@@ -110,7 +110,7 @@ model OrderP2P {
   orderP2PBuySell    BuySell
   orderP2PPoints     Float
   orderP2PPrice      Float?
-  orderP2PPart       Boolean        @default(false) // orderP2PPart: true частями, false не частями
+  orderP2PPart       Boolean        @default(false) // обработана или нет
   orderBankDetails   Json
   orderP2PStatus     OrderP2PStatus @default(OPEN)
   orderP2PCheckUser1 Boolean? // подтверждение сделки User1
@@ -291,6 +291,7 @@ model GlobalData {
   reg             Float?   @default(0) // количество записей regPoints
   ref             Float?   @default(0) // количество записей ReferralUserIpAddress referralStatus=true
   usersPoints     Float?   @default(0) // сумма Points всех пользователей
+  p2pPoints       Float?   @default(0) // сумма P2P в сделках всех пользователей
   margin          Float?   @default(0) // сумма маржи model sum BetClosed, BetClosed3 and BetClosed4 - margin
   openBetsPoints  Float?   @default(0) // сумма ставок, которые еще не закрылись Bet-totalBetAmount, Bet3-totalBetAmount and Bet4 - totalBetAmount
   gameUserBetOpen Float?   @default(0) // ставки игроками на свои игры
