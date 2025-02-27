@@ -98,22 +98,30 @@ export const OrderP2PComponent: React.FC<Props> = ({
     }, [openOrders]);
 
     useEffect(() => {
-        const eventSource = new EventSource(`/api/order-p2p?userId=${user.id}`);
+        const connectToSSE = () => {
+            const eventSource = new EventSource(`/api/order-p2p?userId=${user.id}`);
 
-        eventSource.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                setOpenOrders(data.openOrders as OrderP2PWithUser[]);
-                setCurrentPendingCount(data.pendingOrdersCount);
-            } catch (error) {
-                console.error('Error parsing SSE data:', error);
-            }
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    setOpenOrders(data.openOrders as OrderP2PWithUser[]);
+                    setCurrentPendingCount(data.pendingOrdersCount);
+                } catch (error) {
+                    console.error('Error parsing SSE data:', error);
+                }
+            };
+
+            eventSource.onerror = (error) => {
+                console.error('SSE error:', error);
+                eventSource.close();
+                // Attempt to reconnect after a delay
+                setTimeout(connectToSSE, 5000);
+            };
+
+            return eventSource;
         };
 
-        eventSource.onerror = (error) => {
-            console.error('SSE error:', error);
-            eventSource.close();
-        };
+        const eventSource = connectToSSE();
 
         return () => {
             eventSource.close();
