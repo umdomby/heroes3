@@ -3560,7 +3560,6 @@ export async function closeBetDraw4(betId: number) {
     }
 }// ничья на 4 игрока
 
-
 async function fetchBitcoinRate() {
     try {
         const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
@@ -3633,7 +3632,7 @@ export async function updateCurrencyRatesIfNeeded() {
     } catch (error) {
         console.error('Ошибка при обновлении курсов валют:', error);
     }
-} // 600 - courseValut
+} // 600000 - courseValut
 
 export async function getCourseValuta() {
     try {
@@ -3655,7 +3654,6 @@ export async function checkAndCloseOrderP2PTime() {
         let updateTimeRecord = await prisma.updateDateTime.findUnique({
             where: { id: 1 }, // Предполагаем, что есть одна запись с id 1
         });
-        console.log('1111 start 1111')
         const now = new Date();
         if (!updateTimeRecord) {
             console.error('Запись с id 1 не найдена');
@@ -3663,13 +3661,12 @@ export async function checkAndCloseOrderP2PTime() {
         }
         const lastUpdate = updateTimeRecord.UDTOrderP2P;
         // Проверяем, прошло ли больше часа с момента последнего обновления
-        if (now.getTime() - lastUpdate.getTime() > 3600000) { // 300000 - 5 минут в миллисекундах, 1 час 3600000
+        if (now.getTime() - lastUpdate.getTime() > 60000) { // 300000 - 5 минут в миллисекундах, 1 час 3600000
             // Обновляем поле UDTOrderP2P до текущего времени
             await prisma.updateDateTime.update({
                 where: { id: 1 },
                 data: { UDTOrderP2P: now },
             });
-            console.log('1234-1')
             // Вызываем функцию для проверки и закрытия просроченных сделок
             await checkAndCloseOrderP2P();
         }
@@ -3687,7 +3684,7 @@ async function checkAndCloseOrderP2P() {
                 { orderP2PStatus: 'OPEN' }
             ],
             updatedAt: {
-                lt: new Date(now.getTime() - 3600000), // 300000 - 5 минут назад, 1 час 3600000
+                lt: new Date(now.getTime() - 60000), // 300000 - 5 минут назад, 1 час 3600000
             },
         },
     });
@@ -3741,7 +3738,6 @@ async function checkAndCloseOrderP2P() {
         }
 
 
-
         if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'PENDING') {
             await prisma.$transaction(async (prisma) => {
 
@@ -3763,4 +3759,66 @@ async function checkAndCloseOrderP2P() {
         }
     }
 }// закрытие сделки по времени из клиента
+
+export async function createTurnir(data: { titleTurnir: string; textTurnirTurnir: string; startPointsTurnir: number }) {
+    const currentUser = await getUserSession();
+
+    if (!currentUser || currentUser.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        const newTurnir = await prisma.turnir.create({
+            data: {
+                titleTurnir: data.titleTurnir,
+                textTurnirTurnir: data.textTurnirTurnir,
+                startPointsTurnir: data.startPointsTurnir,
+                statusTurnir: 'REGISTRATION',
+                TurnirBool: true,
+            },
+        });
+
+        return newTurnir;
+    } catch (error) {
+        console.error('Ошибка при создании турнира:', error);
+        throw new Error('Не удалось создать турнир');
+    }
+}
+export async function updateTurnir(id: number, data: { titleTurnir?: string; textTurnirTurnir?: string; startPointsTurnir?: number }) {
+    const currentUser = await getUserSession();
+
+    if (!currentUser || currentUser.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        const updatedTurnir = await prisma.turnir.update({
+            where: { id },
+            data,
+        });
+
+        return updatedTurnir;
+    } catch (error) {
+        console.error('Ошибка при редактировании турнира:', error);
+        throw new Error('Не удалось редактировать турнир');
+    }
+}
+export async function deleteTurnir(id: number) {
+    const currentUser = await getUserSession();
+
+    if (!currentUser || currentUser.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        await prisma.turnir.delete({
+            where: { id },
+        });
+
+        return { success: true, message: 'Турнир успешно удален' };
+    } catch (error) {
+        console.error('Ошибка при удалении турнира:', error);
+        throw new Error('Не удалось удалить турнир');
+    }
+}
 

@@ -1,97 +1,116 @@
-"use client"; // Указываем, что компонент клиентский
-import React, { useState } from 'react';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableRow,
-    TableHeader,
-    TableHead,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+"use client";
+import React, {useState} from 'react';
+import {createTurnir, updateTurnir, deleteTurnir} from '@/app/actions';
+import {Button, Input} from "@/components/ui";
+
+interface Turnir {
+    id: number;
+    titleTurnir: string;
+    textTurnirTurnir: string;
+    startPointsTurnir: number;
+}
 
 interface User {
+    id: number;
     fullName: string;
-    points: number;
-    cardId: string;
-    email: string;
-    telegram: string | null; // Allow telegram to be null
-    telegramView: boolean;
-    createdAt: Date;
+    role: string;
 }
 
 interface Props {
     className?: string;
-    users: User[];
+    user: User;
+    turnirs: Turnir[];
 }
 
-export const TURNIR_ADMIN: React.FC<Props> = ({ className, users }) => {
-    const [showCopyMessage, setShowCopyMessage] = useState(false);
-    const [copiedUserName, setCopiedUserName] = useState('');
+export const TURNIR_ADMIN: React.FC<Props> = ({className, user, turnirs: initialTurnirs}) => {
+    const [title, setTitle] = useState('');
+    const [text, setText] = useState('');
+    const [startPoints, setStartPoints] = useState(0);
+    const [turnirs, setTurnirs] = useState<Turnir[]>(initialTurnirs);
 
-    const handleCopy = (cardId: string, fullName: string) => {
-        navigator.clipboard.writeText(cardId);
-        setCopiedUserName(fullName);
-        setShowCopyMessage(true);
-        setTimeout(() => setShowCopyMessage(false), 1000); // Убираем сообщение через 1 секунду
+    const handleCreate = async () => {
+        try {
+            const newTurnir = await createTurnir({
+                titleTurnir: title,
+                textTurnirTurnir: text,
+                startPointsTurnir: startPoints
+            });
+            setTurnirs([...turnirs, newTurnir]);
+            alert('Турнир успешно создан');
+        } catch (error) {
+            console.error('Ошибка при создании турнира:', error);
+            alert('Не удалось создать турнир');
+        }
+    };
+
+    const handleUpdate = async (id: number, updatedData: Partial<Turnir>) => {
+        try {
+            const updatedTurnir = await updateTurnir(id, updatedData);
+            setTurnirs(turnirs.map(t => (t.id === id ? updatedTurnir : t)));
+            alert('Турнир успешно обновлен');
+        } catch (error) {
+            console.error('Ошибка при обновлении турнира:', error);
+            alert('Не удалось обновить турнир');
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        try {
+            await deleteTurnir(id);
+            setTurnirs(turnirs.filter(t => t.id !== id));
+            alert('Турнир успешно удален');
+        } catch (error) {
+            console.error('Ошибка при удалении турнира:', error);
+            alert('Не удалось удалить турнир');
+        }
     };
 
     return (
-        <div className={`p-4 ${className}`}>
-            <h1 className="text-2xl font-bold text-center mb-6 p-2 bg-gray-400 rounded-lg">
-                Rating
-            </h1>
-            <Table className="w-full">
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="text-center">Points</TableHead>
-                        <TableHead className="text-center">User</TableHead>
-                        <TableHead className="text-center">Email</TableHead>
-                        <TableHead className="text-center">Card ID</TableHead>
-                        <TableHead className="text-center">Дата создания</TableHead>
-                        <TableHead className="text-center">Telegram</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {users.map((user, index) => (
-                        <TableRow key={index} className="hover:bg-gray-400">
-                            <TableCell className="text-center">{Math.floor(user.points * 100) / 100}</TableCell>
-                            <TableCell className="text-center">{user.fullName}</TableCell>
-                            <TableCell className="text-center">{user.email.slice(0, 5)}...</TableCell>
-                            <TableCell className="text-center">
-                                <div className="flex justify-center items-center">
-                                    <span className="mr-2">{user.cardId}</span>
-                                    <Button
-                                        onClick={() => handleCopy(user.cardId, user.fullName)}
-                                        className="bg-blue-500 text-white px-2 py-1 rounded"
-                                    >
-                                        Copy
-                                    </Button>
-                                </div>
-                            </TableCell>
-                            <TableCell className="text-center">{user.createdAt.toLocaleDateString()}</TableCell>
-                            <TableCell className="text-center">
-                                {user.telegramView && user.telegram ? (
-                                    <Link
-                                        className="text-blue-500 hover:text-green-300 font-bold"
-                                        href={user.telegram.replace(/^@/, 'https://t.me/')}
-                                        target="_blank"
-                                    >
-                                        {user.telegram}
-                                    </Link>
-                                ) : (
-                                    <span className="text-gray-500">Скрыто</span>
-                                )}
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className={className}>
+            <h2>Создать турнир</h2>
+            <div><Input type="text" placeholder="Название турнира" value={title}
+                        onChange={(e) => setTitle(e.target.value)}/></div>
+            <div><Input type="text" placeholder="Описание турнира" value={text}
+                        onChange={(e) => setText(e.target.value)}/></div>
+            <div><Input type="number" placeholder="Начальные очки" value={startPoints}
+                        onChange={(e) => setStartPoints(Number(e.target.value))}/></div>
+            <div><Button onClick={handleCreate}>Создать</Button></div>
 
-            {showCopyMessage && (
-                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-2 rounded shadow-lg">
-                    Card ID {copiedUserName} скопирован!
+
+            <h2>Существующие турниры</h2>
+            {turnirs.length === 0 ? (
+                <p>Турниры отсутствуют</p>
+            ) : (
+                <div className="my-5">
+                    {turnirs.map(turnir => (
+                        <div className="my-5" key={turnir.id}>
+                            <div>
+                                <Input
+                                    type="text"
+                                    value={turnir.titleTurnir}
+                                    onChange={(e) => handleUpdate(turnir.id, {titleTurnir: e.target.value})}
+                                />
+                            </div>
+                            <div>
+                                <Input
+                                    type="text"
+                                    value={turnir.textTurnirTurnir}
+                                    onChange={(e) => handleUpdate(turnir.id, {textTurnirTurnir: e.target.value})}
+                                />
+                            </div>
+                            <div>
+                                <Input
+                                    type="number"
+                                    value={turnir.startPointsTurnir}
+                                    onChange={(e) => handleUpdate(turnir.id, {startPointsTurnir: Number(e.target.value)})}
+                                />
+                            </div>
+
+                            <div>
+                                <Button onClick={() => handleDelete(turnir.id)}>Удалить</Button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
         </div>

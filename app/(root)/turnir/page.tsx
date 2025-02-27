@@ -2,18 +2,26 @@
 import {prisma} from '@/prisma/prisma-client';
 import {Container} from "@/components/container";
 import {TURNIR} from "@/components/TURNIR";
+import {getUserSession} from "@/components/lib/get-user-session";
+import {redirect} from "next/navigation";
 
-export default async function Turnir() {
+export default async function TurnirPage() {
 
-    const users = await prisma.user.findMany({
-        orderBy: {
-            points: 'desc', // Sort by points in descending order
-        },
-    });
+    const session = await getUserSession();
+
+    if (!session) {
+        return redirect('/');
+    }
+
+    const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
+
+    if (!user) {
+        return redirect('/');
+    }
 
     return (
         <Container className="flex flex-col my-10">
-            <TURNIR users={users}/>
+            <TURNIR users={user}/>
         </Container>
     )
 }

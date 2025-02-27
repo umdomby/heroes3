@@ -1,19 +1,40 @@
 "use server";
-import {prisma} from '@/prisma/prisma-client';
-import {Container} from "@/components/container";
-import {TURNIR_ADMIN} from "@/components/TURNIR_ADMIN";
+import { prisma } from '@/prisma/prisma-client';
+import { Container } from "@/components/container";
+import { getUserSession } from "@/components/lib/get-user-session";
+import { redirect } from "next/navigation";
+import { TURNIR_ADMIN } from "@/components/TURNIR_ADMIN";
 
-export default async function TurAdmin() {
+export default async function TurnirAdminPage() {
+    const session = await getUserSession();
 
-    const users = await prisma.user.findMany({
+    if (!session) {
+        return redirect('/');
+    }
+
+    // Получаем пользователя и проверяем, является ли он администратором
+    const user = await prisma.user.findFirst({
+        where: { id: Number(session.id), role: 'ADMIN' }
+    });
+
+    if (!user) {
+        return redirect('/');
+    }
+
+    // Получаем список турниров
+    const turnirs = await prisma.turnir.findMany({
         orderBy: {
-            points: 'desc', // Sort by points in descending order
+            createdAt: 'desc', // Сортируем турниры по дате создания
         },
     });
 
+    if (turnirs.length === 0) {
+        console.log('Турниры отсутствуют');
+    }
+
     return (
         <Container className="flex flex-col my-10">
-            <TURNIR_ADMIN users={users}/>
+            <TURNIR_ADMIN user={user} turnirs={turnirs} />
         </Container>
-    )
+    );
 }

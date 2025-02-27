@@ -65,14 +65,16 @@ model User {
 }
 
 model TurnirPlayer {
-  id                Int     @id @default(autoincrement())
-  orderP2PUser      User    @relation(fields: [userId], references: [id])
+  id                Int      @id @default(autoincrement())
+  orderP2PUser      User     @relation(fields: [userId], references: [id])
   userId            Int
   startPointsPlayer Float
   checkPointsPlayer Float?
-  playerBool        Boolean @default(true)
-  turnir            Turnir  @relation(fields: [turnirId], references: [id])
+  playerBool        Boolean  @default(true)
+  turnir            Turnir   @relation(fields: [turnirId], references: [id])
   turnirId          Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Turnir {
@@ -92,6 +94,8 @@ model Turnir {
   turnirLap7        Json?
   turnirLap8        Json?
   turnirLap9        Json?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 enum StatusTurnir {
