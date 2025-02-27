@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { playerTurnirAdd, playerTurnirDelete, playerTurnirAdminUpdate, playerTurnirAdminDelete } from '@/app/actions';
+import React, { useState, useEffect } from 'react';
+import { playerTurnirAdd, playerTurnirDelete, updateGetDataTurnirPage } from '@/app/actions';
 import { Button, Input } from "@/components/ui";
 
 interface User {
@@ -32,7 +32,9 @@ interface Props {
     turnirPlayers: { turnirId: number; players: TurnirPlayer[] }[];
 }
 
-export const TURNIR: React.FC<Props> = ({ className, user, turnirs, turnirPlayers }) => {
+export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurnirs, turnirPlayers: initialTurnirPlayers }) => {
+    const [turnirs, setTurnirs] = useState<Turnir[]>(initialTurnirs);
+    const [turnirPlayers, setTurnirPlayers] = useState<{ turnirId: number; players: TurnirPlayer[] }[]>(initialTurnirPlayers);
     const [selectedTurnir, setSelectedTurnir] = useState<number | null>(null);
     const [message, setMessage] = useState<string | null>(null);
 
@@ -47,6 +49,7 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs, turnirPlayer
         try {
             const response = await playerTurnirAdd(user.id, selectedTurnir);
             showMessage(response.message);
+            await fetchData(); // Обновляем данные после добавления игрока
         } catch (error) {
             console.error('Ошибка при добавлении игрока:', error);
             showMessage('Не удалось добавить игрока');
@@ -59,31 +62,28 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs, turnirPlayer
         try {
             const response = await playerTurnirDelete(user.id, selectedTurnir);
             showMessage(response.message);
+            await fetchData(); // Обновляем данные после удаления игрока
         } catch (error) {
             console.error('Ошибка при удалении игрока:', error);
             showMessage('Не удалось удалить игрока');
         }
     };
 
-    const handleAdminUpdatePlayer = async (playerId: number, newPoints: number, newTurnirId: number) => {
+    const fetchData = async () => {
         try {
-            const response = await playerTurnirAdminUpdate(playerId, newPoints, newTurnirId);
-            showMessage(response.message);
+            const data = await updateGetDataTurnirPage();
+            setTurnirs(data.turnirs);
+            setTurnirPlayers(data.turnirPlayers);
         } catch (error) {
-            console.error('Ошибка при обновлении игрока:', error);
-            showMessage('Не удалось обновить игрока');
+            console.error('Ошибка при обновлении данных:', error);
         }
     };
 
-    const handleAdminDeletePlayer = async (playerId: number) => {
-        try {
-            const response = await playerTurnirAdminDelete(playerId);
-            showMessage(response.message);
-        } catch (error) {
-            console.error('Ошибка при удалении игрока администратором:', error);
-            showMessage('Не удалось удалить игрока');
+    useEffect(() => {
+        if (selectedTurnir !== null) {
+            fetchData();
         }
-    };
+    }, [selectedTurnir]);
 
     const playersForSelectedTurnir = selectedTurnir
         ? turnirPlayers.find(tp => tp.turnirId === selectedTurnir)?.players || []

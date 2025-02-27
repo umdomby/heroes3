@@ -3824,7 +3824,27 @@ export async function deleteTurnir(id: number) {
     }
 }
 
+// получение обновленных данных
+export async function updateGetDataTurnirPage() {
+    // Получаем список турниров
+    const turnirs = await prisma.turnir.findMany({
+        where: { statusTurnir: 'REGISTRATION' },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    });
 
+    // Получаем игроков для каждого турнира
+    const turnirPlayers = await Promise.all(turnirs.map(async (turnir) => {
+        const players = await prisma.turnirPlayer.findMany({
+            where: { turnirId: turnir.id },
+            include: { orderP2PUser: true }, // Используем правильное имя отношения
+        });
+        return { turnirId: turnir.id, players };
+    }));
+
+    return { turnirs, turnirPlayers };
+}
 
 // Добавление игрока к турниру
 export async function playerTurnirAdd(userId: number, turnirId: number) {
