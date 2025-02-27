@@ -24,12 +24,12 @@ interface User {
 
 interface Props {
     className?: string;
-    users: User[];
+    user: User;
 
 
 }
 
-export const TURNIR: React.FC<Props> = ({ className, users }) => {
+export const TURNIR: React.FC<Props> = ({ className, user }) => {
     return (
         <div>
             123

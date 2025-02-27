@@ -85,10 +85,12 @@ export const TURNIR_ADMIN: React.FC<Props> = ({ className, user, turnirs: initia
         }
     };
 
+    const isCreateDisabled = !title || !text || startPoints <= 0;
+
     return (
         <div className={className}>
             {notification && (
-                <div className="fixed top-4 right-4 bg-green-500 text-white p-3 rounded shadow-lg">
+                <div className="fixed top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-3 rounded shadow-lg">
                     {notification}
                 </div>
             )}
@@ -96,7 +98,7 @@ export const TURNIR_ADMIN: React.FC<Props> = ({ className, user, turnirs: initia
             <div><Input type="text" placeholder="Название турнира" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
             <div><Input type="text" placeholder="Описание турнира" value={text} onChange={(e) => setText(e.target.value)} /></div>
             <div><Input type="number" placeholder="Начальные очки" value={startPoints} onChange={(e) => setStartPoints(Number(e.target.value))} /></div>
-            <div><Button onClick={handleCreate}>Создать</Button></div>
+            <div><Button onClick={handleCreate} disabled={isCreateDisabled}>Создать</Button></div>
 
             <h2>Существующие турниры</h2>
             {turnirs.length === 0 ? (

@@ -21,7 +21,7 @@ export default async function TurnirPage() {
 
     return (
         <Container className="flex flex-col my-10">
-            <TURNIR users={user}/>
+            <TURNIR user={user}/>
         </Container>
     )
 }

@@ -24,7 +24,7 @@ export default async function TurnirAdminPage() {
     // Получаем список турниров
     const turnirs = await prisma.turnir.findMany({
         orderBy: {
-            createdAt: 'desc', // Сортируем турниры по дате создания
+            createdAt: 'desc',
         },
     });
 
