@@ -286,6 +286,11 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                 CONTACTS
                             </DropdownMenuRadioItem>
                         </Link>
+                        <Link href="/hall-of-fame">
+                            <DropdownMenuRadioItem value="hall-of-fame" className="cursor-pointer">
+                                HALL-OF-FAME
+                            </DropdownMenuRadioItem>
+                        </Link>
                         <DropdownMenuRadioItem value="create-bet"><ModeToggle/></DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
