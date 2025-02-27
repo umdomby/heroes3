@@ -3696,17 +3696,16 @@ async function checkAndCloseOrderP2P() {
 
         if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'OPEN') {
             await prisma.$transaction(async (prisma) => {
-                await prisma.user.update({
-                    where: { id: order.orderP2PUser1Id },
-                    data: {
-                        points: { increment: order.orderP2PPoints },
-                    },
-                });
-
                 await prisma.orderP2P.update({
                     where: { id: order.id },
                     data: {
                         orderP2PStatus: 'RETURN',
+                    },
+                });
+                await prisma.user.update({
+                    where: { id: order.orderP2PUser1Id },
+                    data: {
+                        points: { increment: order.orderP2PPoints },
                     },
                 });
             });
@@ -3714,17 +3713,17 @@ async function checkAndCloseOrderP2P() {
 
         if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'PENDING') {
             await prisma.$transaction(async (prisma) => {
-                await prisma.user.update({
-                    where: { id: order.orderP2PUser1Id },
-                    data: {
-                        points: { increment: order.orderP2PPoints },
-                    },
-                });
-
                 await prisma.orderP2P.update({
                     where: { id: order.id },
                     data: {
                         orderP2PStatus: 'RETURN',
+                    },
+                });
+
+                await prisma.user.update({
+                    where: { id: order.orderP2PUser1Id },
+                    data: {
+                        points: { increment: order.orderP2PPoints },
                     },
                 });
             });
@@ -3747,17 +3746,16 @@ async function checkAndCloseOrderP2P() {
             await prisma.$transaction(async (prisma) => {
 
                 if (order.orderP2PUser2Id !== null) {
-                    await prisma.user.update({
-                        where: { id: order.orderP2PUser2Id },
-                        data: {
-                            points: { increment: order.orderP2PPoints },
-                        },
-                    });
-
                     await prisma.orderP2P.update({
                         where: { id: order.id },
                         data: {
                             orderP2PStatus: 'RETURN',
+                        },
+                    });
+                    await prisma.user.update({
+                        where: { id: order.orderP2PUser2Id },
+                        data: {
+                            points: { increment: order.orderP2PPoints },
                         },
                     });
                 }
