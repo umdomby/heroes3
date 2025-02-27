@@ -3683,7 +3683,9 @@ async function checkAndCloseOrderP2P() {
                 lt: new Date(now.getTime() - 3600000), // 300000 - 5 минут назад, 1 час 3600000
             },
             NOT: {
-                orderP2PUser1: 1,
+                orderP2PUser1: {
+                    id: 1, // Предполагаем, что поле id существует в модели User
+                },
             },
         },
     });
