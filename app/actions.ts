@@ -3826,7 +3826,7 @@ export async function deleteTurnir(id: number) {
 
 
 
-// добавление игрока к турниру
+// Добавление игрока к турниру
 export async function playerTurnirAdd(userId: number, turnirId: number) {
     try {
         const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -3852,13 +3852,16 @@ export async function playerTurnirAdd(userId: number, turnirId: number) {
                 playerBool: true,
             },
         });
+
+        revalidatePath('/turnir'); // Обновляем страницу после добавления игрока
         return { success: true, message: 'Игрок успешно добавлен в турнир' };
     } catch (error) {
         console.error('Ошибка при добавлении игрока в турнир:', error);
         throw new Error(error.message || 'Не удалось добавить игрока в турнир');
     }
 }
-// удаление игрока к турниру
+
+// Удаление игрока из турнира
 export async function playerTurnirDelete(userId: number, turnirId: number) {
     try {
         await prisma.turnirPlayer.deleteMany({
@@ -3868,6 +3871,7 @@ export async function playerTurnirDelete(userId: number, turnirId: number) {
             },
         });
 
+        revalidatePath('/turnir'); // Обновляем страницу после удаления игрока
         return { success: true, message: 'Игрок успешно удален из турнира' };
     } catch (error) {
         console.error('Ошибка при удалении игрока из турнира:', error);
@@ -3886,6 +3890,7 @@ export async function playerTurnirAdminUpdate(playerId: number, newPoints: numbe
             },
         });
 
+        revalidatePath('/turnir'); // Обновляем страницу после обновления данных игрока
         return { success: true, message: 'Данные игрока успешно обновлены' };
     } catch (error) {
         console.error('Ошибка при обновлении данных игрока:', error);
@@ -3895,13 +3900,13 @@ export async function playerTurnirAdminUpdate(playerId: number, newPoints: numbe
 
 // Удаление игрока из турнира администратором
 export async function playerTurnirAdminDelete(playerId: number) {
-
     try {
         await prisma.turnirPlayer.delete({
-            where: {id: playerId},
+            where: { id: playerId },
         });
 
-        return {success: true, message: 'Игрок успешно удален из турнира'};
+        revalidatePath('/turnir'); // Обновляем страницу после удаления игрока
+        return { success: true, message: 'Игрок успешно удален из турнира' };
     } catch (error) {
         console.error('Ошибка при удалении игрока из турнира администратором:', error);
         throw new Error('Не удалось удалить игрока из турнира');
