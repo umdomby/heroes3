@@ -221,7 +221,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                                         ) : (
                                             <p>Нет доступных банковских реквизитов</p>
                                         )}
-                                        <p>  {order.orderP2PUser1Id !== 1 && <span>Автозакрытие сделки начнется: {getAutoCloseTime(order.updatedAt)}, (обновить) +1 час</span>}</p>
+                                        <p>  {order.orderP2PUser1Id !== 1 && order.orderP2PUser1Id !== 2 && <span>Автозакрытие сделки начнется: {getAutoCloseTime(order.updatedAt)}, (обновить) +1 час</span>}</p>
                                         <p>User1: {order.orderP2PUser1.fullName} - {order.orderP2PCheckUser1 ? "Да" : "Нет"}</p>
                                         <p>User2: {order.orderP2PUser2 ? `${order.orderP2PUser2.fullName} - ${order.orderP2PCheckUser2 ? "Да" : "Нет"}` : "Ожидание"}</p>
                                     </div>
