@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { playerTurnirAdd, playerTurnirDelete, updateGetDataTurnirPage } from '@/app/actions';
+import React, { useState } from 'react';
+import { playerTurnirAdd, playerTurnirDelete, playerTurnirAdminUpdate, playerTurnirAdminDelete } from '@/app/actions';
 import { Button, Input } from "@/components/ui";
 
 interface User {
@@ -32,11 +32,10 @@ interface Props {
     turnirPlayers: { turnirId: number; players: TurnirPlayer[] }[];
 }
 
-export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurnirs, turnirPlayers: initialTurnirPlayers }) => {
-    const [turnirs, setTurnirs] = useState<Turnir[]>(initialTurnirs);
-    const [turnirPlayers, setTurnirPlayers] = useState<{ turnirId: number; players: TurnirPlayer[] }[]>(initialTurnirPlayers);
+export const TURNIR: React.FC<Props> = ({ className, user, turnirs, turnirPlayers }) => {
     const [selectedTurnir, setSelectedTurnir] = useState<number | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    const [editPlayer, setEditPlayer] = useState<{ id: number; newPoints: number; newTurnirId: number } | null>(null);
 
     const showMessage = (msg: string) => {
         setMessage(msg);
@@ -49,7 +48,6 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
         try {
             const response = await playerTurnirAdd(user.id, selectedTurnir);
             showMessage(response.message);
-            await fetchData(); // Обновляем данные после добавления игрока
         } catch (error) {
             console.error('Ошибка при добавлении игрока:', error);
             showMessage('Не удалось добавить игрока');
@@ -62,28 +60,34 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
         try {
             const response = await playerTurnirDelete(user.id, selectedTurnir);
             showMessage(response.message);
-            await fetchData(); // Обновляем данные после удаления игрока
         } catch (error) {
             console.error('Ошибка при удалении игрока:', error);
             showMessage('Не удалось удалить игрока');
         }
     };
 
-    const fetchData = async () => {
+    const handleAdminUpdatePlayer = async () => {
+        if (!editPlayer) return;
+
         try {
-            const data = await updateGetDataTurnirPage();
-            setTurnirs(data.turnirs);
-            setTurnirPlayers(data.turnirPlayers);
+            const response = await playerTurnirAdminUpdate(editPlayer.id, editPlayer.newPoints, editPlayer.newTurnirId);
+            showMessage(response.message);
+            setEditPlayer(null); // Сбрасываем состояние редактирования после сохранения
         } catch (error) {
-            console.error('Ошибка при обновлении данных:', error);
+            console.error('Ошибка при обновлении игрока:', error);
+            showMessage('Не удалось обновить игрока');
         }
     };
 
-    useEffect(() => {
-        if (selectedTurnir !== null) {
-            fetchData();
+    const handleAdminDeletePlayer = async (playerId: number) => {
+        try {
+            const response = await playerTurnirAdminDelete(playerId);
+            showMessage(response.message);
+        } catch (error) {
+            console.error('Ошибка при удалении игрока администратором:', error);
+            showMessage('Не удалось удалить игрока');
         }
-    }, [selectedTurnir]);
+    };
 
     const playersForSelectedTurnir = selectedTurnir
         ? turnirPlayers.find(tp => tp.turnirId === selectedTurnir)?.players || []
@@ -131,9 +135,12 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                         <>
                             <Input
                                 type="number"
-                                value={player.startPointsPlayer}
-                                onChange={(e) => handleAdminUpdatePlayer(player.id, Number(e.target.value), player.turnirId)}
+                                value={editPlayer?.id === player.id ? editPlayer.newPoints : player.startPointsPlayer}
+                                onChange={(e) => setEditPlayer({ id: player.id, newPoints: Number(e.target.value), newTurnirId: player.turnirId })}
                             />
+                            <Button onClick={handleAdminUpdatePlayer} disabled={!editPlayer || editPlayer.id !== player.id}>
+                                Сохранить
+                            </Button>
                             <Button onClick={() => handleAdminDeletePlayer(player.id)}>Удалить игрока</Button>
                         </>
                     )}
