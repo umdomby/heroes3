@@ -50,10 +50,12 @@ export default async function OrderP2PPage() {
             </div>
         );
     }
+
     // курс валют
-    await updateCurrencyRatesIfNeeded();
+    //await updateCurrencyRatesIfNeeded();
+
     // Закрываем просроченные сделки перед рендерингом страницы
-    await checkAndCloseOrderP2PTime();
+    // await checkAndCloseOrderP2PTime();
 
     const openOrders = await prisma.orderP2P.findMany({
         where: { orderP2PStatus: 'OPEN' },
