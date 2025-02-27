@@ -32,6 +32,7 @@ interface TurnirPlayer {
     startPointsPlayer: number;
     checkPointsPlayer: number | null;
     orderP2PUser: User;
+    createdAt: Date;
 }
 
 interface Props {
@@ -126,21 +127,25 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
 
     const isUserInTurnir = playersForSelectedTurnir.some(player => player.userId === user.id);
 
+    // Получаем название выбранного турнира
+    const selectedTurnirTitle = turnirs.find(turnir => turnir.id === selectedTurnir)?.titleTurnir || '';
+
     return (
         <div className={className}>
-            <h2>Турниры</h2>
+            <h2 className="mb-5">Турниры. При регистрации <span className="text-amber-500">points</span> <span className="text-red-500">{user.points}</span> не списываются.
+            </h2>
             <select onChange={(e) => setSelectedTurnir(Number(e.target.value))}>
                 <option value="">Выберите турнир</option>
                 {turnirs.map(turnir => (
                     <option key={turnir.id} value={turnir.id}>
-                        {turnir.titleTurnir}, взнос: {turnir.startPointsTurnir}
+                        {turnir.titleTurnir}
                     </option>
                 ))}
             </select>
-            <Button onClick={handleAddPlayer} disabled={!selectedTurnir || isUserInTurnir}>
+            <Button className="mx-3 h-7" onClick={handleAddPlayer} disabled={!selectedTurnir || isUserInTurnir}>
                 Добавить в турнир
             </Button>
-            <Button onClick={handleDeletePlayer} disabled={!selectedTurnir || !isUserInTurnir}>
+            <Button className="h-7" onClick={handleDeletePlayer} disabled={!selectedTurnir || !isUserInTurnir}>
                 Удалить себя из турнира
             </Button>
 
@@ -158,12 +163,14 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                 </div>
             )}
 
-            <h2>Игроки в турнире</h2>
+            <h2>Игроки в турнире: <span className="text-amber-500"><strong>{selectedTurnirTitle}</strong></span> </h2>
             <Table className="w-full">
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Наличие взноса</TableHead>
+                        <TableHead className="w-[25%]">Name</TableHead>
+                        <TableHead className="w-[20%]">Наличие взноса</TableHead>
+                        <TableHead className="w-[25%]">Дата регистрации</TableHead>
+                        {user.role === 'ADMIN' && <TableHead>Действия</TableHead>}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -173,6 +180,20 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                             <TableCell>
                                 <span className={`inline-block w-4 h-4 rounded-full ${player.checkPointsPlayer ? 'bg-green-500' : 'bg-red-500'}`}></span>
                             </TableCell>
+                            <TableCell>{ new Date(player.createdAt).toLocaleString() }</TableCell>
+                            {user.role === 'ADMIN' && (
+                                <TableCell>
+                                    <Input
+                                        type="number"
+                                        value={editPlayer?.id === player.id ? editPlayer.newPoints : player.startPointsPlayer}
+                                        onChange={(e) => setEditPlayer({ id: player.id, newPoints: Number(e.target.value), newTurnirId: player.turnirId })}
+                                    />
+                                    <Button onClick={handleAdminUpdatePlayer} disabled={!editPlayer || editPlayer.id !== player.id}>
+                                        Сохранить
+                                    </Button>
+                                    <Button onClick={() => handleAdminDeletePlayer(player.id)}>Удалить</Button>
+                                </TableCell>
+                            )}
                         </TableRow>
                     ))}
                 </TableBody>
