@@ -197,7 +197,6 @@ export const Access_user: React.FC<Props> = ({className, role}) => {
                                 MANUAL
                             </DropdownMenuRadioItem>
                         </Link>
-                        hall-of-fame
                         <Link href="/contacts">
                             <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                 CONTACTS
