@@ -937,7 +937,8 @@ export const OrderP2PComponent: React.FC<Props> = ({
                                     </Button>
                                 )}
                                 <div className="text-center">
-                                    Автозакрытие сделки начнется: {getAutoCloseTime(order.updatedAt)}, (обновить) +1 час
+                                    <p>  {order.orderP2PUser1Id !== 1 &&
+                                        <span>Автозакрытие сделки начнется: {getAutoCloseTime(order.updatedAt)}, (обновить) +1 час</span>}</p>
                                 </div>
                             </div>
                         </AccordionContent>
