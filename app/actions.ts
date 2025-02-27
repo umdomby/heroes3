@@ -3876,8 +3876,13 @@ export async function playerTurnirAdd(userId: number, turnirId: number) {
         revalidatePath('/turnir'); // Обновляем страницу после добавления игрока
         return { success: true, message: 'Игрок успешно добавлен в турнир' };
     } catch (error) {
-        console.error('Ошибка при добавлении игрока в турнир:', error);
-        throw new Error(error.message || 'Не удалось добавить игрока в турнир');
+        if (error instanceof Error) {
+            console.error('Ошибка при добавлении игрока в турнир:', error.message);
+            throw new Error(error.message);
+        } else {
+            console.error('Неизвестная ошибка при добавлении игрока в турнир:', error);
+            throw new Error('Не удалось добавить игрока в турнир');
+        }
     }
 }
 
