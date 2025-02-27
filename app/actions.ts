@@ -3592,7 +3592,7 @@ export async function updateCurrencyRatesIfNeeded() {
         });
 
         // Проверяем, прошло ли 10 секунд с момента последнего обновления
-        if (courseValutaData && (new Date().getTime() - new Date(courseValutaData.updatedAt).getTime()) < 10000) {
+        if (courseValutaData && (new Date().getTime() - new Date(courseValutaData.updatedAt).getTime()) < 600000) {
             console.log('Данные обновлены недавно, пропускаем обновление.');
             return;
         }
@@ -3631,7 +3631,7 @@ export async function updateCurrencyRatesIfNeeded() {
     } catch (error) {
         console.error('Ошибка при обновлении курсов валют:', error);
     }
-}
+} // 600 - courseValut
 
 export async function getCourseValuta() {
     try {
@@ -3670,7 +3670,7 @@ export async function checkAndCloseOrderP2PTime() {
     } catch (error) {
         console.error('Ошибка в checkAndCloseOrderP2PTime:', error);
     }
-} // обновление по первой записи
+} // 1 час + p2p
 async function checkAndCloseOrderP2P() {
     const now = new Date();
     const expiredDeals = await prisma.orderP2P.findMany({
