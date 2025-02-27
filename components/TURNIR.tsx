@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from 'react';
 import { playerTurnirAdd, playerTurnirDelete, playerTurnirAdminUpdate, playerTurnirAdminDelete } from '@/app/actions';
 import { Button, Input } from "@/components/ui";
@@ -21,63 +22,70 @@ interface TurnirPlayer {
     userId: number;
     turnirId: number;
     startPointsPlayer: number;
+    orderP2PUser: User; // Используем правильное имя отношения
 }
 
 interface Props {
     className?: string;
     user: User;
     turnirs: Turnir[];
+    turnirPlayers: { turnirId: number; players: TurnirPlayer[] }[];
 }
 
-export const TURNIR: React.FC<Props> = ({ className, user, turnirs }) => {
+export const TURNIR: React.FC<Props> = ({ className, user, turnirs, turnirPlayers }) => {
     const [selectedTurnir, setSelectedTurnir] = useState<number | null>(null);
-    const [players, setPlayers] = useState<TurnirPlayer[]>([]);
+    const [message, setMessage] = useState<string | null>(null);
+
+    const showMessage = (msg: string) => {
+        setMessage(msg);
+        setTimeout(() => setMessage(null), 3000);
+    };
 
     const handleAddPlayer = async () => {
         if (!selectedTurnir) return;
 
         try {
             const response = await playerTurnirAdd(user.id, selectedTurnir);
-            alert(response.message);
-            // Обновите список игроков, если необходимо
+            showMessage(response.message);
         } catch (error) {
             console.error('Ошибка при добавлении игрока:', error);
-            alert('Не удалось добавить игрока');
+            showMessage('Не удалось добавить игрока');
         }
     };
 
     const handleDeletePlayer = async (playerId: number) => {
         try {
             const response = await playerTurnirDelete(user.id, playerId);
-            alert(response.message);
-            // Обновите список игроков, если необходимо
+            showMessage(response.message);
         } catch (error) {
             console.error('Ошибка при удалении игрока:', error);
-            alert('Не удалось удалить игрока');
+            showMessage('Не удалось удалить игрока');
         }
     };
 
     const handleAdminUpdatePlayer = async (playerId: number, newPoints: number, newTurnirId: number) => {
         try {
             const response = await playerTurnirAdminUpdate(playerId, newPoints, newTurnirId);
-            alert(response.message);
-            // Обновите список игроков, если необходимо
+            showMessage(response.message);
         } catch (error) {
             console.error('Ошибка при обновлении игрока:', error);
-            alert('Не удалось обновить игрока');
+            showMessage('Не удалось обновить игрока');
         }
     };
 
     const handleAdminDeletePlayer = async (playerId: number) => {
         try {
             const response = await playerTurnirAdminDelete(playerId);
-            alert(response.message);
-            // Обновите список игроков, если необходимо
+            showMessage(response.message);
         } catch (error) {
             console.error('Ошибка при удалении игрока администратором:', error);
-            alert('Не удалось удалить игрока');
+            showMessage('Не удалось удалить игрока');
         }
     };
+
+    const playersForSelectedTurnir = selectedTurnir
+        ? turnirPlayers.find(tp => tp.turnirId === selectedTurnir)?.players || []
+        : [];
 
     return (
         <div className={className}>
@@ -90,24 +98,35 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs }) => {
                     </option>
                 ))}
             </select>
-            <Button onClick={handleAddPlayer}>Добавить в турнир</Button>
+            <Button onClick={handleAddPlayer}>Турнир</Button>
 
-            {user.role === 'ADMIN' && (
-                <div>
-                    <h2>Управление игроками</h2>
-                    {players.map(player => (
-                        <div key={player.id}>
-                            <span>Игрок ID: {player.userId}</span>
+            {message && (
+                <div
+                    className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded shadow-lg z-50"
+                >
+                    {message}
+                </div>
+            )}
+
+            <h2>Игроки в турнире</h2>
+            {playersForSelectedTurnir.map(player => (
+                <div key={player.id}>
+                    <span>{player.orderP2PUser.fullName} (ID: {player.userId})</span>
+                    {user.role === 'ADMIN' && (
+                        <>
                             <Input
                                 type="number"
                                 value={player.startPointsPlayer}
                                 onChange={(e) => handleAdminUpdatePlayer(player.id, Number(e.target.value), player.turnirId)}
                             />
                             <Button onClick={() => handleAdminDeletePlayer(player.id)}>Удалить игрока</Button>
-                        </div>
-                    ))}
+                        </>
+                    )}
+                    {user.id === player.userId && (
+                        <Button onClick={() => handleDeletePlayer(player.id)}>Удалить себя из турнира</Button>
+                    )}
                 </div>
-            )}
+            ))}
         </div>
     );
 };

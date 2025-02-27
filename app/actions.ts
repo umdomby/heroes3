@@ -3824,6 +3824,8 @@ export async function deleteTurnir(id: number) {
     }
 }
 
+
+
 // добавление игрока к турниру
 export async function playerTurnirAdd(userId: number, turnirId: number) {
     try {
@@ -3832,6 +3834,14 @@ export async function playerTurnirAdd(userId: number, turnirId: number) {
 
         if (!user || !turnir) {
             throw new Error('Пользователь или турнир не найден');
+        }
+
+        const existingPlayer = await prisma.turnirPlayer.findFirst({
+            where: { userId, turnirId },
+        });
+
+        if (existingPlayer) {
+            throw new Error('Игрок уже добавлен в этот турнир');
         }
 
         await prisma.turnirPlayer.create({
@@ -3846,7 +3856,7 @@ export async function playerTurnirAdd(userId: number, turnirId: number) {
         return { success: true, message: 'Игрок успешно добавлен в турнир' };
     } catch (error) {
         console.error('Ошибка при добавлении игрока в турнир:', error);
-        throw new Error('Не удалось добавить игрока в турнир');
+        throw new Error(error.message || 'Не удалось добавить игрока в турнир');
     }
 }
 // удаление игрока к турниру
