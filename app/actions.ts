@@ -3949,3 +3949,34 @@ export async function playerTurnirAdminDelete(playerId: number) {
     }
 }
 
+export async function adminHeroesControl(globalStop: boolean, stopP2P: boolean, stopTransferPoints: boolean, stopGameUserCreate: boolean) {
+    const session = await getUserSession();
+
+    if (!session) {
+        throw new Error('Пользователь не найден');
+    }
+
+    const user = await prisma.user.findFirst({
+        where: { id: Number(session.id), role: 'ADMIN' }
+    });
+
+    if (!user) {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        await prisma.heroesControl.update({
+            where: { id: 1 },
+            data: {
+                globalStop,
+                stopP2P,
+                stopTransferPoints,
+                stopGameUserCreate
+            }
+        });
+    } catch (error) {
+        console.error('Ошибка при обновлении HeroesControl:', error);
+        throw new Error('Не удалось обновить данные');
+    }
+}
+

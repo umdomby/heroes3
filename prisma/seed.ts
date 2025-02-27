@@ -181,6 +181,17 @@ async function up() {
       updatedAt: new Date(), // Обновляем дату
     },
   });
+
+
+  await prisma.heroesControl.create({
+    data: {
+      id: 1, // Указываем id = 1 для создания новой записи
+      globalStop: false,
+      stopP2P: false,
+      stopTransferPoints: false,
+      stopGameUserCreate: false,
+    },
+  });
 }
 
 

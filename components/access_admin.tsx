@@ -163,6 +163,11 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                             ТУРНИРЫ
                                         </DropdownMenuRadioItem>
                                     </Link>
+                                    <Link href="/admin-control">
+                                        <DropdownMenuRadioItem value="admin-control" className="cursor-pointer">
+                                            CONTROL
+                                        </DropdownMenuRadioItem>
+                                    </Link>
                                 </DropdownMenuRadioGroup>
                             </DropdownMenuSubContent>
                         </DropdownMenuSub>
