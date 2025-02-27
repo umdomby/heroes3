@@ -3763,9 +3763,11 @@ async function checkAndCloseOrderP2P() {
 export async function createTurnir(data: { titleTurnir: string; textTurnirTurnir: string; startPointsTurnir: number }) {
     const currentUser = await getUserSession();
 
+
     if (!currentUser || currentUser.role !== 'ADMIN') {
         throw new Error('У вас нет прав для выполнения этой операции');
     }
+
 
     try {
         const newTurnir = await prisma.turnir.create({

@@ -1,13 +1,15 @@
 "use client";
-import React, {useState} from 'react';
-import {createTurnir, updateTurnir, deleteTurnir} from '@/app/actions';
-import {Button, Input} from "@/components/ui";
+import React, { useState } from 'react';
+import { createTurnir, updateTurnir, deleteTurnir } from '@/app/actions';
+import { Button, Input } from "@/components/ui";
 
 interface Turnir {
     id: number;
     titleTurnir: string;
     textTurnirTurnir: string;
     startPointsTurnir: number;
+    statusTurnir: string; // Assuming StatusTurnir is a string enum
+    TurnirBool: boolean;
 }
 
 interface User {
@@ -22,11 +24,12 @@ interface Props {
     turnirs: Turnir[];
 }
 
-export const TURNIR_ADMIN: React.FC<Props> = ({className, user, turnirs: initialTurnirs}) => {
+export const TURNIR_ADMIN: React.FC<Props> = ({ className, user, turnirs: initialTurnirs }) => {
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
     const [startPoints, setStartPoints] = useState(0);
     const [turnirs, setTurnirs] = useState<Turnir[]>(initialTurnirs);
+    const [editTurnir, setEditTurnir] = useState<Partial<Turnir> | null>(null);
 
     const handleCreate = async () => {
         try {
@@ -36,6 +39,9 @@ export const TURNIR_ADMIN: React.FC<Props> = ({className, user, turnirs: initial
                 startPointsTurnir: startPoints
             });
             setTurnirs([...turnirs, newTurnir]);
+            setTitle('');
+            setText('');
+            setStartPoints(0);
             alert('Турнир успешно создан');
         } catch (error) {
             console.error('Ошибка при создании турнира:', error);
@@ -43,10 +49,13 @@ export const TURNIR_ADMIN: React.FC<Props> = ({className, user, turnirs: initial
         }
     };
 
-    const handleUpdate = async (id: number, updatedData: Partial<Turnir>) => {
+    const handleUpdate = async () => {
+        if (!editTurnir || !editTurnir.id) return;
+
         try {
-            const updatedTurnir = await updateTurnir(id, updatedData);
-            setTurnirs(turnirs.map(t => (t.id === id ? updatedTurnir : t)));
+            const updatedTurnir = await updateTurnir(editTurnir.id, editTurnir);
+            setTurnirs(turnirs.map(t => (t.id === editTurnir.id ? updatedTurnir : t)));
+            setEditTurnir(null);
             alert('Турнир успешно обновлен');
         } catch (error) {
             console.error('Ошибка при обновлении турнира:', error);
@@ -55,6 +64,9 @@ export const TURNIR_ADMIN: React.FC<Props> = ({className, user, turnirs: initial
     };
 
     const handleDelete = async (id: number) => {
+        const confirmed = window.confirm('Вы уверены, что хотите удалить этот турнир?');
+        if (!confirmed) return;
+
         try {
             await deleteTurnir(id);
             setTurnirs(turnirs.filter(t => t.id !== id));
@@ -68,14 +80,10 @@ export const TURNIR_ADMIN: React.FC<Props> = ({className, user, turnirs: initial
     return (
         <div className={className}>
             <h2>Создать турнир</h2>
-            <div><Input type="text" placeholder="Название турнира" value={title}
-                        onChange={(e) => setTitle(e.target.value)}/></div>
-            <div><Input type="text" placeholder="Описание турнира" value={text}
-                        onChange={(e) => setText(e.target.value)}/></div>
-            <div><Input type="number" placeholder="Начальные очки" value={startPoints}
-                        onChange={(e) => setStartPoints(Number(e.target.value))}/></div>
+            <div><Input type="text" placeholder="Название турнира" value={title} onChange={(e) => setTitle(e.target.value)} /></div>
+            <div><Input type="text" placeholder="Описание турнира" value={text} onChange={(e) => setText(e.target.value)} /></div>
+            <div><Input type="number" placeholder="Начальные очки" value={startPoints} onChange={(e) => setStartPoints(Number(e.target.value))} /></div>
             <div><Button onClick={handleCreate}>Создать</Button></div>
-
 
             <h2>Существующие турниры</h2>
             {turnirs.length === 0 ? (
@@ -87,26 +95,47 @@ export const TURNIR_ADMIN: React.FC<Props> = ({className, user, turnirs: initial
                             <div>
                                 <Input
                                     type="text"
-                                    value={turnir.titleTurnir}
-                                    onChange={(e) => handleUpdate(turnir.id, {titleTurnir: e.target.value})}
+                                    value={editTurnir?.id === turnir.id ? editTurnir.titleTurnir : turnir.titleTurnir}
+                                    onChange={(e) => setEditTurnir({ ...turnir, titleTurnir: e.target.value })}
                                 />
                             </div>
                             <div>
                                 <Input
                                     type="text"
-                                    value={turnir.textTurnirTurnir}
-                                    onChange={(e) => handleUpdate(turnir.id, {textTurnirTurnir: e.target.value})}
+                                    value={editTurnir?.id === turnir.id ? editTurnir.textTurnirTurnir : turnir.textTurnirTurnir}
+                                    onChange={(e) => setEditTurnir({ ...turnir, textTurnirTurnir: e.target.value })}
                                 />
                             </div>
                             <div>
                                 <Input
                                     type="number"
-                                    value={turnir.startPointsTurnir}
-                                    onChange={(e) => handleUpdate(turnir.id, {startPointsTurnir: Number(e.target.value)})}
+                                    value={editTurnir?.id === turnir.id ? editTurnir.startPointsTurnir : turnir.startPointsTurnir}
+                                    onChange={(e) => setEditTurnir({ ...turnir, startPointsTurnir: Number(e.target.value) })}
                                 />
                             </div>
-
                             <div>
+                                <select
+                                    value={editTurnir?.id === turnir.id ? editTurnir.statusTurnir : turnir.statusTurnir}
+                                    onChange={(e) => setEditTurnir({ ...turnir, statusTurnir: e.target.value })}
+                                >
+                                    <option value="REGISTRATION">REGISTRATION</option>
+                                    <option value="REGISTRATION_OFF">REGISTRATION_OFF</option>
+                                    <option value="START">START</option>
+                                    <option value="CLOSED">CLOSED</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={editTurnir?.id === turnir.id ? editTurnir.TurnirBool : turnir.TurnirBool}
+                                        onChange={(e) => setEditTurnir({ ...turnir, TurnirBool: e.target.checked })}
+                                    />
+                                    TurnirBool
+                                </label>
+                            </div>
+                            <div>
+                                <Button onClick={handleUpdate}>Сохранить</Button>
                                 <Button onClick={() => handleDelete(turnir.id)}>Удалить</Button>
                             </div>
                         </div>
