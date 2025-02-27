@@ -3,6 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { playerTurnirAdd, playerTurnirDelete, playerTurnirAdminUpdate, playerTurnirAdminDelete, updateGetDataTurnirPage } from '@/app/actions';
 import { Button, Input } from "@/components/ui";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableRow,
+    TableHeader,
+    TableHead,
+} from "@/components/ui/table";
 
 interface User {
     id: number;
@@ -125,7 +133,7 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                 <option value="">Выберите турнир</option>
                 {turnirs.map(turnir => (
                     <option key={turnir.id} value={turnir.id}>
-                        {turnir.titleTurnir}
+                        {turnir.titleTurnir}, взнос: {turnir.startPointsTurnir}
                     </option>
                 ))}
             </select>
@@ -151,27 +159,24 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
             )}
 
             <h2>Игроки в турнире</h2>
-            {playersForSelectedTurnir.map(player => (
-                <div key={player.id}>
-                    <span>{player.orderP2PUser.fullName} (ID: {player.userId})</span>
-                    <span className="ml-2">
-                        {player.checkPointsPlayer ? 'Достаточно баллов' : 'Недостаточно баллов'}
-                    </span>
-                    {user.role === 'ADMIN' && (
-                        <>
-                            <Input
-                                type="number"
-                                value={editPlayer?.id === player.id ? editPlayer.newPoints : player.startPointsPlayer}
-                                onChange={(e) => setEditPlayer({ id: player.id, newPoints: Number(e.target.value), newTurnirId: player.turnirId })}
-                            />
-                            <Button onClick={handleAdminUpdatePlayer} disabled={!editPlayer || editPlayer.id !== player.id}>
-                                Сохранить
-                            </Button>
-                            <Button onClick={() => handleAdminDeletePlayer(player.id)}>Удалить игрока</Button>
-                        </>
-                    )}
-                </div>
-            ))}
+            <Table className="w-full">
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Наличие взноса</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {playersForSelectedTurnir.map(player => (
+                        <TableRow key={player.id}>
+                            <TableCell>{player.orderP2PUser.fullName}</TableCell>
+                            <TableCell>
+                                <span className={`inline-block w-4 h-4 rounded-full ${player.checkPointsPlayer ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
         </div>
     );
 };
