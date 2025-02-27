@@ -426,7 +426,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                             bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
                                         }`}
                                     >
-                                    № 2-{bet.id} {bet?.description}
+                                    № {bet.id}-2 {bet?.description}
                                     </span>
                                     <Table>
                                         <TableBody>

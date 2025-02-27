@@ -450,7 +450,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                             bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
                                         }`}
                                     >
-                                    № 3-{bet.id} {bet?.description}
+                                    № {bet.id}-3 {bet?.description}
                                     </span>
                                     <Table>
                                         <TableBody>
