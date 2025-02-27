@@ -40,6 +40,15 @@ export default async function TransferPointsPage({ searchParams }: { searchParam
         );
     }
 
+    const heroesControl = await prisma.heroesControl.findFirst();
+    if (heroesControl && heroesControl.stopTransferPoints) {
+        return (
+            <div className="text-center text-red-500">
+                <h1><strong>Transfer Points временно остановлен. Извините за неудобства.</strong></h1>
+            </div>
+        );
+    }
+
     const page = parseInt(resolvedSearchParams.page ?? '1', 10);
     const transfersPerPage = 100;
     const skip = (page - 1) * transfersPerPage;

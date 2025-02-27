@@ -25,6 +25,15 @@ export default async function OrderP2PPage() {
         return redirect('/');
     }
 
+    const heroesControl = await prisma.heroesControl.findFirst();
+    if (heroesControl && heroesControl.stopP2P) {
+        return (
+            <div className="text-center text-red-500">
+                <h1><strong>P2P Trade временно остановлен. Извините за неудобства.</strong></h1>
+            </div>
+        );
+    }
+
     if (user.telegram === null || user.bankDetails === null ) {
         return (
             <div className="text-center">
