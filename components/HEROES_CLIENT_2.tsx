@@ -49,6 +49,7 @@ interface Bet extends PrismaBet {
     suspendedBet: boolean;
     status: BetStatus;
     description: string | null; // Change this line
+    createdAt: Date;
 }
 
 interface Props {
@@ -425,7 +426,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                                             bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
                                         }`}
                                     >
-                                    № {bet.id}-2 {bet?.description}
+                                    № {bet.id}-2 <span className="text-green-800">{new Date(bet.createdAt).toLocaleString()}</span> {bet?.description}
                                     </span>
                                     <Table>
                                         <TableBody>

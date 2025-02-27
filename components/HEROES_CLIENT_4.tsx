@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import Link from "next/link";
+import {DateTime} from "next-auth/providers/kakao";
 
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
@@ -58,6 +59,7 @@ interface Bet extends PrismaBet4 {
     suspendedBet : boolean;
     status: BetStatus;
     description: string | null; // Change this line
+    createdAt: Date;
 }
 
 interface Props {
@@ -468,7 +470,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                             bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
                                         }`}
                                     >
-                                    № {bet.id}-4 {bet?.description}
+                                    № {bet.id}-4 <span className="text-green-800">{new Date(bet.createdAt).toLocaleString()}</span> {bet?.description}
                                     </span>
                                     <Table>
                                         <TableBody>
