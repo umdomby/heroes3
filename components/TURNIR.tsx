@@ -22,7 +22,7 @@ interface TurnirPlayer {
     userId: number;
     turnirId: number;
     startPointsPlayer: number;
-    orderP2PUser: User; // Используем правильное имя отношения
+    orderP2PUser: User;
 }
 
 interface Props {
@@ -53,9 +53,11 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs, turnirPlayer
         }
     };
 
-    const handleDeletePlayer = async (playerId: number) => {
+    const handleDeletePlayer = async () => {
+        if (!selectedTurnir) return;
+
         try {
-            const response = await playerTurnirDelete(user.id, playerId);
+            const response = await playerTurnirDelete(user.id, selectedTurnir);
             showMessage(response.message);
         } catch (error) {
             console.error('Ошибка при удалении игрока:', error);
@@ -87,6 +89,8 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs, turnirPlayer
         ? turnirPlayers.find(tp => tp.turnirId === selectedTurnir)?.players || []
         : [];
 
+    const isUserInTurnir = playersForSelectedTurnir.some(player => player.userId === user.id);
+
     return (
         <div className={className}>
             <h2>Турниры</h2>
@@ -98,13 +102,24 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs, turnirPlayer
                     </option>
                 ))}
             </select>
-            <Button onClick={handleAddPlayer}>Турнир</Button>
+            <Button onClick={handleAddPlayer} disabled={!selectedTurnir || isUserInTurnir}>
+                Добавить в турнир
+            </Button>
+            <Button onClick={handleDeletePlayer} disabled={!selectedTurnir || !isUserInTurnir}>
+                Удалить себя из турнира
+            </Button>
 
             {message && (
                 <div
                     className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded shadow-lg z-50"
                 >
                     {message}
+                </div>
+            )}
+
+            {isUserInTurnir && (
+                <div className="text-green-500 mt-2">
+                    Вы уже зарегистрированы в этом турнире.
                 </div>
             )}
 
@@ -121,9 +136,6 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs, turnirPlayer
                             />
                             <Button onClick={() => handleAdminDeletePlayer(player.id)}>Удалить игрока</Button>
                         </>
-                    )}
-                    {user.id === player.userId && (
-                        <Button onClick={() => handleDeletePlayer(player.id)}>Удалить себя из турнира</Button>
                     )}
                 </div>
             ))}

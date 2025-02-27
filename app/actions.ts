@@ -3852,7 +3852,6 @@ export async function playerTurnirAdd(userId: number, turnirId: number) {
                 playerBool: true,
             },
         });
-
         return { success: true, message: 'Игрок успешно добавлен в турнир' };
     } catch (error) {
         console.error('Ошибка при добавлении игрока в турнир:', error);
@@ -3875,7 +3874,8 @@ export async function playerTurnirDelete(userId: number, turnirId: number) {
         throw new Error('Не удалось удалить игрока из турнира');
     }
 }
-// редактирование игрока админом (изменения турнира и points)
+
+// Обновление данных игрока администратором
 export async function playerTurnirAdminUpdate(playerId: number, newPoints: number, newTurnirId: number) {
     try {
         await prisma.turnirPlayer.update({
@@ -3892,14 +3892,16 @@ export async function playerTurnirAdminUpdate(playerId: number, newPoints: numbe
         throw new Error('Не удалось обновить данные игрока');
     }
 }
-// удаление игрока из турнира админом
+
+// Удаление игрока из турнира администратором
 export async function playerTurnirAdminDelete(playerId: number) {
+
     try {
         await prisma.turnirPlayer.delete({
-            where: { id: playerId },
+            where: {id: playerId},
         });
 
-        return { success: true, message: 'Игрок успешно удален из турнира' };
+        return {success: true, message: 'Игрок успешно удален из турнира'};
     } catch (error) {
         console.error('Ошибка при удалении игрока из турнира администратором:', error);
         throw new Error('Не удалось удалить игрока из турнира');
