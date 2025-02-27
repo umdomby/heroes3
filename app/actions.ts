@@ -3840,6 +3840,21 @@ export async function updateGetDataTurnirPage() {
             where: { turnirId: turnir.id },
             include: { orderP2PUser: true }, // Используем правильное имя отношения
         });
+
+        // Проверяем и обновляем checkPointsPlayer для каждого игрока
+        await Promise.all(players.map(async (player) => {
+            const user = player.orderP2PUser;
+            const hasEnoughPoints = user.points >= player.startPointsPlayer;
+            const currentCheckPointsPlayer = player.checkPointsPlayer !== null;
+
+            if (currentCheckPointsPlayer !== hasEnoughPoints) {
+                await prisma.turnirPlayer.update({
+                    where: { id: player.id },
+                    data: { checkPointsPlayer: hasEnoughPoints ? player.startPointsPlayer : null },
+                });
+            }
+        }));
+
         return { turnirId: turnir.id, players };
     }));
 

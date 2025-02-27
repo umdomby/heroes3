@@ -22,6 +22,7 @@ interface TurnirPlayer {
     userId: number;
     turnirId: number;
     startPointsPlayer: number;
+    checkPointsPlayer: number | null;
     orderP2PUser: User;
 }
 
@@ -153,6 +154,9 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
             {playersForSelectedTurnir.map(player => (
                 <div key={player.id}>
                     <span>{player.orderP2PUser.fullName} (ID: {player.userId})</span>
+                    <span className="ml-2">
+                        {player.checkPointsPlayer ? 'Достаточно баллов' : 'Недостаточно баллов'}
+                    </span>
                     {user.role === 'ADMIN' && (
                         <>
                             <Input
