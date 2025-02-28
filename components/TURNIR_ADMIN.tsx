@@ -85,7 +85,7 @@ export const TURNIR_ADMIN: React.FC<Props> = ({ className, user, turnirs: initia
         }
     };
 
-    const isCreateDisabled = !title || !text || startPoints <= 0;
+    const isCreateDisabled = !title || !text;
 
     return (
         <div className={className}>
