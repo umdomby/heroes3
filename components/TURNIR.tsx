@@ -168,7 +168,6 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                 </div>
             )}
 
-
             <div><span className="text-green-500">{selectedTurnirText}</span></div>
             <div>Для регистрации {selectedTurnirPoints} points</div>
             <div className="text-center"><h2>Игроки в турнире: <span className="text-amber-500"><strong>{selectedTurnirTitle}</strong></span></h2></div>
