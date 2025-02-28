@@ -586,6 +586,7 @@ export const OrderP2PComponent: React.FC<Props> = ({
                         <span className="text-yellow-500"> RUS: {exchangeRates.RUS} </span>
                         <span className="text-emerald-500"> BTC: {exchangeRates.BTC} </span>
                         <span className="text-blue-500"> USTD: {exchangeRates.USTD} </span>
+                        <span className="text-red-500"> HEROES: 0.01 </span>
                     </div>
                 </div>
             )}</div>
