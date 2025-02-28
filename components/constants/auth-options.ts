@@ -218,35 +218,37 @@ export const authOptions: AuthOptions = {
         });
 
         if (referralEntry) {
-          // Если IP-адрес существует, увеличиваем баллы для пользователя, связанного с рефералом
           const referralPoints = 100; // Получаем количество баллов из переменной окружения или используем 100 по умолчанию
 
-          await prisma.user.update({
-            where: { id: referralEntry.referralUserId }, // Находим пользователя по ID
-            data: {
-              points: {
-                increment: referralPoints, // Увеличиваем баллы на указанное количество
+          await prisma.$transaction(async (prisma) => {
+            // Увеличиваем баллы для пользователя, связанного с рефералом
+            await prisma.user.update({
+              where: { id: referralEntry.referralUserId },
+              data: {
+                points: {
+                  increment: referralPoints,
+                },
               },
-            },
-          });
+            });
 
-          // Обновляем статус реферала отдельно
-          await prisma.referralUserIpAddress.update({
-            where: { id: referralEntry.id }, // Указываем уникальный идентификатор записи
-            data: {
-              referralStatus: true, // Устанавливаем referralStatus в true, чтобы отметить, что реферал подтвержден
-              referralPoints: referralPoints, // Сохраняем количество начисленных баллов
-            },
-          });
-
-          // Отнимаем баллы у пользователя с id = 1
-          await prisma.user.update({
-            where: { id: 1 }, // Находим пользователя с ID 1
-            data: {
-              points: {
-                decrement: referralPoints, // Уменьшаем баллы на то же количество
+            // Обновляем статус реферала
+            await prisma.referralUserIpAddress.update({
+              where: { id: referralEntry.id },
+              data: {
+                referralStatus: true,
+                referralPoints: referralPoints,
               },
-            },
+            });
+
+            // Отнимаем баллы у пользователя с id = 1
+            await prisma.user.update({
+              where: { id: 1 },
+              data: {
+                points: {
+                  decrement: referralPoints,
+                },
+              },
+            });
           });
         }
 
