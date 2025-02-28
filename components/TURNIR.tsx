@@ -148,7 +148,7 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                 ))}
             </select>
             <Button className="mx-3 h-7" onClick={handleAddPlayer} disabled={!selectedTurnir || isUserInTurnir}>
-                Добавить в турнир
+                В турнир
             </Button>
             <Button className="h-7" onClick={handleDeletePlayer} disabled={!selectedTurnir || !isUserInTurnir}>
                 Удалить себя из турнира
