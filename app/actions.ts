@@ -3594,6 +3594,17 @@ interface CourseValutaParams {
 }
 
 export async function setCourseValuta({ usdRate, eurRate, rubRate, belRate, btcRate, usdtRate }: CourseValutaParams) {
+
+    const courseValutaData = await prisma.courseValuta.findUnique({
+        where: { id: 1 }, // Проверяем только первую запись
+    });
+
+    // Проверяем, прошло ли 10 секунд с момента последнего обновления
+    if (courseValutaData && (new Date().getTime() - new Date(courseValutaData.updatedAt).getTime()) < 10000) {
+        console.log('Данные обновлены недавно, пропускаем обновление.');
+        return;
+    }
+
     await prisma.courseValuta.update({
         where: { id: 1 }, // Обновляем только первую запись
         data: {
