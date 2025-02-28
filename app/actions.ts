@@ -773,8 +773,8 @@ export async function globalDataPoints() {
             const currentGlobalData = await prisma.globalData.findUnique({
                 where: { id: 1 },
             });
-            // Проверяем, прошло ли 10 секунд с момента последнего обновления
-            if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 10000) {
+            // Проверяем, прошло ли 10м с момента последнего обновления
+            if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 600000) {
                 console.log('Данные обновлены недавно, пропускаем обновление.');
                 return;
             }
@@ -896,6 +896,31 @@ export async function globalDataPoints() {
             const totalBetUser1 = result._sum.betUser1 || 0;
             const totalBetUser2 = result._sum.betUser2 || 0;
 
+            // Суммируем globalDataBetFund в BetCLOSED
+            const betClosedSum = await prisma.betCLOSED.aggregate({
+                _sum: {
+                    globalDataBetFund: true,
+                },
+            });
+            // Суммируем globalDataBetFund в BetCLOSED3
+            const betClosed3Sum = await prisma.betCLOSED3.aggregate({
+                _sum: {
+                    globalDataBetFund: true,
+                },
+            });
+            // Суммируем globalDataBetFund в BetCLOSED4
+            const betClosed4Sum = await prisma.betCLOSED4.aggregate({
+                _sum: {
+                    globalDataBetFund: true,
+                },
+            });
+            // Вычисляем общую сумму
+            const totalGlobalDataBetFund =
+                (betClosedSum._sum.globalDataBetFund || 0) +
+                (betClosed3Sum._sum.globalDataBetFund || 0) +
+                (betClosed4Sum._sum.globalDataBetFund || 0);
+
+
             // Обновляем запись с id = 1
             await prisma.globalData.update({
                 where: { id: 1 },
@@ -922,6 +947,7 @@ export async function globalDataPoints() {
                     margin: marginSum,
                     openBetsPoints: openBetsPointsSum,
                     gameUserBetOpen: totalBetUser1 + totalBetUser2,
+                    betFund: totalGlobalDataBetFund,
                 },
             });
         });

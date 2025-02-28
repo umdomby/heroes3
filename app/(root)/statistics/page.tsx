@@ -26,6 +26,7 @@ interface GlobalData {
     gameUserBetOpen: number | null;
     p2pPoints: number | null;
 
+
 }
 
 async function fetchGlobalData(page: number): Promise<GlobalData[]> {
@@ -81,10 +82,14 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                 </TableHeader>
                 <TableBody>
                     {globalDataList.map((globalData, index) => {
+
+                        const initialFund = 1000000;
+                        const adjustedFund = initialFund + (globalData.betFund ?? 0);
+
                         const totalSum =
                             (globalData.openBetsPoints ?? 0) +
                             (globalData.usersPoints ?? 0) +
-                            (globalData.betFund ?? 0) +
+                            (adjustedFund ?? 0) +
                             (globalData.margin ?? 0) +
                             (globalData.gameUserBetOpen ?? 0) +
                             (globalData.p2pPoints ?? 0);
@@ -104,7 +109,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{globalData.p2pPoints ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.gameUserBetOpen ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{globalData.betFund ?? 'N/A'}</TableCell>
+                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{adjustedFund}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.margin ?? 'N/A'}</TableCell>
                                 <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(totalSum * 100) / 100}</TableCell>
                             </TableRow>
