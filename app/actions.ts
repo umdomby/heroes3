@@ -774,7 +774,7 @@ export async function globalDataPoints() {
                 where: { id: 1 },
             });
             // Проверяем, прошло ли 10м с момента последнего обновления
-            if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 600000) {
+            if (currentGlobalData && (new Date().getTime() - new Date(currentGlobalData.updatedAt).getTime()) < 10000) {
                 console.log('Данные обновлены недавно, пропускаем обновление.');
                 return;
             }
