@@ -81,40 +81,38 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {globalDataList.map((globalData, index) => {
+                    {globalDataList
+                        .slice(0, -1) // Исключаем последнюю запись
+                        .map((globalData, index) => {
+                            const initialFund = 1000000;
+                            const adjustedFund = initialFund + (globalData.betFund ?? 0);
 
-                        const initialFund = 1000000;
-                        const adjustedFund = initialFund + (globalData.betFund ?? 0);
+                            const totalSum =
+                                (globalData.openBetsPoints ?? 0) +
+                                (globalData.usersPoints ?? 0) +
+                                (adjustedFund ?? 0) +
+                                (globalData.margin ?? 0) +
+                                (globalData.gameUserBetOpen ?? 0) +
+                                (globalData.p2pPoints ?? 0);
 
-                        const totalSum =
-                            (globalData.openBetsPoints ?? 0) +
-                            (globalData.usersPoints ?? 0) +
-                            (adjustedFund ?? 0) +
-                            (globalData.margin ?? 0) +
-                            (globalData.gameUserBetOpen ?? 0) +
-                            (globalData.p2pPoints ?? 0);
+                            const rowStyle = { transition: 'background-color 0.3s', cursor: 'pointer' };
 
-                        const isFirstRecord = index === 0;
-                        const rowStyle = isFirstRecord
-                            ? { backgroundColor: '#4c4c4c', transition: 'background-color 0.3s', cursor: 'pointer' }
-                            : { transition: 'background-color 0.3s', cursor: 'pointer' };
-
-                        return (
-                            <TableRow key={globalData.id} style={rowStyle}>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>{new Date(globalData.updatedAt).toLocaleString('en-US', { hour12: false })}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>11M</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{globalData.reg ?? 'N/A'}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{globalData.ref ?? 'N/A'}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#718dff' }}>{globalData.openBetsPoints ?? 'N/A'}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{globalData.p2pPoints ?? 'N/A'}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.gameUserBetOpen ?? 'N/A'}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{adjustedFund}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.margin ?? 'N/A'}</TableCell>
-                                <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(totalSum * 100) / 100}</TableCell>
-                            </TableRow>
-                        );
-                    })}
+                            return (
+                                <TableRow key={globalData.id} style={rowStyle}>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>{new Date(globalData.updatedAt).toLocaleString('en-US', { hour12: false })}</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>11M</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{globalData.reg ?? 'N/A'}</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{globalData.ref ?? 'N/A'}</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#718dff' }}>{globalData.openBetsPoints ?? 'N/A'}</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{globalData.p2pPoints ?? 'N/A'}</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.gameUserBetOpen ?? 'N/A'}</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{adjustedFund}</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.margin ?? 'N/A'}</TableCell>
+                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(totalSum * 100) / 100}</TableCell>
+                                </TableRow>
+                            );
+                        })}
                 </TableBody>
             </Table>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
