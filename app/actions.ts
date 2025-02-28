@@ -3843,13 +3843,21 @@ export async function updateGetDataTurnirPage() {
             include: { orderP2PUser: true }, // Используем правильное имя отношения
         });
 
-        // Проверяем и обновляем checkPointsPlayer для каждого игрока
+        // Проверяем и обновляем startPointsPlayer и checkPointsPlayer для каждого игрока
         await Promise.all(players.map(async (player) => {
             const user = player.orderP2PUser;
-            const hasEnoughPoints = user.points >= player.startPointsPlayer;
-            const currentCheckPointsPlayer = player.checkPointsPlayer !== null;
+            const hasEnoughPoints = user.points >= turnir.startPointsTurnir;
 
-            if (currentCheckPointsPlayer !== hasEnoughPoints) {
+            // Обновляем startPointsPlayer, если он отличается от текущего startPointsTurnir
+            if (player.startPointsPlayer !== turnir.startPointsTurnir) {
+                await prisma.turnirPlayer.update({
+                    where: { id: player.id },
+                    data: { startPointsPlayer: turnir.startPointsTurnir },
+                });
+            }
+
+            // Обновляем checkPointsPlayer на основе наличия достаточного количества очков
+            if (player.checkPointsPlayer !== (hasEnoughPoints ? player.startPointsPlayer : null)) {
                 await prisma.turnirPlayer.update({
                     where: { id: player.id },
                     data: { checkPointsPlayer: hasEnoughPoints ? player.startPointsPlayer : null },
