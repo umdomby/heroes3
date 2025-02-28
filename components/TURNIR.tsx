@@ -132,7 +132,8 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
 
     return (
         <div className={className}>
-            <h2 className="mb-5">Турниры. При регистрации <span className="text-amber-500">points</span> <span className="text-red-500">{user.points}</span> не списываются.
+            <div><span className="text-amber-500">Points</span> <span className="text-red-500">{user.points}</span></div>
+            <h2 className="mb-5">Турниры. При регистрации <span className="text-amber-500">points</span> не списываются.
             </h2>
             <select onChange={(e) => setSelectedTurnir(Number(e.target.value))}>
                 <option value="">Выберите турнир</option>
