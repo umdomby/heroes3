@@ -3865,7 +3865,13 @@ export async function updateGetDataTurnirPage() {
             }
         }));
 
-        return { turnirId: turnir.id, players };
+        // Повторно запрашиваем обновленные данные
+        const updatedPlayers = await prisma.turnirPlayer.findMany({
+            where: { turnirId: turnir.id },
+            include: { orderP2PUser: true },
+        });
+
+        return { turnirId: turnir.id, players: updatedPlayers };
     }));
 
     return { turnirs, turnirPlayers };
