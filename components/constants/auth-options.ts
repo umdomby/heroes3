@@ -219,7 +219,7 @@ export const authOptions: AuthOptions = {
 
         if (referralEntry) {
           // Если IP-адрес существует, увеличиваем баллы для пользователя, связанного с рефералом
-          const referralPoints = 10; // Получаем количество баллов из переменной окружения или используем 10 по умолчанию
+          const referralPoints = 100; // Получаем количество баллов из переменной окружения или используем 100 по умолчанию
 
           await prisma.user.update({
             where: { id: referralEntry.referralUserId }, // Находим пользователя по ID
@@ -311,8 +311,8 @@ export const authOptions: AuthOptions = {
           }
         }
 
-        // Если IP уже был в истории входов, points = 0, иначе points = 1000
-        const points = ipExists ? 0 : 15;
+        // Если IP уже был в истории входов, points = 0, иначе points = 150
+        const points = ipExists ? 0 : 150;
         console.log('IP уже был в истории входов:', ipExists);
         console.log('Устанавливаем points:', points);
 
