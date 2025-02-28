@@ -44,7 +44,7 @@ interface OrderP2PWithUser extends OrderP2P {
     createdAt: Date;
     updatedAt: Date;
     orderP2PStatus: OrderP2PStatus;
-    orderBankDetails: Prisma.JsonValue;
+    orderBankPay: Prisma.JsonValue;
 }
 
 interface Props {
@@ -204,20 +204,25 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                                     </div>
 
                                     <div className="flex flex-col items-center border p-4" style={{flex: '0 0 45%'}}>
-                                        {order.orderBankDetails && Array.isArray(order.orderBankDetails) ? (
-                                            order.orderBankDetails.map((detail, index) => {
-                                                if (isOrderBankDetail(detail)) {
-                                                    return (
-                                                        <div key={index} className="mb-2">
-                                                            <h3 className="font-bold">{order.orderP2PPrice} {detail.name}</h3>
-                                                            <p>Price one Point = {detail.price}</p>
-                                                            <p>Details: {detail.details}</p>
-                                                            <p>Description: {detail.description}</p>
-                                                        </div>
-                                                    );
+                                        {order.orderBankPay && typeof order.orderBankPay === 'string' ? (
+                                            (() => {
+                                                try {
+                                                    const detail = JSON.parse(order.orderBankPay);
+                                                    if (isOrderBankDetail(detail)) {
+                                                        return (
+                                                            <div className="mb-2">
+                                                                <h3 className="font-bold">{order.orderP2PPrice} {detail.name}</h3>
+                                                                <p>Price one Point = {detail.price}</p>
+                                                                <p className="text-green-500"><strong>{detail.details}</strong>  </p>
+                                                                <p>{detail.description}</p>
+                                                            </div>
+                                                        );
+                                                    }
+                                                } catch (error) {
+                                                    console.error('Error parsing orderBankPay:', error);
                                                 }
-                                                return null;
-                                            })
+                                                return <p>Invalid bank details format</p>;
+                                            })()
                                         ) : (
                                             <p>Нет доступных банковских реквизитов</p>
                                         )}
