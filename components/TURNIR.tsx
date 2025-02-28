@@ -168,9 +168,11 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                 </div>
             )}
 
-            <h2>Игроки в турнире: <span className="text-amber-500"><strong>{selectedTurnirTitle}</strong></span></h2>
+
             <div><span className="text-green-500">{selectedTurnirText}</span></div>
             <div>Для регистрации {selectedTurnirPoints} points</div>
+            <div className="text-center"><h2>Игроки в турнире: <span className="text-amber-500"><strong>{selectedTurnirTitle}</strong></span></h2></div>
+
             <Table className="w-full">
                 <TableHeader>
                     <TableRow>
@@ -185,8 +187,7 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                         <TableRow key={player.id}>
                             <TableCell>{player.orderP2PUser.fullName}</TableCell>
                             <TableCell>
-                                <span
-                                    className={`inline-block w-4 h-4 rounded-full ${player.checkPointsPlayer ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                                <span className={`inline-block w-4 h-4 rounded-full ${player.checkPointsPlayer ? 'bg-green-500' : 'bg-red-500'}`}></span>
                             </TableCell>
                             <TableCell>{new Date(player.createdAt).toLocaleString()}</TableCell>
                             {user.role === 'ADMIN' && (
