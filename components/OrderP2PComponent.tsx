@@ -20,7 +20,7 @@ import {
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import Link from "next/link";
-import {updateCurrencyRatesIfNeeded} from "@/app/actions";
+import axios from 'axios';
 
 interface OrderP2PWithUser extends OrderP2P {
     orderP2PUser1: {
@@ -550,9 +550,59 @@ export const OrderP2PComponent: React.FC<Props> = ({
         });
     };
 
-    const updateRatesI = async () => {
-        await updateCurrencyRatesIfNeeded();
-    }
+    const [currentRates, setCurrentRates] = useState(exchangeRates);
+
+    import React, { useState, useEffect } from 'react';
+    import axios from 'axios';
+
+    const OrderP2PComponent = ({ exchangeRates }) => {
+        const [currentRates, setCurrentRates] = useState(exchangeRates);
+
+        const fetchCurrentRates = async () => {
+            try {
+                const response = await axios.get('https://www.nbrb.by/api/exrates/rates?periodicity=0');
+                const rates = response.data;
+
+                const usdToBynRate = rates.find((rate) => rate.Cur_Abbreviation === 'USD')?.Cur_OfficialRate || 1;
+                const eurToBynRate = rates.find((rate) => rate.Cur_Abbreviation === 'EUR')?.Cur_OfficialRate || 0;
+                const rubToBynRate = rates.find((rate) => rate.Cur_Abbreviation === 'RUB')?.Cur_OfficialRate || 0;
+
+                const usdRate = usdToBynRate;
+                const eurRate = eurToBynRate / usdToBynRate;
+                const rubRate = rubToBynRate / usdToBynRate;
+                const belRate = 1 / usdToBynRate;
+
+                const btcRate = await fetchBitcoinRate();
+
+                setCurrentRates({
+                    USD: Math.floor(usdRate * 100) / 100,
+                    EUR: Math.floor(eurRate * 100) / 100,
+                    RUS: Math.floor(rubRate * 100) / 100,
+                    BEL: Math.floor(belRate * 100) / 100,
+                    BTC: btcRate,
+                    USTD: Math.floor(usdToBynRate * 100) / 100,
+                    updatedAt: new Date(),
+                });
+            } catch (error) {
+                console.error('Ошибка при обновлении курсов валют:', error);
+            }
+        };
+
+        const fetchBitcoinRate = async () => {
+            try {
+                const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+                    params: {
+                        ids: 'bitcoin',
+                        vs_currencies: 'usd',
+                    },
+                });
+                return response.data.bitcoin.usd;
+            } catch (error) {
+                console.error('Ошибка при получении курса биткойна:', error);
+                return 0;
+            }
+        };
+
     return (
         <div className={className}>
             {successMessage && (
@@ -584,21 +634,29 @@ export const OrderP2PComponent: React.FC<Props> = ({
             <div className="text-center"> {exchangeRates && (
                 <div className="marquee">
                     <div className="text-green-500">1 USD</div>
-                    <div>
-                        <span className="text-green-500">USD: {exchangeRates.USD} </span>
-                        <span className="text-fuchsia-500"> EUR: {exchangeRates.EUR} </span>
-                        <span className="text-amber-500"> BEL: {exchangeRates.BEL} </span>
-                        <span className="text-yellow-500"> RUS: {exchangeRates.RUS} </span>
-                        <span className="text-emerald-500"> BTC: {exchangeRates.BTC} </span>
-                        <span className="text-blue-500"> USTD: {exchangeRates.USTD} </span>
-                        <span className="text-red-500"><strong>HEROES: 0.01 </strong></span>
-                    </div>
-                    <div className="text-gray-400">{new Date(exchangeRates.updatedAt).toLocaleString()}</div>
                     <div className="text-gray-400">
-                        {new Date(exchangeRates.updatedAt).toLocaleString()}
-                        <button onClick={updateRatesI} className="ml-2 bg-blue-500 text-white rounded h-6 px-2">
+                        {new Date(currentRates.updatedAt).toLocaleString()}
+                        <button onClick={fetchCurrentRates} className="ml-2 bg-blue-500 text-white rounded h-6 px-2">
                             обновить курсы
                         </button>
+                    </div>
+                    <div>
+                        <div>
+                            <span className="text-green-500">USD: {currentRates.USD} </span>
+                            <span className="text-fuchsia-500">EUR: {currentRates.EUR} </span>
+                            <span className="text-amber-500">BEL: {currentRates.BEL} </span>
+                            <span className="text-yellow-500">RUS: {currentRates.RUS} </span>
+                            <span className="text-emerald-500">BTC: {currentRates.BTC} </span>
+                            <span className="text-blue-500">USTD: {currentRates.USTD} </span>
+                            <span className="text-red-500"><strong>HEROES: 0.01 </strong></span>
+
+                        </div>
+                        <div className="text-gray-400">
+                            <button onClick={fetchCurrentRates}
+                                    className="ml-2 bg-blue-500 text-white rounded h-6 px-2">
+                                обновить курсы
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -614,7 +672,7 @@ export const OrderP2PComponent: React.FC<Props> = ({
                     </Link>
                 </div>
                 <div>
-                    <Link href="/order-p2p-closed">
+                <Link href="/order-p2p-closed">
                         <span className="text-blue-500 hover:underline">
                             P2P Closed
                         </span>
