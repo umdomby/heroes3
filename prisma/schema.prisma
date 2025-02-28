@@ -120,6 +120,7 @@ model OrderP2P {
   orderP2PCheckUser1 Boolean? // подтверждение сделки User1
   orderP2PCheckUser2 Boolean? // подтверждение сделки User2
   orderBankPay       Json? // реквизиты для оплаты
+  isProcessing       Boolean        @default(false)
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 }
@@ -299,6 +300,7 @@ model GlobalData {
   margin          Float?   @default(0) // сумма маржи model sum BetClosed, BetClosed3 and BetClosed4 - margin
   openBetsPoints  Float?   @default(0) // сумма ставок, которые еще не закрылись Bet-totalBetAmount, Bet3-totalBetAmount and Bet4 - totalBetAmount
   gameUserBetOpen Float?   @default(0) // ставки игроками на свои игры
+  isProcessing    Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -398,25 +400,27 @@ model Bet {
   winnerId        Int? // кто победил PLAYER1 или PLAYER2
   suspendedBet    Boolean          @default(false)
   description     String?
+  isProcessing    Boolean          @default(false)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
 // export async function placeBet actions.ts
 model BetParticipant {
-  id        Int          @id @default(autoincrement())
-  betId     Int
-  bet       Bet          @relation(fields: [betId], references: [id])
-  userId    Int // пользователь который ставит ставку
-  user      User         @relation(fields: [userId], references: [id])
-  player    PlayerChoice // выбранный игрок в событии
-  amount    Float // ставка пользователя
-  odds      Float // Коэффициент ставки
-  profit    Float // Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
-  overlap   Float // не используем
-  margin    Float // в placeBet = 0
-  isCovered IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
-  isWinner  Boolean      @default(false) // Победила ли ставка
-  createdAt DateTime     @default(now())
+  id           Int          @id @default(autoincrement())
+  betId        Int
+  bet          Bet          @relation(fields: [betId], references: [id])
+  userId       Int // пользователь который ставит ставку
+  user         User         @relation(fields: [userId], references: [id])
+  player       PlayerChoice // выбранный игрок в событии
+  amount       Float // ставка пользователя
+  odds         Float // Коэффициент ставки
+  profit       Float // Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
+  overlap      Float // не используем
+  margin       Float // в placeBet = 0
+  isCovered    IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
+  isProcessing Boolean      @default(false)
+  isWinner     Boolean      @default(false) // Победила ли ставка
+  createdAt    DateTime     @default(now())
 }
 // закрытые ставки, после закрытия ставки model Bet переносится в model BetCLOSED
 model BetCLOSED {
@@ -511,25 +515,27 @@ model Bet3 {
   winnerId        Int? // кто победил PLAYER1 или PLAYER2 или PLAYER3
   suspendedBet    Boolean           @default(false)
   description     String?
+  isProcessing    Boolean           @default(false)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
 // export async function placeBet actions.ts
 model BetParticipant3 {
-  id        Int          @id @default(autoincrement())
-  betId     Int
-  bet       Bet3         @relation(fields: [betId], references: [id]) // Связь с Bet3
-  userId    Int // пользователь который ставит ставку
-  user      User         @relation(fields: [userId], references: [id])
-  player    PlayerChoice // выбранный игрок в событии
-  amount    Float // ставка пользователя
-  odds      Float // Коэффициент ставки
-  profit    Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
-  overlap   Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
-  margin    Float // в placeBet = 0
-  isWinner  Boolean      @default(false) // Победила ли ставка
-  isCovered IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
-  createdAt DateTime     @default(now())
+  id           Int          @id @default(autoincrement())
+  betId        Int
+  bet          Bet3         @relation(fields: [betId], references: [id]) // Связь с Bet3
+  userId       Int // пользователь который ставит ставку
+  user         User         @relation(fields: [userId], references: [id])
+  player       PlayerChoice // выбранный игрок в событии
+  amount       Float // ставка пользователя
+  odds         Float // Коэффициент ставки
+  profit       Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
+  overlap      Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
+  margin       Float // в placeBet = 0
+  isWinner     Boolean      @default(false) // Победила ли ставка
+  isProcessing Boolean      @default(false)
+  isCovered    IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
+  createdAt    DateTime     @default(now())
 }
 // закрытые ставки, после закрытия ставки model Bet3 переносится в model BetCLOSED3
 model BetCLOSED3 {
@@ -638,25 +644,27 @@ model Bet4 {
   winnerId        Int? // кто победил PLAYER1 или PLAYER2 или PLAYER3
   suspendedBet    Boolean           @default(false)
   description     String?
+  isProcessing    Boolean           @default(false)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
 // export async function placeBet actions.ts
 model BetParticipant4 {
-  id        Int          @id @default(autoincrement())
-  bet       Bet4         @relation(fields: [betId], references: [id])
-  betId     Int
-  userId    Int // пользователь который ставит ставку
-  user      User         @relation(fields: [userId], references: [id])
-  player    PlayerChoice // выбранный игрок в событии
-  amount    Float // ставка пользователя
-  odds      Float // Коэффициент ставки
-  profit    Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
-  overlap   Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
-  margin    Float // в placeBet = 0
-  isWinner  Boolean      @default(false) // Победила ли ставка
-  isCovered IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
-  createdAt DateTime     @default(now())
+  id           Int          @id @default(autoincrement())
+  bet          Bet4         @relation(fields: [betId], references: [id])
+  betId        Int
+  userId       Int // пользователь который ставит ставку
+  user         User         @relation(fields: [userId], references: [id])
+  player       PlayerChoice // выбранный игрок в событии
+  amount       Float // ставка пользователя
+  odds         Float // Коэффициент ставки
+  profit       Float // Показывает пользователю потенциальную выигрышную сумму. Сюда не входит маржа. Сюда не входит ставка пользователя, тут чистый потенциальный выигрыш.
+  overlap      Float // на какую сумму перекрыто, именно с этого поля ничисляются выигранные суммы.
+  margin       Float // в placeBet = 0
+  isWinner     Boolean      @default(false) // Победила ли ставка
+  isProcessing Boolean      @default(false)
+  isCovered    IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
+  createdAt    DateTime     @default(now())
 }
 // закрытые ставки, после закрытия ставки model Bet4 переносится в model BetCLOSED4
 model BetCLOSED4 {

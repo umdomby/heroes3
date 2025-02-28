@@ -3706,69 +3706,32 @@ async function checkAndCloseOrderP2P() {
                 { orderP2PStatus: 'OPEN' }
             ],
             updatedAt: {
-                lt: new Date(now.getTime() - 3600000), // 300000 - 5 минут назад, 1 час 3600000
+                lt: new Date(now.getTime() - 3600000), // 1 час назад
             },
             NOT: {
                 orderP2PUser1: {
                     id: 1, // Предполагаем, что поле id существует в модели User
                 },
             },
+            isProcessing: false, // Только не обрабатываемые записи
         },
     });
 
     for (const order of expiredDeals) {
-
-        if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'OPEN') {
-            await prisma.$transaction(async (prisma) => {
-                await prisma.orderP2P.update({
-                    where: { id: order.id },
-                    data: {
-                        orderP2PStatus: 'RETURN',
-                    },
-                });
-                await prisma.user.update({
-                    where: { id: order.orderP2PUser1Id },
-                    data: {
-                        points: { increment: order.orderP2PPoints },
-                    },
-                });
+        await prisma.$transaction(async (prisma) => {
+            // Устанавливаем флаг обработки
+            await prisma.orderP2P.update({
+                where: { id: order.id },
+                data: { isProcessing: true },
             });
-        }
 
-        if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'PENDING') {
-            await prisma.$transaction(async (prisma) => {
-                await prisma.orderP2P.update({
-                    where: { id: order.id },
-                    data: {
-                        orderP2PStatus: 'RETURN',
-                    },
-                });
-
-                await prisma.user.update({
-                    where: { id: order.orderP2PUser1Id },
-                    data: {
-                        points: { increment: order.orderP2PPoints },
-                    },
-                });
+            // Проверяем и обновляем статус
+            const currentOrder = await prisma.orderP2P.findUnique({
+                where: { id: order.id },
             });
-        }
 
-        if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'OPEN') {
-            await prisma.$transaction(async (prisma) => {
-                await prisma.orderP2P.update({
-                    where: { id: order.id },
-                    data: {
-                        orderP2PStatus: 'RETURN',
-                    },
-                });
-            });
-        }
-
-
-        if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'PENDING') {
-            await prisma.$transaction(async (prisma) => {
-
-                if (order.orderP2PUser2Id !== null) {
+            if (currentOrder && currentOrder.orderP2PStatus === order.orderP2PStatus) {
+                if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'OPEN') {
                     await prisma.orderP2P.update({
                         where: { id: order.id },
                         data: {
@@ -3776,14 +3739,61 @@ async function checkAndCloseOrderP2P() {
                         },
                     });
                     await prisma.user.update({
-                        where: { id: order.orderP2PUser2Id },
+                        where: { id: order.orderP2PUser1Id },
                         data: {
                             points: { increment: order.orderP2PPoints },
                         },
                     });
                 }
+
+                if (order.orderP2PBuySell === "SELL" && order.orderP2PStatus === 'PENDING') {
+                    await prisma.orderP2P.update({
+                        where: { id: order.id },
+                        data: {
+                            orderP2PStatus: 'RETURN',
+                        },
+                    });
+                    await prisma.user.update({
+                        where: { id: order.orderP2PUser1Id },
+                        data: {
+                            points: { increment: order.orderP2PPoints },
+                        },
+                    });
+                }
+
+                if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'OPEN') {
+                    await prisma.orderP2P.update({
+                        where: { id: order.id },
+                        data: {
+                            orderP2PStatus: 'RETURN',
+                        },
+                    });
+                }
+
+                if (order.orderP2PBuySell === "BUY" && order.orderP2PStatus === 'PENDING') {
+                    if (order.orderP2PUser2Id !== null) {
+                        await prisma.orderP2P.update({
+                            where: { id: order.id },
+                            data: {
+                                orderP2PStatus: 'RETURN',
+                            },
+                        });
+                        await prisma.user.update({
+                            where: { id: order.orderP2PUser2Id },
+                            data: {
+                                points: { increment: order.orderP2PPoints },
+                            },
+                        });
+                    }
+                }
+            }
+
+            // Сбрасываем флаг обработки
+            await prisma.orderP2P.update({
+                where: { id: order.id },
+                data: { isProcessing: false },
             });
-        }
+        });
     }
 }// закрытие сделки по времени из клиента
 

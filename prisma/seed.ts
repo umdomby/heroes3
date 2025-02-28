@@ -205,7 +205,7 @@ async function down() {
 
 async function main() {
   try {
-    await down();
+    //await down();
     await up();
   } catch (e) {
     console.error(e);
