@@ -23,6 +23,7 @@ interface Turnir {
     id: number;
     titleTurnir: string;
     startPointsTurnir: number;
+    textTurnirTurnir: string;
 }
 
 interface TurnirPlayer {
@@ -129,17 +130,20 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
 
     // Получаем название выбранного турнира
     const selectedTurnirTitle = turnirs.find(turnir => turnir.id === selectedTurnir)?.titleTurnir || '';
+    const selectedTurnirText = turnirs.find(turnir => turnir.id === selectedTurnir)?.textTurnirTurnir || '';
+    const selectedTurnirPoints = turnirs.find(turnir => turnir.id === selectedTurnir)?.startPointsTurnir|| 0;
 
     return (
         <div className={className}>
-            <div><span className="text-amber-500">Points</span> <span className="text-red-500">{user.points}</span></div>
+            <div><span className="text-amber-500">Points</span> <span className="text-red-500">{user.points}</span>
+            </div>
             <h2 className="mb-5">Турниры. При регистрации <span className="text-amber-500">points</span> не списываются.
             </h2>
             <select onChange={(e) => setSelectedTurnir(Number(e.target.value))}>
                 <option value="">Выберите турнир</option>
                 {turnirs.map(turnir => (
                     <option key={turnir.id} value={turnir.id}>
-                        {turnir.titleTurnir}
+                        {turnir.titleTurnir}, points: {turnir.startPointsTurnir}
                     </option>
                 ))}
             </select>
@@ -164,7 +168,9 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                 </div>
             )}
 
-            <h2>Игроки в турнире: <span className="text-amber-500"><strong>{selectedTurnirTitle}</strong></span> </h2>
+            <h2>Игроки в турнире: <span className="text-amber-500"><strong>{selectedTurnirTitle}</strong></span></h2>
+            <div><span className="text-green-500">{selectedTurnirText}</span></div>
+            <div>Для регистрации {selectedTurnirPoints} points</div>
             <Table className="w-full">
                 <TableHeader>
                     <TableRow>
@@ -179,17 +185,23 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
                         <TableRow key={player.id}>
                             <TableCell>{player.orderP2PUser.fullName}</TableCell>
                             <TableCell>
-                                <span className={`inline-block w-4 h-4 rounded-full ${player.checkPointsPlayer ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                                <span
+                                    className={`inline-block w-4 h-4 rounded-full ${player.checkPointsPlayer ? 'bg-green-500' : 'bg-red-500'}`}></span>
                             </TableCell>
-                            <TableCell>{ new Date(player.createdAt).toLocaleString() }</TableCell>
+                            <TableCell>{new Date(player.createdAt).toLocaleString()}</TableCell>
                             {user.role === 'ADMIN' && (
                                 <TableCell>
                                     <Input
                                         type="number"
                                         value={editPlayer?.id === player.id ? editPlayer.newPoints : player.startPointsPlayer}
-                                        onChange={(e) => setEditPlayer({ id: player.id, newPoints: Number(e.target.value), newTurnirId: player.turnirId })}
+                                        onChange={(e) => setEditPlayer({
+                                            id: player.id,
+                                            newPoints: Number(e.target.value),
+                                            newTurnirId: player.turnirId
+                                        })}
                                     />
-                                    <Button onClick={handleAdminUpdatePlayer} disabled={!editPlayer || editPlayer.id !== player.id}>
+                                    <Button onClick={handleAdminUpdatePlayer}
+                                            disabled={!editPlayer || editPlayer.id !== player.id}>
                                         Сохранить
                                     </Button>
                                     <Button onClick={() => handleAdminDeletePlayer(player.id)}>Удалить</Button>
