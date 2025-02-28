@@ -23,18 +23,72 @@ async function up() {
         points: 9996000,
         cardId: generateCardId(),
         bankDetails: [
-            {"name": "USTD - BSC (BEP20)", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)", "price": "1"},
-            {"name": "BTC", "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow", "description": "Биткойн", "price": "1"},
-            {"name": "Технобанк VISA", "details": "4704693052762369 10/27", "description": "IBAN BY95TECN3014000000GRN0029573", "price": "1"},
-            {"name": "Технобанк ЕРИП", "details": "(№ Договора - GRN29573)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)", "price": "1"},
-            {"name": "Альфа-Банк MasterCard", "details": "5208130010810772 02/29", "description": "IBAN BY17ALFA3014309V9P0050270000", "price": "1"},
-            {"name": "Альфа-Банк VISA", "details": "4585 2200 1910 9759 07/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-            {"name": "Альфа-Банк ЕРИП", "details": "(№ Телефона - 375333814578)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578", "price": "1"},
-            {"name": "MTB MasterCard", "details": "MasterCard: 5351041664841598 04/27", "description": "IBAN BY13MTBK30140008999901709902", "price": "1"},
-            {"name": "MTB ЕРИП", "details": "(№ Договора - 33623213)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213", "price": "1"},
-            {"name": "Беларусбанк MIR", "details": "9112380168621532  02/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-            {"name": "Банк Дабрабыт БЕЛКАРТ", "details": "9112397016744373 02/29", "description": "IBAN BY29MMBN30140116007150001246", "price": "1"},
-            {"name": "Банк Дабрабыт EРИП", "details": "IBAN - BY29MMBN30140116007150001246", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246", "price": "1"},
+          {
+            "name": "USTD",
+            "details": "0x51470b98c8737f14958231cb27491b28c5702c13",
+            "description": "BSC (BEP20)",
+            "price": "0,01"
+          },
+          {
+            "name": "BTC",
+            "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow",
+            "description": "Биткойн",
+            "price": "0,0000001"
+          },
+          {
+            "name": "USD Технобанк VISA",
+            "details": "4704693052762369 10/27",
+            "description": "IBAN BY95TECN3014000000GRN0029573",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Технобанк VISA",
+            "details": "(№ Договора - GRN29573) ",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)",
+            "price": "0,03"
+          },
+          {
+            "name": "RUS Альфа-Банк MasterCard",
+            "details": "5208130010810772 02/29",
+            "description": "IBAN BY17ALFA3014309V9P0050270000",
+            "price": "0,87"
+          },
+          {
+            "name": "USD Альфа-Банк ",
+            "details": "(№ Телефона - 375333814578)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB MasterCard",
+            "details": "MasterCard: 5351041664841598 04/27",
+            "description": "IBAN BY13MTBK30140008999901709902",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB ЕРИП",
+            "details": "(№ Договора - 33623213)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Беларусбанк MIR",
+            "details": "9112380168621532  02/29 ",
+            "description": "IBAN BY77ALFA3014309V9P0010270000",
+            "price": "0,03"
+          },
+          {
+            "name": "BEL Банк Дабрабыт БЕЛКАРТ",
+            "details": "9112397016744373 02/29",
+            "description": "IBAN BY29MMBN30140116007150001246",
+            "price": "0,03"
+          },
+          {
+            "name": " BEL Банк Дабрабыт EРИП БЕЛКАРТ",
+            "details": "IBAN - BY29MMBN30140116007150001246",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246",
+            "price": "0,03"
+          }
         ],
         telegram: "@navatar85",
       },
@@ -47,18 +101,72 @@ async function up() {
         cardId: generateCardId(),
         telegram: "@Pi33",
         bankDetails: [
-          {"name": "USTD - BSC (BEP20)", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)", "price": "1"},
-          {"name": "BTC", "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow", "description": "Биткойн", "price": "1"},
-          {"name": "Технобанк VISA", "details": "4704693052762369 10/27", "description": "IBAN BY95TECN3014000000GRN0029573", "price": "1"},
-          {"name": "Технобанк ЕРИП", "details": "(№ Договора - GRN29573)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)", "price": "1"},
-          {"name": "Альфа-Банк MasterCard", "details": "5208130010810772 02/29", "description": "IBAN BY17ALFA3014309V9P0050270000", "price": "1"},
-          {"name": "Альфа-Банк VISA", "details": "4585 2200 1910 9759 07/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-          {"name": "Альфа-Банк ЕРИП", "details": "(№ Телефона - 375333814578)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578", "price": "1"},
-          {"name": "MTB MasterCard", "details": "MasterCard: 5351041664841598 04/27", "description": "IBAN BY13MTBK30140008999901709902", "price": "1"},
-          {"name": "MTB ЕРИП", "details": "(№ Договора - 33623213)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213", "price": "1"},
-          {"name": "Беларусбанк MIR", "details": "9112380168621532  02/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-          {"name": "Банк Дабрабыт БЕЛКАРТ", "details": "9112397016744373 02/29", "description": "IBAN BY29MMBN30140116007150001246", "price": "1"},
-          {"name": "Банк Дабрабыт EРИП", "details": "IBAN - BY29MMBN30140116007150001246", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246", "price": "1"},
+          {
+            "name": "USTD",
+            "details": "0x51470b98c8737f14958231cb27491b28c5702c13",
+            "description": "BSC (BEP20)",
+            "price": "0,01"
+          },
+          {
+            "name": "BTC",
+            "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow",
+            "description": "Биткойн",
+            "price": "0,0000001"
+          },
+          {
+            "name": "USD Технобанк VISA",
+            "details": "4704693052762369 10/27",
+            "description": "IBAN BY95TECN3014000000GRN0029573",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Технобанк VISA",
+            "details": "(№ Договора - GRN29573) ",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)",
+            "price": "0,03"
+          },
+          {
+            "name": "RUS Альфа-Банк MasterCard",
+            "details": "5208130010810772 02/29",
+            "description": "IBAN BY17ALFA3014309V9P0050270000",
+            "price": "0,87"
+          },
+          {
+            "name": "USD Альфа-Банк ",
+            "details": "(№ Телефона - 375333814578)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB MasterCard",
+            "details": "MasterCard: 5351041664841598 04/27",
+            "description": "IBAN BY13MTBK30140008999901709902",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB ЕРИП",
+            "details": "(№ Договора - 33623213)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Беларусбанк MIR",
+            "details": "9112380168621532  02/29 ",
+            "description": "IBAN BY77ALFA3014309V9P0010270000",
+            "price": "0,03"
+          },
+          {
+            "name": "BEL Банк Дабрабыт БЕЛКАРТ",
+            "details": "9112397016744373 02/29",
+            "description": "IBAN BY29MMBN30140116007150001246",
+            "price": "0,03"
+          },
+          {
+            "name": " BEL Банк Дабрабыт EРИП БЕЛКАРТ",
+            "details": "IBAN - BY29MMBN30140116007150001246",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246",
+            "price": "0,03"
+          }
         ],
       },
       {
@@ -70,18 +178,72 @@ async function up() {
         cardId: generateCardId(),
         telegram: "@Pi555",
         bankDetails: [
-          {"name": "USTD - BSC (BEP20)", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)", "price": "1"},
-          {"name": "BTC", "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow", "description": "Биткойн", "price": "1"},
-          {"name": "Технобанк VISA", "details": "4704693052762369 10/27", "description": "IBAN BY95TECN3014000000GRN0029573", "price": "1"},
-          {"name": "Технобанк ЕРИП", "details": "(№ Договора - GRN29573)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)", "price": "1"},
-          {"name": "Альфа-Банк MasterCard", "details": "5208130010810772 02/29", "description": "IBAN BY17ALFA3014309V9P0050270000", "price": "1"},
-          {"name": "Альфа-Банк VISA", "details": "4585 2200 1910 9759 07/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-          {"name": "Альфа-Банк ЕРИП", "details": "(№ Телефона - 375333814578)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578", "price": "1"},
-          {"name": "MTB MasterCard", "details": "MasterCard: 5351041664841598 04/27", "description": "IBAN BY13MTBK30140008999901709902", "price": "1"},
-          {"name": "MTB ЕРИП", "details": "(№ Договора - 33623213)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213", "price": "1"},
-          {"name": "Беларусбанк MIR", "details": "9112380168621532  02/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-          {"name": "Банк Дабрабыт БЕЛКАРТ", "details": "9112397016744373 02/29", "description": "IBAN BY29MMBN30140116007150001246", "price": "1"},
-          {"name": "Банк Дабрабыт EРИП", "details": "IBAN - BY29MMBN30140116007150001246", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246", "price": "1"},
+          {
+            "name": "USTD",
+            "details": "0x51470b98c8737f14958231cb27491b28c5702c13",
+            "description": "BSC (BEP20)",
+            "price": "0,01"
+          },
+          {
+            "name": "BTC",
+            "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow",
+            "description": "Биткойн",
+            "price": "0,0000001"
+          },
+          {
+            "name": "USD Технобанк VISA",
+            "details": "4704693052762369 10/27",
+            "description": "IBAN BY95TECN3014000000GRN0029573",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Технобанк VISA",
+            "details": "(№ Договора - GRN29573) ",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)",
+            "price": "0,03"
+          },
+          {
+            "name": "RUS Альфа-Банк MasterCard",
+            "details": "5208130010810772 02/29",
+            "description": "IBAN BY17ALFA3014309V9P0050270000",
+            "price": "0,87"
+          },
+          {
+            "name": "USD Альфа-Банк ",
+            "details": "(№ Телефона - 375333814578)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB MasterCard",
+            "details": "MasterCard: 5351041664841598 04/27",
+            "description": "IBAN BY13MTBK30140008999901709902",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB ЕРИП",
+            "details": "(№ Договора - 33623213)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Беларусбанк MIR",
+            "details": "9112380168621532  02/29 ",
+            "description": "IBAN BY77ALFA3014309V9P0010270000",
+            "price": "0,03"
+          },
+          {
+            "name": "BEL Банк Дабрабыт БЕЛКАРТ",
+            "details": "9112397016744373 02/29",
+            "description": "IBAN BY29MMBN30140116007150001246",
+            "price": "0,03"
+          },
+          {
+            "name": " BEL Банк Дабрабыт EРИП БЕЛКАРТ",
+            "details": "IBAN - BY29MMBN30140116007150001246",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246",
+            "price": "0,03"
+          }
         ],
       },
       {
@@ -93,18 +255,72 @@ async function up() {
         cardId: generateCardId(),
         telegram: "@Yatsyk",
         bankDetails: [
-          {"name": "USTD - BSC (BEP20)", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)", "price": "1"},
-          {"name": "BTC", "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow", "description": "Биткойн", "price": "1"},
-          {"name": "Технобанк VISA", "details": "4704693052762369 10/27", "description": "IBAN BY95TECN3014000000GRN0029573", "price": "1"},
-          {"name": "Технобанк ЕРИП", "details": "(№ Договора - GRN29573)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)", "price": "1"},
-          {"name": "Альфа-Банк MasterCard", "details": "5208130010810772 02/29", "description": "IBAN BY17ALFA3014309V9P0050270000", "price": "1"},
-          {"name": "Альфа-Банк VISA", "details": "4585 2200 1910 9759 07/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-          {"name": "Альфа-Банк ЕРИП", "details": "(№ Телефона - 375333814578)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578", "price": "1"},
-          {"name": "MTB MasterCard", "details": "MasterCard: 5351041664841598 04/27", "description": "IBAN BY13MTBK30140008999901709902", "price": "1"},
-          {"name": "MTB ЕРИП", "details": "(№ Договора - 33623213)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213", "price": "1"},
-          {"name": "Беларусбанк MIR", "details": "9112380168621532  02/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-          {"name": "Банк Дабрабыт БЕЛКАРТ", "details": "9112397016744373 02/29", "description": "IBAN BY29MMBN30140116007150001246", "price": "1"},
-          {"name": "Банк Дабрабыт EРИП", "details": "IBAN - BY29MMBN30140116007150001246", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246", "price": "1"},
+          {
+            "name": "USTD",
+            "details": "0x51470b98c8737f14958231cb27491b28c5702c13",
+            "description": "BSC (BEP20)",
+            "price": "0,01"
+          },
+          {
+            "name": "BTC",
+            "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow",
+            "description": "Биткойн",
+            "price": "0,0000001"
+          },
+          {
+            "name": "USD Технобанк VISA",
+            "details": "4704693052762369 10/27",
+            "description": "IBAN BY95TECN3014000000GRN0029573",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Технобанк VISA",
+            "details": "(№ Договора - GRN29573) ",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)",
+            "price": "0,03"
+          },
+          {
+            "name": "RUS Альфа-Банк MasterCard",
+            "details": "5208130010810772 02/29",
+            "description": "IBAN BY17ALFA3014309V9P0050270000",
+            "price": "0,87"
+          },
+          {
+            "name": "USD Альфа-Банк ",
+            "details": "(№ Телефона - 375333814578)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB MasterCard",
+            "details": "MasterCard: 5351041664841598 04/27",
+            "description": "IBAN BY13MTBK30140008999901709902",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB ЕРИП",
+            "details": "(№ Договора - 33623213)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Беларусбанк MIR",
+            "details": "9112380168621532  02/29 ",
+            "description": "IBAN BY77ALFA3014309V9P0010270000",
+            "price": "0,03"
+          },
+          {
+            "name": "BEL Банк Дабрабыт БЕЛКАРТ",
+            "details": "9112397016744373 02/29",
+            "description": "IBAN BY29MMBN30140116007150001246",
+            "price": "0,03"
+          },
+          {
+            "name": " BEL Банк Дабрабыт EРИП БЕЛКАРТ",
+            "details": "IBAN - BY29MMBN30140116007150001246",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246",
+            "price": "0,03"
+          }
         ],
       },
       {
@@ -116,18 +332,72 @@ async function up() {
         cardId: generateCardId(),
         telegram: "@123",
         bankDetails: [
-          {"name": "USTD - BSC (BEP20)", "details": "0x51470b98c8737f14958231cb27491b28c5702c13", "description": "BSC (BEP20)", "price": "1"},
-          {"name": "BTC", "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow", "description": "Биткойн", "price": "1"},
-          {"name": "Технобанк VISA", "details": "4704693052762369 10/27", "description": "IBAN BY95TECN3014000000GRN0029573", "price": "1"},
-          {"name": "Технобанк ЕРИП", "details": "(№ Договора - GRN29573)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)", "price": "1"},
-          {"name": "Альфа-Банк MasterCard", "details": "5208130010810772 02/29", "description": "IBAN BY17ALFA3014309V9P0050270000", "price": "1"},
-          {"name": "Альфа-Банк VISA", "details": "4585 2200 1910 9759 07/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-          {"name": "Альфа-Банк ЕРИП", "details": "(№ Телефона - 375333814578)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578", "price": "1"},
-          {"name": "MTB MasterCard", "details": "MasterCard: 5351041664841598 04/27", "description": "IBAN BY13MTBK30140008999901709902", "price": "1"},
-          {"name": "MTB ЕРИП", "details": "(№ Договора - 33623213)", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213", "price": "1"},
-          {"name": "Беларусбанк MIR", "details": "9112380168621532  02/29", "description": "IBAN BY77ALFA3014309V9P0010270000", "price": "1"},
-          {"name": "Банк Дабрабыт БЕЛКАРТ", "details": "9112397016744373 02/29", "description": "IBAN BY29MMBN30140116007150001246", "price": "1"},
-          {"name": "Банк Дабрабыт EРИП", "details": "IBAN - BY29MMBN30140116007150001246", "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246", "price": "1"},
+          {
+            "name": "USTD",
+            "details": "0x51470b98c8737f14958231cb27491b28c5702c13",
+            "description": "BSC (BEP20)",
+            "price": "0,01"
+          },
+          {
+            "name": "BTC",
+            "details": "19hCv645WrUthCNUWb4ncBdHVu6iLhZVow",
+            "description": "Биткойн",
+            "price": "0,0000001"
+          },
+          {
+            "name": "USD Технобанк VISA",
+            "details": "4704693052762369 10/27",
+            "description": "IBAN BY95TECN3014000000GRN0029573",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Технобанк VISA",
+            "details": "(№ Договора - GRN29573) ",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Технобанк – Пополнение карты - (№ Договора - GRN29573)",
+            "price": "0,03"
+          },
+          {
+            "name": "RUS Альфа-Банк MasterCard",
+            "details": "5208130010810772 02/29",
+            "description": "IBAN BY17ALFA3014309V9P0050270000",
+            "price": "0,87"
+          },
+          {
+            "name": "USD Альфа-Банк ",
+            "details": "(№ Телефона - 375333814578)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – Альфа-Банк – Пополнение счета - № Телефона - 375333814578",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB MasterCard",
+            "details": "MasterCard: 5351041664841598 04/27",
+            "description": "IBAN BY13MTBK30140008999901709902",
+            "price": "0,01"
+          },
+          {
+            "name": "USD MTB ЕРИП",
+            "details": "(№ Договора - 33623213)",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № Договора - 33623213",
+            "price": "0,01"
+          },
+          {
+            "name": "BEL Беларусбанк MIR",
+            "details": "9112380168621532  02/29 ",
+            "description": "IBAN BY77ALFA3014309V9P0010270000",
+            "price": "0,03"
+          },
+          {
+            "name": "BEL Банк Дабрабыт БЕЛКАРТ",
+            "details": "9112397016744373 02/29",
+            "description": "IBAN BY29MMBN30140116007150001246",
+            "price": "0,03"
+          },
+          {
+            "name": " BEL Банк Дабрабыт EРИП БЕЛКАРТ",
+            "details": "IBAN - BY29MMBN30140116007150001246",
+            "description": "Платежи - Банковские, финансовые услуги - Банки, НКФО – MTБанк – Пополнение дебетовой карты - № IBAN - BY29MMBN30140116007150001246",
+            "price": "0,03"
+          }
         ],
       },
     ],
@@ -205,7 +475,7 @@ async function down() {
 
 async function main() {
   try {
-    //await down();
+    await down();
     await up();
   } catch (e) {
     console.error(e);
