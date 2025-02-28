@@ -57,16 +57,16 @@ export const Access_no: React.FC<Props> = ({className}) => {
                                         RATING
                                     </DropdownMenuRadioItem>
                                 </Link>
-                                <Link href="/manual">
-                                    <DropdownMenuRadioItem value="manual" className="cursor-pointer">
-                                        MANUAL
-                                    </DropdownMenuRadioItem>
-                                </Link>
-                                <Link href="/tur">
-                                    <DropdownMenuRadioItem value="tur" className="cursor-pointer">
-                                        ТУРНИРЫ
-                                    </DropdownMenuRadioItem>
-                                </Link>
+                                {/*<Link href="/manual">*/}
+                                {/*    <DropdownMenuRadioItem value="manual" className="cursor-pointer">*/}
+                                {/*        MANUAL*/}
+                                {/*    </DropdownMenuRadioItem>*/}
+                                {/*</Link>*/}
+                                {/*<Link href="/turnir">*/}
+                                {/*    <DropdownMenuRadioItem value="tur" className="cursor-pointer">*/}
+                                {/*        ТУРНИРЫ*/}
+                                {/*    </DropdownMenuRadioItem>*/}
+                                {/*</Link>*/}
                                 <Link href="/hall-of-fame">
                                     <DropdownMenuRadioItem value="hall-of-fame" className="cursor-pointer">
                                         HALL-OF-FAME
