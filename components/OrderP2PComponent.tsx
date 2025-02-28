@@ -20,6 +20,7 @@ import {
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import Link from "next/link";
+import {updateCurrencyRatesIfNeeded} from "@/app/actions";
 
 interface OrderP2PWithUser extends OrderP2P {
     orderP2PUser1: {
@@ -549,6 +550,9 @@ export const OrderP2PComponent: React.FC<Props> = ({
         });
     };
 
+    const updateRatesI = async () => {
+        await updateCurrencyRatesIfNeeded();
+    }
     return (
         <div className={className}>
             {successMessage && (
@@ -590,7 +594,14 @@ export const OrderP2PComponent: React.FC<Props> = ({
                         <span className="text-red-500"><strong>HEROES: 0.01 </strong></span>
                     </div>
                     <div className="text-gray-400">{new Date(exchangeRates.updatedAt).toLocaleString()}</div>
+                    <div className="text-gray-400">
+                        {new Date(exchangeRates.updatedAt).toLocaleString()}
+                        <button onClick={updateRatesI} className="ml-2 bg-blue-500 text-white rounded h-6 px-2">
+                            обновить курсы
+                        </button>
+                    </div>
                 </div>
+
             )}</div>
 
             <div className="flex justify-between items-center m-7">

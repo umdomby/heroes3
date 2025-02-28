@@ -8,7 +8,7 @@ import Loading from "@/app/(root)/loading";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { OrderP2PComponent } from "@/components/OrderP2PComponent";
 import Link from "next/link";
-import { checkAndCloseOrderP2PTime, updateCurrencyRatesIfNeeded, getCourseValuta } from "@/app/actions";
+import { checkAndCloseOrderP2PTime, getCourseValuta } from "@/app/actions";
 
 export default async function OrderP2PPage() {
     const session = await getUserSession();

@@ -3616,7 +3616,7 @@ export async function updateCurrencyRatesIfNeeded() {
         });
 
         // Проверяем, прошло ли 10 секунд с момента последнего обновления
-        if (courseValutaData && (new Date().getTime() - new Date(courseValutaData.updatedAt).getTime()) < 600000) {
+        if (courseValutaData && (new Date().getTime() - new Date(courseValutaData.updatedAt).getTime()) < 10000) {
             console.log('Данные обновлены недавно, пропускаем обновление.');
             return;
         }
@@ -3710,7 +3710,9 @@ async function checkAndCloseOrderP2P() {
             },
             NOT: {
                 orderP2PUser1: {
-                    id: 1, // Предполагаем, что поле id существует в модели User
+                    id: {
+                        in: [1, 2], // Исключаем записи с id 1 и 2
+                    },
                 },
             },
             isProcessing: false, // Только не обрабатываемые записи
