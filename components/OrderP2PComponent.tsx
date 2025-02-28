@@ -858,14 +858,16 @@ export const OrderP2PComponent: React.FC<Props> = ({
                                                                         className="text-amber-500">{(order.orderP2PPoints * parseFloat(bankDetail.price.replace(',', '.'))).toFixed(10)}</strong> {bankDetail.name}
                                                                     </div>
                                                                 </div>
-                                                                <div className="px-2 w-full md:w-1/2">
-                                                                    <div>
-                                                                        {bankDetail.details}
+                                                                {order.orderP2PUser1Id === user.id &&
+                                                                    <div className="px-2 w-full md:w-1/2">
+                                                                        <div>
+                                                                            {bankDetail.details}
+                                                                        </div>
+                                                                        <div>
+                                                                            {bankDetail.description}
+                                                                        </div>
                                                                     </div>
-                                                                    <div>
-                                                                        {bankDetail.description}
-                                                                    </div>
-                                                                </div>
+                                                                }
                                                             </div>
                                                         );
                                                     }
