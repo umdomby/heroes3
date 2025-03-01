@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     Bet4 as PrismaBet4,
     Player,
@@ -9,20 +9,20 @@ import {
     BetStatus,
 } from "@prisma/client";
 import useSWR from "swr";
-import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import {Button} from "@/components/ui/button";
+import {useSession} from "next-auth/react";
+import {redirect} from "next/navigation";
 import {placeBet4, closeBet4, closeBetDraw4, suspendedBetCheck4} from "@/app/actions";
-import { unstable_batchedUpdates } from "react-dom";
+import {unstable_batchedUpdates} from "react-dom";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog";
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
 import Link from "next/link";
 import {DateTime} from "next-auth/providers/kakao";
 
@@ -55,8 +55,8 @@ interface Bet extends PrismaBet4 {
     totalBetPlayer3: number;
     totalBetPlayer4: number;
     totalBetAmount: number;
-    creatorId : number;
-    suspendedBet : boolean;
+    creatorId: number;
+    suspendedBet: boolean;
     status: BetStatus;
     description: string | null; // Change this line
     createdAt: Date;
@@ -74,8 +74,8 @@ const playerColors = {
     [PlayerChoice.PLAYER4]: "text-yellow-400",
 };
 
-export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
-    const { data: session } = useSession();
+export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
+    const {data: session} = useSession();
     const {
         data: bets,
         error,
@@ -92,7 +92,9 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
     const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>({});
     const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
-    const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number; player3: number; player4: number } }>({});
+    const [potentialProfit, setPotentialProfit] = useState<{
+        [key: number]: { player1: number; player2: number; player3: number; player4: number }
+    }>({});
     const [betAmounts, setBetAmounts] = useState<{ [key: number]: string }>({});
 
     // Состояние для управления модальным окном и ввода подтверждения
@@ -380,7 +382,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
 
             mutate();
 
-            setSelectedWinners((prev) => ({ ...prev, [currentBet.id]: null }));
+            setSelectedWinners((prev) => ({...prev, [currentBet.id]: null}));
             setCloseBetError(null);
             closeConfirmationDialog();
         } catch (error) {
@@ -470,7 +472,8 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                             bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
                                         }`}
                                     >
-                                    № {bet.id}-4 <span className="text-green-800">{new Date(bet.createdAt).toLocaleString()}</span> {bet?.description}
+                                    № {bet.id}-4 <span
+                                        className="text-green-800">{new Date(bet.createdAt).toLocaleString()}</span> {bet?.description}
                                     </span>
                                     <Table>
                                         <TableBody>
@@ -777,7 +780,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                         </div>
                                     )}
 
-                                    {bet.status === "OPEN" && !bet.suspendedBet &&(
+                                    {bet.status === "OPEN" && !bet.suspendedBet ? (
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                                 <div className="flex gap-2 m-2">
@@ -835,7 +838,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
             </span>
                                                     </label>
                                                 </div>
-                                                    <div className="flex gap-2 m-2">
+                                                <div className="flex gap-2 m-2">
                                                     <label className="border p-2 rounded w-[50%] text-center">
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
@@ -922,7 +925,8 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                                             </form>
 
                                         </div>
-                                    )}
+                                    ) : ( <div className="text-red-500 mx-5 text-xl"><strong>Ставки временно приостановлены</strong></div> )
+                                    }
 
                                     {bet.status === "OPEN" && bet.creatorId === user?.id && (
                                         <div className="m-2">
@@ -1032,7 +1036,8 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({ className, user }) => {
                         <DialogHeader>
                             <DialogTitle>Подтверждение закрытия ставки</DialogTitle>
                         </DialogHeader>
-                        <p>Введите {selectedWinners[currentBet.id] === "draw" ? "ничья" : selectedWinners[currentBet.id] === currentBet.player1Id ? currentBet.player1.name : selectedWinners[currentBet.id] === currentBet.player2Id ? currentBet.player2.name : selectedWinners[currentBet.id] === currentBet.player3Id ? currentBet.player3.name : currentBet.player4.name} для подтверждения:</p>
+                        <p>Введите {selectedWinners[currentBet.id] === "draw" ? "ничья" : selectedWinners[currentBet.id] === currentBet.player1Id ? currentBet.player1.name : selectedWinners[currentBet.id] === currentBet.player2Id ? currentBet.player2.name : selectedWinners[currentBet.id] === currentBet.player3Id ? currentBet.player3.name : currentBet.player4.name} для
+                            подтверждения:</p>
                         <input
                             type="text"
                             value={confirmationInput}

@@ -619,7 +619,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                         </div>
                                     )}
 
-                                    {bet.status === "OPEN_USER" && !bet.suspendedBet && (
+                                    {bet.status === "OPEN_USER" && !bet.suspendedBet ? (
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                                 <div className="flex gap-2 m-2">
@@ -708,7 +708,8 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                                             </form>
 
                                         </div>
-                                    )}
+                                    ) : ( <div className="text-red-500 mx-5 text-xl"><strong>Ставки временно приостановлены</strong></div> )
+                                    }
 
                                     {bet.status === "OPEN_USER" && bet.creatorId === user?.id && (
                                         <div className="m-2">

@@ -13,6 +13,7 @@ import {Input} from "@/components/ui/input";
 import {User} from "@prisma/client";
 import {getEmailByCardId, transferPoints} from "@/app/actions";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 interface Transfer {
     transferUser1Id: number;
@@ -81,12 +82,29 @@ export const TRANSFER_POINTS: React.FC<Props> = ({user, transferHistory, current
         }
     };
 
+    const handleCopyCardId = () => {
+        navigator.clipboard.writeText(user.cardId);
+        toast.success('Card ID скопирован в буфер обмена');
+    };
+
     return (
         <div className={`p-4 ${className}`}>
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <p className="text-lg font-semibold">Points: {Math.floor(user.points * 100) / 100}</p>
                 </div>
+            </div>
+            <div className="flex mb-3">
+                <span className="mr-2">Card ID</span>
+                <label className="block text-sm font-medium text-green-500">
+                    <strong>{user.cardId}</strong>
+                </label>
+                <Button
+                    onClick={handleCopyCardId}
+                    className="ml-2 bg-blue-500 text-white px-2 py-1 rounded h-5"
+                >
+                    Copy
+                </Button>
             </div>
             <form onSubmit={(e) => {
                 e.preventDefault();
