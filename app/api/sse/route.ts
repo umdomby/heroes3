@@ -23,7 +23,7 @@ export async function GET(request: Request) {
                         clearInterval(intervalId);
                         controller.close();
                     }
-                }, 15000); // Отправляем keep-alive каждые 15 секунд
+                }, 30000); // Отправляем keep-alive каждые 15 секунд
 
                 // Переменная для хранения последнего времени обновления
                 let lastUpdatedAt = new Date();
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
                         clearInterval(checkIntervalId);
                         controller.close();
                     }
-                }, 5000); // Проверяем изменения каждые 5 секунд
+                }, 10000); // Проверяем изменения каждые 10 секунд
 
                 // Обработка закрытия соединения
                 request.signal.onabort = () => {
