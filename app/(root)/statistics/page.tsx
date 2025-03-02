@@ -12,6 +12,7 @@ import { Button } from "@/components/ui";
 import React from "react";
 import { globalDataPoints } from "@/app/actions";
 
+// Интерфейс для описания структуры данных GlobalData
 interface GlobalData {
     id: number;
     margin: number | null;
@@ -27,45 +28,51 @@ interface GlobalData {
     p2pPoints: number | null;
 }
 
+// Функция для получения данных с пагинацией
 const fetchGlobalData = async (page: number): Promise<GlobalData[]> => {
-    const take = 27;
-    const skip = (page - 1) * take;
+    const take = 27; // Количество записей на странице
+    const skip = (page - 1) * take; // Пропустить записи для предыдущих страниц
 
     return await prisma.globalData.findMany({
-        orderBy: { id: 'desc' },
+        orderBy: { id: 'desc' }, // Сортировка по убыванию ID
         take,
         skip,
     });
 };
 
+// Функция для получения первой записи
 const fetchGlobalFirst = async (): Promise<GlobalData | null> => {
     return await prisma.globalData.findFirst({ where: { id: 1 } });
 };
 
+// Функция для получения общего количества записей
 const fetchTotalCount = async (): Promise<number> => {
     return await prisma.globalData.count();
 };
 
+// Основной компонент страницы статистики
 export default async function StatisticsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-    await globalDataPoints();
+    await globalDataPoints(); // Выполнение глобальных действий
 
-    const { page = '1' } = await searchParams;
-    const currentPage = parseInt(page, 10);
+    const { page = '1' } = await searchParams; // Получение параметра страницы из URL
+    const currentPage = parseInt(page, 10); // Преобразование параметра страницы в число
     const [globalDataList, totalCount, globalDataFirst] = await Promise.all([
-        fetchGlobalData(currentPage),
-        fetchTotalCount(),
-        fetchGlobalFirst(),
+        fetchGlobalData(currentPage), // Получение данных для текущей страницы
+        fetchTotalCount(), // Получение общего количества записей
+        fetchGlobalFirst(), // Получение первой записи
     ]);
 
+    // Проверка на наличие данных
     if (!globalDataFirst || globalDataList.length === 0) {
         return <div>Нет доступных данных</div>;
     }
 
-    const totalPages = Math.ceil(totalCount / 27);
+    const totalPages = Math.ceil(totalCount / 27); // Вычисление общего количества страниц
 
+    // Функция для вычисления общей суммы
     const calculateTotalSum = (data: GlobalData, includeInitialFund: boolean = true) => {
-        const initialFund = includeInitialFund ? 1000000 : 0;
-        const adjustedFund = initialFund + (data.betFund ?? 0);
+        const initialFund = includeInitialFund ? 1000000 : 0; // Начальный фонд
+        const adjustedFund = initialFund + (data.betFund ?? 0); // Корректировка фонда
 
         return (
             (data.openBetsPoints ?? 0) +
@@ -77,6 +84,7 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
         );
     };
 
+    // Функция для рендеринга строки таблицы
     const renderTableRow = (data: GlobalData, includeInitialFund: boolean = true) => (
         <TableRow key={data.id} style={{ transition: 'background-color 0.3s', cursor: 'pointer' }}>
             <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>
@@ -114,8 +122,8 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {renderTableRow(globalDataFirst, false)}
-                    {globalDataList.map(data => renderTableRow(data))}
+                    {renderTableRow(globalDataFirst, false)} {/* Рендеринг первой записи без начального фонда */}
+                    {globalDataList.map(data => renderTableRow(data))} {/* Рендеринг остальных записей */}
                 </TableBody>
             </Table>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
