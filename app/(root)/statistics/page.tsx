@@ -122,8 +122,8 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {renderTableRow(globalDataFirst, false)} {/* Рендеринг первой записи без начального фонда */}
-                    {globalDataList.map(data => renderTableRow(data))} {/* Рендеринг остальных записей */}
+                    {renderTableRow(globalDataFirst, false)}{/* Рендеринг первой записи без начального фонда */}
+                    {globalDataList.map(data => renderTableRow(data))}{/* Рендеринг остальных записей */}
                 </TableBody>
             </Table>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
