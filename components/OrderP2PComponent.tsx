@@ -991,9 +991,11 @@ export const OrderP2PComponent: React.FC<Props> = ({
                             </select>
                             {calculatedValues[order.id] !== undefined && calculatedValues[order.id] !== null && (
                                 <span className="ml-3 h-6 text-lg font-semibold">
-                                    Итоговая сумма: <strong className="text-amber-500"> {calculatedValues[order.id].toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 10 })}</strong>
-                </span>
-                                )}
+        Итоговая сумма: <strong className="text-amber-500">
+            {calculatedValues[order.id]?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 10 })}
+        </strong>
+    </span>
+                            )}
                             <div className="text-center">
                                 {order.orderP2PBuySell === 'BUY' && order.orderP2PUser1Id === user.id && (
                                     <Button className="ml-3 h-6" onClick={() => handleCloseBuyOrder(order)}>
