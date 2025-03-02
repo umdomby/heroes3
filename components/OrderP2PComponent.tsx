@@ -764,7 +764,7 @@ export const OrderP2PComponent: React.FC<Props> = ({
                                     За <span className="text-amber-500">{buyPoints} points</span>
                                     <span> нужно </span>
                                     <span
-                                        className="text-green-600">{(parseFloat(detail.price.replace(',', '.')) * buyPoints).toFixed(10)} {detail.name}</span>
+                                        className="text-green-600">{parseFloat((parseFloat(detail.price.replace(',', '.')) * buyPoints).toFixed(10))} {detail.name}</span>
                                 </div>
 
                             </div>
@@ -850,7 +850,7 @@ export const OrderP2PComponent: React.FC<Props> = ({
                                     За <span className="text-amber-500">{sellPoints} points</span>
                                     <span> нужно </span>
                                     <span
-                                        className="text-green-600">{(parseFloat(detail.price.replace(',', '.')) * sellPoints).toFixed(10)} {detail.name}</span>
+                                        className="text-green-600">{parseFloat((parseFloat(detail.price.replace(',', '.')) * buyPoints).toFixed(10))} {detail.name}</span>
                                 </div>
 
                             </div>
@@ -939,7 +939,7 @@ export const OrderP2PComponent: React.FC<Props> = ({
                                                                         <strong
                                                                             className="text-amber-500">{order.orderP2PPoints}</strong> points
                                                                         = <strong
-                                                                        className="text-amber-500">{(order.orderP2PPoints * parseFloat(bankDetail.price.replace(',', '.'))).toFixed(10)}</strong> {bankDetail.name}
+                                                                        className="text-amber-500">{parseFloat((order.orderP2PPoints * parseFloat(bankDetail.price.replace(',', '.'))).toFixed(10))}</strong> {bankDetail.name}
                                                                     </div>
                                                                 </div>
                                                                 {order.orderP2PUser1Id === user.id &&
@@ -991,7 +991,7 @@ export const OrderP2PComponent: React.FC<Props> = ({
                             </select>
                             {calculatedValues[order.id] !== undefined && calculatedValues[order.id] !== null && (
                                 <span className="ml-3 h-6 text-lg font-semibold">
-                                    Итоговая сумма: <strong className="text-amber-500"> {calculatedValues[order.id]} </strong>
+                                    Итоговая сумма: <strong className="text-amber-500"> {calculatedValues[order.id].toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 10 })}</strong>
                 </span>
                                 )}
                             <div className="text-center">

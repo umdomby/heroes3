@@ -183,7 +183,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                                                            target="_blank">{order.orderP2PUser1.telegram}</Link></p>
                                         <p>Card ID: {order.orderP2PUser1.cardId}</p>
                                         <p>Points: - {order.orderP2PPoints}</p>
-                                        <p>Price: + {order.orderP2PPrice}</p>
+                                        <p>Price: + {order.orderP2PPrice.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 10 })}</p>
                                         {order.orderP2PBuySell === 'SELL' &&
                                             <Button
                                                 onClick={() => handleConfirm(order, true)}
@@ -211,8 +211,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                                                     if (isOrderBankDetail(detail)) {
                                                         return (
                                                             <div className="mb-2">
-                                                                <h3 className="font-bold">{order.orderP2PPrice} {detail.name}</h3>
-                                                                <p>Price one Point = {detail.price}</p>
+                                                                <strong className="font-bold text-green-500">{order.orderP2PPrice.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 10 })} {detail.name}</strong>
+                                                                <p>Price one Point = {parseFloat(detail.price.replace(',', '.')).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 10 })}</p>
                                                                 <p className="text-green-500"><strong>{detail.details}</strong>  </p>
                                                                 <p>{detail.description}</p>
                                                             </div>
@@ -247,7 +247,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                                         </p>
                                         <p>Card ID: {order.orderP2PUser2?.cardId || 'Ожидание'}</p>
                                         <p>Points: + {order.orderP2PPoints}</p>
-                                        <p>Price: - {order.orderP2PPrice}</p>
+                                        <p>Price: - {order.orderP2PPrice.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 10 })}</p>
 
                                         {order.orderP2PBuySell === 'SELL' &&
                                             <Button
