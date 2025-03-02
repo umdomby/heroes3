@@ -53,6 +53,7 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
     });
 
     const [createBetError, setCreateBetError] = useState<string | null>(null);
+    const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false);
 
     const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
         const { initBetPlayer1, initBetPlayer2 } = values;
@@ -86,6 +87,8 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
             await createBet(betData);
             form.reset();
             setCreateBetError(null);
+            setShowSuccessDialog(true);
+            setTimeout(() => setShowSuccessDialog(false), 3000);
         } catch (error) {
             if (error instanceof Error) {
                 setCreateBetError(error.message);
@@ -276,6 +279,15 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
                     {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
                 </form>
             </Form>
+
+            {/* Диалоговое окно успешного создания ставки */}
+            {showSuccessDialog && (
+                <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
+                    <div className="p-4 rounded shadow-lg">
+                        <p>Ставка успешно создана!</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

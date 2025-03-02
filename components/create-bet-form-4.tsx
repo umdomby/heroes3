@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import React, { useState } from 'react';
 import { Category, Product, ProductItem, User, Player } from '@prisma/client';
-import { clientCreateBet4 } from "@/app/actions";
+import { clientCreateBet4 } from "@/app/actions"; // Assuming you have a separate action for 4 players
 
-const createBetSchema = z.object({
+const createBetSchema4 = z.object({
     player1Id: z.coerce.number().int(),
     player2Id: z.coerce.number().int(),
     player3Id: z.coerce.number().int(),
@@ -42,8 +42,8 @@ interface Props {
 }
 
 export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
-    const form = useForm<z.infer<typeof createBetSchema>>({
-        resolver: zodResolver(createBetSchema),
+    const form = useForm<z.infer<typeof createBetSchema4>>({
+        resolver: zodResolver(createBetSchema4),
         defaultValues: {
             player1Id: players[0]?.id,
             player2Id: players[1]?.id,
@@ -61,18 +61,19 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
     });
 
     const [createBetError, setCreateBetError] = useState<string | null>(null);
+    const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false);
 
-    const onSubmit = async (values: z.infer<typeof createBetSchema>) => {
+    const onSubmit = async (values: z.infer<typeof createBetSchema4>) => {
         const { initBetPlayer1, initBetPlayer2, initBetPlayer3, initBetPlayer4 } = values;
 
         if (initBetPlayer1 < 100 || initBetPlayer2 < 100 || initBetPlayer3 < 100 || initBetPlayer4 < 100) {
-            setCreateBetError('Минимальная ставка на каждого игрока: 10 баллов');
+            setCreateBetError('Минимальная ставка на каждого игрока: 100 баллов');
             return;
         }
 
         const totalBetAmount = initBetPlayer1 + initBetPlayer2 + initBetPlayer3 + initBetPlayer4;
         if (totalBetAmount > 1000) {
-            setCreateBetError('Максимальная сумма ставок на всех игроков: 100 баллов');
+            setCreateBetError('Максимальная сумма ставок на всех игроков: 1000 баллов');
             return;
         }
 
@@ -100,6 +101,8 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
             await createBet(betData);
             form.reset();
             setCreateBetError(null);
+            setShowSuccessDialog(true);
+            setTimeout(() => setShowSuccessDialog(false), 3000);
         } catch (error) {
             if (error instanceof Error) {
                 setCreateBetError(error.message);
@@ -117,7 +120,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
             </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                    {/* Поле выбора Player 1 */}
+                    {/* Player 1 Selection */}
                     <FormField
                         control={form.control}
                         name="player1Id"
@@ -136,7 +139,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле выбора Player 2 */}
+                    {/* Player 2 Selection */}
                     <FormField
                         control={form.control}
                         name="player2Id"
@@ -155,7 +158,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле выбора Player 3 */}
+                    {/* Player 3 Selection */}
                     <FormField
                         control={form.control}
                         name="player3Id"
@@ -174,7 +177,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле выбора Player 4 */}
+                    {/* Player 4 Selection */}
                     <FormField
                         control={form.control}
                         name="player4Id"
@@ -193,7 +196,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле для ставки на Player 1 */}
+                    {/* Bet on Player 1 */}
                     <FormField
                         control={form.control}
                         name="initBetPlayer1"
@@ -219,7 +222,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле для ставки на Player 2 */}
+                    {/* Bet on Player 2 */}
                     <FormField
                         control={form.control}
                         name="initBetPlayer2"
@@ -245,7 +248,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле для ставки на Player 3 */}
+                    {/* Bet on Player 3 */}
                     <FormField
                         control={form.control}
                         name="initBetPlayer3"
@@ -271,7 +274,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле для ставки на Player 4 */}
+                    {/* Bet on Player 4 */}
                     <FormField
                         control={form.control}
                         name="initBetPlayer4"
@@ -297,7 +300,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле выбора категории */}
+                    {/* Category Selection */}
                     <FormField
                         control={form.control}
                         name="categoryId"
@@ -316,7 +319,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле выбора продукта */}
+                    {/* Product Selection */}
                     <FormField
                         control={form.control}
                         name="productId"
@@ -335,7 +338,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле выбора элемента продукта */}
+                    {/* Product Item Selection */}
                     <FormField
                         control={form.control}
                         name="productItemId"
@@ -354,7 +357,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Поле для описания */}
+                    {/* Description Field */}
                     <FormField
                         control={form.control}
                         name="description"
@@ -373,13 +376,22 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                         )}
                     />
 
-                    {/* Кнопка отправки формы */}
+                    {/* Submit Button */}
                     <Button type="submit">Create Bet</Button>
 
-                    {/* Отображение ошибки */}
+                    {/* Error Message */}
                     {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
                 </form>
             </Form>
+
+            {/* Диалоговое окно успешного создания ставки */}
+            {showSuccessDialog && (
+                <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
+                    <div className=" p-4 rounded shadow-lg">
+                        <p>Ставка успешно создана!</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
