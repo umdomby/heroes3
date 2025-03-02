@@ -979,7 +979,7 @@ export const OrderP2PComponent: React.FC<Props> = ({
                                             return (
                                                 <option key={index} value={JSON.stringify(detail)}>
 
-                                                    {(order.orderP2PPoints * parseFloat(price.replace(',', '.'))).toFixed(10)} - {name}
+                                                    {Number((order.orderP2PPoints * parseFloat(price.replace(',', '.'))).toFixed(10))} - {name}
                                                 </option>
                                             );
                                         }
