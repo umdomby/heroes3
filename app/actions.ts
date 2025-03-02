@@ -4076,7 +4076,7 @@ export async function deleteBetWinnLoseClosed3(betId: number) {
         });
 
         console.log(`Ставка с ID ${betId} успешно удалена.`);
-        revalidatePath('/bet-winn-lose-closed-3')
+        revalidatePath('/bet-winn-lose-closed-3');
     } catch (error) {
         console.error('Ошибка при удалении ставки:', error);
         throw new Error('Не удалось удалить ставку');
@@ -4118,7 +4118,7 @@ export async function deleteBetWinnLoseClosed4(betId: number) {
         });
 
         console.log(`Ставка с ID ${betId} успешно удалена.`);
-        revalidatePath('/bet-winn-lose-closed-4')
+        revalidatePath('/bet-winn-lose-closed-4');
     } catch (error) {
         console.error('Ошибка при удалении ставки:', error);
         throw new Error('Не удалось удалить ставку');

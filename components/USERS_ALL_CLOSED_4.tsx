@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Table,
     TableBody,
@@ -8,8 +8,9 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { deleteBetWinnLoseClosed4 } from "@/app/actions"; // Импортируем функцию удаления
 
-interface BetCLOSED {
+interface BetCLOSED4 {
     id: number;
     player1: { id: number; name: string };
     player2: { id: number; name: string };
@@ -28,13 +29,43 @@ interface BetCLOSED {
     winnerId: number | null;
 }
 
-interface Props {
-    closedBets: BetCLOSED[];
-    currentPage: number;
-    totalPages: number;
+interface User {
+    role: string;
 }
 
-export const USERS_ALL_CLOSED_4: React.FC<Props> = ({ closedBets, currentPage, totalPages }) => {
+interface Props {
+    closedBets: BetCLOSED4[];
+    currentPage: number;
+    totalPages: number;
+    user: User;
+}
+
+export const USERS_ALL_CLOSED_4: React.FC<Props> = ({ user, closedBets, currentPage, totalPages }) => {
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [showResultDialog, setShowResultDialog] = useState(false);
+    const [selectedBetId, setSelectedBetId] = useState<number | null>(null);
+    const [resultMessage, setResultMessage] = useState('');
+
+    const handleDelete = async () => {
+        if (selectedBetId !== null && user?.role === 'ADMIN') {
+            try {
+                await deleteBetWinnLoseClosed4(selectedBetId);
+                setResultMessage('Ставка успешно удалена');
+            } catch (error) {
+                setResultMessage('Ошибка при удалении ставки');
+            } finally {
+                setShowResultDialog(true);
+                setShowConfirmDialog(false);
+                setTimeout(() => setShowResultDialog(false), 3000);
+            }
+        }
+    };
+
+    const openConfirmDialog = (betId: number) => {
+        setSelectedBetId(betId);
+        setShowConfirmDialog(true);
+    };
+
     return (
         <div>
             {closedBets.map((bet) => {
@@ -78,9 +109,16 @@ export const USERS_ALL_CLOSED_4: React.FC<Props> = ({ closedBets, currentPage, t
                                     <TableCell className={`text-center overflow-hidden whitespace-nowrap w-[10%] ${player4Class}`}>
                                         <div>{Math.floor(bet.totalBetPlayer4 * 100) / 100}</div>
                                     </TableCell>
-                                    <TableCell className="text-right overflow-hidden whitespace-nowrap w-[10%]">
+                                    <TableCell className="text-right overflow-hidden whitespace-nowrap w-[15%]">
                                         <div>{formattedDate}</div>
                                     </TableCell>
+                                    {user?.role === 'ADMIN' && (
+                                        <TableCell className="text-right overflow-hidden whitespace-nowrap w-[15%]">
+                                            <Button onClick={() => openConfirmDialog(bet.id)} className="btn btn-danger h-5">
+                                                Удалить
+                                            </Button>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             </TableBody>
                         </Table>
@@ -105,6 +143,32 @@ export const USERS_ALL_CLOSED_4: React.FC<Props> = ({ closedBets, currentPage, t
                     </Link>
                 )}
             </div>
+
+            {/* Диалоговое окно подтверждения удаления */}
+            {showConfirmDialog && (
+                <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
+                    <div className="p-4 rounded">
+                        <p>Вы уверены, что хотите удалить эту ставку?</p>
+                        <div className="flex justify-end mt-4">
+                            <Button onClick={() => setShowConfirmDialog(false)} className="mr-2">
+                                Отмена
+                            </Button>
+                            <Button onClick={handleDelete} className="btn btn-danger">
+                                Удалить
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Диалоговое окно результата */}
+            {showResultDialog && (
+                <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
+                    <div className="p-4 rounded">
+                        <p>{resultMessage}</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
