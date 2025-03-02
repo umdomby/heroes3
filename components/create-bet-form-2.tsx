@@ -102,7 +102,7 @@ export const CreateBetForm2: React.FC<Props> = ({ user, categories, products, pr
         <div>
             <div>Ваши баллы: {user?.points}</div>
             <div style={{ color: 'blue', marginBottom: '10px' }}>
-                Вы можете распределить только 100 баллов между двумя игроками. Баллы не списываются с вашего баланса.
+                Вы можете распределить только 1000 баллов между двумя игроками. Баллы не списываются с вашего баланса.
             </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
