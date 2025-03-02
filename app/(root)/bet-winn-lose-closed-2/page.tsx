@@ -5,8 +5,26 @@ import { prisma } from '@/prisma/prisma-client';
 import React, { Suspense } from "react";
 import Loading from "@/app/(root)/loading";
 import { USERS_ALL_CLOSED_2 } from "@/components/USERS_ALL_CLOSED_2";
+import {getUserSession} from "@/components/lib/get-user-session";
+import {redirect} from "next/navigation";
 
 export default async function Bet2ClosedPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+
+    const session = await getUserSession();
+
+    if (!session) {
+        return redirect('/');
+    }
+
+    const user = await prisma.user.findFirst({
+        where: { id: Number(session?.id) },
+    });
+
+    if (!user || user.role === 'BANED') {
+        return redirect('/');
+    }
+
+
     const resolvedSearchParams = await searchParams; // Await the searchParams if it's a Promise
 
     const page = parseInt(resolvedSearchParams.page ?? '1', 10);
@@ -37,7 +55,7 @@ export default async function Bet2ClosedPage({ searchParams }: { searchParams: P
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <USERS_ALL_CLOSED_2 closedBets={closedBets2} currentPage={page} totalPages={totalPages2} />
+                <USERS_ALL_CLOSED_2 user={user} closedBets={closedBets2} currentPage={page} totalPages={totalPages2} />
             </Suspense>
         </Container>
     );

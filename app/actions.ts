@@ -4000,3 +4000,127 @@ export async function adminHeroesControl(globalStop: boolean, stopP2P: boolean, 
     }
 }
 
+export async function deleteBetWinnLoseClosed2(betId: number) {
+    try {
+        // Получаем текущую сессию пользователя
+        const currentUser = await getUserSession();
+
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        // Проверяем, что пользователь является администратором
+        if (currentUser.role !== 'ADMIN') {
+            throw new Error('У вас нет прав для выполнения этой операции');
+        }
+
+        // Проверяем, существует ли ставка
+        const bet = await prisma.betCLOSED.findUnique({
+            where: { id: betId },
+        });
+
+        if (!bet) {
+            throw new Error('Ставка не найдена');
+        }
+
+        // Удаляем участников, связанных с этой ставкой
+        await prisma.betParticipantCLOSED.deleteMany({
+            where: { betCLOSEDId: betId },
+        });
+
+        // Удаляем саму ставку
+        await prisma.betCLOSED.delete({
+            where: { id: betId },
+        });
+
+        console.log(`Ставка с ID ${betId} успешно удалена.`);
+        revalidatePath('/bet-winn-lose-closed-2')
+    } catch (error) {
+        console.error('Ошибка при удалении ставки:', error);
+        throw new Error('Не удалось удалить ставку');
+    }
+}
+
+
+export async function deleteBetWinnLoseClosed3(betId: number) {
+    try {
+        // Получаем текущую сессию пользователя
+        const currentUser = await getUserSession();
+
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        // Проверяем, что пользователь является администратором
+        if (currentUser.role !== 'ADMIN') {
+            throw new Error('У вас нет прав для выполнения этой операции');
+        }
+
+        // Проверяем, существует ли ставка
+        const bet = await prisma.betCLOSED3.findUnique({
+            where: { id: betId },
+        });
+
+        if (!bet) {
+            throw new Error('Ставка не найдена');
+        }
+
+        // Удаляем участников, связанных с этой ставкой
+        await prisma.betParticipantCLOSED3.deleteMany({
+            where: { betCLOSED3Id: betId },
+        });
+
+        // Удаляем саму ставку
+        await prisma.betCLOSED3.delete({
+            where: { id: betId },
+        });
+
+        console.log(`Ставка с ID ${betId} успешно удалена.`);
+        revalidatePath('/bet-winn-lose-closed-3')
+    } catch (error) {
+        console.error('Ошибка при удалении ставки:', error);
+        throw new Error('Не удалось удалить ставку');
+    }
+}
+
+
+export async function deleteBetWinnLoseClosed4(betId: number) {
+    try {
+        // Получаем текущую сессию пользователя
+        const currentUser = await getUserSession();
+
+        if (!currentUser) {
+            throw new Error('Пользователь не найден');
+        }
+
+        // Проверяем, что пользователь является администратором
+        if (currentUser.role !== 'ADMIN') {
+            throw new Error('У вас нет прав для выполнения этой операции');
+        }
+
+        // Проверяем, существует ли ставка
+        const bet = await prisma.betCLOSED4.findUnique({
+            where: { id: betId },
+        });
+
+        if (!bet) {
+            throw new Error('Ставка не найдена');
+        }
+
+        // Удаляем участников, связанных с этой ставкой
+        await prisma.betParticipantCLOSED4.deleteMany({
+            where: { betCLOSED4Id: betId },
+        });
+
+        // Удаляем саму ставку
+        await prisma.betCLOSED4.delete({
+            where: { id: betId },
+        });
+
+        console.log(`Ставка с ID ${betId} успешно удалена.`);
+        revalidatePath('/bet-winn-lose-closed-4')
+    } catch (error) {
+        console.error('Ошибка при удалении ставки:', error);
+        throw new Error('Не удалось удалить ставку');
+    }
+}
