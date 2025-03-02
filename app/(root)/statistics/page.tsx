@@ -10,7 +10,7 @@ import {
 import Link from 'next/link';
 import { Button } from "@/components/ui";
 import React from "react";
-import {globalDataPoints} from "@/app/actions";
+import { globalDataPoints } from "@/app/actions";
 
 interface GlobalData {
     id: number;
@@ -25,61 +25,75 @@ interface GlobalData {
     betFund: number | null;
     gameUserBetOpen: number | null;
     p2pPoints: number | null;
-
-
 }
 
-async function fetchGlobalData(page: number): Promise<GlobalData[]> {
+const fetchGlobalData = async (page: number): Promise<GlobalData[]> => {
     const take = 27;
     const skip = (page - 1) * take;
 
-    const data = await prisma.globalData.findMany({
-        orderBy: {
-            id: 'desc',
-        },
+    return await prisma.globalData.findMany({
+        orderBy: { id: 'desc' },
         take,
         skip,
     });
+};
 
-    return data;
-}
+const fetchGlobalFirst = async (): Promise<GlobalData | null> => {
+    return await prisma.globalData.findFirst({ where: { id: 1 } });
+};
 
-async function fetchGlobalFirst() {
-
-    const data = await prisma.globalData.findFirst({
-        where: {id: 1}
-    });
-
-    return data;
-}
-
-async function fetchTotalCount(): Promise<number> {
-    const count = await prisma.globalData.count();
-    return count;
-}
+const fetchTotalCount = async (): Promise<number> => {
+    return await prisma.globalData.count();
+};
 
 export default async function StatisticsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     await globalDataPoints();
 
-    const resolvedSearchParams = await searchParams;
-    const currentPage = parseInt(resolvedSearchParams.page ?? '1', 10);
-    const globalDataList = await fetchGlobalData(currentPage);
-    const totalCount = await fetchTotalCount();
-    const totalPages = Math.ceil(totalCount / 27);
+    const { page = '1' } = await searchParams;
+    const currentPage = parseInt(page, 10);
+    const [globalDataList, totalCount, globalDataFirst] = await Promise.all([
+        fetchGlobalData(currentPage),
+        fetchTotalCount(),
+        fetchGlobalFirst(),
+    ]);
 
-    const globalDataFirst = await fetchGlobalFirst();
-
-    const totalSumFirst =
-        (globalDataFirst.openBetsPoints ?? 0) +
-        (globalDataFirst.usersPoints ?? 0) +
-        (globalDataFirst.betFund ?? 0) +
-        (globalDataFirst.margin ?? 0) +
-        (globalDataFirst.gameUserBetOpen ?? 0) +
-        (globalDataFirst.p2pPoints ?? 0);
-
-    if (globalDataList.length === 0) {
+    if (!globalDataFirst || globalDataList.length === 0) {
         return <div>Нет доступных данных</div>;
     }
+
+    const totalPages = Math.ceil(totalCount / 27);
+
+    const calculateTotalSum = (data: GlobalData, includeInitialFund: boolean = true) => {
+        const initialFund = includeInitialFund ? 1000000 : 0;
+        const adjustedFund = initialFund + (data.betFund ?? 0);
+
+        return (
+            (data.openBetsPoints ?? 0) +
+            (data.usersPoints ?? 0) +
+            adjustedFund +
+            (data.margin ?? 0) +
+            (data.gameUserBetOpen ?? 0) +
+            (data.p2pPoints ?? 0)
+        );
+    };
+
+    const renderTableRow = (data: GlobalData, includeInitialFund: boolean = true) => (
+        <TableRow key={data.id} style={{ transition: 'background-color 0.3s', cursor: 'pointer' }}>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>
+                {new Date(data.updatedAt).toLocaleString('en-US', { hour12: false })}
+            </TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>11M</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{data.reg ?? 'N/A'}</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{data.ref ?? 'N/A'}</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#718dff' }}>{data.openBetsPoints ?? 'N/A'}</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{data.p2pPoints ?? 'N/A'}</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{data.gameUserBetOpen ?? 'N/A'}</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{data.usersPoints ?? 'N/A'}</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{includeInitialFund ? 1000000 + (data.betFund ?? 0) : data.betFund ?? 'N/A'}</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{data.margin ?? 'N/A'}</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(calculateTotalSum(data, includeInitialFund) * 100) / 100}</TableCell>
+        </TableRow>
+    );
 
     return (
         <div>
@@ -99,55 +113,9 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Sum</TableHead>
                     </TableRow>
                 </TableHeader>
-
                 <TableBody>
-                    <TableRow>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>{new Date(globalDataFirst.updatedAt).toLocaleString('en-US', { hour12: false })}</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>11M</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{globalDataFirst.reg ?? 'N/A'}</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{globalDataFirst.ref ?? 'N/A'}</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#718dff' }}>{globalDataFirst.openBetsPoints ?? 'N/A'}</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{globalDataFirst.p2pPoints ?? 'N/A'}</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalDataFirst.gameUserBetOpen ?? 'N/A'}</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalDataFirst.usersPoints ?? 'N/A'}</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{globalDataFirst.betFund ?? 'N/A'}</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalDataFirst.margin ?? 'N/A'}</TableCell>
-                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(totalSumFirst * 100) / 100}</TableCell>
-                    </TableRow>
-                </TableBody>
-                <TableBody>
-                    {globalDataList
-                        .slice(0, -1) // Исключаем последнюю запись
-                        .map((globalData, index) => {
-                            const initialFund = 1000000;
-                            const adjustedFund = initialFund + (globalData.betFund ?? 0);
-
-                            const totalSum =
-                                (globalData.openBetsPoints ?? 0) +
-                                (globalData.usersPoints ?? 0) +
-                                (adjustedFund ?? 0) +
-                                (globalData.margin ?? 0) +
-                                (globalData.gameUserBetOpen ?? 0) +
-                                (globalData.p2pPoints ?? 0);
-
-                            const rowStyle = { transition: 'background-color 0.3s', cursor: 'pointer' };
-
-                            return (
-                                <TableRow key={globalData.id} style={rowStyle}>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>{new Date(globalData.updatedAt).toLocaleString('en-US', { hour12: false })}</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>11M</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{globalData.reg ?? 'N/A'}</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{globalData.ref ?? 'N/A'}</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#718dff' }}>{globalData.openBetsPoints ?? 'N/A'}</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{globalData.p2pPoints ?? 'N/A'}</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.gameUserBetOpen ?? 'N/A'}</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalData.usersPoints ?? 'N/A'}</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{adjustedFund}</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalData.margin ?? 'N/A'}</TableCell>
-                                    <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(totalSum * 100) / 100}</TableCell>
-                                </TableRow>
-                            );
-                        })}
+                    {renderTableRow(globalDataFirst, false)}
+                    {globalDataList.map(data => renderTableRow(data))}
                 </TableBody>
             </Table>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
