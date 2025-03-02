@@ -7,21 +7,11 @@ import Loading from "@/app/(root)/loading";
 import { USERS_ALL_CLOSED_4 } from "@/components/USERS_ALL_CLOSED_4";
 import { getUserSession } from "@/components/lib/get-user-session";
 import { redirect } from "next/navigation";
+import {USERS_ALL_CLOSED_4_A} from "@/components/USERS_ALL_CLOSED_4_A";
+import {USERS_ALL_CLOSED_2} from "@/components/USERS_ALL_CLOSED_2";
 
 export default async function Bet4ClosedPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const session = await getUserSession();
-
-    if (!session) {
-        return redirect('/');
-    }
-
-    const user = await prisma.user.findFirst({
-        where: { id: Number(session?.id) },
-    });
-
-    if (!user || user.role === 'BANED') {
-        return redirect('/');
-    }
 
     const resolvedSearchParams = await searchParams; // Await the searchParams if it's a Promise
 
@@ -52,10 +42,29 @@ export default async function Bet4ClosedPage({ searchParams }: { searchParams: P
     const totalBets4 = await prisma.betCLOSED4.count();
     const totalPages4 = Math.ceil(totalBets4 / betsPerPage);
 
+
+    if (!session) {
+        return (
+            <Container className="w-[100%]">
+                <Suspense fallback={<Loading/>}>
+                    <USERS_ALL_CLOSED_4 closedBets={closedBets4} currentPage={page} totalPages={totalPages4}/>
+                </Suspense>
+            </Container>
+        )
+    }
+
+    const user = await prisma.user.findFirst({
+        where: { id: Number(session?.id) },
+    });
+
+    if (!user || user.role === 'BANED') {
+        return <USERS_ALL_CLOSED_4 closedBets={closedBets4} currentPage={page} totalPages={totalPages4} />;
+    }
+
     return (
         <Container className="w-[100%]">
             <Suspense fallback={<Loading />}>
-                <USERS_ALL_CLOSED_4 user={user} closedBets={closedBets4} currentPage={page} totalPages={totalPages4} />
+                <USERS_ALL_CLOSED_4_A user={user} closedBets={closedBets4} currentPage={page} totalPages={totalPages4} />
             </Suspense>
         </Container>
     );

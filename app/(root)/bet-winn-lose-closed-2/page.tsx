@@ -1,28 +1,17 @@
 "use server";
 
-import { Container } from '@/components/container';
-import { prisma } from '@/prisma/prisma-client';
-import React, { Suspense } from "react";
+import {Container} from '@/components/container';
+import {prisma} from '@/prisma/prisma-client';
+import React, {Suspense} from "react";
 import Loading from "@/app/(root)/loading";
-import { USERS_ALL_CLOSED_2 } from "@/components/USERS_ALL_CLOSED_2";
+import {USERS_ALL_CLOSED_2} from "@/components/USERS_ALL_CLOSED_2";
 import {getUserSession} from "@/components/lib/get-user-session";
 import {redirect} from "next/navigation";
+import {USERS_ALL_CLOSED_2_A} from "@/components/USERS_ALL_CLOSED_2_A";
 
-export default async function Bet2ClosedPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+export default async function Bet2ClosedPage({searchParams}: { searchParams: Promise<{ page?: string }> }) {
 
     const session = await getUserSession();
-
-    if (!session) {
-        return redirect('/');
-    }
-
-    const user = await prisma.user.findFirst({
-        where: { id: Number(session?.id) },
-    });
-
-    if (!user || user.role === 'BANED') {
-        return redirect('/');
-    }
 
 
     const resolvedSearchParams = await searchParams; // Await the searchParams if it's a Promise
@@ -52,10 +41,29 @@ export default async function Bet2ClosedPage({ searchParams }: { searchParams: P
     const totalBets2 = await prisma.betCLOSED.count();
     const totalPages2 = Math.ceil(totalBets2 / betsPerPage);
 
+    if (!session) {
+        return (
+            <Container className="w-[100%]">
+                <Suspense fallback={<Loading/>}>
+                    <USERS_ALL_CLOSED_2 closedBets={closedBets2} currentPage={page} totalPages={totalPages2}/>
+                </Suspense>
+            </Container>
+        )
+    }
+
+    const user = await prisma.user.findFirst({
+        where: {id: Number(session?.id)},
+    });
+
+    if (!user || user.role === 'BANED') {
+        return <USERS_ALL_CLOSED_2 closedBets={closedBets2} currentPage={page} totalPages={totalPages2}/>;
+    }
+
+
     return (
         <Container className="w-[100%]">
-            <Suspense fallback={<Loading />}>
-                <USERS_ALL_CLOSED_2 user={user} closedBets={closedBets2} currentPage={page} totalPages={totalPages2} />
+            <Suspense fallback={<Loading/>}>
+                <USERS_ALL_CLOSED_2_A user={user} closedBets={closedBets2} currentPage={page} totalPages={totalPages2}/>
             </Suspense>
         </Container>
     );
