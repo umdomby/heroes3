@@ -44,6 +44,15 @@ async function fetchGlobalData(page: number): Promise<GlobalData[]> {
     return data;
 }
 
+async function fetchGlobalFirst() {
+
+    const data = await prisma.globalData.findFirst({
+        where: {id: 1}
+    });
+
+    return data;
+}
+
 async function fetchTotalCount(): Promise<number> {
     const count = await prisma.globalData.count();
     return count;
@@ -57,6 +66,16 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
     const globalDataList = await fetchGlobalData(currentPage);
     const totalCount = await fetchTotalCount();
     const totalPages = Math.ceil(totalCount / 27);
+
+    const globalDataFirst = await fetchGlobalFirst();
+
+    const totalSumFirst =
+        (globalDataFirst.openBetsPoints ?? 0) +
+        (globalDataFirst.usersPoints ?? 0) +
+        (globalDataFirst.betFund ?? 0) +
+        (globalDataFirst.margin ?? 0) +
+        (globalDataFirst.gameUserBetOpen ?? 0) +
+        (globalDataFirst.p2pPoints ?? 0);
 
     if (globalDataList.length === 0) {
         return <div>Нет доступных данных</div>;
@@ -80,6 +99,22 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Sum</TableHead>
                     </TableRow>
                 </TableHeader>
+
+                <TableBody>
+                    <TableRow>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>{new Date(globalDataFirst.updatedAt).toLocaleString('en-US', { hour12: false })}</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>11M</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{globalDataFirst.reg ?? 'N/A'}</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{globalDataFirst.ref ?? 'N/A'}</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#718dff' }}>{globalDataFirst.openBetsPoints ?? 'N/A'}</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{globalDataFirst.p2pPoints ?? 'N/A'}</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalDataFirst.gameUserBetOpen ?? 'N/A'}</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{globalDataFirst.usersPoints ?? 'N/A'}</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{globalDataFirst.betFund ?? 'N/A'}</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{globalDataFirst.margin ?? 'N/A'}</TableCell>
+                        <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(totalSumFirst * 100) / 100}</TableCell>
+                    </TableRow>
+                </TableBody>
                 <TableBody>
                     {globalDataList
                         .slice(0, -1) // Исключаем последнюю запись

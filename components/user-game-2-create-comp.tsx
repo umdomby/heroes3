@@ -201,7 +201,7 @@ export const UserGame2CreateComp: React.FC<Props> = ({ user, categories, product
                         name="gameUserBetOpen"
                         render={({field}) => (
                             <FormItem>
-                                <FormLabel>Создать событие для ставок. {user.role !== "ADMIN" && user.role !== "USER_BET" && <span> Обратитесь к администратору, чтобы создавать ставки на ваши матчи</span>}</FormLabel>
+                                <FormLabel>Создать событие для ставок. {user.role !== "ADMIN" && user.role !== "USER_BET" && <span> Обратитесь к администратору, чтобы создавать ставки</span>}</FormLabel>
                                 <FormControl>
                                     <input
                                         className="ml-3"
