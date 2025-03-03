@@ -75,7 +75,14 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
 
         eventSource.onerror = (event: Event) => {
             console.error('SSE connection error:', event);
-            eventSource.close();
+            // Попробуйте повторно подключиться через некоторое время
+            setTimeout(() => {
+                eventSource.close();
+                setOpenOrders([]);
+                // Попробуйте снова открыть соединение
+                const newEventSource = new EventSource(`/api/order-p2p-pending?userId=${user.id}`);
+                // Повторите привязку обработчиков событий
+            }, 5000);
         };
 
         return () => {
