@@ -10,7 +10,6 @@ export default async function ReferralPage({
     params: Promise<{ id: string }>;
 }) {
     // Сохраняем IP-адрес пользователя
-    try {
     const { id } = await params;
     const userId = Number(id);
     console.log('userId:', userId);
@@ -60,6 +59,7 @@ export default async function ReferralPage({
     if(ip === 'unknown' || ip === 'undefined') {
         return redirect('/');
     }
+    try {
         await referralUserIpAddress(userId, ip);
     } catch (error) {
         console.error('Ошибка при сохранении IP адреса:', error);
