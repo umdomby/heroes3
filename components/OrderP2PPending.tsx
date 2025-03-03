@@ -12,6 +12,7 @@ import {
     confirmSellOrderCreator,
 } from '@/app/actions';
 import Link from "next/link";
+import useSWR from "swr";
 
 interface OrderBankDetail {
     name: string;
@@ -53,9 +54,25 @@ interface Props {
     user: User;
 }
 
-export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className}) => {
-    const [orders, setOpenOrders] = useState<OrderP2PWithUser[]>(openOrders as OrderP2PWithUser[]);
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
+export const OrderP2PPending: React.FC<Props> = ({ user, openOrders: initialOpenOrders, className }) => {
+    const [orders, setOrders] = useState<OrderP2PWithUser[]>(initialOpenOrders as OrderP2PWithUser[]);
+
+    // Используем SWR для периодического обновления данных
+    const { data: swrOrders, error } = useSWR<OrderP2PWithUser[]>(`/api/order-p2p-pending-swr?userId=${user.id}`, fetcher, {
+        refreshInterval: 5000, // Опционально: периодическое обновление
+        revalidateOnFocus: true, // Обновление при фокусе на вкладке
+    });
+
+    // Обновляем состояние, когда SWR получает новые данные
+    useEffect(() => {
+        if (swrOrders) {
+            setOrders(swrOrders);
+        }
+    }, [swrOrders]);
+
+    // Используем SSE для получения обновлений в реальном времени
     useEffect(() => {
         const eventSource = new EventSource(`/api/order-p2p-pending?userId=${user.id}`);
 
@@ -67,7 +84,7 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                     return;
                 }
 
-                setOpenOrders(data.openOrders as OrderP2PWithUser[]);
+                setOrders(data.openOrders as OrderP2PWithUser[]);
             } catch (error) {
                 console.error('Error parsing SSE data:', error);
             }
@@ -77,9 +94,6 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
             console.error('SSE connection error:', event);
             // Попробуйте повторно подключиться через некоторое время
             setTimeout(() => {
-                //eventSource.close();
-                setOpenOrders([]);
-                // Попробуйте снова открыть соединение
                 const newEventSource = new EventSource(`/api/order-p2p-pending?userId=${user.id}`);
                 newEventSource.onmessage = eventSource.onmessage;
                 newEventSource.onerror = eventSource.onerror;
@@ -90,6 +104,10 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
             eventSource.close();
         };
     }, [user.id]);
+
+    if (error) return <div>Failed to load</div>;
+    if (!orders) return <div>Loading...</div>;
+
 
     function isOrderBankDetail(detail: any): detail is OrderBankDetail {
         return (
