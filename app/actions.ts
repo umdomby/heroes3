@@ -1804,7 +1804,7 @@ export async function clientCreateBet(formData: any) {
         throw new Error('Failed to create bet. Please try again.');
     }
 } // создание ставок
-export async function placeBet(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
+export async function placeBet(formData: { betId: number; userId: number; userRole: UserRole; amount: number; player: PlayerChoice }) {
     try {
         console.log('Запуск функции placeBet с formData:', formData);
 
@@ -1827,7 +1827,7 @@ export async function placeBet(formData: { betId: number; userId: number; amount
             throw new Error('Ставка недоступна для участия');
         }
 
-        if (bet.suspendedBet) {
+        if (bet.suspendedBet && formData.userRole !== "ADMIN") {
             throw new Error('Ставки на это событие приостановлены');
         }
 
@@ -2408,7 +2408,7 @@ export async function clientCreateBet3(formData: any) {
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }// создание ставок на 3 игрока
-export async function placeBet3(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
+export async function placeBet3(formData: { betId: number; userId: number; userRole: UserRole; amount: number; player: PlayerChoice }) {
     try {
         console.log('Запуск функции placeBet3 с formData:', formData);
 
@@ -2431,7 +2431,7 @@ export async function placeBet3(formData: { betId: number; userId: number; amoun
             throw new Error('Ставка недоступна для участия');
         }
 
-        if (bet.suspendedBet) {
+        if (bet.suspendedBet && formData.userRole !== "ADMIN") {
             throw new Error('Ставки на это событие приостановлены');
         }
         const user = await prisma.user.findUnique({
@@ -3041,7 +3041,7 @@ function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initB
 }// Функция для расчета максимальных ставок на 4 игрока
 // ставки на 4 игрока
 // Function to place a bet for four players
-export async function placeBet4(formData: { betId: number; userId: number; amount: number; player: PlayerChoice }) {
+export async function placeBet4(formData: { betId: number; userId: number; userRole: UserRole; amount: number; player: PlayerChoice }) {
     try {
         console.log('Запуск функции placeBet4 с formData:', formData);
 
@@ -3064,7 +3064,7 @@ export async function placeBet4(formData: { betId: number; userId: number; amoun
             throw new Error('Ставка недоступна для участия');
         }
 
-        if (bet.suspendedBet) {
+        if (bet.suspendedBet && formData.userRole !== "ADMIN") {
             throw new Error('Ставки на это событие приостановлены');
         }
 

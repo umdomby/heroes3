@@ -97,8 +97,13 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
             <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{data.p2pPoints ?? 'N/A'}</TableCell>
             <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{data.gameUserBetOpen ?? 'N/A'}</TableCell>
             <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{data.usersPoints ?? 'N/A'}</TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>{includeInitialFund ? 1000000 + (data.betFund ?? 0) : data.betFund ?? 'N/A'}</TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{data.margin ?? 'N/A'}</TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>
+                {includeInitialFund
+                    ? 1000000 + Math.floor((data.betFund ?? 0) * 100) / 100
+                    : data.betFund !== null && data.betFund !== undefined
+                        ? Math.floor(data.betFund * 100) / 100
+                        : 'N/A'}
+            </TableCell>            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{data.margin ?? 'N/A'}</TableCell>
             <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(calculateTotalSum(data, includeInitialFund) * 100) / 100}</TableCell>
         </TableRow>
     );

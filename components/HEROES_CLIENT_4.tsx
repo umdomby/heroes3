@@ -6,7 +6,7 @@ import {
     PlayerChoice,
     User,
     BetParticipant,
-    BetStatus,
+    BetStatus, Product, Category, ProductItem,
 } from "@prisma/client";
 import useSWR from "swr";
 import {Button} from "@/components/ui/button";
@@ -60,10 +60,13 @@ interface Bet extends PrismaBet4 {
     status: BetStatus;
     description: string | null; // Change this line
     createdAt: Date;
+    product?: Product;
+    category?: Category;
+    productItem?: ProductItem;
 }
 
 interface Props {
-    user: User | null;
+    user: User;
     className?: string;
 }
 
@@ -256,6 +259,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
             const response = await placeBet4({
                 betId: bet.id,
                 userId: user.id,
+                userRole: user.role,
                 amount,
                 player,
             });
@@ -468,12 +472,26 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                             <AccordionItem value={`item-${bet.id}`}>
                                 <AccordionTrigger className="relative">
                                     <span
-                                        className={`absolute top-0 left-1 transform -translate-x-1 -translate-y-1 text-sm p-1 rounded shadow ${
+                                        className={`absolute top-0 left-1 transform -translate-x-1 -translate-y-1 text-xs p-1 rounded shadow ${
                                             bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
                                         }`}
                                     >
-                                    № {bet.id}-4 <span
-                                        className="text-green-800">{new Date(bet.createdAt).toLocaleString()}</span> {bet?.description}
+                                    № {bet.id}-4
+                                        {" "}{bet?.description}
+                                        <span className="text-amber-500">
+                                        {bet.category && (
+                                            <span> {bet.category.name}</span>
+                                        )}
+                                            {bet.product && (
+                                                <span> {bet.product.name}</span>
+                                            )}
+                                            {bet.productItem && (
+                                                <span> {bet.productItem.name}</span>
+                                            )}
+                                    </span>
+                                      </span>
+                                    <span className="text-green-600 absolute right-1 transform -translate-y-9 text-xs">
+                                        {new Date(bet.createdAt).toLocaleString()}
                                     </span>
                                     <Table>
                                         <TableBody>
@@ -780,7 +798,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                         </div>
                                     )}
 
-                                    {bet.status === "OPEN" && !bet.suspendedBet ? (
+                                    {bet.status === "OPEN" && (user.role === "ADMIN" || !bet.suspendedBet) ? (
                                         <div>
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                                 <div className="flex gap-2 m-2">
