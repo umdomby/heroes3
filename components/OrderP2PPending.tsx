@@ -81,7 +81,8 @@ export const OrderP2PPending: React.FC<Props> = ({ user, openOrders, className})
                 setOpenOrders([]);
                 // Попробуйте снова открыть соединение
                 const newEventSource = new EventSource(`/api/order-p2p-pending?userId=${user.id}`);
-                // Повторите привязку обработчиков событий
+                newEventSource.onmessage = eventSource.onmessage;
+                newEventSource.onerror = eventSource.onerror;
             }, 5000);
         };
 
