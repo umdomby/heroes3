@@ -28,6 +28,7 @@ export async function GET(request: Request) {
                 category: true,
                 product: true,
                 productItem: true,
+                turnirBet: true,
             },
         });
 
