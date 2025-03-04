@@ -24,11 +24,10 @@ const createBetSchema3 = z.object({
     initBetPlayer1: z.number().int().min(10, { message: 'Минимальная ставка на игрока 1: 10 баллов' }),
     initBetPlayer2: z.number().int().min(10, { message: 'Минимальная ставка на игрока 2: 10 баллов' }),
     initBetPlayer3: z.number().int().min(10, { message: 'Минимальная ставка на игрока 3: 10 баллов' }),
-    categoryId: z.coerce.number().int(),
-    productId: z.coerce.number().int(),
-    productItemId: z.coerce.number().int(),
-    description: z.string().optional(), // Add description field
-    turnirBetId: z.coerce.number().int(), // Добавлено поле для TurnirBet
+    categoryId: z.coerce.number().int().nullable().optional(),
+    productId: z.coerce.number().int().nullable().optional(),
+    productItemId: z.coerce.number().int().nullable().optional(),
+    turnirBetId: z.coerce.number().int().nullable().optional(),
 });
 
 interface Props {
@@ -51,11 +50,11 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
             initBetPlayer1: 333,
             initBetPlayer2: 333,
             initBetPlayer3: 333,
-            categoryId: categories[0]?.id,
-            productId: products[0]?.id,
-            productItemId: productItems[0]?.id,
-            description: 'online', // Default value for description
-            turnirBetId: turnirBet[0]?.id || undefined,
+            categoryId: undefined, // Установлено значение по умолчанию на undefined
+            productId: undefined,  // Установлено значение по умолчанию на undefined
+            productItemId: undefined, // Установлено значение по умолчанию на undefined
+            turnirBetId: undefined, // Установлено значение по умолчанию на undefined
+            description: 'online',
         },
     });
 
@@ -260,6 +259,7 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
                                 <FormLabel>Map</FormLabel>
                                 <FormControl>
                                     <select {...field}>
+                                        <option value="">None</option> {/* Опция для выбора null */}
                                         {categories.map((category) => (
                                             <option key={category.id} value={category.id}>{category.name}</option>
                                         ))}
@@ -279,6 +279,7 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
                                 <FormLabel>Size</FormLabel>
                                 <FormControl>
                                     <select {...field}>
+                                        <option value="">None</option> {/* Опция для выбора null */}
                                         {products.map((product) => (
                                             <option key={product.id} value={product.id}>{product.name}</option>
                                         ))}
@@ -298,6 +299,7 @@ export const CreateBetForm3: React.FC<Props> = ({ user, categories, products, pr
                                 <FormLabel>Product Item</FormLabel>
                                 <FormControl>
                                     <select {...field}>
+                                        <option value="">None</option> {/* Опция для выбора null */}
                                         {productItems.map((productItem) => (
                                             <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
                                         ))}
