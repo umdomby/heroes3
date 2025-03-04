@@ -107,7 +107,7 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                     </Link>
                                     <Link href="/add-player">
                                         <DropdownMenuRadioItem value="add-player" className="cursor-pointer">
-                                            ADD PLAYER
+                                            PLAYER
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/admin-user">
