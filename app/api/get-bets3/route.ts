@@ -19,6 +19,7 @@ export async function GET() {
                 category: true,
                 product: true,
                 productItem: true,
+                turnirBet: true,
             },
         });
 

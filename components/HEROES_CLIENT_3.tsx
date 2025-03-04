@@ -6,7 +6,7 @@ import {
     PlayerChoice,
     User,
     BetParticipant,
-    BetStatus, Product, Category, ProductItem,
+    BetStatus, Product, Category, ProductItem, TurnirBet,
 } from "@prisma/client";
 import useSWR from "swr";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,7 @@ interface Bet extends PrismaBet3 {
     product?: Product;
     category?: Category;
     productItem?: ProductItem;
+    turnirBet?: TurnirBet;
 }
 
 interface Props {
@@ -499,18 +500,27 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                             bet?.description
                         )}
                         <span className="text-lime-500">
-                            {bet.category && (
-                                <span> {bet.category.name}</span>
-                            )}
-                            {bet.product && (
-                                <span> {bet.product.name}</span>
-                            )}
-                            {bet.productItem && (
-                                <span> {bet.productItem.name}</span>
+
+                            {bet.turnirBet && (
+                                bet.turnirBet.name !== null && <span>
+                                {bet.category && (
+                                    <span> {bet.category.name}</span>
+                                )}
+                                    {bet.product && (
+                                        <span> {bet.product.name}</span>
+                                    )}
+                                    {bet.productItem && (
+                                        <span> {bet.productItem.name}</span>
+                                    )}
+                            </span>
                             )}
                         </span>
+                        {bet.turnirBet && (
+                            <span className="text-yellow-500"> {bet.turnirBet.name}</span>
+                        )}
+
                     </span>
-                                    <span className="text-green-600 absolute right-1 transform -translate-y-12 text-xs">
+                                    <span className="text-green-600 absolute right-1 transform -translate-y-10 text-xs">
                         {new Date(bet.createdAt).toLocaleString()}
                     </span>
                                     <Table>

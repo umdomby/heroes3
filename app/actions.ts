@@ -2390,6 +2390,7 @@ export async function clientCreateBet3(formData: any) {
                 totalBetPlayer3: 0,
                 margin: 0,
                 description: formData.description,
+                turnirBetId: formData.turnirBetId || null,
             },
         });
 
@@ -2629,6 +2630,7 @@ export async function closeBet3(betId: number, winnerId: number) {
                     overlapPlayer3: 0, // Инициализируем overlapPlayer3
                     returnBetAmount: 0, // Инициализируем returnBetAmount
                     globalDataBetFund: 0, // Инициализируем globalDataBetFund
+                    turnirBetId: bet.turnirBetId || null,
                 },
             });
 
@@ -2854,6 +2856,7 @@ export async function closeBetDraw3(betId: number) {
                     overlapPlayer1: bet.overlapPlayer1,
                     overlapPlayer2: bet.overlapPlayer2,
                     overlapPlayer3: bet.overlapPlayer3,
+                    turnirBetId: bet.turnirBetId || null,
                 },
             });
 
@@ -3009,6 +3012,7 @@ export async function clientCreateBet4(formData: any) {
                 totalBetPlayer4: 0,
                 margin: 0,
                 description: formData.description,
+                turnirBetId: formData.turnirBetId || null,
             },
         });
 
@@ -3289,6 +3293,7 @@ export async function closeBet4(betId: number, winnerId: number) {
                     overlapPlayer4: 0, // Инициализируем overlapPlayer4
                     returnBetAmount: 0, // Инициализируем returnBetAmount
                     globalDataBetFund: 0, // Инициализируем globalDataBetFund
+                    turnirBetId: bet.turnirBetId || null,
                 },
             });
 
@@ -3525,6 +3530,7 @@ export async function closeBetDraw4(betId: number) {
                     overlapPlayer2: bet.overlapPlayer2,
                     overlapPlayer3: bet.overlapPlayer3,
                     overlapPlayer4: bet.overlapPlayer4,
+                    turnirBetId: bet.turnirBetId || null,
                 },
             });
 

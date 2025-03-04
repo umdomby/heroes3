@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import React, { useState } from 'react';
-import { Category, Product, ProductItem, User, Player } from '@prisma/client';
+import {Category, Product, ProductItem, User, Player, TurnirBet} from '@prisma/client';
 import { clientCreateBet4 } from "@/app/actions"; // Assuming you have a separate action for 4 players
 
 const createBetSchema4 = z.object({
@@ -30,6 +30,7 @@ const createBetSchema4 = z.object({
     productId: z.coerce.number().int(),
     productItemId: z.coerce.number().int(),
     description: z.string().optional(), // Add description field
+    turnirBetId: z.coerce.number().int(), // Добавлено поле для TurnirBet
 });
 
 interface Props {
@@ -39,9 +40,10 @@ interface Props {
     productItems: ProductItem[];
     players: Player[];
     createBet: typeof clientCreateBet4;
+    turnirBet: TurnirBet[]; // Добавлено свойство для TurnirBet
 }
 
-export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, productItems, players, createBet }) => {
+export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, productItems, players, turnirBet, createBet }) => {
     const form = useForm<z.infer<typeof createBetSchema4>>({
         resolver: zodResolver(createBetSchema4),
         defaultValues: {
@@ -57,6 +59,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
             productId: products[0]?.id,
             productItemId: productItems[0]?.id,
             description: 'online', // Default value for description
+            turnirBetId: turnirBet[0]?.id || undefined,
         },
     });
 
@@ -349,6 +352,25 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                     <select {...field}>
                                         {productItems.map((productItem) => (
                                             <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="turnirBetId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Turnir Bet</FormLabel>
+                                <FormControl>
+                                    <select {...field}>
+                                        <option value="">None</option> {/* Опция для выбора null */}
+                                        {turnirBet.map((turnirBet) => (
+                                            <option key={turnirBet.id} value={turnirBet.id}>{turnirBet.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
