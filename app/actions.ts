@@ -4195,3 +4195,55 @@ export async function editDescriptionBet4(betId: number, newDescription: string)
         throw new Error("Failed to update bet description");
     }
 }
+
+// Определяем интерфейс для параметров функции
+interface AdminTurnirBetPageParams {
+    action: 'add' | 'edit' | 'delete'; // Указываем возможные значения для action
+    id?: number; // id может быть необязательным, если действие - 'add'
+    turnirName: string;
+}
+
+// Функция для обработки операций с турнирами
+export async function adminTrurnirBetPage({ action, id, turnirName }: AdminTurnirBetPageParams) {
+    const currentUser = await getUserSession();
+
+    if (!currentUser) {
+        throw new Error('Пользователь не найден');
+    }
+
+    if (currentUser.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        if (action === 'add') {
+            // Проверяем, существует ли уже турнир с таким именем
+            const existingTurnir = await prisma.turnirBet.findUnique({
+                where: { name: turnirName },
+            });
+
+            if (existingTurnir) {
+                return { success: false, message: 'Турнир с таким именем уже существует' };
+            }
+
+            const newTurnir = await prisma.turnirBet.create({
+                data: { name: turnirName },
+            });
+            return { success: true, id: newTurnir.id };
+        } else if (action === 'edit') {
+            await prisma.turnirBet.update({
+                where: { id },
+                data: { name: turnirName },
+            });
+            return { success: true};
+        } else if (action === 'delete') {
+            await prisma.turnirBet.delete({
+                where: { id },
+            });
+            return { success: true };
+        }
+    } catch (error) {
+        console.error('Ошибка при выполнении операции с турниром:', error);
+        throw new Error('Не удалось выполнить операцию');
+    }
+}

@@ -99,22 +99,14 @@ model Turnir {
 }
 
 model TurnirBet {
-  id           Int        @id @default(autoincrement())
-  bet          Bet        @relation(fields: [betId], references: [id])
-  betId        Int
-  bet3         Bet3       @relation(fields: [bet3Id], references: [id])
-  bet3Id       Int
-  bet4         Bet4       @relation(fields: [bet4Id], references: [id])
-  bet4Id       Int
-  betCLOSED    BetCLOSED  @relation(fields: [betCLOSEDId], references: [id])
-  betCLOSEDId  Int
-  betCLOSED3   BetCLOSED3 @relation(fields: [betCLOSED3Id], references: [id])
-  betCLOSED3Id Int
-  betCLOSED4   BetCLOSED4 @relation(fields: [betCLOSED4Id], references: [id])
-  betCLOSED4Id Int
-  turnirName   String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  bets        Bet[]
+  betsCLOSED  BetCLOSED[]
+  bets3       Bet3[] // Обратная связь с Bet3
+  betsCLOSED3 BetCLOSED3[] // Обратная связь с BetCLOSED3
+  bets4       Bet4[] // Обратная связь с Bet3
+  betsCLOSED4 BetCLOSED4[] // Обратная связь с BetCLOSED3
 }
 
 enum StatusTurnir {
@@ -410,7 +402,8 @@ model Bet {
   creatorId       Int
   status          BetStatus        @default(OPEN) // если статус = CLOSED то ставка закрыта, и перемещается в model BetCLOSED
   participants    BetParticipant[]
-  turnirBet       TurnirBet[]
+  turnirBetId     Int?
+  turnirBet       TurnirBet?       @relation(fields: [turnirBetId], references: [id])
   categoryId      Int?
   category        Category?        @relation(fields: [categoryId], references: [id])
   productId       Int?
@@ -467,7 +460,8 @@ model BetCLOSED {
   creator            User                   @relation("BetsCLOSEDCreated", fields: [creatorId], references: [id])
   creatorId          Int
   status             BetStatus              @default(CLOSED) // Статус ставки
-  turnirBet          TurnirBet[]
+  turnirBetId        Int?
+  turnirBet          TurnirBet?             @relation(fields: [turnirBetId], references: [id])
   categoryId         Int?
   category           Category?              @relation(fields: [categoryId], references: [id])
   productId          Int?
@@ -527,7 +521,8 @@ model Bet3 {
   creatorId       Int
   status          BetStatus         @default(OPEN) // если статус = CLOSED то ставка закрыта, и перемещается в model BetCLOSED
   participants    BetParticipant3[] // Обратная связь с BetParticipant3
-  turnirBet       TurnirBet[]
+  turnirBetId     Int?
+  turnirBet       TurnirBet?        @relation(fields: [turnirBetId], references: [id])
   categoryId      Int?
   category        Category?         @relation(fields: [categoryId], references: [id])
   productId       Int?
@@ -588,9 +583,10 @@ model BetCLOSED3 {
   overlapPlayer2      Float // Перекрытие на игрока 2
   overlapPlayer3      Float // Перекрытие на игрока 3
   margin              Float? // вся маржа события
-  turnirBet           TurnirBet[]
   creator             User                    @relation("BetsCLOSEDCreated3", fields: [creatorId], references: [id])
   creatorId           Int
+  turnirBetId         Int?
+  turnirBet           TurnirBet?              @relation(fields: [turnirBetId], references: [id])
   status              BetStatus               @default(CLOSED) // Статус ставки
   categoryId          Int?
   category            Category?               @relation(fields: [categoryId], references: [id])
@@ -658,7 +654,8 @@ model Bet4 {
   creatorId       Int
   status          BetStatus         @default(OPEN) // если статус = CLOSED то ставка закрыта, и перемещается в model BetCLOSED
   participants    BetParticipant4[] // Обратная связь с BetParticipant4
-  turnirBet       TurnirBet[]
+  turnirBetId     Int?
+  turnirBet       TurnirBet?        @relation(fields: [turnirBetId], references: [id])
   categoryId      Int?
   category        Category?         @relation(fields: [categoryId], references: [id])
   productId       Int?
@@ -730,7 +727,8 @@ model BetCLOSED4 {
   creatorId           Int
   status              BetStatus               @default(CLOSED) // Статус ставки
   categoryId          Int?
-  turnirBet           TurnirBet[]
+  turnirBetId         Int?
+  turnirBet           TurnirBet?              @relation(fields: [turnirBetId], references: [id])
   category            Category?               @relation(fields: [categoryId], references: [id])
   productId           Int?
   product             Product?                @relation(fields: [productId], references: [id])
