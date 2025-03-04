@@ -4146,9 +4146,52 @@ export async function editDescriptionBet2(betId: number, newDescription: string)
     }
 }
 
-export async function editDescriptionBet3(){
+export async function editDescriptionBet3(betId: number, newDescription: string){
+
+    const currentUser = await getUserSession();
+
+    if (!currentUser) {
+        throw new Error('Пользователь не найден');
+    }
+
+    // Проверяем, что пользователь является администратором
+    if (currentUser.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        // Update the bet's description in the database
+        await prisma.bet3.update({
+            where: { id: betId },
+            data: { description: newDescription },
+        });
+    } catch (error) {
+        console.error("Error updating bet description:", error);
+        throw new Error("Failed to update bet description");
+    }
 
 }
-export async function editDescriptionBet4(){
+export async function editDescriptionBet4(betId: number, newDescription: string){
 
+    const currentUser = await getUserSession();
+
+    if (!currentUser) {
+        throw new Error('Пользователь не найден');
+    }
+
+    // Проверяем, что пользователь является администратором
+    if (currentUser.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        // Update the bet's description in the database
+        await prisma.bet4.update({
+            where: { id: betId },
+            data: { description: newDescription },
+        });
+    } catch (error) {
+        console.error("Error updating bet description:", error);
+        throw new Error("Failed to update bet description");
+    }
 }

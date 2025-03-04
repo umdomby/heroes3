@@ -12,7 +12,7 @@ import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import {placeBet, closeBet, closeBetDraw, suspendedBetCheck} from "@/app/actions";
+import {placeBet, closeBet, closeBetDraw, suspendedBetCheck, editDescriptionBet2} from "@/app/actions";
 import { unstable_batchedUpdates } from "react-dom";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"; // Импортируем компоненты диалогового окна
@@ -379,6 +379,29 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
     };
 
 
+    // Внутри компонента HEROES_CLIENT_2
+    const [descriptionInput, setDescriptionInput] = useState<{ [key: number]: string }>({});
+
+    // Функция для обработки изменения описания
+    const handleDescriptionChange = (betId: number, newDescription: string) => {
+        setDescriptionInput((prev) => ({
+            ...prev,
+            [betId]: newDescription,
+        }));
+    };
+
+    // Функция для обработки нажатия клавиши Enter
+    const handleDescriptionKeyPress = async (event: React.KeyboardEvent<HTMLInputElement>, betId: number) => {
+        if (event.key === "Enter") {
+            try {
+                await editDescriptionBet2(betId, descriptionInput[betId]);
+                mutate(); // Обновляем данные ставок
+            } catch (error) {
+                console.error("Ошибка при обновлении описания:", error);
+            }
+        }
+    };
+
     if (!session) {
         return redirect("/");
     }
@@ -426,28 +449,39 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                         <Accordion type="single" collapsible>
                             <AccordionItem value={`item-${bet.id}`}>
                                 <AccordionTrigger className="relative">
-                                    <span
-                                        className={`absolute top-0 left-1 transform -translate-x-1 -translate-y-1 text-xs p-1 rounded shadow ${
-                                            bet?.description === 'online' ? 'text-green-500' : 'text-red-500'
-                                        }`}
-                                    >
-                                    № {bet.id}-2
-                                        {" "}{bet?.description}
-                                        <span className="text-amber-500">
-                                        {bet.category && bet?.description === 'online' && (
+                                <span
+                                    className={`absolute top-0 left-1 transform -translate-x-1 -translate-y-1 text-xs p-1 rounded shadow ${
+                                        bet?.description === 'online' ? 'text-green-500' : 'text-amber-500'
+                                    }`}
+                                >
+                                   <span className="text-teal-500">№ {bet.id}-2</span>
+                                    {" "}
+                                    {user.role === 'ADMIN' ? (
+                                        <input
+                                            type="text"
+                                            value={descriptionInput[bet.id] !== undefined ? descriptionInput[bet.id] : bet.description || ""}
+                                            onChange={(e) => handleDescriptionChange(bet.id, e.target.value)}
+                                            onKeyPress={(e) => handleDescriptionKeyPress(e, bet.id)}
+                                            className="bg-transparent border-b border-gray-500 focus:outline-none"
+                                        />
+                                    ) : (
+                                        bet?.description
+                                    )}
+                                    <span className="text-lime-500">
+                                        {bet.category && (
                                             <span> {bet.category.name}</span>
                                         )}
-                                            {bet.product && bet?.description === 'online' && (
-                                                <span> {bet.product.name}</span>
-                                            )}
-                                            {bet.productItem && bet?.description === 'online' && (
-                                                <span> {bet.productItem.name}</span>
-                                            )}
+                                        {bet.product && (
+                                            <span> {bet.product.name}</span>
+                                        )}
+                                        {bet.productItem && (
+                                            <span> {bet.productItem.name}</span>
+                                        )}
                                     </span>
-                                      </span>
-                                    <span className="text-green-600 absolute right-1 transform -translate-y-10 text-xs">
-                                        {new Date(bet.createdAt).toLocaleString()}
-                                    </span>
+                                </span>
+                                                <span className="text-green-600 absolute right-1 transform -translate-y-10 text-xs">
+                                    {new Date(bet.createdAt).toLocaleString()}
+                                </span>
                                     <Table>
                                         <TableBody>
                                             <TableRow>
