@@ -479,13 +479,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                     № {bet.id}-4
                                         {" "}{bet?.description}
                                         <span className="text-amber-500">
-                                        {bet.category && (
+                                        {bet.category && bet?.description === 'online' && (
                                             <span> {bet.category.name}</span>
                                         )}
-                                            {bet.product && (
+                                            {bet.product && bet?.description === 'online' && (
                                                 <span> {bet.product.name}</span>
                                             )}
-                                            {bet.productItem && (
+                                            {bet.productItem && bet?.description === 'online' && (
                                                 <span> {bet.productItem.name}</span>
                                             )}
                                     </span>
