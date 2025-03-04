@@ -15,6 +15,11 @@ function TurnirBetManager({ turnirBets }: TurnirBetManagerProps) {
     const [alertMessage, setAlertMessage] = useState('');
 
     const handleAddTurnir = async () => {
+        if (!newTurnirName.trim()) {
+            showAlert('Название турнира не может быть пустым');
+            return;
+        }
+
         try {
             const response = await adminTrurnirBetPage({ action: 'add', turnirName: newTurnirName });
             if (response && response.success && response.id !== undefined) {
