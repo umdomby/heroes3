@@ -3592,7 +3592,6 @@ interface CourseValutaParams {
     btcRate: number;
     usdtRate: number;
 }
-
 export async function setCourseValuta({ usdRate, eurRate, rubRate, belRate, btcRate, usdtRate }: CourseValutaParams) {
 
     const courseValutaData = await prisma.courseValuta.findUnique({
@@ -4040,8 +4039,6 @@ export async function deleteBetWinnLoseClosed2(betId: number) {
         throw new Error('Не удалось удалить ставку');
     }
 }
-
-
 export async function deleteBetWinnLoseClosed3(betId: number) {
     try {
         // Получаем текущую сессию пользователя
@@ -4082,8 +4079,6 @@ export async function deleteBetWinnLoseClosed3(betId: number) {
         throw new Error('Не удалось удалить ставку');
     }
 }
-
-
 export async function deleteBetWinnLoseClosed4(betId: number) {
     try {
         // Получаем текущую сессию пользователя
@@ -4123,4 +4118,37 @@ export async function deleteBetWinnLoseClosed4(betId: number) {
         console.error('Ошибка при удалении ставки:', error);
         throw new Error('Не удалось удалить ставку');
     }
+}
+
+
+export async function editDescriptionBet2(betId: number, newDescription: string) {
+
+    const currentUser = await getUserSession();
+
+    if (!currentUser) {
+        throw new Error('Пользователь не найден');
+    }
+
+    // Проверяем, что пользователь является администратором
+    if (currentUser.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        // Update the bet's description in the database
+        await prisma.bet.update({
+            where: { id: betId },
+            data: { description: newDescription },
+        });
+    } catch (error) {
+        console.error("Error updating bet description:", error);
+        throw new Error("Failed to update bet description");
+    }
+}
+
+export async function editDescriptionBet3(){
+
+}
+export async function editDescriptionBet4(){
+
 }
