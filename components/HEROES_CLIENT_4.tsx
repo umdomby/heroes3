@@ -530,7 +530,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                             )}
                         </span>
                     </span>
-                                    <span className="text-green-600 absolute right-1 transform -translate-y-10 text-xs">
+                                    <span className="text-green-600 absolute right-1 transform -translate-y-12 text-xs">
                         {new Date(bet.createdAt).toLocaleString()}
                     </span>
                                     <Table>

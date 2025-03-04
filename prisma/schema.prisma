@@ -98,6 +98,15 @@ model Turnir {
   updatedAt         DateTime       @updatedAt
 }
 
+model TurnirBet {
+  id         Int      @id @default(autoincrement())
+  bet        Bet      @relation(fields: [betId], references: [id])
+  betId      Int
+  turnirName String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
 enum StatusTurnir {
   REGISTRATION
   REGISTRATION_OFF
@@ -391,6 +400,7 @@ model Bet {
   creatorId       Int
   status          BetStatus        @default(OPEN) // если статус = CLOSED то ставка закрыта, и перемещается в model BetCLOSED
   participants    BetParticipant[]
+  turnirBet       TurnirBet[]
   categoryId      Int?
   category        Category?        @relation(fields: [categoryId], references: [id])
   productId       Int?
