@@ -17,12 +17,12 @@ function TurnirBetManager({ turnirBets }: TurnirBetManagerProps) {
     const handleAddTurnir = async () => {
         try {
             const response = await adminTrurnirBetPage({ action: 'add', turnirName: newTurnirName });
-            if (response.success) {
+            if (response && response.success && response.id !== undefined) {
                 setTurnirNames([...turnirNames, { id: response.id, name: newTurnirName }]);
                 setNewTurnirName('');
                 showAlert('Турнир успешно добавлен');
-            } else {
-                showAlert(response.message);
+            } else if (response) {
+                showAlert(response.message || 'Неизвестная ошибка');
             }
         } catch (error) {
             console.error('Ошибка при добавлении турнира:', error);
@@ -32,7 +32,7 @@ function TurnirBetManager({ turnirBets }: TurnirBetManagerProps) {
     const handleEditTurnir = async (id: number, newName: string) => {
         try {
             const response = await adminTrurnirBetPage({ action: 'edit', id, turnirName: newName });
-            if (response.success) {
+            if (response && response.success) {
                 setTurnirNames(turnirNames.map(t => t.id === id ? { ...t, name: newName } : t));
                 showAlert('Турнир успешно обновлен');
             }
@@ -43,8 +43,8 @@ function TurnirBetManager({ turnirBets }: TurnirBetManagerProps) {
 
     const handleDeleteTurnir = async (id: number) => {
         try {
-            const response = await adminTrurnirBetPage({ action: 'delete', id });
-            if (response.success) {
+            const response = await adminTrurnirBetPage({ action: 'delete', id, turnirName: '' });
+            if (response && response.success) {
                 setTurnirNames(turnirNames.filter(t => t.id !== id));
                 showAlert('Турнир успешно удален');
             }

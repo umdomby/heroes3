@@ -4198,9 +4198,9 @@ export async function editDescriptionBet4(betId: number, newDescription: string)
 
 // Определяем интерфейс для параметров функции
 interface AdminTurnirBetPageParams {
-    action: 'add' | 'edit' | 'delete'; // Указываем возможные значения для action
-    id?: number; // id может быть необязательным, если действие - 'add'
-    turnirName: string;
+    action: 'add' | 'edit' | 'delete';
+    id?: number;
+    turnirName?: string; // Сделаем turnirName необязательным
 }
 
 // Функция для обработки операций с турнирами
@@ -4217,7 +4217,10 @@ export async function adminTrurnirBetPage({ action, id, turnirName }: AdminTurni
 
     try {
         if (action === 'add') {
-            // Проверяем, существует ли уже турнир с таким именем
+            if (!turnirName) {
+                throw new Error('Название турнира не может быть пустым');
+            }
+
             const existingTurnir = await prisma.turnirBet.findUnique({
                 where: { name: turnirName },
             });
@@ -4231,11 +4234,15 @@ export async function adminTrurnirBetPage({ action, id, turnirName }: AdminTurni
             });
             return { success: true, id: newTurnir.id };
         } else if (action === 'edit') {
+            if (!turnirName) {
+                throw new Error('Название турнира не может быть пустым');
+            }
+
             await prisma.turnirBet.update({
                 where: { id },
                 data: { name: turnirName },
             });
-            return { success: true};
+            return { success: true };
         } else if (action === 'delete') {
             await prisma.turnirBet.delete({
                 where: { id },
