@@ -2,7 +2,7 @@
 import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
 import {
-    $Enums, Bet,
+    $Enums, Bet, Bet3, Bet4,
     BetStatus,
     OrderP2P,
     PlayerChoice,
@@ -2942,6 +2942,31 @@ export async function closeBetDraw3(betId: number) {
         }
     }
 }// ничья на 3 игрока
+export async function editBet3(betId: number, data: Partial<Bet3>) {
+    const session = await getUserSession();
+    if (!session || session.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+    try {
+        // Преобразуем все значения в числа, если они не null
+        const updatedData = {
+            ...data,
+            turnirBetId: data.turnirBetId ? Number(data.turnirBetId) : null,
+            categoryId: data.categoryId ? Number(data.categoryId) : null,
+            productId: data.productId ? Number(data.productId) : null,
+            productItemId: data.productItemId ? Number(data.productItemId) : null,
+        };
+
+        await prisma.bet3.update({
+            where: { id: Number(betId) },
+            data: updatedData,
+        });
+    } catch (error) {
+        console.error("Error updating bet:", error);
+        throw new Error('Не удалось обновить ставку');
+    }
+    revalidatePath('/bet-create-2');
+}
 
 export async function suspendedBetCheck4(betId: number, newValue: boolean) {
     try {
@@ -3616,6 +3641,31 @@ export async function closeBetDraw4(betId: number) {
         }
     }
 }// ничья на 4 игрока
+export async function editBet4(betId: number, data: Partial<Bet4>) {
+    const session = await getUserSession();
+    if (!session || session.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+    try {
+        // Преобразуем все значения в числа, если они не null
+        const updatedData = {
+            ...data,
+            turnirBetId: data.turnirBetId ? Number(data.turnirBetId) : null,
+            categoryId: data.categoryId ? Number(data.categoryId) : null,
+            productId: data.productId ? Number(data.productId) : null,
+            productItemId: data.productItemId ? Number(data.productItemId) : null,
+        };
+
+        await prisma.bet4.update({
+            where: { id: Number(betId) },
+            data: updatedData,
+        });
+    } catch (error) {
+        console.error("Error updating bet:", error);
+        throw new Error('Не удалось обновить ставку');
+    }
+    revalidatePath('/bet-create-2');
+}
 
 
 interface CourseValutaParams {

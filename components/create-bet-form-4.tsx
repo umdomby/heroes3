@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import React, { useState } from 'react';
-import {Category, Product, ProductItem, User, Player, TurnirBet} from '@prisma/client';
-import { clientCreateBet4 } from "@/app/actions"; // Assuming you have a separate action for 4 players
+import React, {useEffect, useState} from 'react';
+import {Category, Product, ProductItem, User, Player, TurnirBet, Bet4} from '@prisma/client';
+import {clientCreateBet4, editBet4} from "@/app/actions"; // Assuming you have a separate action for 4 players
 
 const createBetSchema4 = z.object({
     player1Id: z.coerce.number().int(),
@@ -41,9 +41,10 @@ interface Props {
     players: Player[];
     createBet: typeof clientCreateBet4;
     turnirBet: TurnirBet[]; // Добавлено свойство для TurnirBet
+    openBets: Bet4[]; // Добавлено свойство для открытых ставок
 }
 
-export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, productItems, players, turnirBet, createBet }) => {
+export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, productItems, players, turnirBet, createBet, openBets }) => {
     const form = useForm<z.infer<typeof createBetSchema4>>({
         resolver: zodResolver(createBetSchema4),
         defaultValues: {
@@ -65,6 +66,50 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
 
     const [createBetError, setCreateBetError] = useState<string | null>(null);
     const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false);
+
+    const [openBetsState, setOpenBets] = useState<Bet4[]>(openBets);
+    const [tempChanges, setTempChanges] = useState<{ [key: number]: Partial<Bet4> }>({});
+
+    useEffect(() => {
+        // Инициализируем tempChanges с текущими значениями из openBets
+        const initialChanges = openBets.reduce((acc, bet) => {
+            acc[bet.id] = {
+                turnirBetId: bet.turnirBetId,
+                categoryId: bet.categoryId,
+                productId: bet.productId,
+                productItemId: bet.productItemId,
+            };
+            return acc;
+        }, {} as { [key: number]: Partial<Bet4> });
+
+        setTempChanges(initialChanges);
+    }, [openBets]);
+
+    const handleSelectChange = (betId: number, field: string, value: any) => {
+        setTempChanges(prev => ({
+            ...prev,
+            [betId]: {
+                ...prev[betId],
+                [field]: value,
+            },
+        }));
+    };
+
+    const handleSave = async (betId: number) => {
+        const changes = tempChanges[betId];
+        if (changes) {
+            try {
+                await editBet4(betId, changes);
+                setOpenBets(prevBets => prevBets.map(bet => bet.id === betId ? { ...bet, ...changes } : bet));
+                setTempChanges(prev => {
+                    const { [betId]: _, ...rest } = prev;
+                    return rest;
+                });
+            } catch (error) {
+                console.error("Error saving bet:", error);
+            }
+        }
+    };
 
     const onSubmit = async (values: z.infer<typeof createBetSchema4>) => {
         const { initBetPlayer1, initBetPlayer2, initBetPlayer3, initBetPlayer4 } = values;
@@ -118,7 +163,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
     return (
         <div>
             <div>Ваши баллы: {user?.points}</div>
-            <div style={{ color: 'blue', marginBottom: '10px' }}>
+            <div style={{color: 'blue', marginBottom: '10px'}}>
                 Вы можете распределить только 100 баллов между четырьмя игроками. Баллы не списываются с вашего баланса.
             </div>
             <Form {...form}>
@@ -127,7 +172,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="player1Id"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Player 1</FormLabel>
                                 <FormControl>
@@ -137,7 +182,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -146,7 +191,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="player2Id"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Player 2</FormLabel>
                                 <FormControl>
@@ -156,7 +201,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -165,7 +210,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="player3Id"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Player 3</FormLabel>
                                 <FormControl>
@@ -175,7 +220,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -184,7 +229,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="player4Id"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Player 4</FormLabel>
                                 <FormControl>
@@ -194,7 +239,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -203,7 +248,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="initBetPlayer1"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Ставка на Player 1</FormLabel>
                                 <FormControl>
@@ -220,7 +265,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         }}
                                     />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -229,7 +274,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="initBetPlayer2"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Ставка на Player 2</FormLabel>
                                 <FormControl>
@@ -246,7 +291,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         }}
                                     />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -255,7 +300,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="initBetPlayer3"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Ставка на Player 3</FormLabel>
                                 <FormControl>
@@ -272,7 +317,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         }}
                                     />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -281,7 +326,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="initBetPlayer4"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Ставка на Player 4</FormLabel>
                                 <FormControl>
@@ -298,7 +343,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         }}
                                     />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -307,18 +352,19 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="categoryId"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Map</FormLabel>
                                 <FormControl>
                                     <select {...field} value={field.value ?? ""}>
-                                        <option value="">None</option> {/* Опция для выбора null */}
+                                        <option value="">None</option>
+                                        {/* Опция для выбора null */}
                                         {categories.map((category) => (
                                             <option key={category.id} value={category.id}>{category.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -327,18 +373,19 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="productId"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Size</FormLabel>
                                 <FormControl>
                                     <select {...field} value={field.value ?? ""}>
-                                        <option value="">None</option> {/* Опция для выбора null */}
+                                        <option value="">None</option>
+                                        {/* Опция для выбора null */}
                                         {products.map((product) => (
                                             <option key={product.id} value={product.id}>{product.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -347,18 +394,20 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="productItemId"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Product Item</FormLabel>
                                 <FormControl>
                                     <select {...field} value={field.value ?? ""}>
-                                        <option value="">None</option> {/* Опция для выбора null */}
+                                        <option value="">None</option>
+                                        {/* Опция для выбора null */}
                                         {productItems.map((productItem) => (
-                                            <option key={productItem.id} value={productItem.id}>{productItem.name}</option>
+                                            <option key={productItem.id}
+                                                    value={productItem.id}>{productItem.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -366,18 +415,19 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="turnirBetId"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Turnir Bet</FormLabel>
                                 <FormControl>
                                     <select {...field} value={field.value ?? ""}>
-                                        <option value="">None</option> {/* Опция для выбора null */}
+                                        <option value="">None</option>
+                                        {/* Опция для выбора null */}
                                         {turnirBet.map((turnirBet) => (
                                             <option key={turnirBet.id} value={turnirBet.id}>{turnirBet.name}</option>
                                         ))}
                                     </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -386,7 +436,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <FormField
                         control={form.control}
                         name="description"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormLabel>Description</FormLabel>
                                 <FormControl>
@@ -396,7 +446,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                                         {...field}
                                     />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />
@@ -405,7 +455,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     <Button type="submit">Create Bet</Button>
 
                     {/* Error Message */}
-                    {createBetError && <p style={{ color: 'red' }}>{createBetError}</p>}
+                    {createBetError && <p style={{color: 'red'}}>{createBetError}</p>}
                 </form>
             </Form>
 
@@ -417,6 +467,65 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
                     </div>
                 </div>
             )}
+
+
+            <div>
+                <h2>Открытые ставки</h2>
+                {openBetsState.map(bet => (
+                    <div key={bet.id} className="bet-item mb-4 p-4 border rounded">
+                        <div className="flex flex-col space-y-2">
+                            <span>Ставка ID: {bet.id}</span>
+                            <select
+                                className="p-2 border rounded"
+                                value={tempChanges[bet.id]?.turnirBetId ?? bet.turnirBetId ?? ""}
+                                onChange={(e) => handleSelectChange(bet.id, 'turnirBetId', e.target.value)}
+                            >
+                                <option value="">None</option>
+                                {turnirBet.map(tb => (
+                                    <option key={tb.id} value={tb.id}>{tb.name}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="p-2 border rounded"
+                                value={tempChanges[bet.id]?.categoryId ?? bet.categoryId ?? ""}
+                                onChange={(e) => handleSelectChange(bet.id, 'categoryId', e.target.value)}
+                            >
+                                <option value="">None</option>
+                                {categories.map(cat => (
+                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="p-2 border rounded"
+                                value={tempChanges[bet.id]?.productId ?? bet.productId ?? ""}
+                                onChange={(e) => handleSelectChange(bet.id, 'productId', e.target.value)}
+                            >
+                                <option value="">None</option>
+                                {products.map(prod => (
+                                    <option key={prod.id} value={prod.id}>{prod.name}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="p-2 border rounded"
+                                value={tempChanges[bet.id]?.productItemId ?? bet.productItemId ?? ""}
+                                onChange={(e) => handleSelectChange(bet.id, 'productItemId', e.target.value)}
+                            >
+                                <option value="">None</option>
+                                {productItems.map(pi => (
+                                    <option key={pi.id} value={pi.id}>{pi.name}</option>
+                                ))}
+                            </select>
+                            <Button
+                                className="mt-2"
+                                onClick={() => handleSave(bet.id)}
+                            >
+                                Сохранить
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
         </div>
     );
 };
