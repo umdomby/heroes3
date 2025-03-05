@@ -103,7 +103,8 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                     : data.betFund !== null && data.betFund !== undefined
                         ? Math.floor(data.betFund * 100) / 100
                         : 'N/A'}
-            </TableCell>            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{data.margin ?? 'N/A'}</TableCell>
+            </TableCell>
+            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#2563eb' }}>{data.margin ?? 'N/A'}</TableCell>
             <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#30ff00' }}>{Math.floor(calculateTotalSum(data, includeInitialFund) * 100) / 100}</TableCell>
         </TableRow>
     );
