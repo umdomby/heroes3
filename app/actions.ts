@@ -4106,14 +4106,39 @@ export async function deleteBetWinnLoseClosed2(betId: number) {
             throw new Error('Ставка не найдена');
         }
 
-        // Удаляем участников, связанных с этой ставкой
-        await prisma.betParticipantCLOSED.deleteMany({
-            where: { betCLOSEDId: betId },
-        });
+        // Используем транзакцию для атомарного выполнения операций
+        await prisma.$transaction(async (prisma) => {
 
-        // Удаляем саму ставку
-        await prisma.betCLOSED.delete({
-            where: { id: betId },
+            const margin = bet.margin ?? 0;
+            // Обновляем betFund в GlobalData
+            await prisma.globalData.update({
+                where: { id: 1 },
+                data: {
+                    betFund: {
+                        increment: -bet.globalDataBetFund
+                    }
+                }
+            });
+
+            //
+            await prisma.user.update({
+                where: { id: 1 },
+                data: {
+                    points: {
+                        increment: bet.globalDataBetFund + margin
+                    }
+                }
+            });
+
+            // Удаляем участников, связанных с этой ставкой
+            await prisma.betParticipantCLOSED.deleteMany({
+                where: { betCLOSEDId: betId },
+            });
+
+            // Удаляем саму ставку
+            await prisma.betCLOSED.delete({
+                where: { id: betId },
+            });
         });
 
         console.log(`Ставка с ID ${betId} успешно удалена.`);
@@ -4146,14 +4171,38 @@ export async function deleteBetWinnLoseClosed3(betId: number) {
             throw new Error('Ставка не найдена');
         }
 
-        // Удаляем участников, связанных с этой ставкой
-        await prisma.betParticipantCLOSED3.deleteMany({
-            where: { betCLOSED3Id: betId },
-        });
+        // Используем транзакцию для атомарного выполнения операций
+        await prisma.$transaction(async (prisma) => {
+            const margin = bet.margin ?? 0;
+            // Обновляем betFund в GlobalData
+            await prisma.globalData.update({
+                where: { id: 1 },
+                data: {
+                    betFund: {
+                        increment: -bet.globalDataBetFund
+                    }
+                }
+            });
 
-        // Удаляем саму ставку
-        await prisma.betCLOSED3.delete({
-            where: { id: betId },
+            //
+            await prisma.user.update({
+                where: { id: 1 },
+                data: {
+                    points: {
+                        increment: bet.globalDataBetFund + margin
+                    }
+                }
+            });
+
+            // Удаляем участников, связанных с этой ставкой
+            await prisma.betParticipantCLOSED3.deleteMany({
+                where: { betCLOSED3Id: betId },
+            });
+
+            // Удаляем саму ставку
+            await prisma.betCLOSED3.delete({
+                where: { id: betId },
+            });
         });
 
         console.log(`Ставка с ID ${betId} успешно удалена.`);
@@ -4186,14 +4235,38 @@ export async function deleteBetWinnLoseClosed4(betId: number) {
             throw new Error('Ставка не найдена');
         }
 
-        // Удаляем участников, связанных с этой ставкой
-        await prisma.betParticipantCLOSED4.deleteMany({
-            where: { betCLOSED4Id: betId },
-        });
+        // Используем транзакцию для атомарного выполнения операций
+        await prisma.$transaction(async (prisma) => {
+            const margin = bet.margin ?? 0;
+            // Обновляем betFund в GlobalData
+            await prisma.globalData.update({
+                where: { id: 1 },
+                data: {
+                    betFund: {
+                        increment: -bet.globalDataBetFund
+                    }
+                }
+            });
 
-        // Удаляем саму ставку
-        await prisma.betCLOSED4.delete({
-            where: { id: betId },
+            //
+            await prisma.user.update({
+                where: { id: 1 },
+                data: {
+                    points: {
+                        increment: bet.globalDataBetFund + margin
+                    }
+                }
+            });
+
+            // Удаляем участников, связанных с этой ставкой
+            await prisma.betParticipantCLOSED4.deleteMany({
+                where: { betCLOSED4Id: betId },
+            });
+
+            // Удаляем саму ставку
+            await prisma.betCLOSED4.delete({
+                where: { id: betId },
+            });
         });
 
         console.log(`Ставка с ID ${betId} успешно удалена.`);
