@@ -2,7 +2,7 @@
 import {prisma} from '@/prisma/prisma-client';
 import {getUserSession} from '@/components/lib/get-user-session';
 import {
-    $Enums,
+    $Enums, Bet,
     BetStatus,
     OrderP2P,
     PlayerChoice,
@@ -1270,13 +1270,13 @@ export async function updatePlayerName(name: string) {
     }
 }
 
+//GAME USER
 type GameUserBetDataUser = {
     userId: number;
     betUser2: number; // Замените `any` на конкретный тип, если он известен
     gameUserBetDetails: string; // Замените `any` на конкретный тип, если он известен
     userTelegram: string;
 };
-
 export async function removeGameUserBetRegistration(gameData: {
     userId: number;
     gameUserBetId: number;
@@ -2294,6 +2294,31 @@ export async function closeBetDraw(betId: number) {
             throw new Error("Не удалось закрыть ставку как ничья.");
         }
     }
+}
+export async function editBet(betId: number, data: Partial<Bet>) {
+    const session = await getUserSession();
+    if (!session || session.role !== 'ADMIN') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+    try {
+        // Преобразуем все значения в числа, если они не null
+        const updatedData = {
+            ...data,
+            turnirBetId: data.turnirBetId ? Number(data.turnirBetId) : null,
+            categoryId: data.categoryId ? Number(data.categoryId) : null,
+            productId: data.productId ? Number(data.productId) : null,
+            productItemId: data.productItemId ? Number(data.productItemId) : null,
+        };
+
+        await prisma.bet.update({
+            where: { id: Number(betId) },
+            data: updatedData,
+        });
+    } catch (error) {
+        console.error("Error updating bet:", error);
+        throw new Error('Не удалось обновить ставку');
+    }
+    revalidatePath('/bet-create-2');
 }
 
 export async function suspendedBetCheck3(betId: number, newValue: boolean) {

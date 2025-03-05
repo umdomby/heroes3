@@ -470,8 +470,6 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                         )}
                         <span className="text-lime-500">
 
-                            {bet.turnirBet && (
-                                bet.turnirBet.name !== null && <span>
                                 {bet.category &&  (
                                     <span> {bet.category.name}</span>
                                 )}
@@ -481,13 +479,10 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                                 {bet.productItem && (
                                     <span> {bet.productItem.name}</span>
                                 )}
-                            </span>
-                            )}
                         </span>
                             {bet.turnirBet && (
                                 <span className="text-yellow-500"> {bet.turnirBet.name}</span>
                             )}
-
                     </span>
                                     <span className="text-green-600 absolute right-1 transform -translate-y-10 text-xs">
                         {new Date(bet.createdAt).toLocaleString()}

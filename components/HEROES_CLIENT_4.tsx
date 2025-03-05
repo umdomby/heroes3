@@ -522,26 +522,21 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                         )}
                         <span className="text-lime-500">
 
-                            {bet.turnirBet && (
-                                bet.turnirBet.name !== null && <span>
                                 {bet.category && (
                                     <span> {bet.category.name}</span>
                                 )}
-                                    {bet.product && (
-                                        <span> {bet.product.name}</span>
-                                    )}
-                                    {bet.productItem && (
-                                        <span> {bet.productItem.name}</span>
-                                    )}
-                            </span>
+                            {bet.product && (
+                                <span> {bet.product.name}</span>
+                            )}
+                            {bet.productItem && (
+                                <span> {bet.productItem.name}</span>
                             )}
                         </span>
                         {bet.turnirBet && (
                             <span className="text-yellow-500"> {bet.turnirBet.name}</span>
                         )}
-
                     </span>
-                                    <span className="text-green-600 absolute right-1 transform -translate-y-12 text-xs">
+                                    <span className="text-green-600 absolute right-1 transform -translate-y-10 text-xs">
                         {new Date(bet.createdAt).toLocaleString()}
                     </span>
                                     <Table>
@@ -994,7 +989,8 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                             </form>
 
                                         </div>
-                                    ) : ( <div className="text-red-500 mx-5 text-xl"><strong>Ставки временно приостановлены</strong></div> )
+                                    ) : (<div className="text-red-500 mx-5 text-xl"><strong>Ставки временно
+                                        приостановлены</strong></div>)
                                     }
 
                                     {bet.status === "OPEN" && bet.creatorId === user?.id && (

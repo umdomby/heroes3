@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     Bet3 as PrismaBet3,
     Player,
@@ -9,9 +9,9 @@ import {
     BetStatus, Product, Category, ProductItem, TurnirBet,
 } from "@prisma/client";
 import useSWR from "swr";
-import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import {Button} from "@/components/ui/button";
+import {useSession} from "next-auth/react";
+import {redirect} from "next/navigation";
 import {
     placeBet3,
     closeBet3,
@@ -19,9 +19,9 @@ import {
     suspendedBetCheck3,
     editDescriptionBet3
 } from "@/app/actions";
-import { unstable_batchedUpdates } from "react-dom";
+import {unstable_batchedUpdates} from "react-dom";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog";
 
 import {
     Accordion,
@@ -29,7 +29,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
 import Link from "next/link";
 
 const fetcher = (url: string, options?: RequestInit) =>
@@ -57,8 +57,8 @@ interface Bet extends PrismaBet3 {
     totalBetPlayer2: number;
     totalBetPlayer3: number;
     totalBetAmount: number;
-    creatorId : number;
-    suspendedBet : boolean;
+    creatorId: number;
+    suspendedBet: boolean;
     status: BetStatus;
     description: string | null; // Change this line
     createdAt: Date;
@@ -81,8 +81,8 @@ const playerColors = {
     [PlayerChoice.PLAYER4]: "text-yellow-400", // Color for Player 4
 };
 
-export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
-    const { data: session } = useSession();
+export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
+    const {data: session} = useSession();
     const {
         data: bets,
         error,
@@ -99,7 +99,9 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
     const [isBetDisabled, setIsBetDisabled] = useState<{ [key: number]: boolean }>({});
     const [placeBetErrors, setPlaceBetErrors] = useState<{ [key: number]: string | null }>({});
     const [oddsErrors, setOddsErrors] = useState<{ [key: number]: string | null }>({});
-    const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number; player3: number } }>({});
+    const [potentialProfit, setPotentialProfit] = useState<{
+        [key: number]: { player1: number; player2: number; player3: number }
+    }>({});
     const [betAmounts, setBetAmounts] = useState<{ [key: number]: string }>({});
 
     // Состояние для управления модальным окном и ввода подтверждения
@@ -120,7 +122,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                     data.type === "delete"
                 ) {
                     mutate(); // Обновляем данные ставок
-                     // Обновляем данные пользователя
+                    // Обновляем данные пользователя
                 }
             });
         };
@@ -367,8 +369,8 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
             }
 
             mutate();
-            
-            setSelectedWinners((prev) => ({ ...prev, [currentBet.id]: null }));
+
+            setSelectedWinners((prev) => ({...prev, [currentBet.id]: null}));
             setCloseBetError(null);
             closeConfirmationModal();
         } catch (error) {
@@ -501,24 +503,19 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                         )}
                         <span className="text-lime-500">
 
-                            {bet.turnirBet && (
-                                bet.turnirBet.name !== null && <span>
                                 {bet.category && (
                                     <span> {bet.category.name}</span>
                                 )}
-                                    {bet.product && (
-                                        <span> {bet.product.name}</span>
-                                    )}
-                                    {bet.productItem && (
-                                        <span> {bet.productItem.name}</span>
-                                    )}
-                            </span>
+                            {bet.product && (
+                                <span> {bet.product.name}</span>
+                            )}
+                            {bet.productItem && (
+                                <span> {bet.productItem.name}</span>
                             )}
                         </span>
                         {bet.turnirBet && (
                             <span className="text-yellow-500"> {bet.turnirBet.name}</span>
                         )}
-
                     </span>
                                     <span className="text-green-600 absolute right-1 transform -translate-y-10 text-xs">
                         {new Date(bet.createdAt).toLocaleString()}
@@ -899,7 +896,8 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                                             </form>
 
                                         </div>
-                                    ) : ( <div className="text-red-500 mx-5 text-xl"><strong>Ставки временно приостановлены</strong></div> )
+                                    ) : (<div className="text-red-500 mx-5 text-xl"><strong>Ставки временно
+                                        приостановлены</strong></div>)
                                     }
 
                                     {bet.status === "OPEN" && bet.creatorId === user?.id && (
@@ -994,7 +992,8 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({ className, user }) => {
                         <DialogHeader>
                             <DialogTitle>Подтверждение закрытия ставки</DialogTitle>
                         </DialogHeader>
-                        <p>Введите {selectedWinners[currentBet.id] === "draw" ? "ничья" : selectedWinners[currentBet.id] === currentBet.player1Id ? currentBet.player1.name : selectedWinners[currentBet.id] === currentBet.player2Id ? currentBet.player2.name : currentBet.player3.name} для подтверждения:</p>
+                        <p>Введите {selectedWinners[currentBet.id] === "draw" ? "ничья" : selectedWinners[currentBet.id] === currentBet.player1Id ? currentBet.player1.name : selectedWinners[currentBet.id] === currentBet.player2Id ? currentBet.player2.name : currentBet.player3.name} для
+                            подтверждения:</p>
                         <input
                             type="text"
                             value={confirmationInput}
