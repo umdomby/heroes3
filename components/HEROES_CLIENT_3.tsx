@@ -530,8 +530,13 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%] `}
                                                 >
-                                                    <div>
-                                                    {bet.player1.name}
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                    >
+                                                        {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
+                                                    </div>
+                                                    <div className="text-xs">
+                                                        {bet.player1.name}
 
                                                     </div>
                                                     <div>  <span
@@ -552,7 +557,12 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%] `}
                                                 >
-                                                    <div>
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                    >
+                                                        {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
+                                                    </div>
+                                                    <div className="text-xs">
                                                         {bet.player2.name}
 
                                                     </div>
@@ -574,7 +584,12 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%] `}
                                                 >
-                                                    <div>
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                    >
+                                                        {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
+                                                    </div>
+                                                    <div className="text-xs">
                                                         {bet.player3.name}
 
                                                     </div>
@@ -595,24 +610,6 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
-                                                </TableCell>
-                                                {/* Коэффициент для игроков */}
-                                                <TableCell className="w-10">
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
-                                                        {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
-                                                    </div>
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
-                                                        {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
-                                                    </div>
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
-                                                        {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
-                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>

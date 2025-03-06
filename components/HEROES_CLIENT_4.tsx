@@ -548,6 +548,11 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                    >
+                                                        {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
+                                                    </div>
                                                     <div className="text-xs">
                                                         {bet.player1.name}
 
@@ -569,6 +574,11 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                    >
+                                                        {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
+                                                    </div>
                                                     <div className="text-xs">
                                                         {bet.player2.name}
 
@@ -590,6 +600,11 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                    >
+                                                        {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
+                                                    </div>
                                                     <div className="text-xs">
                                                         {bet.player3.name}
 
@@ -611,6 +626,11 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
+                                                    <div
+                                                        className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                    >
+                                                        {Math.floor(bet.oddsBetPlayer4 * 100) / 100}
+                                                    </div>
                                                     <div className="text-xs">
                                                         {bet.player4.name}
 
@@ -628,35 +648,14 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
         </span></div>
                                                     <div>{Math.floor(bet.totalBetPlayer4 * 100) / 100}</div>
                                                 </TableCell>
-                                                <TableCell className="w-10">
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
-                                                        {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
-                                                    </div>
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
-                                                        {Math.floor(bet.oddsBetPlayer2 * 100) / 100}
-                                                    </div>
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
-                                                        {Math.floor(bet.oddsBetPlayer3 * 100) / 100}
-                                                    </div>
-                                                    <div
-                                                        className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                    >
-                                                        {Math.floor(bet.oddsBetPlayer4 * 100) / 100}
-                                                    </div>
-                                                </TableCell>
+
                                             </TableRow>
                                         </TableBody>
                                     </Table>
                                 </AccordionTrigger>
                                 <AccordionContent>
 
-                                    {bet.status === "OPEN" && (
+                                {bet.status === "OPEN" && (
                                         <div className="m-4">
                                             <p>
                                                 Общая сумма ставок на это событие:

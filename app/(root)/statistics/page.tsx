@@ -87,17 +87,17 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
     // Функция для рендеринга строки таблицы
     const renderTableRow = (data: GlobalData, includeInitialFund: boolean = true) => (
         <TableRow key={data.id} style={{ transition: 'background-color 0.3s', cursor: 'pointer' }}>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>
+            <TableCell className="text-xs" style={{ textAlign: 'center', fontWeight: 'bold', color: '#f64343' }}>
                 {new Date(data.updatedAt).toLocaleString('en-US', { hour12: false })}
             </TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>11M</TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{data.reg ?? 'N/A'}</TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{data.ref ?? 'N/A'}</TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#718dff' }}>{data.openBetsPoints ?? 'N/A'}</TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{data.p2pPoints ?? 'N/A'}</TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{data.gameUserBetOpen ?? 'N/A'}</TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{data.usersPoints ?? 'N/A'}</TableCell>
-            <TableCell style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>
+            <TableCell className="text-xs" style={{ textAlign: 'center', fontWeight: 'bold', color: '#1db812' }}>11M</TableCell>
+            <TableCell className="text-xs" style={{ textAlign: 'center', fontWeight: 'bold', color: '#f1b11e' }}>{data.reg ?? 'N/A'}</TableCell>
+            <TableCell className="text-xs" style={{ textAlign: 'center', fontWeight: 'bold', color: '#a5e24a' }}>{data.ref ?? 'N/A'}</TableCell>
+            <TableCell className="text-xs" style={{ textAlign: 'center', fontWeight: 'bold', color: '#718dff' }}>{data.openBetsPoints ?? 'N/A'}</TableCell>
+            <TableCell className="text-xs" style={{ textAlign: 'center', fontWeight: 'bold', color: '#d11acb' }}>{data.p2pPoints ?? 'N/A'}</TableCell>
+            <TableCell className="text-xs" style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{data.gameUserBetOpen ?? 'N/A'}</TableCell>
+            <TableCell className="text-xs" style={{ textAlign: 'center', fontWeight: 'bold', color: '#cdca59' }}>{data.usersPoints ?? 'N/A'}</TableCell>
+            <TableCell className="text-xs" style={{ textAlign: 'center', fontWeight: 'bold', color: '#b541d3' }}>
                 {includeInitialFund
                     ? 1000000 + Math.floor((data.betFund ?? 0) * 100) / 100
                     : data.betFund !== null && data.betFund !== undefined
@@ -118,9 +118,9 @@ export default async function StatisticsPage({ searchParams }: { searchParams: P
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Start</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Reg</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Ref</TableHead>
-                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>OpenBet</TableHead>
-                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>OpenP2P</TableHead>
-                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>myGame</TableHead>
+                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Bet</TableHead>
+                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>P2P</TableHead>
+                        <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Game</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>User</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Fund</TableHead>
                         <TableHead style={{ textAlign: 'center', color: '#fff', fontWeight: 'bold' }}>Margin</TableHead>
