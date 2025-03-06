@@ -850,7 +850,7 @@ export const OrderP2PComponent: React.FC<Props> = ({
                                     За <span className="text-amber-500">{sellPoints} points</span>
                                     <span> нужно </span>
                                     <span
-                                        className="text-green-600">{Number((parseFloat(detail.price.replace(',', '.')) * buyPoints).toFixed(10))} {detail.name}</span>
+                                        className="text-green-600">{Number((parseFloat(detail.price.replace(',', '.')) * sellPoints).toFixed(10))} {detail.name}</span>
                                 </div>
 
                             </div>
