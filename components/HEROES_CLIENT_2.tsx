@@ -470,21 +470,23 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                         )}
                         <span className="text-lime-500">
 
-                                {bet.category &&  (
+                                {bet.category && (
                                     <span> {bet.category.name}</span>
                                 )}
-                                {bet.product &&  (
-                                    <span> {bet.product.name}</span>
-                                )}
-                                {bet.productItem && (
-                                    <span> {bet.productItem.name}</span>
-                                )}
-                        </span>
-                            {bet.turnirBet && (
-                                <span className="text-yellow-500"> {bet.turnirBet.name}</span>
+                            {bet.product && (
+                                <span> {bet.product.name}</span>
                             )}
+                            {bet.productItem && (
+                                <span> {bet.productItem.name}</span>
+                            )}
+                        </span>
+
                     </span>
-                                    <span className="text-green-600 absolute right-1 transform -translate-y-10 text-xs">
+                                    {bet.turnirBet && (
+                                        <span className="text-yellow-500 absolute left-1 transform translate-y-10 text-xs text-ellipsis overflow-hidden whitespace-nowrap"> {bet.turnirBet.name}</span>
+                                    )}
+                                    <span
+                                        className="text-green-600 absolute right-1 transform translate-y-10 text-xs text-ellipsis overflow-hidden whitespace-nowrap">
                         {new Date(bet.createdAt).toLocaleString()}
                     </span>
                                     <Table>

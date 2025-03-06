@@ -532,11 +532,14 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                 <span> {bet.productItem.name}</span>
                             )}
                         </span>
-                        {bet.turnirBet && (
-                            <span className="text-yellow-500"> {bet.turnirBet.name}</span>
-                        )}
+
                     </span>
-                                    <span className="text-green-600 absolute right-1 transform -translate-y-12 text-xs">
+                                    {bet.turnirBet && (
+                                        <span
+                                            className="text-yellow-500 absolute left-1 transform translate-y-12 text-xs text-ellipsis overflow-hidden whitespace-nowrap"> {bet.turnirBet.name}</span>
+                                    )}
+                                    <span
+                                        className="text-green-600 absolute right-1 transform translate-y-12 text-xs text-ellipsis overflow-hidden whitespace-nowrap">
                         {new Date(bet.createdAt).toLocaleString()}
                     </span>
                                     <Table>
@@ -545,7 +548,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
-                                                    <div>
+                                                    <div className="text-xs">
                                                         {bet.player1.name}
 
                                                     </div>
@@ -566,7 +569,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
-                                                    <div>
+                                                    <div className="text-xs">
                                                         {bet.player2.name}
 
                                                     </div>
@@ -587,7 +590,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
-                                                    <div>
+                                                    <div className="text-xs">
                                                         {bet.player3.name}
 
                                                     </div>
@@ -608,7 +611,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 <TableCell
                                                     className={`${playerColors[PlayerChoice.PLAYER4]} text-ellipsis  overflow-hidden whitespace-nowrap w-[22%]`}
                                                 >
-                                                    <div>
+                                                    <div className="text-xs">
                                                         {bet.player4.name}
 
                                                     </div>

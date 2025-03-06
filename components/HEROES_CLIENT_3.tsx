@@ -513,11 +513,14 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                 <span> {bet.productItem.name}</span>
                             )}
                         </span>
-                        {bet.turnirBet && (
-                            <span className="text-yellow-500"> {bet.turnirBet.name}</span>
-                        )}
+
                     </span>
-                                    <span className="text-green-600 absolute right-1 transform -translate-y-10 text-xs">
+                                    {bet.turnirBet && (
+                                        <span
+                                            className="text-yellow-500 absolute left-1 transform translate-y-10 text-xs text-ellipsis overflow-hidden whitespace-nowrap"> {bet.turnirBet.name}</span>
+                                    )}
+                                    <span
+                                        className="text-green-600 absolute right-1 transform translate-y-10 text-xs text-ellipsis overflow-hidden whitespace-nowrap">
                         {new Date(bet.createdAt).toLocaleString()}
                     </span>
                                     <Table>
@@ -528,7 +531,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                     className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap w-[22%] `}
                                                 >
                                                     <div>
-                                                        {bet.player1.name}
+                                                    {bet.player1.name}
 
                                                     </div>
                                                     <div>  <span
