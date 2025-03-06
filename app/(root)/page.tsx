@@ -18,11 +18,9 @@ import {SheetChat} from "@/components/SheetChat";
 import {PointsUser} from "@/components/PointsUser";
 
 const FixedLink = () => (
-    <div className="fixed bottom-4 right-4 p-4 shadow-lg rounded-lg z-50">
-        <p className="text-md text-blue-500 font-bold">
+    <div className="fixed bottom-4 right-4 shadow-lg rounded-lg z-50">
             <Link className="text-blue-500 hover:text-green-300 font-bold text-xl" href={'https://t.me/navatar85'}
-                  target="_blank">@navatar85</Link>
-        </p>
+                  target="_blank">@</Link>
     </div>
 );
 
