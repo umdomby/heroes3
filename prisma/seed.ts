@@ -1,4 +1,4 @@
-import { categories, products, productsItem, players } from './constants';
+import { categories, products, productsItem, players, playerStatistics } from './constants';
 import { prisma } from './prisma-client';
 import { hashSync } from 'bcrypt';
 
@@ -402,6 +402,32 @@ async function up() {
       },
     ],
   });
+
+  await prisma.turnirBet.createMany({
+    data: [
+          {
+            id: 1,
+        name: "HeroesCup1deaL"
+        },
+        {
+          id: 2,
+          name: "Heroes Cup"
+        },
+        {
+          id: 3,
+          name: "Heroes Cup 2"
+        },
+        {
+          id: 4,
+          name: "Heroes Cup 3"
+        },
+        {
+          id: 5,
+          name: "HC 3 PO"
+        },
+      ]
+  });
+
   await prisma.category.createMany({
     data: categories,
   });
@@ -416,6 +442,10 @@ async function up() {
 
   await prisma.player.createMany({
     data: players,
+  });
+
+  await prisma.playerStatistic.createMany({
+    data: playerStatistics,
   });
 
   await prisma.globalData.create({

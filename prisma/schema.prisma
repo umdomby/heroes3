@@ -99,14 +99,15 @@ model Turnir {
 }
 
 model TurnirBet {
-  id          Int          @id @default(autoincrement())
-  name        String       @unique
-  bets        Bet[]
-  betsCLOSED  BetCLOSED[]
-  bets3       Bet3[] // Обратная связь с Bet3
-  betsCLOSED3 BetCLOSED3[] // Обратная связь с BetCLOSED3
-  bets4       Bet4[] // Обратная связь с Bet3
-  betsCLOSED4 BetCLOSED4[] // Обратная связь с BetCLOSED3
+  id               Int               @id @default(autoincrement())
+  name             String            @unique
+  bets             Bet[]
+  betsCLOSED       BetCLOSED[]
+  bets3            Bet3[] // Обратная связь с Bet3
+  betsCLOSED3      BetCLOSED3[] // Обратная связь с BetCLOSED3
+  bets4            Bet4[] // Обратная связь с Bet3
+  betsCLOSED4      BetCLOSED4[] // Обратная связь с BetCLOSED3
+  playerStatistics PlayerStatistic[]
 }
 
 enum StatusTurnir {
@@ -178,15 +179,16 @@ model CourseValuta {
 }
 
 model Category {
-  id           Int           @id @default(autoincrement())
-  name         String        @unique
-  bets         Bet[]
-  betsCLOSED   BetCLOSED[]
-  bets3        Bet3[] // Обратная связь с Bet3
-  betsCLOSED3  BetCLOSED3[] // Обратная связь с BetCLOSED3
-  bets4        Bet4[] // Обратная связь с Bet3
-  betsCLOSED4  BetCLOSED4[] // Обратная связь с BetCLOSED3
-  gameUserBets GameUserBet[] // Добавлено обратное отношение
+  id               Int               @id @default(autoincrement())
+  name             String            @unique
+  bets             Bet[]
+  betsCLOSED       BetCLOSED[]
+  bets3            Bet3[] // Обратная связь с Bet3
+  betsCLOSED3      BetCLOSED3[] // Обратная связь с BetCLOSED3
+  bets4            Bet4[] // Обратная связь с Bet3
+  betsCLOSED4      BetCLOSED4[] // Обратная связь с BetCLOSED3
+  gameUserBets     GameUserBet[] // Добавлено обратное отношение
+  playerStatistics PlayerStatistic[]
 }
 
 model RegPoints {
@@ -227,14 +229,15 @@ model Player {
   player2BetsCLOSED3 BetCLOSED3[] @relation(name: "Player2BetsCLOSED3") // Relation for bets as player 2
   player3BetsCLOSED3 BetCLOSED3[] @relation(name: "Player3BetsCLOSED3") // Relation for bets as player 3
 
-  player1Bets4       Bet4[]       @relation(name: "Player1Bets4") // Relation for bets as player 1
-  player2Bets4       Bet4[]       @relation(name: "Player2Bets4") // Relation for bets as player 2
-  player3Bets4       Bet4[]       @relation(name: "Player3Bets4") // Relation for bets as player 3
-  player4Bets4       Bet4[]       @relation(name: "Player4Bets4") // Relation for bets as player 4
-  player1BetsCLOSED4 BetCLOSED4[] @relation(name: "Player1BetsCLOSED4") // Relation for bets as player 1
-  player2BetsCLOSED4 BetCLOSED4[] @relation(name: "Player2BetsCLOSED4") // Relation for bets as player 2
-  player3BetsCLOSED4 BetCLOSED4[] @relation(name: "Player3BetsCLOSED4") // Relation for bets as player 3
-  player4BetsCLOSED4 BetCLOSED4[] @relation(name: "Player4BetsCLOSED4") // Relation for bets as player 4
+  player1Bets4       Bet4[]            @relation(name: "Player1Bets4") // Relation for bets as player 1
+  player2Bets4       Bet4[]            @relation(name: "Player2Bets4") // Relation for bets as player 2
+  player3Bets4       Bet4[]            @relation(name: "Player3Bets4") // Relation for bets as player 3
+  player4Bets4       Bet4[]            @relation(name: "Player4Bets4") // Relation for bets as player 4
+  player1BetsCLOSED4 BetCLOSED4[]      @relation(name: "Player1BetsCLOSED4") // Relation for bets as player 1
+  player2BetsCLOSED4 BetCLOSED4[]      @relation(name: "Player2BetsCLOSED4") // Relation for bets as player 2
+  player3BetsCLOSED4 BetCLOSED4[]      @relation(name: "Player3BetsCLOSED4") // Relation for bets as player 3
+  player4BetsCLOSED4 BetCLOSED4[]      @relation(name: "Player4BetsCLOSED4") // Relation for bets as player 4
+  playerStatistics   PlayerStatistic[]
 }
 
 model Product {
@@ -758,31 +761,48 @@ model BetParticipantCLOSED4 {
 }
 
 //------------------------------Win/Lose-------------------
-// enum ColorPlayer {
-//   RED //(КРАСНЫЙ)
-//   BLUE //(СИНИЙ)
-//   GREEN //(ЗЕЛЁНЫЙ)
-//   YELLOW //(ЖЁЛТЫЙ)
-//   PURPLE //(ФИОЛЕТОВЫЙ)
-//   ORANGE //(ОРАНЖЕВЫЙ)
-//   TEAL //(БИРЮЗОВЫЙ)
-//   PINK //(РОЗОВЫЙ)
-// }
-//
-// enum CityHeroes {
-//   CASTLE //(ЗАМОК) 1
-//   RAMPART //(ОПЛОТ) 1
-//   TOWER //(БАШНЯ) 1
-//   INFERNO //(ИНФЕРНО) 1
-//   NECROPOLIS //(НЕКРОПОЛИС) 1
-//   DUNGEON //(ТЕМНИЦА) 1
-//   STRONGHOLD //(ЦИТАДЕЛЬ) 1
-//   FORTRESS //(КРЕПОСТЬ) 1
-//   CONFLUX //(СОПРЯЖЕНИЕ) 1
-//   COVE //(ПРИЧАЛ) 1
-//   FACTORY //(ФАБРИКА) 1
-// }
 
-// category
-// turnir
-// map
+model PlayerStatistic {
+  id Int @id @default(autoincrement())
+
+  turnirBet TurnirBet @relation(fields: [turnirId], references: [id])
+  turnirId  Int
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  player   Player @relation(fields: [playerId], references: [id])
+  playerId Int
+
+  color    ColorPlayer
+  city     CityHeroes?
+  gold     Int         @default(0)
+  security String      @default("")
+  win      Boolean
+  link     String      @default("")
+}
+
+enum ColorPlayer {
+  RED //(КРАСНЫЙ)
+  BLUE //(СИНИЙ)
+  GREEN //(ЗЕЛЁНЫЙ)
+  YELLOW //(ЖЁЛТЫЙ)
+  PURPLE //(ФИОЛЕТОВЫЙ)
+  ORANGE //(ОРАНЖЕВЫЙ)
+  TEAL //(БИРЮЗОВЫЙ)
+  PINK //(РОЗОВЫЙ)
+}
+
+enum CityHeroes {
+  CASTLE //(ЗАМОК) 1
+  RAMPART //(ОПЛОТ) 1
+  TOWER //(БАШНЯ) 1
+  INFERNO //(ИНФЕРНО) 1
+  NECROPOLIS //(НЕКРОПОЛИС) 1
+  DUNGEON //(ТЕМНИЦА) 1
+  STRONGHOLD //(ЦИТАДЕЛЬ) 1
+  FORTRESS //(КРЕПОСТЬ) 1
+  CONFLUX //(СОПРЯЖЕНИЕ) 1
+  COVE //(ПРИЧАЛ) 1
+  FACTORY //(ФАБРИКА) 1
+}
