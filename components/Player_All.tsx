@@ -37,10 +37,15 @@ export const Player_All: React.FC<Props> = ({playerAll}) => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {playerAll.map((player) => (
+                    {playerAll.map((player, index) => (
                         <TableRow key={player.id}>
+                            <TableCell className="w-[10px]">
+                                <Link className="text-blue-500 cursor-pointer hover:text-green-500" href={`/player/${player.id}`}>
+                                    {index + 1} {/* Индекс начинается с 0, поэтому добавляем 1 */}
+                                </Link>
+                            </TableCell>
                             <TableCell>
-                                <Link className=" text-blue-500 cursor-pointer hover:text-green-500 " href={`/player/${player.id}`}>
+                                <Link className="text-blue-500 cursor-pointer hover:text-green-500" href={`/player/${player.id}`}>
                                     {player.name}
                                 </Link>
                             </TableCell>

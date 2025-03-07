@@ -214,6 +214,10 @@ model ReferralUserIpAddress {
 model Player {
   id                Int         @id @default(autoincrement())
   name              String
+  countGame         Int?
+  winGame           Int?
+  lossGame          Int?
+  rateGame          Float?
   twitch            String?
   user              User?       @relation(fields: [userId], references: [id])
   userId            Int?

@@ -24,7 +24,7 @@ const cityTranslations = {
 interface PlayerStatisticWithRelations extends PlayerStatistic {
     turnirBet?: { name: string };
     category?: { name: string };
-    player?: { name: string };
+    player?: { id: number; name: string }; // Добавьте id здесь
 }
 
 interface PlayerStatisticsProps {
@@ -96,7 +96,16 @@ export function TOURNAMENT({ playerStatistics, currentPage, totalPages }: Player
                                 {stat.win && <span className="yellow-circle"></span>}
                             </TableCell>
                             <TableCell className={`text-${stat.color?.toLowerCase() || 'gray'}-500`}>
-                                <span className="text-center">{stat.player?.name || 'N/A'}</span>
+                                {stat.player ? (
+                                    <Link
+                                        className="text-blue-500 cursor-pointer hover:text-green-500"
+                                        href={`/player/${stat.player.id}`}
+                                    >
+                                        {stat.player.name || 'N/A'}
+                                    </Link>
+                                ) : (
+                                    'N/A'
+                                )}
                             </TableCell>
                             <TableCell
                                 className={`text-${stat.color?.toLowerCase() || 'gray'}-500`}>{stat.gold}</TableCell>
