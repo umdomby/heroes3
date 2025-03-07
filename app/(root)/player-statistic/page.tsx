@@ -10,15 +10,15 @@ import { PlayerStatisticsComp } from "@/components/PlayerStatisticsComp";
 export default async function PlayerStatisticsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const session = await getUserSession();
 
-    if (!session) {
-        return redirect('/');
-    }
-
-    const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
-
-    if (user?.role !== 'ADMIN') {
-        return redirect('/');
-    }
+    // if (!session) {
+    //     return redirect('/');
+    // }
+    //
+    // const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
+    //
+    // if (user?.role !== 'ADMIN') {
+    //     return redirect('/');
+    // }
 
     const resolvedSearchParams = await searchParams;
     const page = parseInt(resolvedSearchParams.page || '1', 10);
