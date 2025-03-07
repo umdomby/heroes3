@@ -59,6 +59,12 @@ export const categories = [
 
         name: 'Nine-day Wonder',
     },
+    {
+        name: 'JC Blitz',
+    },
+    {
+        name: 'JC Amazonki',
+    },
 ];
 
 export const products = [

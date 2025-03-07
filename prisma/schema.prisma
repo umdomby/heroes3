@@ -756,3 +756,33 @@ model BetParticipantCLOSED4 {
   isCovered    IsCovered //   OPEN: не перекрыта совсем "0", CLOSED: полностью перекрыта "overlap = profit", PENDING: частично перекрыта "overlap < profit"
   createdAt    DateTime     @default(now())
 }
+
+//------------------------------Win/Lose-------------------
+// enum ColorPlayer {
+//   RED //(КРАСНЫЙ)
+//   BLUE //(СИНИЙ)
+//   GREEN //(ЗЕЛЁНЫЙ)
+//   YELLOW //(ЖЁЛТЫЙ)
+//   PURPLE //(ФИОЛЕТОВЫЙ)
+//   ORANGE //(ОРАНЖЕВЫЙ)
+//   TEAL //(БИРЮЗОВЫЙ)
+//   PINK //(РОЗОВЫЙ)
+// }
+//
+// enum CityHeroes {
+//   CASTLE //(ЗАМОК) 1
+//   RAMPART //(ОПЛОТ) 1
+//   TOWER //(БАШНЯ) 1
+//   INFERNO //(ИНФЕРНО) 1
+//   NECROPOLIS //(НЕКРОПОЛИС) 1
+//   DUNGEON //(ТЕМНИЦА) 1
+//   STRONGHOLD //(ЦИТАДЕЛЬ) 1
+//   FORTRESS //(КРЕПОСТЬ) 1
+//   CONFLUX //(СОПРЯЖЕНИЕ) 1
+//   COVE //(ПРИЧАЛ) 1
+//   FACTORY //(ФАБРИКА) 1
+// }
+
+// category
+// turnir
+// map
