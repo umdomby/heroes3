@@ -14,6 +14,7 @@ import {
 import {Container} from "@/components/container";
 import {Player} from "@prisma/client";
 import Link from "next/link";
+import {Button} from "@/components/ui";
 
 
 interface Props {
@@ -25,6 +26,9 @@ export const Player_All: React.FC<Props> = ({playerAll}) => {
 
     return (
         <Container>
+            <Link href="/tournament">
+                <Button className="m-5 h-5">ТУРНИРЫ HEROES HUB</Button>
+            </Link>
             <Table>
                 <TableCaption>List of Players</TableCaption>
                 <TableHeader>

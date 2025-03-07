@@ -52,6 +52,16 @@ export const Access_no: React.FC<Props> = ({className}) => {
                                         WINN/LOSE PLAYERS 4
                                     </DropdownMenuRadioItem>
                                 </Link>
+                                <Link href="/player">
+                                    <DropdownMenuRadioItem value="player" className="cursor-pointer">
+                                        PLAYER
+                                    </DropdownMenuRadioItem>
+                                </Link>
+                                <Link href="/tournament">
+                                    <DropdownMenuRadioItem value="tournament" className="cursor-pointer">
+                                        TOURNAMENT
+                                    </DropdownMenuRadioItem>
+                                </Link>
                                 <Link href="/rating">
                                     <DropdownMenuRadioItem value="rating" className="cursor-pointer">
                                         RATING

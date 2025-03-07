@@ -5,6 +5,7 @@ import { PlayerStatistic } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import {Button} from "@/components/ui";
+import {DropdownMenuRadioItem} from "@/components/ui/dropdown-menu";
 
 const cityTranslations = {
     CASTLE: "ЗАМОК",
@@ -32,7 +33,7 @@ interface PlayerStatisticsProps {
     totalPages: number;
 }
 
-export function PlayerStatisticsComp({ playerStatistics, currentPage, totalPages }: PlayerStatisticsProps) {
+export function TOURNAMENT({ playerStatistics, currentPage, totalPages }: PlayerStatisticsProps) {
     const router = useRouter();
 
     const handlePageChange = (newPage: number) => {
@@ -41,35 +42,44 @@ export function PlayerStatisticsComp({ playerStatistics, currentPage, totalPages
 
     return (
         <div>
-            <div className="pagination-buttons flex justify-center m-6">
-                <Button className="h-7 mx-2"
+            <div className="pagination-buttons flex justify-center items-center m-6">
+                <div className="flex justify-start w-full">
+                    <Link href="/player">
+                        <Button className="mx-5 h-5">ИГРОКИ</Button>
+                    </Link>
+                </div>
+                <div className="flex justify-center w-full">
+                    <Button
+                        className="h-7 mx-2"
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage <= 1}
-                >
-                    Предыдущая
-                </Button>
-                <span>Страница {currentPage} из {totalPages}</span>
-                <Button className="h-7 mx-2"
+                    >
+                        Предыдущая
+                    </Button>
+                    <span>Страница {currentPage} из {totalPages}</span>
+                    <Button
+                        className="h-7 mx-2"
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage >= totalPages}
-                >
-                    Следующая
-                </Button>
+                    >
+                        Следующая
+                    </Button>
+                </div>
             </div>
 
             <Table>
                 <TableBody>
-                        <TableRow >
-                            <TableCell>id</TableCell>
-                            <TableCell>turnir</TableCell>
-                            <TableCell>map</TableCell>
-                            <TableCell>city</TableCell>
-                            <TableCell>win</TableCell>
-                            <TableCell>player</TableCell>
-                            <TableCell>gold</TableCell>
-                            <TableCell className="text-center">security</TableCell>
-                            <TableCell>link</TableCell>
-                        </TableRow>
+                    <TableRow>
+                        <TableCell>id</TableCell>
+                        <TableCell>turnir</TableCell>
+                        <TableCell>map</TableCell>
+                        <TableCell>city</TableCell>
+                        <TableCell>win</TableCell>
+                        <TableCell>player</TableCell>
+                        <TableCell>gold</TableCell>
+                        <TableCell className="text-center">security</TableCell>
+                        <TableCell>link</TableCell>
+                    </TableRow>
                 </TableBody>
             </Table>
             <Table>
@@ -88,11 +98,13 @@ export function PlayerStatisticsComp({ playerStatistics, currentPage, totalPages
                             <TableCell className={`text-${stat.color?.toLowerCase() || 'gray'}-500`}>
                                 <span className="text-center">{stat.player?.name || 'N/A'}</span>
                             </TableCell>
-                            <TableCell className={`text-${stat.color?.toLowerCase() || 'gray'}-500`}>{stat.gold}</TableCell>
+                            <TableCell
+                                className={`text-${stat.color?.toLowerCase() || 'gray'}-500`}>{stat.gold}</TableCell>
                             <TableCell className="text-amber-500 text-center">{stat.security || '-'}</TableCell>
                             <TableCell className="text-gray-500">
                                 {stat.link ? (
-                                    <Link href={stat.link} target="_blank" rel="noopener noreferrer" className="text-blue-500">
+                                    <Link href={stat.link} target="_blank" rel="noopener noreferrer"
+                                          className="text-blue-500">
                                         Link
                                     </Link>
                                 ) : ''}

@@ -5,7 +5,7 @@ import { getUserSession } from "@/components/lib/get-user-session";
 import { prisma } from "@/prisma/prisma-client";
 import React from "react";
 import { Container } from "@/components/container";
-import { PlayerStatisticsComp } from "@/components/PlayerStatisticsComp";
+import { TOURNAMENT } from "@/components/TOURNAMENT";
 
 export default async function PlayerStatisticsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const session = await getUserSession();
@@ -38,7 +38,7 @@ export default async function PlayerStatisticsPage({ searchParams }: { searchPar
 
     return (
         <Container className="w-[96%]">
-            <PlayerStatisticsComp
+            <TOURNAMENT
                 playerStatistics={playerStatistics}
                 currentPage={page}
                 totalPages={Math.ceil(totalRecords / pageSize)}

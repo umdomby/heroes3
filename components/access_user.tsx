@@ -184,7 +184,17 @@ export const Access_user: React.FC<Props> = ({className, role}) => {
                         </Link>
                         <Link href="/statistics">
                             <DropdownMenuRadioItem value="statistics" className="cursor-pointer">
-                                STATISTICS
+                                SITE STATISTICS
+                            </DropdownMenuRadioItem>
+                        </Link>
+                        <Link href="/player">
+                            <DropdownMenuRadioItem value="player" className="cursor-pointer">
+                                PLAYER
+                            </DropdownMenuRadioItem>
+                        </Link>
+                        <Link href="/tournament">
+                            <DropdownMenuRadioItem value="tournament" className="cursor-pointer">
+                                TOURNAMENT
                             </DropdownMenuRadioItem>
                         </Link>
                         <Link href="/rating">
