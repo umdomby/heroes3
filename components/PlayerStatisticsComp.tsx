@@ -6,6 +6,20 @@ import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import {Button} from "@/components/ui";
 
+const cityTranslations = {
+    CASTLE: "ЗАМОК",
+    RAMPART: "ОПЛОТ",
+    TOWER: "БАШНЯ",
+    INFERNO: "ИНФЕРНО",
+    NECROPOLIS: "НЕКРОПОЛИС",
+    DUNGEON: "ТЕМНИЦА",
+    STRONGHOLD: "ЦИТАДЕЛЬ",
+    FORTRESS: "КРЕПОСТЬ",
+    CONFLUX: "СОПРЯЖЕНИЕ",
+    COVE: "ПРИЧАЛ",
+    FACTORY: "ФАБРИКА"
+};
+
 interface PlayerStatisticWithRelations extends PlayerStatistic {
     turnirBet?: { name: string };
     category?: { name: string };
@@ -65,7 +79,9 @@ export function PlayerStatisticsComp({ playerStatistics, currentPage, totalPages
                             <TableCell className="text-orange-500">{stat.id || 'N/A'}</TableCell>
                             <TableCell className="text-green-500">{stat.turnirBet?.name || 'N/A'}</TableCell>
                             <TableCell className="text-blue-500">{stat.category?.name || 'N/A'}</TableCell>
-                            <TableCell className="text-amber-500">{stat?.city || 'N/A'}</TableCell>
+                            <TableCell className="text-amber-500">
+                                {stat.city ? cityTranslations[stat.city] || 'N/A' : 'N/A'}
+                            </TableCell>
                             <TableCell>
                                 {stat.win && <span className="yellow-circle"></span>}
                             </TableCell>
@@ -77,7 +93,7 @@ export function PlayerStatisticsComp({ playerStatistics, currentPage, totalPages
                             <TableCell className="text-gray-500">
                                 {stat.link ? (
                                     <Link href={stat.link} target="_blank" rel="noopener noreferrer">
-                                        Открыть ссылку
+                                        Link
                                     </Link>
                                 ) : 'N/A'}
                             </TableCell>

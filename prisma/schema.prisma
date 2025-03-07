@@ -795,15 +795,15 @@ enum ColorPlayer {
 }
 
 enum CityHeroes {
-  CASTLE //(ЗАМОК) 1
-  RAMPART //(ОПЛОТ) 1
-  TOWER //(БАШНЯ) 1
-  INFERNO //(ИНФЕРНО) 1
-  NECROPOLIS //(НЕКРОПОЛИС) 1
-  DUNGEON //(ТЕМНИЦА) 1
-  STRONGHOLD //(ЦИТАДЕЛЬ) 1
-  FORTRESS //(КРЕПОСТЬ) 1
-  CONFLUX //(СОПРЯЖЕНИЕ) 1
-  COVE //(ПРИЧАЛ) 1
-  FACTORY //(ФАБРИКА) 1
+  CASTLE //(ЗАМОК)
+  RAMPART //(ОПЛОТ)
+  TOWER //(БАШНЯ)
+  INFERNO //(ИНФЕРНО)
+  NECROPOLIS //(НЕКРОПОЛИС)
+  DUNGEON //(ТЕМНИЦА)
+  STRONGHOLD //(ЦИТАДЕЛЬ)
+  FORTRESS //(КРЕПОСТЬ)
+  CONFLUX //(СОПРЯЖЕНИЕ)
+  COVE //(ПРИЧАЛ)
+  FACTORY //(ФАБРИКА)
 }
