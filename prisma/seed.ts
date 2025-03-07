@@ -425,6 +425,10 @@ async function up() {
           id: 5,
           name: "HC 3 PO"
         },
+      {
+        id: 6,
+        name: "HC 2 PO"
+      },
       ]
   });
 
@@ -444,9 +448,14 @@ async function up() {
     data: players,
   });
 
-  await prisma.playerStatistic.createMany({
-    data: playerStatistics,
-  });
+
+  for (const stat of playerStatistics) {
+    try {
+      await prisma.playerStatistic.create({ data: stat });
+    } catch (error) {
+      console.error('Ошибка при вставке записи:', stat, error);
+    }
+  }
 
   await prisma.globalData.create({
     data: {

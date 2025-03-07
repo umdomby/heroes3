@@ -779,7 +779,7 @@ model PlayerStatistic {
   gold     Int         @default(0)
   security String      @default("")
   win      Boolean
-  link     String      @default("")
+  link     String?     @default("")
 }
 
 enum ColorPlayer {
