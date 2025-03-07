@@ -4359,7 +4359,6 @@ interface AdminTurnirBetPageParams {
     id?: number;
     turnirName?: string; // Сделаем turnirName необязательным
 }
-
 // Функция для обработки операций с турнирами
 export async function adminTrurnirBetPage({ action, id, turnirName }: AdminTurnirBetPageParams) {
     const currentUser = await getUserSession();
@@ -4405,6 +4404,39 @@ export async function adminTrurnirBetPage({ action, id, turnirName }: AdminTurni
                 where: { id },
             });
             return { success: true };
+        }
+    } catch (error) {
+        console.error('Ошибка при выполнении операции с турниром:', error);
+        throw new Error('Не удалось выполнить операцию');
+    }
+}
+
+
+export async function playerStatisticActions({ action, id, data }: { action: string, id?: number, data?: any }) {
+    const currentUser = await getUserSession();
+
+    if (!currentUser) {
+        throw new Error('Пользователь не найден');
+    }
+
+    if (currentUser.role !== 'ADMIN' && currentUser.role !== 'USER_EDIT') {
+        throw new Error('У вас нет прав для выполнения этой операции');
+    }
+
+    try {
+        if (action === 'add') {
+            await prisma.playerStatistic.create({
+                data: {
+                    ...data,
+                },
+            });
+        } else if (action === 'edit' && id) {
+            await prisma.playerStatistic.update({
+                where: { id },
+                data: {
+                    ...data,
+                },
+            });
         }
     } catch (error) {
         console.error('Ошибка при выполнении операции с турниром:', error);

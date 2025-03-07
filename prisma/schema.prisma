@@ -275,6 +275,7 @@ enum BetStatus {
 enum UserRole {
   USER
   USER_BET
+  USER_EDIT
   ADMIN
   BANED
 }

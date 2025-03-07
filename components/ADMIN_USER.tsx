@@ -124,6 +124,15 @@ export const ADMIN_USER: React.FC<Props> = ({ className, user, users }) => {
                                         <input
                                             type="radio"
                                             name={`role-${user.id}`}
+                                            checked={user.role === 'USER_EDIT'}
+                                            onChange={() => handleRoleChange(user.id, 'USER_EDIT')}
+                                        />
+                                        USER_EDIT
+                                    </label>
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name={`role-${user.id}`}
                                             checked={user.role === 'ADMIN'}
                                             onChange={() => handleRoleChange(user.id, 'ADMIN')}
                                         />

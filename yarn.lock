@@ -4603,6 +4603,11 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
+lucide-preact@^0.479.0:
+  version "0.479.0"
+  resolved "https://registry.yarnpkg.com/lucide-preact/-/lucide-preact-0.479.0.tgz#885ce6128a59150a9d95c556b23f70342e3d9baa"
+  integrity sha512-Q8vrKrMg7vC/WXHYOAIa99HbK8NF4SPNXTm40SEpyysHmvBerETtHHQ6GIzfDzWRm4W36bDfYwsCZCc428ZYhQ==
+
 lucide-react@^0.468.0:
   version "0.468.0"
   resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.468.0.tgz#830c1bfd905575ddd23b832baa420c87db166910"
