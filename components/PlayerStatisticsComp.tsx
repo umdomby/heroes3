@@ -49,11 +49,11 @@ export function PlayerStatisticsComp({ playerStatistics, currentPage, totalPages
                             <TableCell>id</TableCell>
                             <TableCell>turnir</TableCell>
                             <TableCell>map</TableCell>
+                            <TableCell>city</TableCell>
+                            <TableCell>win</TableCell>
                             <TableCell>player</TableCell>
                             <TableCell>gold</TableCell>
-                            <TableCell>security</TableCell>
-                            <TableCell>win</TableCell>
-                            <TableCell>color</TableCell>
+                            <TableCell className="text-center">security</TableCell>
                             <TableCell>link</TableCell>
                         </TableRow>
                 </TableBody>
@@ -65,11 +65,15 @@ export function PlayerStatisticsComp({ playerStatistics, currentPage, totalPages
                             <TableCell className="text-orange-500">{stat.id || 'N/A'}</TableCell>
                             <TableCell className="text-green-500">{stat.turnirBet?.name || 'N/A'}</TableCell>
                             <TableCell className="text-blue-500">{stat.category?.name || 'N/A'}</TableCell>
-                            <TableCell className="text-purple-500">{stat.player?.name}</TableCell>
-                            <TableCell className="text-yellow-500">{stat.gold}</TableCell>
-                            <TableCell className="text-red-500">{stat.security || 'N/A'}</TableCell>
-                            <TableCell className="text-teal-500">{stat.win ? 'win' : 'los'}</TableCell>
-                            <TableCell className="text-pink-500">{stat.color || 'N/A'}</TableCell>
+                            <TableCell className="text-amber-500">{stat?.city || 'N/A'}</TableCell>
+                            <TableCell>
+                                {stat.win && <span className="yellow-circle"></span>}
+                            </TableCell>
+                            <TableCell className={`text-${stat.color?.toLowerCase() || 'gray'}-500`}>
+                                <span className="text-center">{stat.player?.name || 'N/A'}</span>
+                            </TableCell>
+                            <TableCell className="text-yellow-500 text-right">{stat.gold}</TableCell>
+                            <TableCell className="text-red-500 text-center">{stat.security || 'N/A'}</TableCell>
                             <TableCell className="text-gray-500">
                                 {stat.link ? (
                                     <Link href={stat.link} target="_blank" rel="noopener noreferrer">

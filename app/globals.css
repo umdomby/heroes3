@@ -199,3 +199,13 @@ html {
     flex: 1 1 100%; /* Задает ширину 100% для каждого блока */
   }
 }
+
+
+.yellow-circle {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: yellow;
+  border-radius: 50%;
+  margin-left: 8px; /* Отступ слева от имени игрока */
+}
