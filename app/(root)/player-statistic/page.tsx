@@ -22,9 +22,10 @@ export default async function PlayerStatisticsPage({ searchParams }: { searchPar
 
     const resolvedSearchParams = await searchParams;
     const page = parseInt(resolvedSearchParams.page || '1', 10);
-    const pageSize = 100;
+    const pageSize = 50;
     const skip = (page - 1) * pageSize;
 
+    const totalRecords = await prisma.playerStatistic.count();
     const playerStatistics = await prisma.playerStatistic.findMany({
         skip,
         take: pageSize,
@@ -35,17 +36,13 @@ export default async function PlayerStatisticsPage({ searchParams }: { searchPar
         },
     });
 
-    // Debugging: Log the data to ensure it's an array
-    console.log("Loaded playerStatistics:", playerStatistics);
-
-    if (!Array.isArray(playerStatistics)) {
-        console.error("playerStatistics is not an array:", playerStatistics);
-        return null; // или обработайте ошибку соответствующим образом
-    }
-
     return (
         <Container className="w-[96%]">
-            <PlayerStatisticsComp playerStatistics={playerStatistics} />
+            <PlayerStatisticsComp
+                playerStatistics={playerStatistics}
+                currentPage={page}
+                totalPages={Math.ceil(totalRecords / pageSize)}
+            />
         </Container>
     );
 }
