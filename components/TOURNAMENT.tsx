@@ -1,11 +1,11 @@
 'use client';
-import React from "react";
+import React, {useTransition} from "react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { PlayerStatistic } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import {Button} from "@/components/ui";
-import {DropdownMenuRadioItem} from "@/components/ui/dropdown-menu";
+import {tournamentSumPlayers} from "@/app/actions";
 
 const cityTranslations = {
     CASTLE: "ЗАМОК",
@@ -35,18 +35,34 @@ interface PlayerStatisticsProps {
 
 export function TOURNAMENT({ playerStatistics, currentPage, totalPages }: PlayerStatisticsProps) {
     const router = useRouter();
+    const [isPending, startTransition] = useTransition();
 
     const handlePageChange = (newPage: number) => {
         router.push(`?page=${newPage}`);
     };
 
+    const handleCalculateStatistics = () => {
+        startTransition(async () => {
+            try {
+                await tournamentSumPlayers();
+                alert('Статистика обновлена успешно!');
+            } catch (error) {
+                console.error('Ошибка при обновлении статистики:', error);
+                alert('Ошибка при обновлении статистики.');
+            }
+        });
+    };
+
     return (
         <div>
             <div className="pagination-buttons flex justify-center items-center m-6">
-                <div className="flex justify-start w-full">
+                <div className="flex justify-start w-full mx-5">
                     <Link href="/player">
-                        <Button className="mx-5 h-5">ИГРОКИ</Button>
+                        <Button className="h-7 mr-2">ИГРОКИ</Button>
                     </Link>
+                    <Button className="h-7" onClick={handleCalculateStatistics} disabled={isPending}>
+                        {isPending ? 'Обновление...' : 'Обновить статистику'}
+                    </Button>
                 </div>
                 <div className="flex justify-center w-full">
                     <Button

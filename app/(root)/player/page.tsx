@@ -21,7 +21,11 @@ export default async function PlayerStatisticsPage() {
     // }
 
 
-    const playerAll = await prisma.player.findMany();
+    const playerAll = await prisma.player.findMany({
+        orderBy: {
+            rateGame: 'desc', // Сортировка по убыванию
+        },
+    });
 
     return (
         <Container className="w-[96%]">
