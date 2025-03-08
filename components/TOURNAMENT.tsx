@@ -132,9 +132,9 @@ export function TOURNAMENT({
 
     return (
         <div>
-            <div className="text-center">
+            <div className="text-right">
                 <Link href="/player">
-                    <Button className="h-6 mt-4">ИГРОКИ</Button>
+                    <Button className="h-6 my-4">ИГРОКИ</Button>
                 </Link>
             </div>
 
@@ -209,7 +209,7 @@ export function TOURNAMENT({
                     />
                 </div>
                 <Button onClick={handleSearch} className="h-7">Поиск</Button>
-                <Button onClick={handleCalculateStatistics} className="h-7">Обновить</Button>
+                {/*<Button onClick={handleCalculateStatistics} className="h-7">Обновить</Button>*/}
             </div>
 
             <div className="pagination-buttons flex justify-center items-center m-3">
