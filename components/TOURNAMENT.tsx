@@ -1,4 +1,4 @@
-'use client';
+"use client"
 import React, { useState, useTransition } from "react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { PlayerStatistic, User } from "@prisma/client";
@@ -79,7 +79,15 @@ export function TOURNAMENT({
         playerId: '',
         color: '',
         city: '',
-        win: false
+        win: null // изменено на null для управления состоянием
+    });
+
+    const [activeSelects, setActiveSelects] = useState({
+        turnirId: true,
+        categoryId: true,
+        playerId: true,
+        color: true,
+        city: true
     });
 
     const isFormValid = Object.values(formData).every(value => value !== '' && value !== 0);
@@ -130,6 +138,24 @@ export function TOURNAMENT({
         }
     };
 
+    const resetFilters = () => {
+        setFormDataSort({
+            turnirId: '',
+            categoryId: '',
+            playerId: '',
+            color: '',
+            city: '',
+            win: null
+        });
+        setActiveSelects({
+            turnirId: true,
+            categoryId: true,
+            playerId: true,
+            color: true,
+            city: true
+        });
+    };
+
     return (
         <div>
             <div className="text-right">
@@ -139,77 +165,94 @@ export function TOURNAMENT({
             </div>
 
             <div className="flex flex-wrap items-center space-x-2">
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, turnirId: value})}>
-                    <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Турнир"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                        {turnirs.map((turnir) => (
-                            <SelectItem key={turnir.id} value={turnir.id.toString()}>
-                                {turnir.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, categoryId: value})}>
-                    <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Категория"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                        {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id.toString()}>
-                                {category.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, playerId: value})}>
-                    <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Игрок"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                        {players.map((player) => (
-                            <SelectItem key={player.id} value={player.id.toString()}>
-                                {player.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, color: value})}>
-                    <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Цвет"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Object.keys(ColorPlayer).map((color) => (
-                            <SelectItem key={color} value={color}>
-                                {ColorPlayer[color as keyof typeof ColorPlayer]}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, city: value})}>
-                    <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Город"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Object.keys(cityTranslations).map((city) => (
-                            <SelectItem key={city} value={city}>
-                                {cityTranslations[city as keyof typeof cityTranslations]}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                {activeSelects.turnirId && (
+                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, turnirId: value})}>
+                        <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Турнир"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {turnirs.map((turnir) => (
+                                <SelectItem key={turnir.id} value={turnir.id.toString()}>
+                                    {turnir.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+                {activeSelects.categoryId && (
+                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, categoryId: value})}>
+                        <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Категория"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {categories.map((category) => (
+                                <SelectItem key={category.id} value={category.id.toString()}>
+                                    {category.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+                {activeSelects.playerId && (
+                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, playerId: value})}>
+                        <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Игрок"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {players.map((player) => (
+                                <SelectItem key={player.id} value={player.id.toString()}>
+                                    {player.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+                {activeSelects.color && (
+                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, color: value})}>
+                        <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Цвет"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.keys(ColorPlayer).map((color) => (
+                                <SelectItem key={color} value={color}>
+                                    {ColorPlayer[color as keyof typeof ColorPlayer]}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
+                {activeSelects.city && (
+                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, city: value})}>
+                        <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Город"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.keys(cityTranslations).map((city) => (
+                                <SelectItem key={city} value={city}>
+                                    {cityTranslations[city as keyof typeof cityTranslations]}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
                 <div className="flex items-center">
-                    <span className="mr-2">Win/Lose</span>
+                    <span className="mr-2">Win</span>
                     <Input
-                        type="checkbox"
+                        type="radio"
                         name="win"
-                        checked={formDataSort.win}
-                        onChange={(e) => setFormDataSort({...formDataSort, win: e.target.checked})}
+                        checked={formDataSort.win === true}
+                        onChange={() => setFormDataSort({...formDataSort, win: true})}
+                    />
+                    <span className="mr-2">Lose</span>
+                    <Input
+                        type="radio"
+                        name="win"
+                        checked={formDataSort.win === false}
+                        onChange={() => setFormDataSort({...formDataSort, win: false})}
                     />
                 </div>
                 <Button onClick={handleSearch} className="h-7">Поиск</Button>
-                {/*<Button onClick={handleCalculateStatistics} className="h-7">Обновить</Button>*/}
+                <Button onClick={resetFilters} className="h-7">Сбросить</Button>
             </div>
 
             <div className="pagination-buttons flex justify-center items-center m-3">
@@ -380,12 +423,20 @@ export function TOURNAMENT({
                                 onChange={handleInputChange}
                                 placeholder="Security"
                             />
-                            Win/Lose<Input
-                            type="checkbox"
-                            name="win"
-                            checked={formData.win}
-                            onChange={handleInputChange}
-                        />
+                            Win
+                            <Input
+                                type="radio"
+                                name="win"
+                                checked={formData.win === true}
+                                onChange={() => setFormData({...formData, win: true})}
+                            />
+                            Lose
+                            <Input
+                                type="radio"
+                                name="win"
+                                checked={formData.win === false}
+                                onChange={() => setFormData({...formData, win: false})}
+                            />
                             <Input
                                 type="text"
                                 name="link"
