@@ -131,11 +131,11 @@ export function TOURNAMENT({
                         Следующая
                     </Button>
                 </div>
-                <div>
-                    <Link href="/player">
-                        <Button className="h-7 mr-2">ИГРОКИ</Button>
-                    </Link>
-                </div>
+            </div>
+            <div>
+                <Link className="text-center" href="/player">
+                    <Button className="h-7 mb-2">ИГРОКИ</Button>
+                </Link>
             </div>
 
             <Table>
