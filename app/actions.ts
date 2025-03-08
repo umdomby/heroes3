@@ -4445,27 +4445,98 @@ export async function playerStatisticActions({ action, id, data }: { action: str
 }
 
 
+// export async function tournamentSumPlayers2() {
+//     const players = await prisma.player.findMany({
+//         include: {
+//             playerStatistics: true,
+//         },
+//     });
+//
+//     for (const player of players) {
+//         const totalGames = player.playerStatistics.length;
+//         const winGames = player.playerStatistics.filter(stat => stat.win).length;
+//         const lossGames = totalGames - winGames;
+//         const winRate = totalGames > 0 ? (winGames / totalGames) * 100 : 0;
+//
+//         await prisma.player.update({
+//             where: { id: player.id },
+//             data: {
+//                 countGame: totalGames,
+//                 winGame: winGames,
+//                 lossGame: lossGames,
+//                 rateGame: winRate,
+//             },
+//         });
+//     }
+// }
+
 export async function tournamentSumPlayers() {
     const players = await prisma.player.findMany({
         include: {
-            playerStatistics: true,
+            playerStatistics: {
+                include: {
+                    turnirBet: true, // Убедитесь, что turnirBet загружается
+                },
+            },
         },
     });
 
     for (const player of players) {
-        const totalGames = player.playerStatistics.length;
-        const winGames = player.playerStatistics.filter(stat => stat.win).length;
-        const lossGames = totalGames - winGames;
-        const winRate = totalGames > 0 ? (winGames / totalGames) * 100 : 0;
+        console.log(`Player ${player.id} has ${player.playerStatistics.length} statistics`);
 
-        await prisma.player.update({
-            where: { id: player.id },
-            data: {
+        const tournaments = [
+            { name: "heroescup1deal", field: "HeroesCup1deaL" },
+            { name: "heroescup", field: "HeroesCup" },
+            { name: "heroescup2", field: "HeroesCup2" },
+            { name: "heroescup3", field: "HeroesCup3" },
+            { name: "hc3po", field: "HC3PO" },
+            { name: "hc2po", field: "HC2PO" },
+        ];
+
+        const tournamentStats = {};
+
+        for (const tournament of tournaments) {
+            const stats = player.playerStatistics.filter(stat => {
+                const tournamentName = stat.turnirBet?.name.toLowerCase().replace(/\s+/g, '');
+                console.log(`Checking stat for player ${player.id}:`, tournamentName);
+                return tournamentName === tournament.name;
+            });
+            console.log(`Player ${player.id} has ${stats.length} statistics for tournament ${tournament.name}`);
+
+            const totalGames = stats.length;
+            const winGames = stats.filter(stat => stat.win).length;
+            const lossGames = totalGames - winGames;
+            const winRate = totalGames > 0 ? (winGames / totalGames) * 100 : 0;
+
+            tournamentStats[tournament.field] = {
+                tournament: tournament.name,
                 countGame: totalGames,
                 winGame: winGames,
                 lossGame: lossGames,
                 rateGame: winRate,
-            },
-        });
+            };
+        }
+
+        console.log(`Updating player ${player.id} with data:`, tournamentStats);
+
+        try {
+            await prisma.player.update({
+                where: { id: player.id },
+                data: {
+                    countGame: player.playerStatistics.length,
+                    winGame: player.playerStatistics.filter(stat => stat.win).length,
+                    lossGame: player.playerStatistics.length - player.playerStatistics.filter(stat => stat.win).length,
+                    rateGame: player.playerStatistics.length > 0 ? (player.playerStatistics.filter(stat => stat.win).length / player.playerStatistics.length) * 100 : 0,
+                    HeroesCup1deaL: tournamentStats["HeroesCup1deaL"],
+                    HeroesCup: tournamentStats["HeroesCup"],
+                    HeroesCup2: tournamentStats["HeroesCup2"],
+                    HeroesCup3: tournamentStats["HeroesCup3"],
+                    HC3PO: tournamentStats["HC3PO"],
+                    HC2PO: tournamentStats["HC2PO"],
+                },
+            });
+        } catch (error) {
+            console.error(`Error updating player ${player.id}:`, error);
+        }
     }
 }
