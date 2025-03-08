@@ -4470,12 +4470,24 @@ export async function playerStatisticActions({ action, id, data }: { action: str
 //     }
 // }
 
+interface TournamentStat {
+    tournament: string;
+    countGame: number;
+    winGame: number;
+    lossGame: number;
+    rateGame: number;
+}
+
+type TournamentStats = {
+    [key: string]: TournamentStat;
+};
+
 export async function tournamentSumPlayers() {
     const players = await prisma.player.findMany({
         include: {
             playerStatistics: {
                 include: {
-                    turnirBet: true, // Убедитесь, что turnirBet загружается
+                    turnirBet: true,
                 },
             },
         },
@@ -4493,7 +4505,7 @@ export async function tournamentSumPlayers() {
             { name: "hc2po", field: "HC2PO" },
         ];
 
-        const tournamentStats = {};
+        const tournamentStats: TournamentStats = {};
 
         for (const tournament of tournaments) {
             const stats = player.playerStatistics.filter(stat => {
@@ -4527,12 +4539,12 @@ export async function tournamentSumPlayers() {
                     winGame: player.playerStatistics.filter(stat => stat.win).length,
                     lossGame: player.playerStatistics.length - player.playerStatistics.filter(stat => stat.win).length,
                     rateGame: player.playerStatistics.length > 0 ? (player.playerStatistics.filter(stat => stat.win).length / player.playerStatistics.length) * 100 : 0,
-                    HeroesCup1deaL: tournamentStats["HeroesCup1deaL"],
-                    HeroesCup: tournamentStats["HeroesCup"],
-                    HeroesCup2: tournamentStats["HeroesCup2"],
-                    HeroesCup3: tournamentStats["HeroesCup3"],
-                    HC3PO: tournamentStats["HC3PO"],
-                    HC2PO: tournamentStats["HC2PO"],
+                    HeroesCup1deaL: JSON.stringify(tournamentStats["HeroesCup1deaL"]),
+                    HeroesCup: JSON.stringify(tournamentStats["HeroesCup"]),
+                    HeroesCup2: JSON.stringify(tournamentStats["HeroesCup2"]),
+                    HeroesCup3: JSON.stringify(tournamentStats["HeroesCup3"]),
+                    HC3PO: JSON.stringify(tournamentStats["HC3PO"]),
+                    HC2PO: JSON.stringify(tournamentStats["HC2PO"]),
                 },
             });
         } catch (error) {

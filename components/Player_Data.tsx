@@ -36,12 +36,12 @@ export const Player_Data: React.FC<Props> = ({playerData}) => {
                 <Button className="mx-5 h-5">ТУРНИРЫ HEROES HUB</Button>
             </Link>
             <div className="text-2xl text-center">{playerData.name}</div>
-            <div className="text-center font-bold">Player Details</div> {/* Caption at the top */}
+            <div className="text-center text-green-500 font-bold">All Player Details</div> {/* Caption at the top */}
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead style={{ width: '50%', textAlign: 'center' }}>Attribute</TableHead>
-                        <TableHead style={{ width: '50%', textAlign: 'center' }}>Value</TableHead>
+                        <TableHead className="text-blue-500" style={{ width: '50%', textAlign: 'center' }}>Attribute</TableHead>
+                        <TableHead className="text-blue-500" style={{ width: '50%', textAlign: 'center' }}>Value</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -72,12 +72,12 @@ export const Player_Data: React.FC<Props> = ({playerData}) => {
                 const data = tournament.data as any;
                 return (
                     <div key={index}>
-                        <div className="text-center mt-5 font-bold">{tournament.name} Details</div> {/* Caption at the top */}
+                        <div className="text-center mt-5 text-amber-500 font-bold">{tournament.name}</div> {/* Caption at the top */}
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead style={{ width: '50%', textAlign: 'center' }}>Attribute</TableHead>
-                                    <TableHead style={{ width: '50%', textAlign: 'center' }}>Value</TableHead>
+                                    <TableHead className="text-blue-500" style={{ width: '50%', textAlign: 'center' }}>Attribute</TableHead>
+                                    <TableHead className="text-blue-500" style={{ width: '50%', textAlign: 'center' }}>Value</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -99,7 +99,7 @@ export const Player_Data: React.FC<Props> = ({playerData}) => {
                                 </TableRow>
                                 <TableRow>
                                     <TableCell style={{ width: '50%', textAlign: 'center' }}>Win Rate (%)</TableCell>
-                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>{data?.rateGame !== null && data?.rateGame !== undefined ? data.rateGame.toFixed(2) : 'N/A'}</TableCell>
+                                    <TableCell className="text-red-400" style={{ width: '50%', textAlign: 'center' }}>{data?.rateGame !== null && data?.rateGame !== undefined ? data.rateGame.toFixed(2) : 'N/A'}</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
