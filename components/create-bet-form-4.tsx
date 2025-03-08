@@ -52,10 +52,10 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
             player2Id: players[1]?.id,
             player3Id: players[2]?.id,
             player4Id: players[3]?.id,
-            initBetPlayer1: 250,
-            initBetPlayer2: 250,
-            initBetPlayer3: 250,
-            initBetPlayer4: 250,
+            initBetPlayer1: 100,
+            initBetPlayer2: 100,
+            initBetPlayer3: 100,
+            initBetPlayer4: 100,
             categoryId: undefined, // Установлено значение по умолчанию на undefined
             productId: undefined,  // Установлено значение по умолчанию на undefined
             productItemId: undefined, // Установлено значение по умолчанию на undefined
@@ -120,8 +120,8 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
         }
 
         const totalBetAmount = initBetPlayer1 + initBetPlayer2 + initBetPlayer3 + initBetPlayer4;
-        if (totalBetAmount > 1000) {
-            setCreateBetError('Максимальная сумма ставок на всех игроков: 1000 баллов');
+        if (totalBetAmount > 20000) {
+            setCreateBetError('Максимальная сумма ставок на всех игроков: 20000 баллов');
             return;
         }
 
@@ -164,7 +164,7 @@ export const CreateBetForm4: React.FC<Props> = ({ user, categories, products, pr
         <div>
             <div>Ваши баллы: {user?.points}</div>
             <div style={{color: 'blue', marginBottom: '10px'}}>
-                Вы можете распределить только 100 баллов между четырьмя игроками. Баллы не списываются с вашего баланса.
+                Распределить 20000 баллов между четырьмя игроками. Баллы не списываются с вашего баланса.
             </div>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">

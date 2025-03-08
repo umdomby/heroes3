@@ -1757,8 +1757,8 @@ export async function clientCreateBet(formData: any) {
 
         // Округляем до двух знаков после запятой
         const totalBetAmount = Math.floor((formData.initBetPlayer1 + formData.initBetPlayer2) * 100) / 100;
-        if (totalBetAmount > 1000) {
-            throw new Error("Сумма начальных ставок не должна превышать 1000 баллов");
+        if (totalBetAmount > 20000) {
+            throw new Error("Сумма начальных ставок не должна превышать 20000 баллов");
         }
 
         const {maxBetPlayer1, maxBetPlayer2} = calculateMaxBets(formData.initBetPlayer1, formData.initBetPlayer2);
@@ -2377,8 +2377,8 @@ export async function clientCreateBet3(formData: any) {
         }
 
         const totalBetAmount = Math.floor((formData.initBetPlayer1 + formData.initBetPlayer2 + formData.initBetPlayer3) * 100) / 100;
-        if (totalBetAmount > 1000) {
-            throw new Error("Сумма начальных ставок не должна превышать 1000 баллов");
+        if (totalBetAmount > 20000) {
+            throw new Error("Сумма начальных ставок не должна превышать 20000 баллов");
         }
 
         const {
@@ -3017,8 +3017,8 @@ export async function clientCreateBet4(formData: any) {
         }
 
         const totalBetAmount = Math.floor((formData.initBetPlayer1 + formData.initBetPlayer2 + formData.initBetPlayer3 + formData.initBetPlayer4) * 100) / 100;
-        if (totalBetAmount > 1000) {
-            throw new Error("Сумма начальных ставок не должна превышать 1000 баллов");
+        if (totalBetAmount > 20000) {
+            throw new Error("Сумма начальных ставок не должна превышать 20000 баллов");
         }
 
         const {
