@@ -89,7 +89,7 @@ export function TOURNAMENT({
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const {name, value, type, checked} = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData({
             ...formData,
             [name]: type === 'checkbox' ? checked : value
@@ -110,73 +110,100 @@ export function TOURNAMENT({
 
     return (
         <div>
-
-            {user.role === 'ADMIN' || user.role === 'USER_EDIT' ? (
+            {(user?.role === 'ADMIN' || user?.role === 'USER_EDIT') && (
                 <div>
                     <form onSubmit={handleSubmit} className="mb-6">
                         <div className="flex flex-wrap gap-4">
-                            <Select onValueChange={(value) => setFormData({...formData, turnirId: value})}>
+                            <Select onValueChange={(value) => setFormData({ ...formData, turnirId: value })}>
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Выберите турнир"/>
+                                    <SelectValue placeholder="Выберите турнир" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {turnirs.map(turnir => (
-                                        <SelectItem key={turnir.id}
-                                                    value={turnir.id.toString()}>{turnir.name}</SelectItem>
+                                    {turnirs.map((turnir) => (
+                                        <SelectItem key={turnir.id} value={turnir.id.toString()}>
+                                            {turnir.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <Select onValueChange={(value) => setFormData({...formData, categoryId: value})}>
+                            <Select onValueChange={(value) => setFormData({ ...formData, categoryId: value })}>
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Выберите категорию"/>
+                                    <SelectValue placeholder="Выберите категорию" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {categories.map(category => (
-                                        <SelectItem key={category.id}
-                                                    value={category.id.toString()}>{category.name}</SelectItem>
+                                    {categories.map((category) => (
+                                        <SelectItem key={category.id} value={category.id.toString()}>
+                                            {category.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <Select onValueChange={(value) => setFormData({...formData, playerId: value})}>
+                            <Select onValueChange={(value) => setFormData({ ...formData, playerId: value })}>
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Выберите игрока"/>
+                                    <SelectValue placeholder="Выберите игрока" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {players.map(player => (
-                                        <SelectItem key={player.id}
-                                                    value={player.id.toString()}>{player.name}</SelectItem>
+                                    {players.map((player) => (
+                                        <SelectItem key={player.id} value={player.id.toString()}>
+                                            {player.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <Select onValueChange={(value) => setFormData({...formData, color: value})}>
+                            <Select onValueChange={(value) => setFormData({ ...formData, color: value })}>
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Выберите цвет"/>
+                                    <SelectValue placeholder="Выберите цвет" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {Object.keys(ColorPlayer).map(color => (
-                                        <SelectItem key={color}
-                                                    value={color}>{ColorPlayer[color as keyof typeof ColorPlayer]}</SelectItem>
+                                    {Object.keys(ColorPlayer).map((color) => (
+                                        <SelectItem key={color} value={color}>
+                                            {ColorPlayer[color as keyof typeof ColorPlayer]}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <Select onValueChange={(value) => setFormData({...formData, city: value})}>
+                            <Select onValueChange={(value) => setFormData({ ...formData, city: value })}>
                                 <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Выберите город"/>
+                                    <SelectValue placeholder="Выберите город" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {Object.keys(cityTranslations).map(city => (
-                                        <SelectItem key={city} value={city}>{cityTranslations[city]}</SelectItem>
+                                    {Object.keys(cityTranslations).map((city) => (
+                                        <SelectItem key={city} value={city}>
+                                            {cityTranslations[city]}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <Input type="number" name="gold" value={formData.gold} onChange={handleInputChange}
-                                   placeholder="Gold"/>
-                            <Input type="text" name="security" value={formData.security} onChange={handleInputChange}
-                                   placeholder="Security"/>
-                            <Input type="checkbox" name="win" checked={formData.win} onChange={handleInputChange}/>
-                            <Input type="text" name="link" value={formData.link} onChange={handleInputChange}
-                                   placeholder="Link"/>
-                            <Button type="submit" className="h-7">Сохранить</Button>
+                            <Input
+                                type="number"
+                                name="gold"
+                                value={formData.gold}
+                                onChange={handleInputChange}
+                                placeholder="Gold"
+                            />
+                            <Input
+                                type="text"
+                                name="security"
+                                value={formData.security}
+                                onChange={handleInputChange}
+                                placeholder="Security"
+                            />
+                            <Input
+                                type="checkbox"
+                                name="win"
+                                checked={formData.win}
+                                onChange={handleInputChange}
+                            />
+                            <Input
+                                type="text"
+                                name="link"
+                                value={formData.link}
+                                onChange={handleInputChange}
+                                placeholder="Link"
+                            />
+                            <Button type="submit" className="h-7">
+                                Сохранить
+                            </Button>
                         </div>
                     </form>
                     <div>
@@ -190,7 +217,7 @@ export function TOURNAMENT({
                         </div>
                     </div>
                 </div>
-            ) : null}
+            )}
 
             <div className="pagination-buttons flex justify-center items-center m-6">
                 <div className="flex justify-center w-full">
