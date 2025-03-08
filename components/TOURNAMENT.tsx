@@ -168,7 +168,7 @@ export function TOURNAMENT({
                             <TableCell className={`text-${stat.color?.toLowerCase() || 'gray'}-500`}>
                                 {stat.player ? (
                                     <Link
-                                        className="text-blue-500 cursor-pointer hover:text-green-500"
+                                        className="cursor-pointer hover:text-green-500"
                                         href={`/player/${stat.player.id}`}
                                     >
                                         {stat.player.name || 'N/A'}
