@@ -1,10 +1,7 @@
-'use client';
-
 import React from 'react';
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
@@ -39,72 +36,74 @@ export const Player_Data: React.FC<Props> = ({playerData}) => {
                 <Button className="mx-5 h-5">ТУРНИРЫ HEROES HUB</Button>
             </Link>
             <div className="text-2xl text-center">{playerData.name}</div>
+            <div className="text-center font-bold">Player Details</div> {/* Caption at the top */}
             <Table>
-                <TableCaption>Player Details</TableCaption>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Attribute</TableHead>
-                        <TableHead>Value</TableHead>
+                        <TableHead style={{ width: '50%', textAlign: 'center' }}>Attribute</TableHead>
+                        <TableHead style={{ width: '50%', textAlign: 'center' }}>Value</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>{playerData.name}</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>Name</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>{playerData.name}</TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>Games Played</TableCell>
-                        <TableCell>{playerData.countGame ?? 'N/A'}</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>Games Played</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>{playerData.countGame ?? 'N/A'}</TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>Wins</TableCell>
-                        <TableCell>{playerData.winGame ?? 'N/A'}</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>Wins</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>{playerData.winGame ?? 'N/A'}</TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>Losses</TableCell>
-                        <TableCell>{playerData.lossGame ?? 'N/A'}</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>Losses</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>{playerData.lossGame ?? 'N/A'}</TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>Win Rate (%)</TableCell>
-                        <TableCell>{playerData.rateGame !== null && playerData.rateGame !== undefined ? playerData.rateGame.toFixed(2) : 'N/A'}</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>Win Rate (%)</TableCell>
+                        <TableCell style={{ width: '50%', textAlign: 'center' }}>{playerData.rateGame !== null && playerData.rateGame !== undefined ? playerData.rateGame.toFixed(2) : 'N/A'}</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
 
             {tournamentFields.map((tournament, index) => {
-                const data = tournament.data as any; // Приведение к any для доступа к полям JSON
+                const data = tournament.data as any;
                 return (
-                    <Table key={index}>
-                        <TableCaption>{tournament.name} Details</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Attribute</TableHead>
-                                <TableHead>Value</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow>
-                                <TableCell>Tournament</TableCell>
-                                <TableCell>{data?.tournament ?? 'N/A'}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Games Played</TableCell>
-                                <TableCell>{data?.countGame ?? 'N/A'}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Wins</TableCell>
-                                <TableCell>{data?.winGame ?? 'N/A'}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Losses</TableCell>
-                                <TableCell>{data?.lossGame ?? 'N/A'}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>Win Rate (%)</TableCell>
-                                <TableCell>{data?.rateGame !== null && data?.rateGame !== undefined ? data.rateGame.toFixed(2) : 'N/A'}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
+                    <div key={index}>
+                        <div className="text-center mt-5 font-bold">{tournament.name} Details</div> {/* Caption at the top */}
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead style={{ width: '50%', textAlign: 'center' }}>Attribute</TableHead>
+                                    <TableHead style={{ width: '50%', textAlign: 'center' }}>Value</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>Tournament</TableCell>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>{data?.tournament ?? 'N/A'}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>Games Played</TableCell>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>{data?.countGame ?? 'N/A'}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>Wins</TableCell>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>{data?.winGame ?? 'N/A'}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>Losses</TableCell>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>{data?.lossGame ?? 'N/A'}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>Win Rate (%)</TableCell>
+                                    <TableCell style={{ width: '50%', textAlign: 'center' }}>{data?.rateGame !== null && data?.rateGame !== undefined ? data.rateGame.toFixed(2) : 'N/A'}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </div>
                 );
             })}
         </Container>
