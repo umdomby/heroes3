@@ -173,76 +173,66 @@ export function TOURNAMENT({
             </div>
 
             <div className="flex flex-wrap items-center space-x-2">
-                {activeSelects.turnirId && (
-                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, turnirId: value})}>
-                        <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Турнир"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            {turnirs.map((turnir) => (
-                                <SelectItem key={turnir.id} value={turnir.id.toString()}>
-                                    {turnir.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                )}
-                {activeSelects.categoryId && (
-                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, categoryId: value})}>
-                        <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Категория"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            {categories.map((category) => (
-                                <SelectItem key={category.id} value={category.id.toString()}>
-                                    {category.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                )}
-                {activeSelects.playerId && (
-                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, playerId: value})}>
-                        <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Игрок"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            {players.map((player) => (
-                                <SelectItem key={player.id} value={player.id.toString()}>
-                                    {player.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                )}
-                {activeSelects.color && (
-                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, color: value})}>
-                        <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Цвет"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Object.keys(ColorPlayer).map((color) => (
-                                <SelectItem key={color} value={color}>
-                                    {ColorPlayer[color as keyof typeof ColorPlayer]}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                )}
-                {activeSelects.city && (
-                    <Select onValueChange={(value) => setFormDataSort({...formDataSort, city: value})}>
-                        <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Город"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Object.keys(cityTranslations).map((city) => (
-                                <SelectItem key={city} value={city}>
-                                    {cityTranslations[city as keyof typeof cityTranslations]}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                )}
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, turnirId: value})} value={formDataSort.turnirId}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Турнир"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {turnirs.map((turnir) => (
+                            <SelectItem key={turnir.id} value={turnir.id.toString()}>
+                                {turnir.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, categoryId: value})} value={formDataSort.categoryId}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Категория"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                                {category.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, playerId: value})} value={formDataSort.playerId}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Игрок"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {players.map((player) => (
+                            <SelectItem key={player.id} value={player.id.toString()}>
+                                {player.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, color: value})} value={formDataSort.color}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Цвет"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {Object.keys(ColorPlayer).map((color) => (
+                            <SelectItem key={color} value={color}>
+                                {ColorPlayer[color as keyof typeof ColorPlayer]}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, city: value})} value={formDataSort.city}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Город"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {Object.keys(cityTranslations).map((city) => (
+                            <SelectItem key={city} value={city}>
+                                {cityTranslations[city as keyof typeof cityTranslations]}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
                 <div className="flex items-center">
                     <span className="mr-2">Win</span>
                     <Input

@@ -4526,7 +4526,7 @@ export async function tournamentSumPlayers() {
     }
 }
 export async function getPlayerStatistics(filters: any) {
-    const { turnirId, categoryId, city, win, playerId } = filters;
+    const { turnirId, categoryId, city, win, playerId, color } = filters; // Добавляем color
 
     const playerStatistics = await prisma.playerStatistic.findMany({
         where: {
@@ -4535,6 +4535,7 @@ export async function getPlayerStatistics(filters: any) {
             city: city || undefined,
             win: win !== undefined ? Boolean(win) : undefined,
             playerId: playerId ? Number(playerId) : undefined,
+            color: color || undefined, // Добавляем условие для color
         },
         include: {
             turnirBet: true,
@@ -4547,6 +4548,7 @@ export async function getPlayerStatistics(filters: any) {
             { city: 'asc' },
             { win: 'asc' },
             { playerId: 'asc' },
+            { color: 'asc' }, // Добавляем сортировку по color
         ],
     });
 
