@@ -9,7 +9,6 @@ import { TOURNAMENT } from "@/components/TOURNAMENT";
 
 export default async function PlayerStatisticsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const session = await getUserSession();
-
     const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
     const resolvedSearchParams = await searchParams;
     const page = parseInt(resolvedSearchParams.page || '1', 10);
@@ -20,12 +19,19 @@ export default async function PlayerStatisticsPage({ searchParams }: { searchPar
     const playerStatistics = await prisma.playerStatistic.findMany({
         skip,
         take: pageSize,
+        orderBy: {
+            id: 'desc', // Sort by the 'id' field in descending order
+        },
         include: {
             turnirBet: true,
             category: true,
             player: true,
         },
     });
+
+    const turnirs = await prisma.turnirBet.findMany();
+    const categories = await prisma.category.findMany();
+    const players = await prisma.player.findMany();
 
     return (
         <Container className="w-[96%]">
@@ -34,6 +40,9 @@ export default async function PlayerStatisticsPage({ searchParams }: { searchPar
                 playerStatistics={playerStatistics}
                 currentPage={page}
                 totalPages={Math.ceil(totalRecords / pageSize)}
+                turnirs={turnirs}
+                categories={categories}
+                players={players}
             />
         </Container>
     );

@@ -4412,7 +4412,7 @@ export async function adminTrurnirBetPage({ action, id, turnirName }: AdminTurni
 }
 
 
-export async function playerStatisticActions() {
+export async function createPlayerStatistic(data: any) {
     const currentUser = await getUserSession();
 
     if (!currentUser) {
@@ -4424,7 +4424,20 @@ export async function playerStatisticActions() {
     }
 
     try {
-
+            // Создание новой записи
+            await prisma.playerStatistic.create({
+                data: {
+                    turnirId: Number(data.turnirId),
+                    categoryId: Number(data.categoryId),
+                    playerId: Number(data.playerId),
+                    color: data.color,
+                    city: data.city,
+                    gold: Number(data.gold),
+                    security: data.security,
+                    win: data.win,
+                    link: data.link,
+                },
+            });
     } catch (error) {
         console.error('Ошибка при выполнении операции с турниром:', error);
         throw new Error('Не удалось выполнить операцию');

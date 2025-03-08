@@ -1,11 +1,12 @@
 'use client';
-import React, {useTransition} from "react";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import React, {useState, useTransition} from "react";
+import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
 import {PlayerStatistic, User} from "@prisma/client";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
-import {Button} from "@/components/ui";
-import {tournamentSumPlayers} from "@/app/actions";
+import {useRouter} from 'next/navigation';
+import {Button, Input} from "@/components/ui";
+import {Select, SelectTrigger, SelectContent, SelectItem, SelectValue} from "@/components/ui/select";
+import {tournamentSumPlayers, createPlayerStatistic} from "@/app/actions";
 
 const cityTranslations = {
     CASTLE: "ЗАМОК",
@@ -21,10 +22,21 @@ const cityTranslations = {
     FACTORY: "ФАБРИКА"
 };
 
+enum ColorPlayer {
+    RED = "КРАСНЫЙ",
+    BLUE = "СИНИЙ",
+    GREEN = "ЗЕЛЁНЫЙ",
+    YELLOW = "ЖЁЛТЫЙ",
+    PURPLE = "ФИОЛЕТОВЫЙ",
+    ORANGE = "ОРАНЖЕВЫЙ",
+    TEAL = "БИРЮЗОВЫЙ",
+    PINK = "РОЗОВЫЙ"
+}
+
 interface PlayerStatisticWithRelations extends PlayerStatistic {
     turnirBet?: { name: string };
     category?: { name: string };
-    player?: { id: number; name: string }; // Добавьте id здесь
+    player?: { id: number; name: string };
 }
 
 interface PlayerStatisticsProps {
@@ -32,11 +44,33 @@ interface PlayerStatisticsProps {
     currentPage: number;
     totalPages: number;
     user: User;
+    turnirs: { id: number; name: string }[];
+    categories: { id: number; name: string }[];
+    players: { id: number; name: string }[];
 }
 
-export function TOURNAMENT({ user, playerStatistics, currentPage, totalPages }: PlayerStatisticsProps) {
+export function TOURNAMENT({
+                               user,
+                               playerStatistics,
+                               currentPage,
+                               totalPages,
+                               turnirs,
+                               categories,
+                               players
+                           }: PlayerStatisticsProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
+    const [formData, setFormData] = useState({
+        turnirId: '',
+        categoryId: '',
+        playerId: '',
+        color: '',
+        city: '',
+        gold: 0,
+        security: '',
+        win: false,
+        link: ''
+    });
 
     const handlePageChange = (newPage: number) => {
         router.push(`?page=${newPage}`);
@@ -54,17 +88,111 @@ export function TOURNAMENT({ user, playerStatistics, currentPage, totalPages }: 
         });
     };
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const {name, value, type, checked} = e.target;
+        setFormData({
+            ...formData,
+            [name]: type === 'checkbox' ? checked : value
+        });
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await createPlayerStatistic(formData);
+            alert('Запись успешно создана!');
+            router.refresh(); // Обновляем страницу после создания записи
+        } catch (error) {
+            console.error('Ошибка при создании записи:', error);
+            alert('Ошибка при создании записи.');
+        }
+    };
+
     return (
         <div>
-            <div className="pagination-buttons flex justify-center items-center m-6">
-                <div className="flex justify-start w-full mx-5">
-                    <Link href="/player">
-                        <Button className="h-7 mr-2">ИГРОКИ</Button>
-                    </Link>
-                    <Button className="h-7" onClick={handleCalculateStatistics} disabled={isPending}>
-                        {isPending ? 'Обновление...' : 'Обновить статистику'}
-                    </Button>
+
+            {user.role === 'ADMIN' || user.role === 'USER_EDIT' ? (
+                <div>
+                    <form onSubmit={handleSubmit} className="mb-6">
+                        <div className="flex flex-wrap gap-4">
+                            <Select onValueChange={(value) => setFormData({...formData, turnirId: value})}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Выберите турнир"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {turnirs.map(turnir => (
+                                        <SelectItem key={turnir.id}
+                                                    value={turnir.id.toString()}>{turnir.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select onValueChange={(value) => setFormData({...formData, categoryId: value})}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Выберите категорию"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categories.map(category => (
+                                        <SelectItem key={category.id}
+                                                    value={category.id.toString()}>{category.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select onValueChange={(value) => setFormData({...formData, playerId: value})}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Выберите игрока"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {players.map(player => (
+                                        <SelectItem key={player.id}
+                                                    value={player.id.toString()}>{player.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select onValueChange={(value) => setFormData({...formData, color: value})}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Выберите цвет"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.keys(ColorPlayer).map(color => (
+                                        <SelectItem key={color}
+                                                    value={color}>{ColorPlayer[color as keyof typeof ColorPlayer]}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select onValueChange={(value) => setFormData({...formData, city: value})}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Выберите город"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.keys(cityTranslations).map(city => (
+                                        <SelectItem key={city} value={city}>{cityTranslations[city]}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Input type="number" name="gold" value={formData.gold} onChange={handleInputChange}
+                                   placeholder="Gold"/>
+                            <Input type="text" name="security" value={formData.security} onChange={handleInputChange}
+                                   placeholder="Security"/>
+                            <Input type="checkbox" name="win" checked={formData.win} onChange={handleInputChange}/>
+                            <Input type="text" name="link" value={formData.link} onChange={handleInputChange}
+                                   placeholder="Link"/>
+                            <Button type="submit" className="h-7">Сохранить</Button>
+                        </div>
+                    </form>
+                    <div>
+                        <div className="flex justify-start w-full mx-5">
+                            <Link href="/player">
+                                <Button className="h-7 mr-2">ИГРОКИ</Button>
+                            </Link>
+                            <Button className="h-7" onClick={handleCalculateStatistics} disabled={isPending}>
+                                {isPending ? 'Обновление...' : 'Обновить статистику'}
+                            </Button>
+                        </div>
+                    </div>
                 </div>
+            ) : null}
+
+            <div className="pagination-buttons flex justify-center items-center m-6">
                 <div className="flex justify-center w-full">
                     <Button
                         className="h-7 mx-2"
