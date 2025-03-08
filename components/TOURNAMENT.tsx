@@ -1,7 +1,7 @@
 'use client';
 import React, {useTransition} from "react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { PlayerStatistic } from "@prisma/client";
+import {PlayerStatistic, User} from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import {Button} from "@/components/ui";
@@ -31,9 +31,10 @@ interface PlayerStatisticsProps {
     playerStatistics: PlayerStatisticWithRelations[];
     currentPage: number;
     totalPages: number;
+    user: User;
 }
 
-export function TOURNAMENT({ playerStatistics, currentPage, totalPages }: PlayerStatisticsProps) {
+export function TOURNAMENT({ user, playerStatistics, currentPage, totalPages }: PlayerStatisticsProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
