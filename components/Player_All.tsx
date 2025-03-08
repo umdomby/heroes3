@@ -32,10 +32,10 @@ export const Player_All: React.FC<Props> = ({playerAll}) => {
                     <TableRow>
                         <TableHead>#</TableHead>
                         <TableHead>Name</TableHead>
-                        <TableHead>Games Played</TableHead>
-                        <TableHead>Wins</TableHead>
-                        <TableHead>Losses</TableHead>
-                        <TableHead>Win Rate (%)</TableHead>
+                        <TableHead>Games</TableHead>
+                        <TableHead>Win</TableHead>
+                        <TableHead>Loss</TableHead>
+                        <TableHead>%</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
