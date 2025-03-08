@@ -154,6 +154,7 @@ export function TOURNAMENT({
             color: true,
             city: true
         });
+        setPlayerStatistics(initialPlayerStatistics); // Обновляем отображаемые данные
     };
 
     return (
@@ -238,17 +239,17 @@ export function TOURNAMENT({
                 <div className="flex items-center">
                     <span className="mr-2">Win</span>
                     <Input
-                        type="radio"
+                        type="checkbox"
                         name="win"
                         checked={formDataSort.win === true}
-                        onChange={() => setFormDataSort({...formDataSort, win: true})}
+                        onChange={() => setFormDataSort({...formDataSort, win: formDataSort.win === true ? null : true})}
                     />
                     <span className="mr-2">Lose</span>
                     <Input
-                        type="radio"
+                        type="checkbox"
                         name="win"
                         checked={formDataSort.win === false}
-                        onChange={() => setFormDataSort({...formDataSort, win: false})}
+                        onChange={() => setFormDataSort({...formDataSort, win: formDataSort.win === false ? null : false})}
                     />
                 </div>
                 <Button onClick={handleSearch} className="h-7">Поиск</Button>
