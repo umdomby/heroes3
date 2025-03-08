@@ -4445,31 +4445,6 @@ export async function playerStatisticActions({ action, id, data }: { action: str
 }
 
 
-// export async function tournamentSumPlayers2() {
-//     const players = await prisma.player.findMany({
-//         include: {
-//             playerStatistics: true,
-//         },
-//     });
-//
-//     for (const player of players) {
-//         const totalGames = player.playerStatistics.length;
-//         const winGames = player.playerStatistics.filter(stat => stat.win).length;
-//         const lossGames = totalGames - winGames;
-//         const winRate = totalGames > 0 ? (winGames / totalGames) * 100 : 0;
-//
-//         await prisma.player.update({
-//             where: { id: player.id },
-//             data: {
-//                 countGame: totalGames,
-//                 winGame: winGames,
-//                 lossGame: lossGames,
-//                 rateGame: winRate,
-//             },
-//         });
-//     }
-// }
-
 interface TournamentStat {
     tournament: string;
     countGame: number;
@@ -4477,11 +4452,9 @@ interface TournamentStat {
     lossGame: number;
     rateGame: number;
 }
-
 type TournamentStats = {
     [key: string]: TournamentStat;
 };
-
 export async function tournamentSumPlayers() {
     const players = await prisma.player.findMany({
         include: {
