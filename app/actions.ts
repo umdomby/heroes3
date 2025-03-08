@@ -1832,103 +1832,124 @@ export async function placeBet(formData: { betId: number; userId: number; userRo
             throw new Error('Ставки на это событие приостановлены');
         }
 
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
+        if (bet.isProcessing) {
+            throw new Error('Ставка в данный момент обрабатывается');
+        }
+
+        // Устанавливаем флаг isProcessing в true
+        await prisma.bet.update({
+            where: { id: betId },
+            data: { isProcessing: true },
         });
 
-        if (!user || user.points < amount) {
-            throw new Error('Недостаточно баллов для совершения ставки');
-        }
-
-        const totalPlayer1 = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.amount, 0);
-
-        const totalPlayer2 = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.amount, 0);
-
-        const totalPlayer1Profit = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.profit, 0);
-
-        const totalPlayer2Profit = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.profit, 0);
-
-        const totalWithInitPlayer1 = totalPlayer1Profit + (bet.initBetPlayer1 || 0);
-        const totalWithInitPlayer2 = totalPlayer2Profit + (bet.initBetPlayer2 || 0);
-
-        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
-        if (currentOdds <= 1.04) {
-            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
-        }
-
-        const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
-
-        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
-        if (amount > maxAllowedBet) {
-            throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
-        }
-
-        // Используем транзакцию для атомарного выполнения операций
-        await prisma.$transaction(async (prisma) => {
-            await prisma.betParticipant.create({
-                data: {
-                    betId,
-                    userId,
-                    amount,
-                    player,
-                    odds: currentOdds,
-                    profit: potentialProfit,
-                    margin: 0,
-                    isCovered: "OPEN",
-                    overlap: 0,
-                },
-            });
-
-            await prisma.user.update({
+        try {
+            const user = await prisma.user.findUnique({
                 where: { id: userId },
-                data: {
-                    points: user.points - amount,
-                },
             });
 
-            const {
-                oddsPlayer1,
-                oddsPlayer2
-            } = calculateOdds(
-                totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
-                totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0)
-            );
+            if (!user || user.points < amount) {
+                throw new Error('Недостаточно баллов для совершения ставки');
+            }
 
-            const totalMargin = await prisma.betParticipant.aggregate({
-                _sum: {
-                    margin: true,
-                },
-                where: {
-                    betId: betId,
-                },
+            const totalPlayer1 = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER1)
+                .reduce((sum, p) => sum + p.amount, 0);
+
+            const totalPlayer2 = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER2)
+                .reduce((sum, p) => sum + p.amount, 0);
+
+            const totalPlayer1Profit = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER1)
+                .reduce((sum, p) => sum + p.profit, 0);
+
+            const totalPlayer2Profit = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER2)
+                .reduce((sum, p) => sum + p.profit, 0);
+
+            const totalWithInitPlayer1 = totalPlayer1Profit + (bet.initBetPlayer1 || 0);
+            const totalWithInitPlayer2 = totalPlayer2Profit + (bet.initBetPlayer2 || 0);
+
+            const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
+            if (currentOdds <= 1.04) {
+                throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
+            }
+
+            const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
+
+            const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
+            if (amount > maxAllowedBet) {
+                throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
+            }
+
+            // Используем транзакцию для атомарного выполнения операций
+            await prisma.$transaction(async (prisma) => {
+                await prisma.betParticipant.create({
+                    data: {
+                        betId,
+                        userId,
+                        amount,
+                        player,
+                        odds: currentOdds,
+                        profit: potentialProfit,
+                        margin: 0,
+                        isCovered: "OPEN",
+                        overlap: 0,
+                    },
+                });
+
+                await prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                        points: user.points - amount,
+                    },
+                });
+
+                const {
+                    oddsPlayer1,
+                    oddsPlayer2
+                } = calculateOdds(
+                    totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
+                    totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0)
+                );
+
+                const totalMargin = await prisma.betParticipant.aggregate({
+                    _sum: {
+                        margin: true,
+                    },
+                    where: {
+                        betId: betId,
+                    },
+                });
+
+                const updatedBetData = {
+                    oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+                    oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+                    totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
+                    totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
+                    totalBetAmount: totalPlayer1 + totalPlayer2 + amount,
+                    margin: totalMargin._sum.margin || 0,
+                    maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
+                    maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
+                    overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
+                    overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
+                };
+
+                await prisma.bet.update({
+                    where: { id: betId },
+                    data: updatedBetData,
+                });
             });
 
-            const updatedBetData = {
-                oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
-                oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
-                totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
-                totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
-                totalBetAmount: totalPlayer1 + totalPlayer2 + amount,
-                margin: totalMargin._sum.margin || 0,
-                maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
-                maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
-                overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
-                overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
-            };
-
+        } catch (error) {
+            throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+        } finally {
+            // Сбрасываем флаг isProcessing
             await prisma.bet.update({
                 where: { id: betId },
-                data: updatedBetData,
+                data: { isProcessing: false },
             });
-        });
+        }
 
         revalidatePath('/');
 
@@ -1945,7 +1966,7 @@ export async function placeBet(formData: { betId: number; userId: number; userRo
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
-}// ставки
+}
 export async function closeBet(betId: number, winnerId: number) {
     const session = await getUserSession();
 
