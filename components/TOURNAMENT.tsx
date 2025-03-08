@@ -113,7 +113,12 @@ export function TOURNAMENT({
 
     return (
         <div>
-            <div className="pagination-buttons flex justify-center items-center m-6">
+            <div className="text-center">
+                <Link href="/player">
+                    <Button className="h-6 mt-4">ИГРОКИ</Button>
+                </Link>
+            </div>
+            <div className="pagination-buttons flex justify-center items-center m-3">
                 <div className="flex justify-center w-full">
                     <Button
                         className="h-7 mx-2"
@@ -132,12 +137,6 @@ export function TOURNAMENT({
                     </Button>
                 </div>
             </div>
-            <div>
-                <Link className="text-center" href="/player">
-                    <Button className="h-7 mb-2">ИГРОКИ</Button>
-                </Link>
-            </div>
-
             <Table>
                 <TableBody>
                     <TableRow>
