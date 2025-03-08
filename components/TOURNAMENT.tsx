@@ -204,18 +204,11 @@ export function TOURNAMENT({
                             <Button type="submit" className="h-7">
                                 Сохранить
                             </Button>
-                        </div>
-                    </form>
-                    <div>
-                        <div className="flex justify-start w-full mx-5">
-                            <Link href="/player">
-                                <Button className="h-7 mr-2">ИГРОКИ</Button>
-                            </Link>
                             <Button className="h-7" onClick={handleCalculateStatistics} disabled={isPending}>
                                 {isPending ? 'Обновление...' : 'Обновить статистику'}
                             </Button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             )}
 
@@ -236,6 +229,11 @@ export function TOURNAMENT({
                     >
                         Следующая
                     </Button>
+                </div>
+                <div>
+                    <Link href="/player">
+                        <Button className="h-7 mr-2">ИГРОКИ</Button>
+                    </Link>
                 </div>
             </div>
 
