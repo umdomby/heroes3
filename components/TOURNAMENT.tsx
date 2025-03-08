@@ -73,13 +73,20 @@ export function TOURNAMENT({
         link: ''
     });
 
-    const [formDataSort, setFormDataSort] = useState({
+    const [formDataSort, setFormDataSort] = useState<{
+        turnirId: string;
+        categoryId: string;
+        playerId: string;
+        color: string;
+        city: string;
+        win: boolean | null;
+    }>({
         turnirId: '',
         categoryId: '',
         playerId: '',
         color: '',
         city: '',
-        win: null // изменено на null для управления состоянием
+        win: null
     });
 
     const [activeSelects, setActiveSelects] = useState({
