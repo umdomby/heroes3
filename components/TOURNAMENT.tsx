@@ -1,12 +1,12 @@
 'use client';
-import React, {useState, useTransition} from "react";
-import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
-import {PlayerStatistic, User} from "@prisma/client";
+import React, { useState, useTransition } from "react";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { PlayerStatistic, User } from "@prisma/client";
 import Link from "next/link";
-import {useRouter} from 'next/navigation';
-import {Button, Input} from "@/components/ui";
-import {Select, SelectTrigger, SelectContent, SelectItem, SelectValue} from "@/components/ui/select";
-import {tournamentSumPlayers, createPlayerStatistic} from "@/app/actions";
+import { useRouter } from 'next/navigation';
+import { Button, Input } from "@/components/ui";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { tournamentSumPlayers, createPlayerStatistic, getPlayerStatistics } from "@/app/actions";
 
 const cityTranslations = {
     CASTLE: "ЗАМОК",
@@ -51,7 +51,7 @@ interface PlayerStatisticsProps {
 
 export function TOURNAMENT({
                                user,
-                               playerStatistics,
+                               playerStatistics: initialPlayerStatistics,
                                currentPage,
                                totalPages,
                                turnirs,
@@ -60,6 +60,7 @@ export function TOURNAMENT({
                            }: PlayerStatisticsProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
+    const [playerStatistics, setPlayerStatistics] = useState(initialPlayerStatistics);
     const [formData, setFormData] = useState({
         turnirId: '',
         categoryId: '',
@@ -71,7 +72,16 @@ export function TOURNAMENT({
         win: false,
         link: ''
     });
-    // Проверка на заполненность всех полей
+
+    const [formDataSort, setFormDataSort] = useState({
+        turnirId: '',
+        categoryId: '',
+        playerId: '',
+        color: '',
+        city: '',
+        win: false
+    });
+
     const isFormValid = Object.values(formData).every(value => value !== '' && value !== 0);
 
     const handlePageChange = (newPage: number) => {
@@ -92,11 +102,20 @@ export function TOURNAMENT({
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
-        const checked = (e.target as HTMLInputElement).checked; // Приведение типа для checkbox
+        const checked = (e.target as HTMLInputElement).checked;
         setFormData({
             ...formData,
             [name]: type === 'checkbox' ? checked : value
         });
+    };
+
+    const handleSearch = async () => {
+        try {
+            const filteredStatistics = await getPlayerStatistics(formDataSort);
+            setPlayerStatistics(filteredStatistics);
+        } catch (error) {
+            console.error('Ошибка при фильтрации данных:', error);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -104,7 +123,7 @@ export function TOURNAMENT({
         try {
             await createPlayerStatistic(formData);
             alert('Запись успешно создана!');
-            router.refresh(); // Обновляем страницу после создания записи
+            router.refresh();
         } catch (error) {
             console.error('Ошибка при создании записи:', error);
             alert('Ошибка при создании записи.');
@@ -118,6 +137,81 @@ export function TOURNAMENT({
                     <Button className="h-6 mt-4">ИГРОКИ</Button>
                 </Link>
             </div>
+
+            <div className="flex flex-wrap items-center space-x-2">
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, turnirId: value})}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Турнир"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {turnirs.map((turnir) => (
+                            <SelectItem key={turnir.id} value={turnir.id.toString()}>
+                                {turnir.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, categoryId: value})}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Категория"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                                {category.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, playerId: value})}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Игрок"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {players.map((player) => (
+                            <SelectItem key={player.id} value={player.id.toString()}>
+                                {player.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, color: value})}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Цвет"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {Object.keys(ColorPlayer).map((color) => (
+                            <SelectItem key={color} value={color}>
+                                {ColorPlayer[color as keyof typeof ColorPlayer]}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select onValueChange={(value) => setFormDataSort({...formDataSort, city: value})}>
+                    <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Город"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {Object.keys(cityTranslations).map((city) => (
+                            <SelectItem key={city} value={city}>
+                                {cityTranslations[city as keyof typeof cityTranslations]}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <div className="flex items-center">
+                    <span className="mr-2">Win/Lose</span>
+                    <Input
+                        type="checkbox"
+                        name="win"
+                        checked={formDataSort.win}
+                        onChange={(e) => setFormDataSort({...formDataSort, win: e.target.checked})}
+                    />
+                </div>
+                <Button onClick={handleSearch} className="h-7">Поиск</Button>
+                <Button onClick={handleCalculateStatistics} className="h-7">Обновить</Button>
+            </div>
+
             <div className="pagination-buttons flex justify-center items-center m-3">
                 <div className="flex justify-center w-full">
                     <Button

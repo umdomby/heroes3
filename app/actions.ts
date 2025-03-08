@@ -4525,3 +4525,30 @@ export async function tournamentSumPlayers() {
         }
     }
 }
+export async function getPlayerStatistics(filters: any) {
+    const { turnirId, categoryId, city, win, playerId } = filters;
+
+    const playerStatistics = await prisma.playerStatistic.findMany({
+        where: {
+            turnirId: turnirId ? Number(turnirId) : undefined,
+            categoryId: categoryId ? Number(categoryId) : undefined,
+            city: city || undefined,
+            win: win !== undefined ? Boolean(win) : undefined,
+            playerId: playerId ? Number(playerId) : undefined,
+        },
+        include: {
+            turnirBet: true,
+            category: true,
+            player: true,
+        },
+        orderBy: [
+            { turnirId: 'asc' },
+            { categoryId: 'asc' },
+            { city: 'asc' },
+            { win: 'asc' },
+            { playerId: 'asc' },
+        ],
+    });
+
+    return playerStatistics;
+}
