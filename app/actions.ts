@@ -2451,128 +2451,150 @@ export async function placeBet3(formData: { betId: number; userId: number; userR
             throw new Error('Отсутствуют обязательные поля в данных формы');
         }
 
-        const bet = await prisma.bet3.findUnique({
-            where: { id: betId },
-            include: { participants: true },
-        });
-
-        if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
-            throw new Error('Ставка недоступна для участия');
-        }
-
-        if (bet.suspendedBet && formData.userRole !== "ADMIN") {
-            throw new Error('Ставки на это событие приостановлены');
-        }
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-        });
-
-        if (!user || user.points < amount) {
-            throw new Error('Недостаточно баллов для совершения ставки');
-        }
-
-        const totalPlayer1 = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.amount, 0);
-
-        const totalPlayer2 = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.amount, 0);
-
-        const totalPlayer3 = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER3)
-            .reduce((sum, p) => sum + p.amount, 0);
-
-        const totalPlayer1Profit = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.profit, 0);
-
-        const totalPlayer2Profit = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.profit, 0);
-
-        const totalPlayer3Profit = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER3)
-            .reduce((sum, p) => sum + p.profit, 0);
-
-        const totalWithInitPlayer1 = totalPlayer1Profit + (bet.initBetPlayer1 || 0);
-        const totalWithInitPlayer2 = totalPlayer2Profit + (bet.initBetPlayer2 || 0);
-        const totalWithInitPlayer3 = totalPlayer3Profit + (bet.initBetPlayer3 || 0);
-
-        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
-        if (currentOdds <= 1.04) {
-            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
-        }
-
-        const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
-
-        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer3;
-        if (amount > maxAllowedBet) {
-            throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
-        }
-
         await prisma.$transaction(async (prisma) => {
-            await prisma.betParticipant3.create({
-                data: {
-                    betId,
-                    userId,
-                    amount,
-                    player,
-                    odds: currentOdds,
-                    profit: potentialProfit,
-                    margin: 0,
-                    isCovered: "OPEN",
-                    overlap: 0,
-                },
+            const bet = await prisma.bet3.findUnique({
+                where: { id: betId },
+                include: { participants: true },
             });
 
-            await prisma.user.update({
-                where: { id: userId },
-                data: {
-                    points: user.points - amount,
-                },
-            });
+            if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
+                throw new Error('Ставка недоступна для участия');
+            }
 
-            const {
-                oddsPlayer1,
-                oddsPlayer2,
-                oddsPlayer3
-            } = calculateOdds3(
-                totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
-                totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
-                totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0)
-            );
+            if (bet.suspendedBet && formData.userRole !== "ADMIN") {
+                throw new Error('Ставки на это событие приостановлены');
+            }
 
-            const totalMargin = await prisma.betParticipant3.aggregate({
-                _sum: {
-                    margin: true,
-                },
-                where: {
-                    betId: betId,
-                },
-            });
+            if (bet.isProcessing) {
+                throw new Error('Ставка в данный момент обрабатывается');
+            }
 
-            const updatedBetData = {
-                oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
-                oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
-                oddsBetPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
-                totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
-                totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
-                totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
-                totalBetAmount: totalPlayer1 + totalPlayer2 + totalPlayer3 + amount,
-                margin: totalMargin._sum.margin || 0,
-                maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
-                maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
-                maxBetPlayer3: player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer3 + amount,
-                overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
-                overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
-                overlapPlayer3: player === PlayerChoice.PLAYER3 ? bet.overlapPlayer3 + amount : bet.overlapPlayer3,
-            };
-
+            // Устанавливаем флаг isProcessing в true
             await prisma.bet3.update({
                 where: { id: betId },
-                data: updatedBetData,
+                data: { isProcessing: true },
             });
+
+            try {
+                const user = await prisma.user.findUnique({
+                    where: { id: userId },
+                });
+
+                if (!user || user.points < amount) {
+                    throw new Error('Недостаточно баллов для совершения ставки');
+                }
+
+                const totalPlayer1 = bet.participants
+                    .filter(p => p.player === PlayerChoice.PLAYER1)
+                    .reduce((sum, p) => sum + p.amount, 0);
+
+                const totalPlayer2 = bet.participants
+                    .filter(p => p.player === PlayerChoice.PLAYER2)
+                    .reduce((sum, p) => sum + p.amount, 0);
+
+                const totalPlayer3 = bet.participants
+                    .filter(p => p.player === PlayerChoice.PLAYER3)
+                    .reduce((sum, p) => sum + p.amount, 0);
+
+                const totalPlayer1Profit = bet.participants
+                    .filter(p => p.player === PlayerChoice.PLAYER1)
+                    .reduce((sum, p) => sum + p.profit, 0);
+
+                const totalPlayer2Profit = bet.participants
+                    .filter(p => p.player === PlayerChoice.PLAYER2)
+                    .reduce((sum, p) => sum + p.profit, 0);
+
+                const totalPlayer3Profit = bet.participants
+                    .filter(p => p.player === PlayerChoice.PLAYER3)
+                    .reduce((sum, p) => sum + p.profit, 0);
+
+                const totalWithInitPlayer1 = totalPlayer1Profit + (bet.initBetPlayer1 || 0);
+                const totalWithInitPlayer2 = totalPlayer2Profit + (bet.initBetPlayer2 || 0);
+                const totalWithInitPlayer3 = totalPlayer3Profit + (bet.initBetPlayer3 || 0);
+
+                const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
+                if (currentOdds <= 1.04) {
+                    throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
+                }
+
+                const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
+
+                const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer3;
+                if (amount > maxAllowedBet) {
+                    throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
+                }
+
+                await prisma.betParticipant3.create({
+                    data: {
+                        betId,
+                        userId,
+                        amount,
+                        player,
+                        odds: currentOdds,
+                        profit: potentialProfit,
+                        margin: 0,
+                        isCovered: "OPEN",
+                        overlap: 0,
+                    },
+                });
+
+                await prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                        points: user.points - amount,
+                    },
+                });
+
+                const {
+                    oddsPlayer1,
+                    oddsPlayer2,
+                    oddsPlayer3
+                } = calculateOdds3(
+                    totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
+                    totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
+                    totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0)
+                );
+
+                const totalMargin = await prisma.betParticipant3.aggregate({
+                    _sum: {
+                        margin: true,
+                    },
+                    where: {
+                        betId: betId,
+                    },
+                });
+
+                const updatedBetData = {
+                    oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+                    oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+                    oddsBetPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
+                    totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
+                    totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
+                    totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
+                    totalBetAmount: totalPlayer1 + totalPlayer2 + totalPlayer3 + amount,
+                    margin: totalMargin._sum.margin || 0,
+                    maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
+                    maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
+                    maxBetPlayer3: player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer3 + amount,
+                    overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
+                    overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
+                    overlapPlayer3: player === PlayerChoice.PLAYER3 ? bet.overlapPlayer3 + amount : bet.overlapPlayer3,
+                };
+
+                await prisma.bet3.update({
+                    where: { id: betId },
+                    data: updatedBetData,
+                });
+
+            } catch (error) {
+                throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+            } finally {
+                // Сбрасываем флаг isProcessing
+                await prisma.bet3.update({
+                    where: { id: betId },
+                    data: { isProcessing: false },
+                });
+            }
         });
 
         revalidatePath('/');
@@ -2590,7 +2612,7 @@ export async function placeBet3(formData: { betId: number; userId: number; userR
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
-}// ставки на 3 игрока
+}
 export async function closeBet3(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -3106,159 +3128,177 @@ export async function placeBet4(formData: { betId: number; userId: number; userR
             throw new Error('Неверные данные формы');
         }
 
-        const {betId, userId, amount, player} = formData;
+        const { betId, userId, amount, player } = formData;
 
         if (!betId || !userId || !amount || !player) {
             throw new Error('Отсутствуют обязательные поля в данных формы');
         }
 
-        const bet = await prisma.bet4.findUnique({
-            where: {id: betId},
-            include: {participants: true},
-        });
+        await prisma.$transaction(async (prisma) => {
+            const bet = await prisma.bet4.findUnique({
+                where: { id: betId },
+                include: { participants: true },
+            });
 
-        if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
-            throw new Error('Ставка недоступна для участия');
-        }
+            if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
+                throw new Error('Ставка недоступна для участия');
+            }
 
-        if (bet.suspendedBet && formData.userRole !== "ADMIN") {
-            throw new Error('Ставки на это событие приостановлены');
-        }
+            if (bet.suspendedBet && formData.userRole !== "ADMIN") {
+                throw new Error('Ставки на это событие приостановлены');
+            }
 
-        const user = await prisma.user.findUnique({
-            where: {id: userId},
-        });
+            if (bet.isProcessing) {
+                throw new Error('Ставка в данный момент обрабатывается');
+            }
 
-        if (!user || user.points < amount) {
-            throw new Error('Недостаточно баллов для совершения ставки');
-        }
+            // Устанавливаем флаг isProcessing в true
+            await prisma.bet4.update({
+                where: { id: betId },
+                data: { isProcessing: true },
+            });
 
-        const totalPlayer1 = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.amount, 0);
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+            });
 
-        const totalPlayer2 = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.amount, 0);
+            if (!user || user.points < amount) {
+                throw new Error('Недостаточно баллов для совершения ставки');
+            }
 
-        const totalPlayer3 = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER3)
-            .reduce((sum, p) => sum + p.amount, 0);
+            const totalPlayer1 = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER1)
+                .reduce((sum, p) => sum + p.amount, 0);
 
-        const totalPlayer4 = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER4)
-            .reduce((sum, p) => sum + p.amount, 0);
+            const totalPlayer2 = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER2)
+                .reduce((sum, p) => sum + p.amount, 0);
 
-        const totalPlayer1Profit = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER1)
-            .reduce((sum, p) => sum + p.profit, 0);
+            const totalPlayer3 = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER3)
+                .reduce((sum, p) => sum + p.amount, 0);
 
-        const totalPlayer2Profit = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER2)
-            .reduce((sum, p) => sum + p.profit, 0);
+            const totalPlayer4 = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER4)
+                .reduce((sum, p) => sum + p.amount, 0);
 
-        const totalPlayer3Profit = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER3)
-            .reduce((sum, p) => sum + p.profit, 0);
+            const totalPlayer1Profit = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER1)
+                .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalPlayer4Profit = bet.participants
-            .filter(p => p.player === PlayerChoice.PLAYER4)
-            .reduce((sum, p) => sum + p.profit, 0);
+            const totalPlayer2Profit = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER2)
+                .reduce((sum, p) => sum + p.profit, 0);
 
-        const totalWithInitPlayer1 = totalPlayer1Profit + (bet.initBetPlayer1 || 0);
-        const totalWithInitPlayer2 = totalPlayer2Profit + (bet.initBetPlayer2 || 0);
-        const totalWithInitPlayer3 = totalPlayer3Profit + (bet.initBetPlayer3 || 0);
-        const totalWithInitPlayer4 = totalPlayer4Profit + (bet.initBetPlayer4 || 0);
+            const totalPlayer3Profit = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER3)
+                .reduce((sum, p) => sum + p.profit, 0);
 
-        const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 :
-            player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 :
-                player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 :
-                    bet.oddsBetPlayer4;
-        if (currentOdds <= 1.04) {
-            throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
-        }
+            const totalPlayer4Profit = bet.participants
+                .filter(p => p.player === PlayerChoice.PLAYER4)
+                .reduce((sum, p) => sum + p.profit, 0);
 
-        const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
+            const totalWithInitPlayer1 = totalPlayer1Profit + (bet.initBetPlayer1 || 0);
+            const totalWithInitPlayer2 = totalPlayer2Profit + (bet.initBetPlayer2 || 0);
+            const totalWithInitPlayer3 = totalPlayer3Profit + (bet.initBetPlayer3 || 0);
+            const totalWithInitPlayer4 = totalPlayer4Profit + (bet.initBetPlayer4 || 0);
 
-        const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 :
-            player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 :
-                player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 :
-                    bet.maxBetPlayer4;
-        if (amount > maxAllowedBet) {
-            throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
-        }
+            const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 :
+                player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 :
+                    player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 :
+                        bet.oddsBetPlayer4;
+            if (currentOdds <= 1.04) {
+                throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
+            }
 
-        await prisma.betParticipant4.create({
-            data: {
-                betId,
-                userId,
-                amount,
-                player,
-                odds: currentOdds,
-                profit: potentialProfit,
-                margin: 0,
-                isCovered: "OPEN",
-                overlap: 0,
-            },
-        });
+            const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
 
-        await prisma.user.update({
-            where: {id: userId},
-            data: {
-                points: user.points - amount,
-            },
-        });
+            const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 :
+                player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 :
+                    player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 :
+                        bet.maxBetPlayer4;
+            if (amount > maxAllowedBet) {
+                throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
+            }
 
-        const {
-            oddsPlayer1,
-            oddsPlayer2,
-            oddsPlayer3,
-            oddsPlayer4
-        } = calculateOdds4(
-            totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
-            totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
-            totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0),
-            totalWithInitPlayer4 + (player === PlayerChoice.PLAYER4 ? potentialProfit : 0)
-        );
+            await prisma.betParticipant4.create({
+                data: {
+                    betId,
+                    userId,
+                    amount,
+                    player,
+                    odds: currentOdds,
+                    profit: potentialProfit,
+                    margin: 0,
+                    isCovered: "OPEN",
+                    overlap: 0,
+                },
+            });
 
-        const totalMargin = await prisma.betParticipant4.aggregate({
-            _sum: {
-                margin: true,
-            },
-            where: {
-                betId: betId,
-            },
-        });
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    points: user.points - amount,
+                },
+            });
 
-        const updatedBetData = {
-            oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
-            oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
-            oddsBetPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
-            oddsBetPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
-            totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
-            totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
-            totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
-            totalBetPlayer4: player === PlayerChoice.PLAYER4 ? totalPlayer4 + amount : totalPlayer4,
-            totalBetAmount: totalPlayer1 + totalPlayer2 + totalPlayer3 + totalPlayer4 + amount,
-            margin: totalMargin._sum.margin || 0,
-            maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
-            maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
-            maxBetPlayer3: player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer3 + amount,
-            maxBetPlayer4: player === PlayerChoice.PLAYER4 ? bet.maxBetPlayer4 : bet.maxBetPlayer4 + amount,
-            overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
-            overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
-            overlapPlayer3: player === PlayerChoice.PLAYER3 ? bet.overlapPlayer3 + amount : bet.overlapPlayer3,
-            overlapPlayer4: player === PlayerChoice.PLAYER4 ? bet.overlapPlayer4 + amount : bet.overlapPlayer4,
-        };
+            const {
+                oddsPlayer1,
+                oddsPlayer2,
+                oddsPlayer3,
+                oddsPlayer4
+            } = calculateOdds4(
+                totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
+                totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
+                totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0),
+                totalWithInitPlayer4 + (player === PlayerChoice.PLAYER4 ? potentialProfit : 0)
+            );
 
-        await prisma.bet4.update({
-            where: {id: betId},
-            data: updatedBetData,
+            const totalMargin = await prisma.betParticipant4.aggregate({
+                _sum: {
+                    margin: true,
+                },
+                where: {
+                    betId: betId,
+                },
+            });
+
+            const updatedBetData = {
+                oddsBetPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+                oddsBetPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+                oddsBetPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
+                oddsBetPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
+                totalBetPlayer1: player === PlayerChoice.PLAYER1 ? totalPlayer1 + amount : totalPlayer1,
+                totalBetPlayer2: player === PlayerChoice.PLAYER2 ? totalPlayer2 + amount : totalPlayer2,
+                totalBetPlayer3: player === PlayerChoice.PLAYER3 ? totalPlayer3 + amount : totalPlayer3,
+                totalBetPlayer4: player === PlayerChoice.PLAYER4 ? totalPlayer4 + amount : totalPlayer4,
+                totalBetAmount: totalPlayer1 + totalPlayer2 + totalPlayer3 + totalPlayer4 + amount,
+                margin: totalMargin._sum.margin || 0,
+                maxBetPlayer1: player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer1 + amount,
+                maxBetPlayer2: player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer2 + amount,
+                maxBetPlayer3: player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 : bet.maxBetPlayer3 + amount,
+                maxBetPlayer4: player === PlayerChoice.PLAYER4 ? bet.maxBetPlayer4 : bet.maxBetPlayer4 + amount,
+                overlapPlayer1: player === PlayerChoice.PLAYER1 ? bet.overlapPlayer1 + amount : bet.overlapPlayer1,
+                overlapPlayer2: player === PlayerChoice.PLAYER2 ? bet.overlapPlayer2 + amount : bet.overlapPlayer2,
+                overlapPlayer3: player === PlayerChoice.PLAYER3 ? bet.overlapPlayer3 + amount : bet.overlapPlayer3,
+                overlapPlayer4: player === PlayerChoice.PLAYER4 ? bet.overlapPlayer4 + amount : bet.overlapPlayer4,
+            };
+
+            await prisma.bet4.update({
+                where: { id: betId },
+                data: updatedBetData,
+            });
+
+            // Сбрасываем флаг isProcessing
+            await prisma.bet4.update({
+                where: { id: betId },
+                data: { isProcessing: false },
+            });
         });
 
         revalidatePath('/');
 
-        return {success: true};
+        return { success: true };
     } catch (error) {
         if (error === null || error === undefined) {
             console.error('Ошибка в placeBet4: Неизвестная ошибка (error is null или undefined)');
