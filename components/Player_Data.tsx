@@ -36,7 +36,7 @@ export const Player_Data: React.FC<Props> = ({playerData}) => {
                 <Button className="mx-5 h-5">ТУРНИРЫ HEROES HUB</Button>
             </Link>
             <div className="text-2xl text-center">{playerData.name}</div>
-            <div className="text-center text-green-500 font-bold">All Player Details</div> {/* Caption at the top */}
+            <div className="text-center text-green-500 font-bold">All Player Details</div>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -69,10 +69,10 @@ export const Player_Data: React.FC<Props> = ({playerData}) => {
             </Table>
 
             {tournamentFields.map((tournament, index) => {
-                const data = tournament.data as any;
+                const data = tournament.data ? JSON.parse(tournament.data as string) : null;
                 return (
                     <div key={index}>
-                        <div className="text-center mt-5 text-amber-500 font-bold">{tournament.name}</div> {/* Caption at the top */}
+                        <div className="text-center mt-5 text-amber-500 font-bold">{tournament.name}</div>
                         <Table>
                             <TableHeader>
                                 <TableRow>
