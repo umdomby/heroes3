@@ -557,6 +557,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                     </div>
                                                     <div className="text-xs">
                                                         {bet.player1.name}
+                                                        {user.role === "ADMIN" && (
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={bet.betP1}
+                                                                onChange={() => updateBet4PField(bet.id, 'betP1', !bet.betP1)}
+                                                            />
+                                                        )}
 
                                                     </div>
                                                     <div> <span
@@ -583,7 +590,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                     </div>
                                                     <div className="text-xs">
                                                         {bet.player2.name}
-
+                                                        {user.role === "ADMIN" && (
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={bet.betP2}
+                                                                onChange={() => updateBet4PField(bet.id, 'betP2', !bet.betP2)}
+                                                            />
+                                                        )}
                                                     </div>
                                                     <div>     <span
                                                         className={
@@ -609,7 +622,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                     </div>
                                                     <div className="text-xs">
                                                         {bet.player3.name}
-
+                                                        {user.role === "ADMIN" && (
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={bet.betP3}
+                                                                onChange={() => updateBet4PField(bet.id, 'betP3', !bet.betP3)}
+                                                            />
+                                                        )}
                                                     </div>
                                                     <div> <span
                                                         className={
@@ -635,7 +654,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                     </div>
                                                     <div className="text-xs">
                                                         {bet.player4.name}
-
+                                                        {user.role === "ADMIN" && (
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={bet.betP4}
+                                                                onChange={() => updateBet4PField(bet.id, 'betP4', !bet.betP4)}
+                                                            />
+                                                        )}
                                                     </div>
                                                     <div>  <span
                                                         className={
@@ -748,13 +773,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
                                                     {bet.player1.name}
-                                                    {user.role === "ADMIN" && (
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={bet.betP1}
-                                                            onChange={() => updateBet4PField(bet.id, 'betP1', !bet.betP1)}
-                                                        />
-                                                    )}
                                                 </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
@@ -765,13 +783,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
                 {bet.player2.name}
-                                                    {user.role === "ADMIN" && (
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={bet.betP2}
-                                                            onChange={() => updateBet4PField(bet.id, 'betP2', !bet.betP2)}
-                                                        />
-                                                    )}
             </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
@@ -782,13 +793,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER3]}>
                 {bet.player3.name}
-                                                    {user.role === "ADMIN" && (
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={bet.betP3}
-                                                            onChange={() => updateBet4PField(bet.id, 'betP3', !bet.betP3)}
-                                                        />
-                                                    )}
             </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER3]}>
@@ -799,13 +803,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER4]}>
                 {bet.player4.name}
-                                                    {user.role === "ADMIN" && (
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={bet.betP4}
-                                                            onChange={() => updateBet4PField(bet.id, 'betP4', !bet.betP4)}
-                                                        />
-                                                    )}
             </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER4]}>
