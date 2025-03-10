@@ -724,13 +724,6 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                 Ваши ставки на этот матч:
                                             </h4>
                                             {userBets.map((participant) => {
-                                                // Рассчитываем процент перекрытия на основе прибыли
-                                                const profitToCover = participant.amount * (participant.odds - 1);
-                                                const overlapPercentage =
-                                                    participant.overlap > 0
-                                                        ? Math.floor((participant.overlap / profitToCover) * 10000) / 100
-                                                        : 0;
-
                                                 return (
                                                     <div
                                                         key={participant.id}
