@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect, useTransition } from "react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { PlayerStatistic, User } from "@prisma/client";
@@ -129,7 +129,11 @@ export function TOURNAMENT({
     };
 
     const handleSearch = () => {
-        setCurrentPage(1);
+        setCurrentPage(1); // Reset to the first page
+        // Reset win to null if neither checkbox is selected
+        if (formDataSort.win === null) {
+            setFormDataSort({ ...formDataSort, win: null });
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -165,7 +169,10 @@ export function TOURNAMENT({
             </div>
 
             <div className="flex flex-wrap items-center space-x-2">
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, turnirId: value})} value={formDataSort.turnirId}>
+                <Select onValueChange={(value) => {
+                    setFormDataSort({...formDataSort, turnirId: value});
+                    setCurrentPage(1); // Reset to the first page
+                }} value={formDataSort.turnirId}>
                     <SelectTrigger className="w-32">
                         <SelectValue placeholder="Турнир"/>
                     </SelectTrigger>
@@ -177,7 +184,10 @@ export function TOURNAMENT({
                         ))}
                     </SelectContent>
                 </Select>
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, categoryId: value})} value={formDataSort.categoryId}>
+                <Select onValueChange={(value) => {
+                    setFormDataSort({...formDataSort, categoryId: value});
+                    setCurrentPage(1); // Reset to the first page
+                }} value={formDataSort.categoryId}>
                     <SelectTrigger className="w-32">
                         <SelectValue placeholder="Категория"/>
                     </SelectTrigger>
@@ -189,7 +199,10 @@ export function TOURNAMENT({
                         ))}
                     </SelectContent>
                 </Select>
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, playerId: value})} value={formDataSort.playerId}>
+                <Select onValueChange={(value) => {
+                    setFormDataSort({...formDataSort, playerId: value});
+                    setCurrentPage(1); // Reset to the first page
+                }} value={formDataSort.playerId}>
                     <SelectTrigger className="w-32">
                         <SelectValue placeholder="Игрок"/>
                     </SelectTrigger>
@@ -201,7 +214,10 @@ export function TOURNAMENT({
                         ))}
                     </SelectContent>
                 </Select>
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, color: value})} value={formDataSort.color}>
+                <Select onValueChange={(value) => {
+                    setFormDataSort({...formDataSort, color: value});
+                    setCurrentPage(1); // Reset to the first page
+                }} value={formDataSort.color}>
                     <SelectTrigger className="w-32">
                         <SelectValue placeholder="Цвет"/>
                     </SelectTrigger>
@@ -213,7 +229,10 @@ export function TOURNAMENT({
                         ))}
                     </SelectContent>
                 </Select>
-                <Select onValueChange={(value) => setFormDataSort({...formDataSort, city: value})} value={formDataSort.city}>
+                <Select onValueChange={(value) => {
+                    setFormDataSort({...formDataSort, city: value});
+                    setCurrentPage(1); // Reset to the first page
+                }} value={formDataSort.city}>
                     <SelectTrigger className="w-32">
                         <SelectValue placeholder="Город"/>
                     </SelectTrigger>
@@ -231,14 +250,20 @@ export function TOURNAMENT({
                         type="checkbox"
                         name="win"
                         checked={formDataSort.win === true}
-                        onChange={() => setFormDataSort({...formDataSort, win: formDataSort.win === true ? null : true})}
+                        onChange={() => {
+                            setFormDataSort({...formDataSort, win: formDataSort.win === true ? null : true});
+                            setCurrentPage(1); // Reset to the first page
+                        }}
                     />
                     <span className="mr-2">Lose</span>
                     <Input
                         type="checkbox"
                         name="win"
                         checked={formDataSort.win === false}
-                        onChange={() => setFormDataSort({...formDataSort, win: formDataSort.win === false ? null : false})}
+                        onChange={() => {
+                            setFormDataSort({...formDataSort, win: formDataSort.win === false ? null : false});
+                            setCurrentPage(1); // Reset to the first page
+                        }}
                     />
                 </div>
                 <Button onClick={handleSearch} className="h-7">Поиск</Button>

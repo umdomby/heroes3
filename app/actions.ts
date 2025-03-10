@@ -4601,7 +4601,7 @@ export async function getPlayerStatistics(filters: any, page: number = 1, pageSi
             turnirId: turnirId ? Number(turnirId) : undefined,
             categoryId: categoryId ? Number(categoryId) : undefined,
             city: city || undefined,
-            win: win !== undefined ? Boolean(win) : undefined,
+            win: win !== null ? Boolean(win) : undefined, // Adjusted logic for win parameter
             playerId: playerId ? Number(playerId) : undefined,
             color: color || undefined,
         },
@@ -4627,7 +4627,7 @@ export async function getPlayerStatistics(filters: any, page: number = 1, pageSi
             turnirId: turnirId ? Number(turnirId) : undefined,
             categoryId: categoryId ? Number(categoryId) : undefined,
             city: city || undefined,
-            win: win !== undefined ? Boolean(win) : undefined,
+            win: win !== null ? Boolean(win) : undefined, // Adjusted logic for win parameter
             playerId: playerId ? Number(playerId) : undefined,
             color: color || undefined,
         },
