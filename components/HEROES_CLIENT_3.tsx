@@ -17,7 +17,7 @@ import {
     closeBet3,
     closeBetDraw3,
     suspendedBetCheck3,
-    editDescriptionBet3, updateBetPField, updateBet3PField
+    editDescriptionBet3, updateBet3PField
 } from "@/app/actions";
 import {unstable_batchedUpdates} from "react-dom";
 
@@ -798,33 +798,39 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                             <form onSubmit={(event) => handleSubmit(event, bet)}>
                                                 <div className="flex gap-2 m-2">
                                                     <label className="border p-2 rounded w-[33%] text-center">
-                                                        <div
-                                                            className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
-                                                        >
-                                                            {"("}
-                                                            {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
-                                                            {") "}
+                                                        {bet.betP1 &&
+                                                            <div>
+                                                                <div
+                                                                    className={`${playerColors[PlayerChoice.PLAYER1]} text-ellipsis overflow-hidden whitespace-nowrap`}
+                                                                >
+                                                                    {"("}
+                                                                    {Math.floor(bet.oddsBetPlayer1 * 100) / 100}
+                                                                    {") "}
 
-                                                        </div>
-                                                        <div>
-                                                            {potentialProfit[bet.id]?.player1
-                                                                ? `+${Math.floor(potentialProfit[bet.id].player1 * 100) / 100}`
-                                                                : ""}
-                                                        </div>
-                                                        <input
-                                                            className="mt-1"
-                                                            type="radio"
-                                                            name="player"
-                                                            value={PlayerChoice.PLAYER1}
-                                                            required
-                                                            onChange={(e) => handlePlayerChange(e, bet)}
-                                                        />
+                                                                </div>
+                                                                <div>
+                                                                    {potentialProfit[bet.id]?.player1
+                                                                        ? `+${Math.floor(potentialProfit[bet.id].player1 * 100) / 100}`
+                                                                        : ""}
+                                                                </div>
+                                                                <input
+                                                                    className="mt-1"
+                                                                    type="radio"
+                                                                    name="player"
+                                                                    value={PlayerChoice.PLAYER1}
+                                                                    required
+                                                                    onChange={(e) => handlePlayerChange(e, bet)}
+                                                                />
+                                                            </div>
+                                                        }
                                                         <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {bet.player1.name}
-            </span>
+                                                        {bet.player1.name}
+                                                    </span>
                                                     </label>
 
                                                     <label className="border p-2 rounded w-[33%] text-center">
+                                                        {bet.betP2 &&
+                                                            <div>
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER2]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
@@ -846,12 +852,16 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
                                                         />
+                                                            </div>
+                                                        }
                                                         <span className={playerColors[PlayerChoice.PLAYER2]}>
-                {bet.player2.name}
-            </span>
+                                                            {bet.player2.name}
+                                                        </span>
                                                     </label>
 
                                                     <label className="border p-2 rounded w-[33%] text-center">
+                                                        {bet.betP3 &&
+                                                            <div>
                                                         <div
                                                             className={`${playerColors[PlayerChoice.PLAYER3]} text-ellipsis overflow-hidden whitespace-nowrap`}
                                                         >
@@ -873,9 +883,11 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                             required
                                                             onChange={(e) => handlePlayerChange(e, bet)}
                                                         />
+                                                            </div>
+                                                        }
                                                         <span className={playerColors[PlayerChoice.PLAYER3]}>
-                {bet.player3.name}
-            </span>
+                                                            {bet.player3.name}
+                                                        </span>
                                                     </label>
                                                 </div>
 

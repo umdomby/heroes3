@@ -2353,23 +2353,36 @@ export async function suspendedBetCheck3(betId: number, newValue: boolean) {
         throw new Error("Не удалось обновить статус suspendedBet.");
     }
 }// остановка ставки
-function calculateOdds3(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number) {
-    // Add a constant value to each player's total to stabilize the odds
-    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 3000;
-    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 3000;
-    const adjustedTotalPlayer3 = totalWithInitPlayer3 + 3000;
+function calculateOdds3(
+    totalPlayer1: number,
+    totalPlayer2: number,
+    totalPlayer3: number,
+    betP1: boolean,
+    betP2: boolean,
+    betP3: boolean
+) {
+    let oddsPlayer1 = 0;
+    let oddsPlayer2 = 0;
+    let oddsPlayer3 = 0;
 
-    const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2 + adjustedTotalPlayer3;
+    const totalSum = (betP1 ? totalPlayer1 : 0) + (betP2 ? totalPlayer2 : 0) + (betP3 ? totalPlayer3 : 0);
 
-    const oddsPlayer1 = adjustedTotalPlayer1 === 0 ? 1 : totalWithInit / adjustedTotalPlayer1;
-    const oddsPlayer2 = adjustedTotalPlayer2 === 0 ? 1 : totalWithInit / adjustedTotalPlayer2;
-    const oddsPlayer3 = adjustedTotalPlayer3 === 0 ? 1 : totalWithInit / adjustedTotalPlayer3;
+    if (betP1 && totalPlayer1 > 0) {
+        oddsPlayer1 = totalSum / totalPlayer1;
+    }
+
+    if (betP2 && totalPlayer2 > 0) {
+        oddsPlayer2 = totalSum / totalPlayer2;
+    }
+
+    if (betP3 && totalPlayer3 > 0) {
+        oddsPlayer3 = totalSum / totalPlayer3;
+    }
 
     return {
-        // Round to two decimal places
-        oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
-        oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
-        oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
+        oddsPlayer1,
+        oddsPlayer2,
+        oddsPlayer3
     };
 }// Функция для расчета коэффициентов на 3 игроков
 function calculateMaxBets3(initBetPlayer1: number, initBetPlayer2: number, initBetPlayer3: number): {
@@ -2573,7 +2586,10 @@ export async function placeBet3(formData: { betId: number; userId: number; userR
                 } = calculateOdds3(
                     totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
                     totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
-                    totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0)
+                    totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0),
+                    bet.betP1,
+                    bet.betP2,
+                    bet.betP3
                 );
 
                 const totalMargin = await prisma.betParticipant3.aggregate({
@@ -3041,29 +3057,39 @@ export async function suspendedBetCheck4(betId: number, newValue: boolean) {
         throw new Error("Не удалось обновить статус suspendedBet.");
     }
 }// остановка ставки
-function calculateOdds4(totalWithInitPlayer1: number, totalWithInitPlayer2: number, totalWithInitPlayer3: number, totalWithInitPlayer4: number) {
-    // Add a constant value to each player's total to stabilize the odds
-    const adjustedTotalPlayer1 = totalWithInitPlayer1 + 4000;
-    const adjustedTotalPlayer2 = totalWithInitPlayer2 + 4000;
-    const adjustedTotalPlayer3 = totalWithInitPlayer3 + 4000;
-    const adjustedTotalPlayer4 = totalWithInitPlayer4 + 4000;
+function calculateOdds4(
+    totalWithInitPlayer1: number,
+    totalWithInitPlayer2: number,
+    totalWithInitPlayer3: number,
+    totalWithInitPlayer4: number,
+    betP1: boolean,
+    betP2: boolean,
+    betP3: boolean,
+    betP4: boolean
+) {
+    // Добавляем константное значение к каждой сумме игрока для стабилизации коэффициентов
+    const adjustedTotalPlayer1 = betP1 ? totalWithInitPlayer1 + 4000 : 0;
+    const adjustedTotalPlayer2 = betP2 ? totalWithInitPlayer2 + 4000 : 0;
+    const adjustedTotalPlayer3 = betP3 ? totalWithInitPlayer3 + 4000 : 0;
+    const adjustedTotalPlayer4 = betP4 ? totalWithInitPlayer4 + 4000 : 0;
 
+    // Суммируем только те значения, для которых флаг установлен в true
     const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2 + adjustedTotalPlayer3 + adjustedTotalPlayer4;
 
-    const oddsPlayer1 = adjustedTotalPlayer1 === 0 ? 1 : totalWithInit / adjustedTotalPlayer1;
-    const oddsPlayer2 = adjustedTotalPlayer2 === 0 ? 1 : totalWithInit / adjustedTotalPlayer2;
-    const oddsPlayer3 = adjustedTotalPlayer3 === 0 ? 1 : totalWithInit / adjustedTotalPlayer3;
-    const oddsPlayer4 = adjustedTotalPlayer4 === 0 ? 1 : totalWithInit / adjustedTotalPlayer4;
+    // Рассчитываем коэффициенты только для тех игроков, для которых флаг установлен в true
+    const oddsPlayer1 = betP1 && adjustedTotalPlayer1 > 0 ? totalWithInit / adjustedTotalPlayer1 : 0;
+    const oddsPlayer2 = betP2 && adjustedTotalPlayer2 > 0 ? totalWithInit / adjustedTotalPlayer2 : 0;
+    const oddsPlayer3 = betP3 && adjustedTotalPlayer3 > 0 ? totalWithInit / adjustedTotalPlayer3 : 0;
+    const oddsPlayer4 = betP4 && adjustedTotalPlayer4 > 0 ? totalWithInit / adjustedTotalPlayer4 : 0;
 
     return {
-        // Round to two decimal places
+        // Округляем до двух знаков после запятой
         oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
         oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
         oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
         oddsPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
     };
-}// Функция для расчета коэффициентов на 4 игроков
-export async function clientCreateBet4(formData: any) {
+}export async function clientCreateBet4(formData: any) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
         throw new Error('У вас нет прав для выполнения этой операции');
@@ -3292,7 +3318,11 @@ export async function placeBet4(formData: { betId: number; userId: number; userR
                     totalWithInitPlayer1 + (player === PlayerChoice.PLAYER1 ? potentialProfit : 0),
                     totalWithInitPlayer2 + (player === PlayerChoice.PLAYER2 ? potentialProfit : 0),
                     totalWithInitPlayer3 + (player === PlayerChoice.PLAYER3 ? potentialProfit : 0),
-                    totalWithInitPlayer4 + (player === PlayerChoice.PLAYER4 ? potentialProfit : 0)
+                    totalWithInitPlayer4 + (player === PlayerChoice.PLAYER4 ? potentialProfit : 0),
+                    bet.betP1, // Передаем флаг betP1
+                    bet.betP2, // Передаем флаг betP2
+                    bet.betP3, // Передаем флаг betP3
+                    bet.betP4  // Передаем флаг betP4
                 );
 
                 const totalMargin = await prisma.betParticipant4.aggregate({
