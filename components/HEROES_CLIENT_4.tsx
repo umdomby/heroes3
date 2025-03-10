@@ -17,7 +17,7 @@ import {
     closeBet4,
     closeBetDraw4,
     suspendedBetCheck4,
-    editDescriptionBet4
+    editDescriptionBet4, updateBet4PField
 } from "@/app/actions";
 import {unstable_batchedUpdates} from "react-dom";
 
@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/accordion";
 import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
 import Link from "next/link";
-import {DateTime} from "next-auth/providers/kakao";
 
 const fetcher = (url: string, options?: RequestInit) =>
     fetch(url, options).then((res) => res.json());
@@ -70,7 +69,10 @@ interface Bet extends PrismaBet4 {
     category?: Category;
     productItem?: ProductItem;
     turnirBet?: TurnirBet;
-
+    betP1: boolean;
+    betP2: boolean;
+    betP3: boolean;
+    betP4: boolean;
 }
 
 interface Props {
@@ -745,8 +747,15 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                             <p>
                                                 Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
-                {bet.player1.name}
-            </span>
+                                                    {bet.player1.name}
+                                                    {user.role === "ADMIN" && (
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={bet.betP1}
+                                                            onChange={() => updateBet4PField(bet.id, 'betP1', !bet.betP1)}
+                                                        />
+                                                    )}
+                                                </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER1]}>
                 {Math.floor(bet.overlapPlayer1 * 100) / 100} Points
@@ -756,6 +765,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
                 {bet.player2.name}
+                                                    {user.role === "ADMIN" && (
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={bet.betP2}
+                                                            onChange={() => updateBet4PField(bet.id, 'betP2', !bet.betP2)}
+                                                        />
+                                                    )}
             </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER2]}>
@@ -766,6 +782,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER3]}>
                 {bet.player3.name}
+                                                    {user.role === "ADMIN" && (
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={bet.betP3}
+                                                            onChange={() => updateBet4PField(bet.id, 'betP3', !bet.betP3)}
+                                                        />
+                                                    )}
             </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER3]}>
@@ -776,6 +799,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                                                 Поставлено:{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER4]}>
                 {bet.player4.name}
+                                                    {user.role === "ADMIN" && (
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={bet.betP4}
+                                                            onChange={() => updateBet4PField(bet.id, 'betP4', !bet.betP4)}
+                                                        />
+                                                    )}
             </span>
                                                 :{" "}
                                                 <span className={playerColors[PlayerChoice.PLAYER4]}>

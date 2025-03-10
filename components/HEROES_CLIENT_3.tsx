@@ -17,7 +17,7 @@ import {
     closeBet3,
     closeBetDraw3,
     suspendedBetCheck3,
-    editDescriptionBet3
+    editDescriptionBet3, updateBetPField, updateBet3PField
 } from "@/app/actions";
 import {unstable_batchedUpdates} from "react-dom";
 
@@ -66,6 +66,9 @@ interface Bet extends PrismaBet3 {
     category?: Category;
     productItem?: ProductItem;
     turnirBet?: TurnirBet;
+    betP1: boolean;
+    betP2: boolean;
+    betP3: boolean;
 }
 
 interface Props {
@@ -537,7 +540,13 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                     </div>
                                                     <div className="text-xs">
                                                         {bet.player1.name}
-
+                                                        {user.role === "ADMIN" && (
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={bet.betP1}
+                                                                onChange={() => updateBet3PField(bet.id, 'betP1', !bet.betP1)}
+                                                            />
+                                                        )}
                                                     </div>
                                                     <div>  <span
                                                         className={
@@ -564,7 +573,13 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                     </div>
                                                     <div className="text-xs">
                                                         {bet.player2.name}
-
+                                                        {user.role === "ADMIN" && (
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={bet.betP2}
+                                                                onChange={() => updateBet3PField(bet.id, 'betP2', !bet.betP2)}
+                                                            />
+                                                        )}
                                                     </div>
                                                     <div> <span
                                                         className={
@@ -591,7 +606,13 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                     </div>
                                                     <div className="text-xs">
                                                         {bet.player3.name}
-
+                                                        {user.role === "ADMIN" && (
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={bet.betP3}
+                                                                onChange={() => updateBet3PField(bet.id, 'betP3', !bet.betP3)}
+                                                            />
+                                                        )}
                                                     </div>
                                                     <div> <span
                                                         className={

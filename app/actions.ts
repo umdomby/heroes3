@@ -2634,6 +2634,25 @@ export async function placeBet3(formData: { betId: number; userId: number; userR
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }
+export async function updateBet3PField(
+    betId: number,
+    field: "betP1" | "betP2" | "betP3" | "betP4",
+    newValue: boolean
+) {
+    try {
+        const session = await getUserSession();
+        if (!session || session.role !== 'ADMIN') {
+            throw new Error('У вас нет прав для выполнения этой операции');
+        }
+        await prisma.bet3.update({
+            where: { id: betId },
+            data: { [field]: newValue },
+        });
+    } catch (error) {
+        console.error(`Ошибка при обновлении ${field}:`, error);
+        throw new Error(`Не удалось обновить ${field}.`);
+    }
+}
 export async function closeBet3(betId: number, winnerId: number) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
@@ -3336,6 +3355,25 @@ export async function placeBet4(formData: { betId: number; userId: number; userR
         }
 
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+    }
+}
+export async function updateBet4PField(
+    betId: number,
+    field: "betP1" | "betP2" | "betP3" | "betP4",
+    newValue: boolean
+) {
+    try {
+        const session = await getUserSession();
+        if (!session || session.role !== 'ADMIN') {
+            throw new Error('У вас нет прав для выполнения этой операции');
+        }
+        await prisma.bet4.update({
+            where: { id: betId },
+            data: { [field]: newValue },
+        });
+    } catch (error) {
+        console.error(`Ошибка при обновлении ${field}:`, error);
+        throw new Error(`Не удалось обновить ${field}.`);
     }
 }
 export async function closeBet4(betId: number, winnerId: number) {
