@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { PlayerStatistic, User } from "@prisma/client";
 import Link from "next/link";
@@ -40,9 +40,6 @@ interface PlayerStatisticWithRelations extends PlayerStatistic {
 }
 
 interface PlayerStatisticsProps {
-    playerStatistics: PlayerStatisticWithRelations[];
-    currentPage: number;
-    totalPages: number;
     user: User | null;
     turnirs: { id: number; name: string }[];
     categories: { id: number; name: string }[];
@@ -51,16 +48,15 @@ interface PlayerStatisticsProps {
 
 export function TOURNAMENT({
                                user,
-                               playerStatistics: initialPlayerStatistics,
-                               currentPage,
-                               totalPages,
                                turnirs,
                                categories,
                                players
                            }: PlayerStatisticsProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
-    const [playerStatistics, setPlayerStatistics] = useState(initialPlayerStatistics);
+    const [playerStatistics, setPlayerStatistics] = useState<PlayerStatisticWithRelations[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [formData, setFormData] = useState({
         turnirId: '',
         categoryId: '',
@@ -89,18 +85,26 @@ export function TOURNAMENT({
         win: null
     });
 
-    const [activeSelects, setActiveSelects] = useState({
-        turnirId: true,
-        categoryId: true,
-        playerId: true,
-        color: true,
-        city: true
-    });
-
     const isFormValid = Object.values(formData).every(value => value !== '' && value !== 0);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const { playerStatistics, totalPages } = await getPlayerStatistics(formDataSort, currentPage);
+                setPlayerStatistics(playerStatistics);
+                setTotalPages(totalPages);
+            } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+            }
+        };
+
+        fetchData();
+    }, [formDataSort, currentPage]);
+
     const handlePageChange = (newPage: number) => {
-        router.push(`?page=${newPage}`);
+        if (newPage > 0 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+        }
     };
 
     const handleCalculateStatistics = () => {
@@ -124,13 +128,8 @@ export function TOURNAMENT({
         });
     };
 
-    const handleSearch = async () => {
-        try {
-            const filteredStatistics = await getPlayerStatistics(formDataSort);
-            setPlayerStatistics(filteredStatistics);
-        } catch (error) {
-            console.error('Ошибка при фильтрации данных:', error);
-        }
+    const handleSearch = () => {
+        setCurrentPage(1);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -154,14 +153,7 @@ export function TOURNAMENT({
             city: '',
             win: null
         });
-        setActiveSelects({
-            turnirId: true,
-            categoryId: true,
-            playerId: true,
-            color: true,
-            city: true
-        });
-        setPlayerStatistics(initialPlayerStatistics); // Обновляем отображаемые данные
+        setCurrentPage(1);
     };
 
     return (
@@ -275,6 +267,7 @@ export function TOURNAMENT({
             <Table>
                 <TableBody>
                     <TableRow>
+                        <TableCell>№</TableCell>
                         <TableCell>id</TableCell>
                         <TableCell>turnir</TableCell>
                         <TableCell>map</TableCell>
@@ -289,8 +282,9 @@ export function TOURNAMENT({
             </Table>
             <Table>
                 <TableBody>
-                    {playerStatistics.map((stat) => (
+                    {playerStatistics.map((stat, index) => (
                         <TableRow key={stat.id}>
+                            <TableCell className="text-orange-500">{(currentPage - 1) * 50 + index + 1}</TableCell>
                             <TableCell className="text-orange-500">{stat.id || 'N/A'}</TableCell>
                             <TableCell className="text-green-500">{stat.turnirBet?.name || 'N/A'}</TableCell>
                             <TableCell className="text-blue-500">{stat.category?.name || 'N/A'}</TableCell>

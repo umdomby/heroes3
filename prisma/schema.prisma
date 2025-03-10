@@ -546,6 +546,9 @@ model Bet3 {
   winnerId        Int? // кто победил PLAYER1 или PLAYER2 или PLAYER3
   suspendedBet    Boolean           @default(false)
   description     String?
+  betP1           Boolean           @default(true)
+  betP2           Boolean           @default(true)
+  betP3           Boolean           @default(true)
   isProcessing    Boolean           @default(false)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -679,6 +682,10 @@ model Bet4 {
   winnerId        Int? // кто победил PLAYER1 или PLAYER2 или PLAYER3
   suspendedBet    Boolean           @default(false)
   description     String?
+  betP1           Boolean           @default(true)
+  betP2           Boolean           @default(true)
+  betP3           Boolean           @default(true)
+  betP4           Boolean           @default(true)
   isProcessing    Boolean           @default(false)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt

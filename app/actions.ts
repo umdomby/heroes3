@@ -4591,8 +4591,10 @@ export async function tournamentSumPlayers() {
         }
     }
 }
-export async function getPlayerStatistics(filters: any) {
-    const { turnirId, categoryId, city, win, playerId, color } = filters; // Добавляем color
+export async function getPlayerStatistics(filters: any, page: number = 1, pageSize: number = 50) {
+    const { turnirId, categoryId, city, win, playerId, color } = filters;
+
+    const skip = (page - 1) * pageSize;
 
     const playerStatistics = await prisma.playerStatistic.findMany({
         where: {
@@ -4601,7 +4603,7 @@ export async function getPlayerStatistics(filters: any) {
             city: city || undefined,
             win: win !== undefined ? Boolean(win) : undefined,
             playerId: playerId ? Number(playerId) : undefined,
-            color: color || undefined, // Добавляем условие для color
+            color: color || undefined,
         },
         include: {
             turnirBet: true,
@@ -4614,9 +4616,28 @@ export async function getPlayerStatistics(filters: any) {
             { city: 'asc' },
             { win: 'asc' },
             { playerId: 'asc' },
-            { color: 'asc' }, // Добавляем сортировку по color
+            { color: 'asc' },
         ],
+        skip: skip,
+        take: pageSize,
     });
 
-    return playerStatistics;
+    const totalRecords = await prisma.playerStatistic.count({
+        where: {
+            turnirId: turnirId ? Number(turnirId) : undefined,
+            categoryId: categoryId ? Number(categoryId) : undefined,
+            city: city || undefined,
+            win: win !== undefined ? Boolean(win) : undefined,
+            playerId: playerId ? Number(playerId) : undefined,
+            color: color || undefined,
+        },
+    });
+
+    const totalPages = Math.ceil(totalRecords / pageSize);
+
+    return {
+        playerStatistics,
+        totalPages,
+        currentPage: page,
+    };
 }
