@@ -202,11 +202,11 @@ export const Access_user: React.FC<Props> = ({className, role}) => {
                                 RATING
                             </DropdownMenuRadioItem>
                         </Link>
-                        <Link href="/manual">
-                            <DropdownMenuRadioItem value="manual" className="cursor-pointer">
-                                MANUAL
-                            </DropdownMenuRadioItem>
-                        </Link>
+                        {/*<Link href="/manual">*/}
+                        {/*    <DropdownMenuRadioItem value="manual" className="cursor-pointer">*/}
+                        {/*        MANUAL*/}
+                        {/*    </DropdownMenuRadioItem>*/}
+                        {/*</Link>*/}
                         <Link href="/contacts">
                             <DropdownMenuRadioItem value="bet-closed" className="cursor-pointer">
                                 CONTACTS
