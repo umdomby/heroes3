@@ -209,3 +209,13 @@ html {
   border-radius: 50%;
   margin-left: 8px; /* Отступ слева от имени игрока */
 }
+
+.enlarged-image {
+  height: 100%; /* Устанавливаем высоту в процентах от контейнера */
+  width: auto; /* Ширина будет автоматически рассчитана */
+}
+.dialog-content {
+  height: 700px; /* Устанавливаем фиксированную высоту для контейнера */
+  max-width: none;
+  width: auto;
+}

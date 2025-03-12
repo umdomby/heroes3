@@ -1714,24 +1714,6 @@ export async function suspendedBetCheck(betId: number, newValue: boolean) {
         throw new Error("Не удалось обновить статус suspendedBet.");
     }
 }// остановка ставки
-// function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
-//     // Добавляем константу к каждой сумме для стабилизации коэффициентов
-//     const adjustedTotalPlayer1 = totalWithInitPlayer1 + 2000;
-//     const adjustedTotalPlayer2 = totalWithInitPlayer2 + 2000;
-//
-//     const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2;
-//
-//     // Calculate odds without margin
-//     const oddsPlayer1 = adjustedTotalPlayer1 === 0 ? 1 : totalWithInit / adjustedTotalPlayer1;
-//     const oddsPlayer2 = adjustedTotalPlayer2 === 0 ? 1 : totalWithInit / adjustedTotalPlayer2;
-//
-//     return {
-//         // Округляем до двух знаков после запятой
-//         oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
-//         oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
-//     };
-// } // Функция для расчета коэффициентов
-
 
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     // Добавляем константу к каждой сумме для стабилизации коэффициентов
