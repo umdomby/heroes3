@@ -1733,7 +1733,7 @@ export async function suspendedBetCheck(betId: number, newValue: boolean) {
 // } // Функция для расчета коэффициентов
 
 
-function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number, reductionFactor: number = 1.2) {
+function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
     // Добавляем константу к каждой сумме для стабилизации коэффициентов
     const adjustedTotalPlayer1 = totalWithInitPlayer1 + 2000;
     const adjustedTotalPlayer2 = totalWithInitPlayer2 + 2000;
@@ -1751,11 +1751,11 @@ function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: numbe
     const differencePercentagePlayer1 = (totalBetPlayer1 - totalBetPlayer2) / totalBetPlayer2;
     const differencePercentagePlayer2 = (totalBetPlayer2 - totalBetPlayer1) / totalBetPlayer1;
 
-    // Если на одного из игроков поставили больше, снижаем его коэффициент
+    // Если на одного из игроков поставили больше, снижаем его коэффициент пропорционально разнице
     if (differencePercentagePlayer1 > 0) {
-        oddsPlayer1 /= reductionFactor;
+        oddsPlayer1 /= (1 + differencePercentagePlayer1);
     } else if (differencePercentagePlayer2 > 0) {
-        oddsPlayer2 /= reductionFactor;
+        oddsPlayer2 /= (1 + differencePercentagePlayer2);
     }
 
     return {
@@ -2395,28 +2395,44 @@ function calculateOdds3(
     betP2: boolean,
     betP3: boolean
 ) {
-    let oddsPlayer1 = 0;
-    let oddsPlayer2 = 0;
-    let oddsPlayer3 = 0;
+    // Добавляем константное значение к каждой сумме игрока для стабилизации коэффициентов
+    const adjustedTotalPlayer1 = betP1 ? totalPlayer1 + 3000 : 0;
+    const adjustedTotalPlayer2 = betP2 ? totalPlayer2 + 3000 : 0;
+    const adjustedTotalPlayer3 = betP3 ? totalPlayer3 + 3000 : 0;
 
-    const totalSum = (betP1 ? totalPlayer1 : 0) + (betP2 ? totalPlayer2 : 0) + (betP3 ? totalPlayer3 : 0);
+    // Суммируем только те значения, для которых флаг установлен в true
+    const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2 + adjustedTotalPlayer3;
 
-    if (betP1 && totalPlayer1 > 0) {
-        oddsPlayer1 = totalSum / totalPlayer1;
+    // Рассчитываем коэффициенты только для тех игроков, для которых флаг установлен в true
+    let oddsPlayer1 = betP1 && adjustedTotalPlayer1 > 0 ? totalWithInit / adjustedTotalPlayer1 : 0;
+    let oddsPlayer2 = betP2 && adjustedTotalPlayer2 > 0 ? totalWithInit / adjustedTotalPlayer2 : 0;
+    let oddsPlayer3 = betP3 && adjustedTotalPlayer3 > 0 ? totalWithInit / adjustedTotalPlayer3 : 0;
+
+    // Рассчитываем разницу в процентах между ставками
+    const sumOtherPlayers1 = (betP2 ? adjustedTotalPlayer2 : 0) + (betP3 ? adjustedTotalPlayer3 : 0);
+    const sumOtherPlayers2 = (betP1 ? adjustedTotalPlayer1 : 0) + (betP3 ? adjustedTotalPlayer3 : 0);
+    const sumOtherPlayers3 = (betP1 ? adjustedTotalPlayer1 : 0) + (betP2 ? adjustedTotalPlayer2 : 0);
+
+    const differencePercentagePlayer1 = betP1 ? (adjustedTotalPlayer1 - sumOtherPlayers1) / sumOtherPlayers1 : 0;
+    const differencePercentagePlayer2 = betP2 ? (adjustedTotalPlayer2 - sumOtherPlayers2) / sumOtherPlayers2 : 0;
+    const differencePercentagePlayer3 = betP3 ? (adjustedTotalPlayer3 - sumOtherPlayers3) / sumOtherPlayers3 : 0;
+
+    // Если на одного из игроков поставили больше, снижаем его коэффициент
+    if (differencePercentagePlayer1 > 0) {
+        oddsPlayer1 /= (1 + differencePercentagePlayer1);
     }
-
-    if (betP2 && totalPlayer2 > 0) {
-        oddsPlayer2 = totalSum / totalPlayer2;
+    if (differencePercentagePlayer2 > 0) {
+        oddsPlayer2 /= (1 + differencePercentagePlayer2);
     }
-
-    if (betP3 && totalPlayer3 > 0) {
-        oddsPlayer3 = totalSum / totalPlayer3;
+    if (differencePercentagePlayer3 > 0) {
+        oddsPlayer3 /= (1 + differencePercentagePlayer3);
     }
 
     return {
-        oddsPlayer1,
-        oddsPlayer2,
-        oddsPlayer3
+        // Округляем до двух знаков после запятой
+        oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+        oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+        oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100
     };
 }// Функция для расчета коэффициентов на 3 игроков
 function calculateMaxBets3(initBetPlayer1: number, initBetPlayer2: number, initBetPlayer3: number): {
@@ -3111,10 +3127,35 @@ function calculateOdds4(
     const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2 + adjustedTotalPlayer3 + adjustedTotalPlayer4;
 
     // Рассчитываем коэффициенты только для тех игроков, для которых флаг установлен в true
-    const oddsPlayer1 = betP1 && adjustedTotalPlayer1 > 0 ? totalWithInit / adjustedTotalPlayer1 : 0;
-    const oddsPlayer2 = betP2 && adjustedTotalPlayer2 > 0 ? totalWithInit / adjustedTotalPlayer2 : 0;
-    const oddsPlayer3 = betP3 && adjustedTotalPlayer3 > 0 ? totalWithInit / adjustedTotalPlayer3 : 0;
-    const oddsPlayer4 = betP4 && adjustedTotalPlayer4 > 0 ? totalWithInit / adjustedTotalPlayer4 : 0;
+    let oddsPlayer1 = betP1 && adjustedTotalPlayer1 > 0 ? totalWithInit / adjustedTotalPlayer1 : 0;
+    let oddsPlayer2 = betP2 && adjustedTotalPlayer2 > 0 ? totalWithInit / adjustedTotalPlayer2 : 0;
+    let oddsPlayer3 = betP3 && adjustedTotalPlayer3 > 0 ? totalWithInit / adjustedTotalPlayer3 : 0;
+    let oddsPlayer4 = betP4 && adjustedTotalPlayer4 > 0 ? totalWithInit / adjustedTotalPlayer4 : 0;
+
+    // Рассчитываем разницу в процентах между ставками
+    const sumOtherPlayers1 = (betP2 ? adjustedTotalPlayer2 : 0) + (betP3 ? adjustedTotalPlayer3 : 0) + (betP4 ? adjustedTotalPlayer4 : 0);
+    const sumOtherPlayers2 = (betP1 ? adjustedTotalPlayer1 : 0) + (betP3 ? adjustedTotalPlayer3 : 0) + (betP4 ? adjustedTotalPlayer4 : 0);
+    const sumOtherPlayers3 = (betP1 ? adjustedTotalPlayer1 : 0) + (betP2 ? adjustedTotalPlayer2 : 0) + (betP4 ? adjustedTotalPlayer4 : 0);
+    const sumOtherPlayers4 = (betP1 ? adjustedTotalPlayer1 : 0) + (betP2 ? adjustedTotalPlayer2 : 0) + (betP3 ? adjustedTotalPlayer3 : 0);
+
+    const differencePercentagePlayer1 = betP1 ? (adjustedTotalPlayer1 - sumOtherPlayers1) / sumOtherPlayers1 : 0;
+    const differencePercentagePlayer2 = betP2 ? (adjustedTotalPlayer2 - sumOtherPlayers2) / sumOtherPlayers2 : 0;
+    const differencePercentagePlayer3 = betP3 ? (adjustedTotalPlayer3 - sumOtherPlayers3) / sumOtherPlayers3 : 0;
+    const differencePercentagePlayer4 = betP4 ? (adjustedTotalPlayer4 - sumOtherPlayers4) / sumOtherPlayers4 : 0;
+
+    // Если на одного из игроков поставили больше, снижаем его коэффициент
+    if (differencePercentagePlayer1 > 0) {
+        oddsPlayer1 /= (1 + differencePercentagePlayer1);
+    }
+    if (differencePercentagePlayer2 > 0) {
+        oddsPlayer2 /= (1 + differencePercentagePlayer2);
+    }
+    if (differencePercentagePlayer3 > 0) {
+        oddsPlayer3 /= (1 + differencePercentagePlayer3);
+    }
+    if (differencePercentagePlayer4 > 0) {
+        oddsPlayer4 /= (1 + differencePercentagePlayer4);
+    }
 
     return {
         // Округляем до двух знаков после запятой
