@@ -1714,23 +1714,57 @@ export async function suspendedBetCheck(betId: number, newValue: boolean) {
         throw new Error("Не удалось обновить статус suspendedBet.");
     }
 }// остановка ставки
+// function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
+//     // Добавляем константу к каждой сумме для стабилизации коэффициентов
+//     const adjustedTotalPlayer1 = totalWithInitPlayer1 + 2000;
+//     const adjustedTotalPlayer2 = totalWithInitPlayer2 + 2000;
+//
+//     const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2;
+//
+//     // Calculate odds without margin
+//     const oddsPlayer1 = adjustedTotalPlayer1 === 0 ? 1 : totalWithInit / adjustedTotalPlayer1;
+//     const oddsPlayer2 = adjustedTotalPlayer2 === 0 ? 1 : totalWithInit / adjustedTotalPlayer2;
+//
+//     return {
+//         // Округляем до двух знаков после запятой
+//         oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
+//         oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
+//     };
+// } // Функция для расчета коэффициентов
+
+
 function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
-    // Add a constant value to each player's total to stabilize the odds
+    // Добавляем константу к каждой сумме для стабилизации коэффициентов
     const adjustedTotalPlayer1 = totalWithInitPlayer1 + 2000;
     const adjustedTotalPlayer2 = totalWithInitPlayer2 + 2000;
 
     const totalWithInit = adjustedTotalPlayer1 + adjustedTotalPlayer2;
 
-    // Calculate odds without margin
-    const oddsPlayer1 = adjustedTotalPlayer1 === 0 ? 1 : totalWithInit / adjustedTotalPlayer1;
-    const oddsPlayer2 = adjustedTotalPlayer2 === 0 ? 1 : totalWithInit / adjustedTotalPlayer2;
+    // Рассчитываем базовые коэффициенты без учета маржи
+    let oddsPlayer1 = adjustedTotalPlayer1 === 0 ? 1 : totalWithInit / adjustedTotalPlayer1;
+    let oddsPlayer2 = adjustedTotalPlayer2 === 0 ? 1 : totalWithInit / adjustedTotalPlayer2;
+
+    // Рассчитываем разницу в процентах между ставками
+    const totalBetPlayer1 = totalWithInitPlayer1 + 2000;
+    const totalBetPlayer2 = totalWithInitPlayer2 + 2000;
+
+    const differencePercentagePlayer1 = (totalBetPlayer1 - totalBetPlayer2) / totalBetPlayer2;
+    const differencePercentagePlayer2 = (totalBetPlayer2 - totalBetPlayer1) / totalBetPlayer1;
+
+    // Если на одного из игроков поставили больше, снижаем его коэффициент
+    if (differencePercentagePlayer1 > 0) {
+        oddsPlayer1 /= (1 + differencePercentagePlayer1);
+    } else if (differencePercentagePlayer2 > 0) {
+        oddsPlayer2 /= (1 + differencePercentagePlayer2);
+    }
 
     return {
-        // Round to two decimal places
+        // Округляем до двух знаков после запятой
         oddsPlayer1: Math.floor((oddsPlayer1 * 100)) / 100,
         oddsPlayer2: Math.floor((oddsPlayer2 * 100)) / 100,
     };
 } // Функция для расчета коэффициентов
+
 function calculateMaxBets(initBetPlayer1: number, initBetPlayer2: number): {
     maxBetPlayer1: number,
     maxBetPlayer2: number
@@ -3089,7 +3123,8 @@ function calculateOdds4(
         oddsPlayer3: Math.floor((oddsPlayer3 * 100)) / 100,
         oddsPlayer4: Math.floor((oddsPlayer4 * 100)) / 100,
     };
-}export async function clientCreateBet4(formData: any) {
+}
+export async function clientCreateBet4(formData: any) {
     const session = await getUserSession();
     if (!session || session.role !== 'ADMIN') {
         throw new Error('У вас нет прав для выполнения этой операции');
