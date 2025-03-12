@@ -1733,7 +1733,7 @@ export async function suspendedBetCheck(betId: number, newValue: boolean) {
 // } // Функция для расчета коэффициентов
 
 
-function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number) {
+function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: number, reductionFactor: number = 1.2) {
     // Добавляем константу к каждой сумме для стабилизации коэффициентов
     const adjustedTotalPlayer1 = totalWithInitPlayer1 + 2000;
     const adjustedTotalPlayer2 = totalWithInitPlayer2 + 2000;
@@ -1753,9 +1753,9 @@ function calculateOdds(totalWithInitPlayer1: number, totalWithInitPlayer2: numbe
 
     // Если на одного из игроков поставили больше, снижаем его коэффициент
     if (differencePercentagePlayer1 > 0) {
-        oddsPlayer1 /= (1 + differencePercentagePlayer1);
+        oddsPlayer1 /= reductionFactor;
     } else if (differencePercentagePlayer2 > 0) {
-        oddsPlayer2 /= (1 + differencePercentagePlayer2);
+        oddsPlayer2 /= reductionFactor;
     }
 
     return {
