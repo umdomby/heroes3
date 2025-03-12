@@ -145,7 +145,7 @@ export default function COOP() {
                 <AccordionItem value="item-4">
                     <AccordionTrigger className="bg-yellow-500 text-black"><span className="mx-3 text-lg">P2P торговля</span></AccordionTrigger>
                     <AccordionContent className="bg-yellow-500 text-white-100 text-lg">
-                        <div className="mx-3">
+                        <div className="flex mx-3">
                             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Image
@@ -334,7 +334,7 @@ export default function COOP() {
                 <AccordionItem value="item-7">
                     <AccordionTrigger className="bg-orange-500 text-black"><span className="mx-3 text-lg">Игры на $ points</span></AccordionTrigger>
                     <AccordionContent className="bg-orange-500 text-white-100 text-lg">
-                        <div className="mx-3">
+                        <div className="flex mx-3">
                             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Image
@@ -416,7 +416,8 @@ export default function COOP() {
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>
-                            <p>Игры на $ points позволяют пользователям участвовать в различных соревнованиях и зарабатывать баллы. Это делает платформу более интерактивной и увлекательной.</p>
+                            <p>Игры на $ points позволяют пользователям участвовать в различных соревнованиях и
+                                зарабатывать баллы. Это делает платформу более интерактивной и увлекательной.</p>
                         </div>
                     </AccordionContent>
                 </AccordionItem>

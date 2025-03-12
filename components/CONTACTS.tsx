@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import React, { useState } from "react";
+import COOP from "@/components/COOP";
 
 export const CONTACTS = () => {
     const [notification, setNotification] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export const CONTACTS = () => {
                     {notification}
                 </div>
             )}
-            <Table className="mt-10">
+            <Table className="my-10">
                 <TableBody className="space-y-3">
                     <TableRow className="border-b border-gray-200">
                         <TableCell className="text-center overflow-hidden whitespace-nowrap w-[25%]">
@@ -53,6 +54,8 @@ export const CONTACTS = () => {
                     </TableRow>
                 </TableBody>
             </Table>
+            <div className="text-2xl text-center text-slate-500 mb-2"><strong>Heroes3.site</strong> </div>
+            <COOP/>
             <div className="text-center my-3"><h1>Поддержать проект</h1></div>
             <Table style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
                 <TableHeader>
