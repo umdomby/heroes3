@@ -8,10 +8,8 @@ import {Button} from "@/components/ui";
 export const dynamic = 'force-dynamic'
 
 export default async function RatingPage({
-                                             params,
                                              searchParams,
                                          }: {
-    params: Promise<{}>;
     searchParams: Promise<{ page?: string | undefined }>;
 }) {
     const resolvedSearchParams = await searchParams;
