@@ -120,14 +120,29 @@ export const Access_admin: React.FC<Props> = ({className}) => {
                                             BET CLOSED 2
                                         </DropdownMenuRadioItem>
                                     </Link>
+                                    <Link href="/users-a-2">
+                                        <DropdownMenuRadioItem value="users-a-2" className="cursor-pointer">
+                                            USER CLOSED 2
+                                        </DropdownMenuRadioItem>
+                                    </Link>
                                     <Link href="/bet-closed-admin-3">
                                         <DropdownMenuRadioItem value="bet-closed-admin-3" className="cursor-pointer">
                                             BET CLOSED 3
                                         </DropdownMenuRadioItem>
                                     </Link>
+                                    <Link href="/users-a-3">
+                                        <DropdownMenuRadioItem value="users-a-3" className="cursor-pointer">
+                                            USER CLOSED 3
+                                        </DropdownMenuRadioItem>
+                                    </Link>
                                     <Link href="/bet-closed-admin-4">
                                         <DropdownMenuRadioItem value="bet-closed-admin-4" className="cursor-pointer">
                                             BET CLOSED 4
+                                        </DropdownMenuRadioItem>
+                                    </Link>
+                                    <Link href="/users-a-4">
+                                        <DropdownMenuRadioItem value="users-a-4" className="cursor-pointer">
+                                            USER CLOSED 4
                                         </DropdownMenuRadioItem>
                                     </Link>
                                     <Link href="/order-p2p-pending-admin">

@@ -343,7 +343,7 @@ model GameUserBet {
   checkWinUser2         WinGameUserBet? // подтверждение победы User2
   gameUser2Bet          User?             @relation("GameUser2Bet", fields: [gameUserBet2Id], references: [id]) // сюда User1 выбирает с кем будет играть
   gameUserBet2Id        Int? // User2.id
-  gameUserBetDataUsers2 Json? // сюда будут добавляться другие users из которых user1 выберет с кем будет играть
+  gameUserBetDataUsers2 Json? // сюда будут добавляться другие users-a-2 из которых user1 выберет с кем будет играть
   category              Category          @relation(fields: [categoryId], references: [id]) // выбирает User1
   categoryId            Int // выбирает User1
   product               Product           @relation(fields: [productId], references: [id])
