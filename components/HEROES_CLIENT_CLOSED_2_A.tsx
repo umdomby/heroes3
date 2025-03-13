@@ -162,21 +162,21 @@ export const HEROES_CLIENT_CLOSED_2_A: React.FC<Props> = ({ user, closedBets }) 
                                                             Ставка: <span className="text-blue-500">
                                                                     {participant.user.telegram ? (
                                                                         <>
-                                                                        <Link
-                                                                            className="text-blue-500 hover:text-green-300 font-bold"
-                                                                            href={`https://t.me/${participant.user.telegram.replace(/^@/, '')}`}
-                                                                            target="_blank"
-                                                                        >
-                                                                            {participant.user.telegram},
-                                                                        </Link>
-                                                                            <span> {participant.user.email}, </span>
-                                                                            <span> {participant.user.fullName}, </span>
-                                                                            <span> id: {participant.user.id} </span>
+                                                                            <Link
+                                                                                className="text-blue-500 hover:text-green-300 font-bold"
+                                                                                href={`https://t.me/${participant.user.telegram.replace(/^@/, '')}`}
+                                                                                target="_blank"
+                                                                            >
+                                                                                {participant.user.telegram},
+                                                                            </Link>
                                                                         </>
                                                                     ) : (
                                                                         <span>No Telegram</span> // Or any other placeholder text you prefer
                                                                     )}
-                                                        </span> ,  <strong>{participant.amount}</strong> на{' '}
+                                                                            <span> {participant.user.email}, </span>
+                                                                            <span> {participant.user.fullName}, </span>
+                                                                            <span> id: {participant.user.id} </span>
+                                                        </span> , <strong>{participant.amount}</strong> на{' '}
                                                             <strong>
                                                                 {participant.player === 'PLAYER1' ? bet.player1.name : bet.player2.name}
                                                             </strong>

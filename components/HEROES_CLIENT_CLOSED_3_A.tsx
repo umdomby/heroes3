@@ -186,14 +186,14 @@ export const HEROES_CLIENT_CLOSED_3_A: React.FC<Props> = ({ user, closedBets }) 
                                                                         >
                                                                             {participant.user.telegram},
                                                                         </Link>
-                                                                        <span> {participant.user.email}, </span>
-                                                                        <span> {participant.user.fullName}, </span>
-                                                                        <span> id: {participant.user.id} </span>
                                                                     </>
                                                                 ) : (
                                                                     <span>No Telegram</span>
                                                                 )}
-                                                    </span> ,  <strong>{participant.amount}</strong> на{' '}
+                                                                        <span> {participant.user.email}, </span>
+                                                                        <span> {participant.user.fullName}, </span>
+                                                                        <span> id: {participant.user.id} </span>
+                                                    </span> , <strong>{participant.amount}</strong> на{' '}
                                                         <strong>
                                                             {participant.player === 'PLAYER1' ? bet.player1.name : participant.player === 'PLAYER2' ? bet.player2.name : bet.player3.name}
                                                         </strong>
