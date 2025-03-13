@@ -16,7 +16,9 @@ import Link from "next/link";
 
 interface Users {
     telegram: string | null; // Allow telegram to be null
-    // Add other properties if needed
+    fullName: string;
+    email: string;
+    id: number;
 }
 
 interface BetParticipantCLOSED {
@@ -59,8 +61,8 @@ interface Props {
 export const HEROES_CLIENT_CLOSED_2_A: React.FC<Props> = ({ user, closedBets }) => {
     // Подсчитываем общую прибыль/потерю
     const totalProfitLoss = closedBets.reduce((total, bet) => {
-        const userBets = bet.participantsCLOSED.filter((p) => p.userId === user.id);
-        return total + userBets.reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0);
+        //const userBets = bet.participantsCLOSED.filter((p) => p.userId === user.id);
+        return total + bet.participantsCLOSED.reduce((sum, p) => sum + (p.isWinner ? p.profit : (p.return - p.amount)), 0);
     }, 0);
 
     return (
@@ -159,13 +161,18 @@ export const HEROES_CLIENT_CLOSED_2_A: React.FC<Props> = ({ user, closedBets }) 
                                                         <p>
                                                             Ставка: <span className="text-blue-500">
                                                                     {participant.user.telegram ? (
+                                                                        <>
                                                                         <Link
                                                                             className="text-blue-500 hover:text-green-300 font-bold"
                                                                             href={`https://t.me/${participant.user.telegram.replace(/^@/, '')}`}
                                                                             target="_blank"
                                                                         >
-                                                                            {participant.user.telegram}
+                                                                            {participant.user.telegram},
                                                                         </Link>
+                                                                            <span> {participant.user.email}, </span>
+                                                                            <span> {participant.user.fullName}, </span>
+                                                                            <span> id: {participant.user.id} </span>
+                                                                        </>
                                                                     ) : (
                                                                         <span>No Telegram</span> // Or any other placeholder text you prefer
                                                                     )}
