@@ -135,7 +135,7 @@ export const TURNIR: React.FC<Props> = ({ className, user, turnirs: initialTurni
 
     return (
         <div className={className}>
-            <div><span className="text-amber-500">Points</span> <span className="text-red-500">{user.points}</span>
+            <div><span className="text-amber-500">Points</span> <span className="text-red-500">{Math.floor(user.points * 100) / 100}</span>
             </div>
             <h2 className="mb-5">Турниры. При регистрации <span className="text-amber-500">points</span> не списываются.
             </h2>
