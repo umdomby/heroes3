@@ -56,6 +56,15 @@ interface Bet extends PrismaBet {
     turnirBet?: TurnirBet;
 }
 
+interface BetParticipantWithUser extends BetParticipant {
+    user: {
+        id: number;
+        email: string;
+        fullName: string;
+        telegram?: string;
+    };
+}
+
 interface Props {
     user: User;
     className?: string;
@@ -424,7 +433,9 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
             <span className="text-blue-500">Heroes3.site не несет ответственность за закрытие ставок открытыми другими игроками.</span>
             {/* Отображение отфильтрованных ставок */}
             {filteredBets.map((bet: Bet) => {
-                const userBets = bet.participants.filter((p) => p.userId === user?.id);
+                const participantsWithUser = bet.participants as BetParticipantWithUser[];
+
+                const userBets = user.role === 'ADMIN' ? participantsWithUser : participantsWithUser.filter((p) => p.userId === user?.id);
 
                 // Рассчитываем прибыль и убытки для каждого исхода
                 const totalBetOnPlayer1 = userBets

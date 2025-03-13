@@ -71,6 +71,15 @@ interface Bet extends PrismaBet3 {
     betP3: boolean;
 }
 
+interface BetParticipantWithUser extends BetParticipant {
+    user: {
+        id: number;
+        email: string;
+        fullName: string;
+        telegram?: string;
+    };
+}
+
 interface Props {
     user: User;
     className?: string;
@@ -451,7 +460,9 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
         <div>
             {/* Отображение отфильтрованных ставок */}
             {filteredBets.map((bet: Bet) => {
-                const userBets = bet.participants.filter((p) => p.userId === user?.id);
+                const participantsWithUser = bet.participants as BetParticipantWithUser[];
+
+                const userBets = user.role === 'ADMIN' ? participantsWithUser : participantsWithUser.filter((p) => p.userId === user?.id);
 
                 // Рассчитываем прибыль и убытки для каждого исхода
                 const totalBetOnPlayer1 = userBets
@@ -754,6 +765,14 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                                                             Ставка:{" "}
                                                             <strong className={playerColors[participant.player]}>
                                                                 {participant.amount}
+                                                                {user.role === 'ADMIN' && participant.user && (
+                                                                    <>
+                                                                        <span> {participant.user.email}, </span>
+                                                                        <span> {participant.user.fullName}, </span>
+                                                                        <span> {participant.user?.telegram}, </span>
+                                                                        <span> id: {participant.user.id} </span>
+                                                                    </>
+                                                                )}
                                                             </strong>{" "}
                                                             на{" "}
                                                             <strong className={playerColors[participant.player]}>
