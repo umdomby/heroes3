@@ -50,7 +50,7 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
                         Google
                     </Button>
                     <div className="text-center">
-                        VPN YES = NO BONUS
+                        VPN = NO BONUS
                     </div>
                     {type === 'login' ? (
                         <LoginForm onClose={handleClose}/>

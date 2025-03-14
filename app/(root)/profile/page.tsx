@@ -3,12 +3,13 @@ import { prisma } from '@/prisma/prisma-client';
 import { ProfileForm } from '@/components/profile-form';
 import { getUserSession } from '@/components/lib/get-user-session';
 import { redirect } from 'next/navigation';
+import {AuthPage} from "@/components/AuthPage";
 
 export default async function ProfilePage() {
   const session = await getUserSession();
 
   if (!session) {
-    return redirect('/');
+    return <AuthPage/>
   }
 
   const user = await prisma.user.findFirst({ where: { id: Number(session?.id) } });
