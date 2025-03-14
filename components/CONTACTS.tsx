@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import React, { useState } from "react";
 import COOP from "@/components/COOP";
+import {Button} from "@/components/ui";
 
 export const CONTACTS = () => {
     const [notification, setNotification] = useState<string | null>(null);
@@ -126,6 +127,11 @@ export const CONTACTS = () => {
                         <strong>С уважением, Сергей Heroes3.site</strong>
                     </p>
                 </div>
+            </div>
+            <div className="flex justify-center my-4" >
+            <Button className="gap-2 h-10 p-2 flex-1 text-center">
+                <Link target="_blank" href="/profile">Регистрация</Link>
+            </Button>
             </div>
 
             <Table className="my-10">
