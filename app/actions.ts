@@ -1841,15 +1841,15 @@ export async function placeBet(formData: { betId: number; userId: number; userRo
         });
 
         if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
-            throw new Error('Ставка недоступна для участия');
+            return { success: false, message: 'Ставка недоступна для участия' };
         }
 
         if (bet.suspendedBet && formData.userRole !== "ADMIN") {
-            throw new Error('Ставки на это событие приостановлены');
+            return { success: false, message: 'Ставки на это событие приостановлены' };
         }
 
         if (bet.isProcessing) {
-            throw new Error('Ставка в данный момент обрабатывается');
+            return { success: false, message: 'Ставка в данный момент обрабатывается' };
         }
 
         // Устанавливаем флаг isProcessing в true
@@ -1864,7 +1864,7 @@ export async function placeBet(formData: { betId: number; userId: number; userRo
             });
 
             if (!user || user.points < amount) {
-                throw new Error('Недостаточно баллов для совершения ставки');
+                return { success: false, message: 'Недостаточно баллов для совершения ставки' };
             }
 
             const totalPlayer1 = bet.participants
@@ -1888,14 +1888,14 @@ export async function placeBet(formData: { betId: number; userId: number; userRo
 
             const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
             if (currentOdds <= 1.04) {
-                throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
+                return { success: false, message: 'Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05' };
             }
 
             const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
 
             const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : bet.maxBetPlayer2;
             if (amount > maxAllowedBet) {
-                throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
+                return { success: false, message: `Максимально допустимая ставка: ${maxAllowedBet}` };
             }
 
             // Используем транзакцию для атомарного выполнения операций
@@ -1958,7 +1958,7 @@ export async function placeBet(formData: { betId: number; userId: number; userRo
             });
 
         } catch (error) {
-            throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+            throw error; // Передаем ошибку дальше
         } finally {
             // Сбрасываем флаг isProcessing
             await prisma.bet.update({
@@ -1980,9 +1980,10 @@ export async function placeBet(formData: { betId: number; userId: number; userRo
             console.error('Ошибка в placeBet:', error);
         }
 
-        throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+        return { success: false, message: 'Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.' };
     }
 }
+
 export async function closeBet(betId: number, winnerId: number) {
     const session = await getUserSession();
 
@@ -2524,15 +2525,15 @@ export async function placeBet3(formData: { betId: number; userId: number; userR
             });
 
             if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
-                throw new Error('Ставка недоступна для участия');
+                return { success: false, message: 'Ставка недоступна для участия' };
             }
 
             if (bet.suspendedBet && formData.userRole !== "ADMIN") {
-                throw new Error('Ставки на это событие приостановлены');
+                return { success: false, message: 'Ставки на это событие приостановлены' };
             }
 
             if (bet.isProcessing) {
-                throw new Error('Ставка в данный момент обрабатывается');
+                return { success: false, message: 'Ставка в данный момент обрабатывается' };
             }
 
             // Устанавливаем флаг isProcessing в true
@@ -2547,7 +2548,7 @@ export async function placeBet3(formData: { betId: number; userId: number; userR
                 });
 
                 if (!user || user.points < amount) {
-                    throw new Error('Недостаточно баллов для совершения ставки');
+                    return { success: false, message: 'Недостаточно баллов для совершения ставки' };
                 }
 
                 const totalPlayer1 = bet.participants
@@ -2580,14 +2581,14 @@ export async function placeBet3(formData: { betId: number; userId: number; userR
 
                 const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 : bet.oddsBetPlayer3;
                 if (currentOdds <= 1.04) {
-                    throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
+                    return { success: false, message: 'Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05' };
                 }
 
                 const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
 
                 const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer3;
                 if (amount > maxAllowedBet) {
-                    throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
+                    return { success: false, message: `Максимально допустимая ставка: ${maxAllowedBet}` };
                 }
 
                 await prisma.betParticipant3.create({
@@ -2656,7 +2657,7 @@ export async function placeBet3(formData: { betId: number; userId: number; userR
                 });
 
             } catch (error) {
-                throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+                throw error; // Передаем ошибку дальше
             } finally {
                 // Сбрасываем флаг isProcessing
                 await prisma.bet3.update({
@@ -2679,7 +2680,7 @@ export async function placeBet3(formData: { betId: number; userId: number; userR
             console.error('Ошибка в placeBet3:', error);
         }
 
-        throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+        return { success: false, message: 'Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.' };
     }
 }
 export async function updateBet3PField(
@@ -3265,15 +3266,15 @@ export async function placeBet4(formData: { betId: number; userId: number; userR
             });
 
             if (!bet || (bet.status !== 'OPEN' && bet.status !== 'OPEN_USER' && bet.status !== 'OPEN_TUR')) {
-                throw new Error('Ставка недоступна для участия');
+                return { success: false, message: 'Ставка недоступна для участия' };
             }
 
             if (bet.suspendedBet && formData.userRole !== "ADMIN") {
-                throw new Error('Ставки на это событие приостановлены');
+                return { success: false, message: 'Ставки на это событие приостановлены' };
             }
 
             if (bet.isProcessing) {
-                throw new Error('Ставка в данный момент обрабатывается');
+                return { success: false, message: 'Ставка в данный момент обрабатывается' };
             }
 
             // Устанавливаем флаг isProcessing в true
@@ -3288,7 +3289,7 @@ export async function placeBet4(formData: { betId: number; userId: number; userR
                 });
 
                 if (!user || user.points < amount) {
-                    throw new Error('Недостаточно баллов для совершения ставки');
+                    return { success: false, message: 'Недостаточно баллов для совершения ставки' };
                 }
 
                 const totalPlayer1 = bet.participants
@@ -3333,7 +3334,7 @@ export async function placeBet4(formData: { betId: number; userId: number; userR
                         player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 :
                             bet.oddsBetPlayer4;
                 if (currentOdds <= 1.04) {
-                    throw new Error('Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05');
+                    return { success: false, message: 'Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05' };
                 }
 
                 const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
@@ -3343,7 +3344,7 @@ export async function placeBet4(formData: { betId: number; userId: number; userR
                         player === PlayerChoice.PLAYER3 ? bet.maxBetPlayer3 :
                             bet.maxBetPlayer4;
                 if (amount > maxAllowedBet) {
-                    throw new Error(`Максимально допустимая ставка: ${maxAllowedBet}`);
+                    return { success: false, message: `Максимально допустимая ставка: ${maxAllowedBet}` };
                 }
 
                 await prisma.betParticipant4.create({
@@ -3419,7 +3420,7 @@ export async function placeBet4(formData: { betId: number; userId: number; userR
                 });
 
             } catch (error) {
-                throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+                throw error; // Передаем ошибку дальше
             } finally {
                 // Сбрасываем флаг isProcessing
                 await prisma.bet4.update({
@@ -3442,7 +3443,7 @@ export async function placeBet4(formData: { betId: number; userId: number; userR
             console.error('Ошибка в placeBet4:', error);
         }
 
-        throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
+        return { success: false, message: 'Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.' };
     }
 }
 export async function updateBet4PField(

@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {
     Bet as PrismaBet,
     Player,
@@ -139,6 +139,27 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
         };
     }, [mutate]);
 
+    useEffect(() => {
+        if (bets) {
+            // Создаем копию текущих ошибок
+            const updatedErrors = { ...placeBetErrors };
+            let hasChanges = false;
+
+            bets.forEach((bet) => {
+                if (!bet.suspendedBet && updatedErrors[bet.id] !== null) {
+                    updatedErrors[bet.id] = null;
+                    hasChanges = true;
+                }
+            });
+
+            // Обновляем состояние только если были изменения
+            if (hasChanges) {
+                setPlaceBetErrors(updatedErrors);
+            }
+        }
+    }, [bets, placeBetErrors]);
+
+
     // Фильтрация ставок по статусу OPEN
     const filteredBets = bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
 
@@ -260,14 +281,25 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                 player,
             });
 
-            mutate();
-            setIsBetDisabled((prev) => ({
-                ...prev,
-                [bet.id]: true,
-            }));
+            if (!response.success) {
+                setPlaceBetErrors((prev) => ({
+                    ...prev,
+                    [bet.id]: response.message || "Неизвестная ошибка", // Устанавливаем ошибку для конкретной ставки
+                }));
+                return;
+            }
+
+            mutate(); // Обновляем данные ставок
+
+            // Очистка ошибок после успешного обновления данных
             setPlaceBetErrors((prev) => ({
                 ...prev,
                 [bet.id]: null, // Очищаем ошибку при успешной ставке
+            }));
+
+            setIsBetDisabled((prev) => ({
+                ...prev,
+                [bet.id]: true,
             }));
 
             // Очистка поля ввода после успешной ставки
@@ -276,17 +308,6 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                 [bet.id]: "",
             }));
         } catch (err) {
-            if (err instanceof Error) {
-                setPlaceBetErrors((prev) => ({
-                    ...prev,
-                    [bet.id]: err.message, // Устанавливаем ошибку для конкретной ставки
-                }));
-            } else {
-                setPlaceBetErrors((prev) => ({
-                    ...prev,
-                    [bet.id]: "Неизвестная ошибка", // Устанавливаем общую ошибку
-                }));
-            }
             console.error("Error placing bet:", err);
         }
     };
