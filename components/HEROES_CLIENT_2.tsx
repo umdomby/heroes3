@@ -146,9 +146,16 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
             let hasChanges = false;
 
             bets.forEach((bet) => {
-                if (!bet.suspendedBet && updatedErrors[bet.id] !== null) {
+                if (bet.suspendedBet && updatedErrors[bet.id] !== null) {
                     updatedErrors[bet.id] = null;
                     hasChanges = true;
+                }else{
+                    setTimeout(() => {
+                        setPlaceBetErrors((prev) => ({
+                            ...prev,
+                            [bet.id]: null,
+                        }));
+                    }, 10000);
                 }
             });
 
@@ -273,12 +280,15 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                 throw new Error("Пользователь не найден");
             }
 
+            const oddsPlayerBet = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
+
             const response = await placeBet({
                 betId: bet.id,
                 userId: user.id,
                 userRole: user.role,
                 amount,
                 player,
+                oddsPlayerBet, // Пример значения
             });
 
             if (!response.success) {

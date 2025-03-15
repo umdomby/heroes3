@@ -17,7 +17,7 @@ import {
     closeBet3,
     closeBetDraw3,
     suspendedBetCheck3,
-    editDescriptionBet3, updateBet3PField
+    editDescriptionBet3, updateBet3PField, placeBet
 } from "@/app/actions";
 import {unstable_batchedUpdates} from "react-dom";
 
@@ -162,9 +162,16 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
             let hasChanges = false;
 
             bets.forEach((bet) => {
-                if (!bet.suspendedBet && updatedErrors[bet.id] !== null) {
+                if (bet.suspendedBet && updatedErrors[bet.id] !== null) {
                     updatedErrors[bet.id] = null;
                     hasChanges = true;
+                }else{
+                    setTimeout(() => {
+                        setPlaceBetErrors((prev) => ({
+                            ...prev,
+                            [bet.id]: null,
+                        }));
+                    }, 10000);
                 }
             });
 
@@ -293,12 +300,15 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                 throw new Error("Пользователь не найден");
             }
 
+            const oddsPlayerBet = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
+
             const response = await placeBet3({
                 betId: bet.id,
                 userId: user.id,
                 userRole: user.role,
                 amount,
                 player,
+                oddsPlayerBet, // Пример значения
             });
 
             if (!response.success) {
