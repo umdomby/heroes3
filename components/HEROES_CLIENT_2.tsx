@@ -100,6 +100,9 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
     const [potentialProfit, setPotentialProfit] = useState<{ [key: number]: { player1: number; player2: number } }>({});
     const [betAmounts, setBetAmounts] = useState<{ [key: number]: string }>({});
 
+    const [timer, setTimer] = useState<{ [key: number]: number }>({});
+    const [isCountingDown, setIsCountingDown] = useState<{ [key: number]: boolean }>({});
+
     // Состояние для управления модальным окном и ввода подтверждения
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [confirmationInput, setConfirmationInput] = useState("");
@@ -319,11 +322,33 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
             return;
         }
 
-        setIsBetDisabled((prev) => ({
+        setIsCountingDown((prev) => ({
             ...prev,
-            [bet.id]: false,
+            [bet.id]: true,
         }));
-        handlePlaceBet(bet, amount, player);
+
+        let countdown = 5;
+        setTimer((prev) => ({
+            ...prev,
+            [bet.id]: countdown,
+        }));
+
+        const interval = setInterval(() => {
+            countdown -= 1;
+            setTimer((prev) => ({
+                ...prev,
+                [bet.id]: countdown,
+            }));
+
+            if (countdown <= 0) {
+                clearInterval(interval);
+                setIsCountingDown((prev) => ({
+                    ...prev,
+                    [bet.id]: false,
+                }));
+                handlePlaceBet(bet, amount, player);
+            }
+        }, 1000);
     };
 
     // Функция для открытия диалогового окна
@@ -766,12 +791,12 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                                                     />
                                                     <Button
                                                         className={`mt-2 w-[50%] ${
-                                                            isBetDisabled[bet.id] ? "bg-gray-400 cursor-not-allowed" : ""
+                                                            isBetDisabled[bet.id] || isCountingDown[bet.id] ? "bg-gray-400 cursor-not-allowed" : ""
                                                         }`}
                                                         type="submit"
-                                                        disabled={isBetDisabled[bet.id] || !user}
+                                                        disabled={isBetDisabled[bet.id] || !user || isCountingDown[bet.id]}
                                                     >
-                                                        BET
+                                                        {isCountingDown[bet.id] ? `BET (${timer[bet.id]})` : "BET"}
                                                     </Button>
                                                 </div>
                                                 {oddsErrors[bet.id] && (
