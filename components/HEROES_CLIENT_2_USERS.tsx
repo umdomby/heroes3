@@ -282,8 +282,7 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
                 userId: user.id,
                 userRole: user.role,
                 amount,
-                player,
-                oddsPlayerBet,
+                player
             });
 
             if (!response.success) {

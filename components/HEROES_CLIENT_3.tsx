@@ -17,7 +17,7 @@ import {
     closeBet3,
     closeBetDraw3,
     suspendedBetCheck3,
-    editDescriptionBet3, updateBet3PField, placeBet
+    editDescriptionBet3, updateBet3PField
 } from "@/app/actions";
 import {unstable_batchedUpdates} from "react-dom";
 
@@ -307,8 +307,7 @@ export const HEROES_CLIENT_3: React.FC<Props> = ({className, user}) => {
                 userId: user.id,
                 userRole: user.role,
                 amount,
-                player,
-                oddsPlayerBet, // Пример значения
+                player
             });
 
             if (!response.success) {

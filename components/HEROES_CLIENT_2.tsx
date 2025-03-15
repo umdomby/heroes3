@@ -1,5 +1,5 @@
 "use client";
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     Bet as PrismaBet,
     Player,
@@ -287,8 +287,7 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
                 userId: user.id,
                 userRole: user.role,
                 amount,
-                player,
-                oddsPlayerBet, // Пример значения
+                player
             });
 
             if (!response.success) {
