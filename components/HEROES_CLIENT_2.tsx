@@ -139,6 +139,10 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
     // Фильтрация ставок по статусу OPEN
     const filteredBets = bets?.filter((bet) => bet.status === BetStatus.OPEN) || [];
 
+    // const filteredBets = bets
+    //     ?.filter((bet) => bet.status === BetStatus.OPEN)
+    //     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) || [];
+
     const handleValidation = (bet: Bet, amount: number, player: PlayerChoice) => {
         const totalBets = bet.totalBetPlayer1 + bet.totalBetPlayer2;
         const totalBetOnPlayer = player === PlayerChoice.PLAYER1 ? bet.totalBetPlayer1 : bet.totalBetPlayer2;
@@ -434,8 +438,8 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
             {/* Отображение отфильтрованных ставок */}
             {filteredBets.map((bet: Bet) => {
                 const participantsWithUser = bet.participants as BetParticipantWithUser[];
-
-                const userBets = user.role === 'ADMIN' ? participantsWithUser : participantsWithUser.filter((p) => p.userId === user?.id);
+                const sortedParticipants = participantsWithUser.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                const userBets = user.role === 'ADMIN' ? sortedParticipants : sortedParticipants.filter((p) => p.userId === user?.id);
 
                 // Рассчитываем прибыль и убытки для каждого исхода
                 const totalBetOnPlayer1 = userBets

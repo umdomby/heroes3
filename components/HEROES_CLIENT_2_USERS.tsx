@@ -434,8 +434,8 @@ export const HEROES_CLIENT_2_USERS: React.FC<Props> = ({ className, user }) => {
             {/* Отображение отфильтрованных ставок */}
             {filteredBets.map((bet: Bet) => {
                 const participantsWithUser = bet.participants as BetParticipantWithUser[];
-
-                const userBets = user.role === 'ADMIN' ? participantsWithUser : participantsWithUser.filter((p) => p.userId === user?.id);
+                const sortedParticipants = participantsWithUser.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                const userBets = user.role === 'ADMIN' ? sortedParticipants : sortedParticipants.filter((p) => p.userId === user?.id);
 
                 // Рассчитываем прибыль и убытки для каждого исхода
                 const totalBetOnPlayer1 = userBets
