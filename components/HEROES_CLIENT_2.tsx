@@ -160,9 +160,9 @@ export const HEROES_CLIENT_2: React.FC<Props> = ({className, user}) => {
             });
 
             // Обновляем состояние только если были изменения
-            if (hasChanges) {
-                setPlaceBetErrors(updatedErrors);
-            }
+            // if (hasChanges) {
+            //     setPlaceBetErrors(updatedErrors);
+            // }
         }
     }, [bets, placeBetErrors]);
 

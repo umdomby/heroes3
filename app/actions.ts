@@ -1494,11 +1494,11 @@ export async function gameUserBetClosed(gameData: {
                 updatedGameUserBet.checkWinUser2 !== null
             ) {
                 if ((updatedGameUserBet.checkWinUser1 !== updatedGameUserBet.checkWinUser2 &&
-                    updatedGameUserBet.checkWinUser1 !== WinGameUserBet.DRAW &&
-                    updatedGameUserBet.checkWinUser2 !== WinGameUserBet.DRAW ) ||
+                        updatedGameUserBet.checkWinUser1 !== WinGameUserBet.DRAW &&
+                        updatedGameUserBet.checkWinUser2 !== WinGameUserBet.DRAW ) ||
 
                     (updatedGameUserBet.checkWinUser1 === WinGameUserBet.DRAW &&
-                    updatedGameUserBet.checkWinUser2 === WinGameUserBet.DRAW )) {
+                        updatedGameUserBet.checkWinUser2 === WinGameUserBet.DRAW )) {
 
                     console.log("Оба пользователя выбрали не одинаковый результат и не равен ничье");
 
@@ -1821,7 +1821,7 @@ export async function clientCreateBet(formData: any) {
         throw new Error('Failed to create bet. Please try again.');
     }
 } // создание ставок
-export async function placeBet(formData: { betId: number, userId: number, userRole: UserRole, amount: number, player: PlayerChoice, oddsPlayerBet: number }) {
+export async function placeBet(formData: { betId: number; userId: number; userRole: UserRole; amount: number; player: PlayerChoice }) {
     try {
         console.log('Запуск функции placeBet с formData:', formData);
 
@@ -1829,9 +1829,9 @@ export async function placeBet(formData: { betId: number, userId: number, userRo
             throw new Error('Неверные данные формы');
         }
 
-        const { betId, userId, amount, player, oddsPlayerBet } = formData;
+        const { betId, userId, amount, player } = formData;
 
-        if (!betId || !userId || !amount || !player || !oddsPlayerBet) {
+        if (!betId || !userId || !amount || !player) {
             throw new Error('Отсутствуют обязательные поля в данных формы');
         }
 
@@ -1889,10 +1889,6 @@ export async function placeBet(formData: { betId: number, userId: number, userRo
             const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 : bet.oddsBetPlayer2;
             if (currentOdds <= 1.04) {
                 return { success: false, message: 'Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05' };
-            }
-
-            if (oddsPlayerBet !== currentOdds) {
-                return { success: false, message: 'Коэффициент ставки изменился' };
             }
 
             const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
@@ -2508,7 +2504,7 @@ export async function clientCreateBet3(formData: any) {
         throw new Error('Не удалось разместить ставку. Пожалуйста, попробуйте еще раз.');
     }
 }// создание ставок на 3 игрока
-export async function placeBet3(formData: { betId: number, userId: number, userRole: UserRole, amount: number, player: PlayerChoice, oddsPlayerBet: number }) {
+export async function placeBet3(formData: { betId: number; userId: number; userRole: UserRole; amount: number; player: PlayerChoice }) {
     try {
         console.log('Запуск функции placeBet3 с formData:', formData);
 
@@ -2516,9 +2512,9 @@ export async function placeBet3(formData: { betId: number, userId: number, userR
             throw new Error('Неверные данные формы');
         }
 
-        const { betId, userId, amount, player, oddsPlayerBet } = formData;
+        const { betId, userId, amount, player } = formData;
 
-        if (!betId || !userId || !amount || !player || !oddsPlayerBet) {
+        if (!betId || !userId || !amount || !player) {
             throw new Error('Отсутствуют обязательные поля в данных формы');
         }
 
@@ -2587,9 +2583,7 @@ export async function placeBet3(formData: { betId: number, userId: number, userR
                 if (currentOdds <= 1.04) {
                     return { success: false, message: 'Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05' };
                 }
-                if (oddsPlayerBet !== currentOdds) {
-                    return { success: false, message: 'Коэффициент ставки изменился' };
-                }
+
                 const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
 
                 const maxAllowedBet = player === PlayerChoice.PLAYER1 ? bet.maxBetPlayer1 : player === PlayerChoice.PLAYER2 ? bet.maxBetPlayer2 : bet.maxBetPlayer3;
@@ -3251,17 +3245,17 @@ function calculateMaxBets4(initBetPlayer1: number, initBetPlayer2: number, initB
 }// Функция для расчета максимальных ставок на 4 игрока
 // ставки на 4 игрока
 // Function to place a bet for four players
-export async function placeBet4(formData: { betId: number, userId: number, userRole: UserRole, amount: number, player: PlayerChoice, oddsPlayerBet: number }) {
+export async function placeBet4(formData: { betId: number; userId: number; userRole: UserRole; amount: number; player: PlayerChoice }) {
     try {
-        console.log('Запуск функции placeBet с formData:', formData);
+        console.log('Запуск функции placeBet4 с formData:', formData);
 
         if (!formData || typeof formData !== 'object') {
             throw new Error('Неверные данные формы');
         }
 
-        const { betId, userId, amount, player, oddsPlayerBet } = formData;
+        const { betId, userId, amount, player } = formData;
 
-        if (!betId || !userId || !amount || !player || !oddsPlayerBet) {
+        if (!betId || !userId || !amount || !player) {
             throw new Error('Отсутствуют обязательные поля в данных формы');
         }
 
@@ -3341,10 +3335,6 @@ export async function placeBet4(formData: { betId: number, userId: number, userR
                             bet.oddsBetPlayer4;
                 if (currentOdds <= 1.04) {
                     return { success: false, message: 'Коэффициент ставки слишком низкий. Минимально допустимый коэффициент: 1.05' };
-                }
-
-                if (oddsPlayerBet !== currentOdds) {
-                    return { success: false, message: 'Коэффициент ставки изменился' };
                 }
 
                 const potentialProfit = Math.floor((amount * (currentOdds - 1)) * 100) / 100;
@@ -4627,20 +4617,20 @@ export async function createPlayerStatistic(data: any) {
     }
 
     try {
-            // Создание новой записи
-            await prisma.playerStatistic.create({
-                data: {
-                    turnirId: Number(data.turnirId),
-                    categoryId: Number(data.categoryId),
-                    playerId: Number(data.playerId),
-                    color: data.color,
-                    city: data.city,
-                    gold: Number(data.gold),
-                    security: data.security,
-                    win: data.win,
-                    link: data.link,
-                },
-            });
+        // Создание новой записи
+        await prisma.playerStatistic.create({
+            data: {
+                turnirId: Number(data.turnirId),
+                categoryId: Number(data.categoryId),
+                playerId: Number(data.playerId),
+                color: data.color,
+                city: data.city,
+                gold: Number(data.gold),
+                security: data.security,
+                win: data.win,
+                link: data.link,
+            },
+        });
     } catch (error) {
         console.error('Ошибка при выполнении операции с турниром:', error);
         throw new Error('Не удалось выполнить операцию');

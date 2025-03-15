@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     Bet4 as PrismaBet4,
     Player,
@@ -17,7 +17,7 @@ import {
     closeBet4,
     closeBetDraw4,
     suspendedBetCheck4,
-    editDescriptionBet4, updateBet4PField, placeBet
+    editDescriptionBet4, updateBet4PField
 } from "@/app/actions";
 import {unstable_batchedUpdates} from "react-dom";
 
@@ -122,8 +122,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
     const [timer, setTimer] = useState<{ [key: number]: number }>({});
     const [isCountingDown, setIsCountingDown] = useState<{ [key: number]: boolean }>({});
 
-    const initialOddsRef = useRef<{ [key: number]: { player1: number; player2: number; player3: number; player4: number } }>({});
-
     // Состояние для управления модальным окном и ввода подтверждения
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [confirmationInput, setConfirmationInput] = useState("");
@@ -136,19 +134,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
             const data = JSON.parse(event.data);
 
             unstable_batchedUpdates(() => {
-                if (data.type === "update" && data.bet) {
-                    // Обновляем коэффициенты в initialOddsRef
-                    initialOddsRef.current[data.bet.id] = {
-                        player1: data.bet.oddsBetPlayer1,
-                        player2: data.bet.oddsBetPlayer2,
-                        player3: data.bet.oddsBetPlayer3,
-                        player4: data.bet.oddsBetPlayer4,
-                    };
-                    console.log("Updated odds for bet ID:", data.bet.id, initialOddsRef.current[data.bet.id]);
-                }
-
-                if (data.type === "create" || data.type === "update" || data.type === "delete") {
+                if (
+                    data.type === "create" ||
+                    data.type === "update" ||
+                    data.type === "delete"
+                ) {
                     mutate();
+
                 }
             });
         };
@@ -174,24 +166,16 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
             let hasChanges = false;
 
             bets.forEach((bet) => {
-                if (bet.suspendedBet && updatedErrors[bet.id] !== null) {
+                if (!bet.suspendedBet && updatedErrors[bet.id] !== null) {
                     updatedErrors[bet.id] = null;
                     hasChanges = true;
-                }
-                else{
-                    setTimeout(() => {
-                        setPlaceBetErrors((prev) => ({
-                            ...prev,
-                            [bet.id]: null,
-                        }));
-                    }, 10000);
                 }
             });
 
             // Обновляем состояние только если были изменения
-            if (hasChanges) {
-                setPlaceBetErrors(updatedErrors);
-            }
+            // if (hasChanges) {
+            //     setPlaceBetErrors(updatedErrors);
+            // }
         }
     }, [bets, placeBetErrors]);
 
@@ -210,7 +194,6 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
         const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 :
             player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 :
                 player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 : bet.oddsBetPlayer4;
-
         if (currentOdds < MIN_ODDS) {
             setOddsErrors((prev) => ({
                 ...prev,
@@ -286,21 +269,9 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
     };
 
     const handlePlayerChange = (e: React.ChangeEvent<HTMLInputElement>, bet: Bet) => {
-        const selectedPlayer = e.target.value as PlayerChoice;
-
-        // Сохраняем начальные коэффициенты для всех игроков в useRef
-        initialOddsRef.current[bet.id] = {
-            player1: bet.oddsBetPlayer1,
-            player2: bet.oddsBetPlayer2,
-            player3: bet.oddsBetPlayer3,
-            player4: bet.oddsBetPlayer4,
-        };
-
-        console.log("Initial odds set for bet ID:", bet.id, initialOddsRef.current[bet.id]);
-
-        // Если сумма введена, продолжаем валидацию и расчет потенциальной прибыли
         const amountInput = e.target.form?.elements.namedItem("amount") as HTMLInputElement;
         const amount = parseFloat(amountInput.value);
+        const selectedPlayer = e.target.value as PlayerChoice;
 
         if (!isNaN(amount) && amount > 0) {
             handleValidation(bet, amount, selectedPlayer);
@@ -322,40 +293,11 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
         }
     };
 
-    const handlePlaceBet = async (bet: Bet, amount: number, player: PlayerChoice, currentOdds: number) => {
+    const handlePlaceBet = async (bet: Bet, amount: number, player: PlayerChoice) => {
         try {
             if (!user) {
                 throw new Error("Пользователь не найден");
             }
-
-            // const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 :
-            //     player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 :
-            //         player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 : bet.oddsBetPlayer4;
-            //
-            // const initialOddsForPlayer = initialOddsRef.current[bet.id] ? (
-            //     player === PlayerChoice.PLAYER1 ? initialOddsRef.current[bet.id].player1 :
-            //         player === PlayerChoice.PLAYER2 ? initialOddsRef.current[bet.id].player2 :
-            //             player === PlayerChoice.PLAYER3 ? initialOddsRef.current[bet.id].player3 : initialOddsRef.current[bet.id].player4
-            // ) : undefined;
-            //
-            // console.log("currentOdds:", currentOdds);
-            // console.log("initialOddsForPlayer:", initialOddsForPlayer);
-
-            // if (initialOddsForPlayer === undefined) {
-            //     setPlaceBetErrors((prev) => ({
-            //         ...prev,
-            //         [bet.id]: "Ошибка: начальные коэффициенты не установлены.",
-            //     }));
-            //     return;
-            // }
-            //
-            // if (currentOdds !== initialOddsForPlayer) {
-            //     setPlaceBetErrors((prev) => ({
-            //         ...prev,
-            //         [bet.id]: "Коэффициент изменился, попробуйте снова.",
-            //     }));
-            //     return;
-            // }
 
             const response = await placeBet4({
                 betId: bet.id,
@@ -363,22 +305,22 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                 userRole: user.role,
                 amount,
                 player,
-                oddsPlayerBet: currentOdds,
             });
 
             if (!response.success) {
                 setPlaceBetErrors((prev) => ({
                     ...prev,
-                    [bet.id]: response.message || "Неизвестная ошибка",
+                    [bet.id]: response.message || "Неизвестная ошибка", // Устанавливаем ошибку для конкретной ставки
                 }));
                 return;
             }
 
-            mutate();
+            mutate(); // Обновляем данные ставок
 
+            // Очистка ошибок после успешного обновления данных
             setPlaceBetErrors((prev) => ({
                 ...prev,
-                [bet.id]: null,
+                [bet.id]: null, // Очищаем ошибку при успешной ставке
             }));
 
             setIsBetDisabled((prev) => ({
@@ -386,6 +328,7 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                 [bet.id]: true,
             }));
 
+            // Очистка поля ввода после успешной ставки
             setBetAmounts((prev) => ({
                 ...prev,
                 [bet.id]: "",
@@ -394,12 +337,12 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
             if (err instanceof Error) {
                 setPlaceBetErrors((prev) => ({
                     ...prev,
-                    [bet.id]: err.message,
+                    [bet.id]: err.message, // Устанавливаем ошибку для конкретной ставки
                 }));
             } else {
                 setPlaceBetErrors((prev) => ({
                     ...prev,
-                    [bet.id]: "Неизвестная ошибка",
+                    [bet.id]: "Неизвестная ошибка", // Устанавливаем общую ошибку
                 }));
             }
             console.error("Error placing bet:", err);
@@ -455,39 +398,13 @@ export const HEROES_CLIENT_4: React.FC<Props> = ({className, user}) => {
                 [bet.id]: countdown,
             }));
 
-            // Получаем текущие коэффициенты
-            const currentOdds = player === PlayerChoice.PLAYER1 ? bet.oddsBetPlayer1 :
-                player === PlayerChoice.PLAYER2 ? bet.oddsBetPlayer2 :
-                    player === PlayerChoice.PLAYER3 ? bet.oddsBetPlayer3 : bet.oddsBetPlayer4;
-
-            // Получаем начальные коэффициенты из useRef
-            const initialOddsForPlayer = initialOddsRef.current[bet.id] ? (
-                player === PlayerChoice.PLAYER1 ? initialOddsRef.current[bet.id].player1 :
-                    player === PlayerChoice.PLAYER2 ? initialOddsRef.current[bet.id].player2 :
-                        player === PlayerChoice.PLAYER3 ? initialOddsRef.current[bet.id].player3 : initialOddsRef.current[bet.id].player4
-            ) : undefined;
-            console.log("Initial odds set for bet ID:", bet.id, initialOddsRef.current[bet.id]);
-            // Проверяем, изменились ли коэффициенты
-            if (currentOdds !== initialOddsForPlayer) {
-                clearInterval(interval);
-                setIsCountingDown((prev) => ({
-                    ...prev,
-                    [bet.id]: false,
-                }));
-                setPlaceBetErrors((prev) => ({
-                    ...prev,
-                    [bet.id]: "Коэффициент изменился, попробуйте снова.",
-                }));
-                return;
-            }
-
             if (countdown <= 0) {
                 clearInterval(interval);
                 setIsCountingDown((prev) => ({
                     ...prev,
                     [bet.id]: false,
                 }));
-                handlePlaceBet(bet, amount, player, currentOdds);
+                handlePlaceBet(bet, amount, player);
             }
         }, 1000);
     };
