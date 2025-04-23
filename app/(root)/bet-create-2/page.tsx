@@ -21,7 +21,7 @@ async function fetchData() {
             prisma.category.findMany(),
             prisma.product.findMany(),
             prisma.productItem.findMany(),
-            prisma.player.findMany({ where: { userId: parseInt(session.id) } }),
+            prisma.player.findMany(),
             prisma.turnirBet.findMany(),
             prisma.bet.findMany({ where: { status: 'OPEN' } }) // Получение открытых ставок
         ]);
