@@ -35,8 +35,7 @@ export default function COOP() {
     return (
         <div className="my-10 mx-3">
             <div className="rounded-lg shadow-md">
-                <h1 className="text-2xl text-center font-bold text-blue-600 mb-4">Ищем Партнеров для Развития и Продвижения
-                    Heroes3.site!</h1>
+                <h1 className="text-2xl text-center font-bold text-blue-600 mb-4">Heroes3.site!</h1>
                 <p className="text-lg mb-4">
                     Мы стремимся создать нечто большее, чем просто платформу — мы хотим сделать продукт, который будет
                     интересным и значимым для людей. Если вы разделяете нашу страсть к Heroes 3 и хотите внести свой
